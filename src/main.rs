@@ -1,12 +1,14 @@
 #![allow(unused_parens)]
 
-use std::fs;
-use std::vec::Vec;
 use std::error::Error;
+
+mod table;
 
 mod file_names
 {
-    pub(crate) const MAIN_DATA_FILE:&str = "./data/SRC_SC_SH_WVH_WB Business Day Data.tsv";
+    pub(crate) const MAIN_DATA_FILE:&str = "./data/SRC_SC_SH_WVH_WB Business Day Data.csv";
+    pub(crate) const CATEGORIES_LOCATION_FILE:&str = "./categories/Categories_Location.csv";
+    pub(crate) const CATEGORIES_EXAM_FILE:&str = "./categories/Categories_Exam.csv";
 }
 
 mod main_headers {
@@ -102,32 +104,16 @@ mod static_categorization {
 
     pub(crate) const ignored:&str="Ignored";
 }
-
 fn main()->Result<(), Box<dyn Error>> {
     
-    let file=fs::read_to_string(file_names::MAIN_DATA_FILE)?;
-    let rows=file.lines().clone();
+    let main_data:table::Table;
+    let main_data=table::Table::create(file_names::MAIN_DATA_FILE)?;
 
-    let mut headers:Option<Vec<&str>>=None;
-    let mut data:Vec<Vec<&str>>=Vec::new();
+    //Get current categories
+    let exam_categories=table::Table::create(file_names::CATEGORIES_EXAM_FILE)?;
+    let location_categories=table::Table::create(file_names::CATEGORIES_LOCATION_FILE)?;
 
-    //Data rows
-    for row in rows
-    {
-        let cells = row.rsplit("\t");
-        let mut newrow:Vec<&str>=Vec::new();
-
-        for cell in cells
-        {
-            newrow.push(cell);
-        }
-
-        match headers
-        {
-            None => headers=Some(newrow),
-            Some(_) => data.push(newrow),
-        }
-    }
+    
     
     return Ok(());
 }
