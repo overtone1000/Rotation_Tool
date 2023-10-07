@@ -1,4 +1,5 @@
 use std::fs;
+use std::ops::Range;
 use std::vec::Vec;
 use std::io::Error;
 use std::io::ErrorKind;
@@ -21,94 +22,62 @@ impl Table
             .has_headers(true)
             .from_path(file_path)?;
         
+        let mut retval=Table { 
+            headers: Vec::new(), 
+            data: Vec::new(),
+            labelmap: HashMap::new()
+        };
 
-        let mut headers:Vec<String>=Vec::new();
-        let mut data:Vec<Vec<String>>=Vec::new();
-        let mut labelmap:HashMap<String,usize>=HashMap::new();
-
-        println!("Headers");
+        let mut n:usize=0;
         for header in rdr.headers()?.iter() {
-            headers.push(header.to_string());
+            retval.headers.push(header.to_string());
+            retval.labelmap.insert(header.to_string(),n);
+            n+=1;
         }
 
-        println!("Rows");
         for record in rdr.records() {
             let mut row:Vec<String>=Vec::new();
             for cell in record?.iter()
             {
                 row.push(cell.to_string());
             }
-            if(row.len()!=headers.len())
+            if(row.len()!=retval.headers.len())
             {
                 let mut message:String = "Malformed data. Header length is ".to_string();
-                message+=&(headers.len().to_string());
+                message+=&(retval.headers.len().to_string());
                 message+=" but row ";
-                message+=&(data.len().to_string());
+                message+=&(retval.data.len().to_string());
                 message+=" contains ";
                 message+=&(row.len().to_string());
                 message+=" items.";
                 return Err(Error::new(ErrorKind::InvalidData, message));
             }
-            data.push(row);
+            retval.data.push(row);
         }
 
-        print!("Stop!");
 
-        /*
-        let file=fs::read_to_string(file_path.to_string())?;
-        let rows=file.lines();
-
-        for row in rows
-        {
-            let cells = row.split(",");
-            let mut newrow:Vec<String>=Vec::new();
-
-            for cell in cells
-            {
-                newrow.push(cell.to_string());
-            }
-
-            match &headers
-            {
-                None => {
-                    let mut n:usize=0;
-                    for header in &newrow
-                    {
-                        labelmap.insert(header.to_owned(), n);
-                        n+=1;
-                    }
-                    headers=Some(newrow);
-                },
-                Some(x) => {
-                    if(newrow.len()!=x.len())
-                    {
-                        
-                    }
-                    data.push(newrow.to_owned())
-                },
-            }
-        }
-
-        match headers
-        {
-            None=>Err(Error::new(ErrorKind::InvalidData,"No headers found.")),
-            Some(x)=>{
-                Ok(
-                    Table{
-                        headers:x.to_owned(),
-                        data:data,
-                        labelmap:labelmap
-                    }
-                )
-            }
-        }
-        */
-
-        return Err(Error::new(ErrorKind::InvalidData,"No headers found."));
+        Ok(retval)
     }
 
-    pub fn getHeaderColumnIndex(&self, header_label:String)->Option<&usize>
+    fn getHeaderColumnIndex(&self, header_label:String)->Option<&usize>
     {
-        return self.labelmap.get(&header_label);
+        self.labelmap.get(&header_label)
+    }
+
+    pub fn getVal(&self, header_label:String, row:usize)->Option<String>
+    {
+        let index=self.getHeaderColumnIndex(header_label)?.to_owned();
+        let datarow=self.data.get(row)?.to_owned();
+        let cell=datarow.get(index);
+
+        match cell{
+            None=>None,
+            Some(val)=>Some(val.to_owned())
+        }
+    }
+
+    pub fn rowIndices(&self)->Range<usize>
+    {
+        0..self.data.len()
     }
 }
