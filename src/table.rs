@@ -27,8 +27,8 @@ impl Table
         let mut labelmap:HashMap<String,usize>=HashMap::new();
 
         println!("Headers");
-        for header in rdr.headers() {
-            headers.push(header.as_slice().to_string());
+        for header in rdr.headers()?.iter() {
+            headers.push(header.to_string());
         }
 
         println!("Rows");
