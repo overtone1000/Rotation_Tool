@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::fs;
 use std::ops::Range;
 use std::vec::Vec;
@@ -59,12 +60,12 @@ impl Table
         Ok(retval)
     }
 
-    fn getHeaderColumnIndex(&self, header_label:String)->Option<&usize>
+    fn getHeaderColumnIndex(&self, header_label:&String)->Option<&usize>
     {
-        self.labelmap.get(&header_label)
+        self.labelmap.get(header_label)
     }
 
-    pub fn getVal(&self, header_label:String, row:usize)->Option<String>
+    pub fn getVal(&self, header_label:&String, row:usize)->Option<String>
     {
         let index=self.getHeaderColumnIndex(header_label)?.to_owned();
         let datarow=self.data.get(row)?.to_owned();
@@ -79,5 +80,32 @@ impl Table
     pub fn rowIndices(&self)->Range<usize>
     {
         0..self.data.len()
+    }
+
+    pub fn getKeyedColumnValueMap(&self, key_header_label:&String, adjoined_header_labels:&[String])->HashMap<String,Vec<String>>
+    {
+        let mut retval:HashMap<String,Vec<String>>=HashMap::new();
+        for row_i in self.rowIndices()
+        {
+            let key_value=self.getVal(key_header_label, row_i);
+            match key_value
+            {
+                None=>{},
+                Some(key_value)=>{
+                    let mut adjoined:Vec<String>=Vec::new();
+                    for adjoined_header_label in adjoined_header_labels
+                    {
+                        let adjoined_value=self.getVal(adjoined_header_label, row_i);
+                        match adjoined_value{
+                            None=>{adjoined.push("".to_string());}
+                            Some(av)=>{adjoined.push(av.to_owned());}
+                        }
+                    }
+                    retval.insert(key_value, adjoined);
+                }
+            }
+        }
+
+        retval
     }
 }

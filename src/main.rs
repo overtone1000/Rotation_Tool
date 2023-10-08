@@ -1,6 +1,8 @@
 #![allow(unused_parens)]
 
-use std::error::Error;
+use std::{error::Error, collections::HashSet, io::ErrorKind};
+
+use main_headers::pertinent_headers;
 
 mod table;
 
@@ -22,16 +24,50 @@ mod main_headers {
         modality
     }
 
-    pub(crate) fn getFromLabel(header:&pertinent_headers)->&str{
-        match header{
-            pertinent_headers::accession => "Accession",
-            pertinent_headers::procedure_code => "ProcedureCodeList",
-            pertinent_headers::exam => "ProcedureDescList",
-            pertinent_headers::location => "LocationDescription",
-            pertinent_headers::scheduled_datetime => "Exam Started",
-            pertinent_headers::rvu => "WorkRVU",
-            pertinent_headers::modality => "Modality",
+    impl pertinent_headers {
+        pub(crate) fn getLabel(&self)->String
+        {
+            match self{
+                pertinent_headers::accession => "Accession".to_string(),
+                pertinent_headers::procedure_code => "ProcedureCodeList".to_string(),
+                pertinent_headers::exam => "ProcedureDescList".to_string(),
+                pertinent_headers::location => "LocationDescription".to_string(),
+                pertinent_headers::scheduled_datetime => "Exam Started".to_string(),
+                pertinent_headers::rvu => "WorkRVU".to_string(),
+                pertinent_headers::modality => "Modality".to_string(),
+            }
         }
+    }
+}
+
+mod exam_categories {
+    pub(crate) enum pertinent_headers {
+        procedure_code,
+        exam,
+        subspecialty,
+        comments
+    }
+
+    impl pertinent_headers {
+        pub(crate) fn getLabel(&self)->String
+        {
+            match self{
+                pertinent_headers::procedure_code => "Exam Code".to_string(),
+                pertinent_headers::exam => "Exam Description".to_string(),
+                pertinent_headers::subspecialty => "Subspecialty".to_string(),
+                pertinent_headers::comments => "Comments".to_string(),
+            }
+        }
+    }
+
+    pub(crate) struct exam_category {
+        pub procedure_code:String,
+        pub exam:String,
+        pub subspecialty:String,
+        pub comments:String
+    }
+
+    impl exam_category {
     }
 }
 
@@ -106,14 +142,52 @@ mod static_categorization {
 }
 fn main()->Result<(), Box<dyn Error>> {
     
-    let main_data:table::Table;
-    let main_data=table::Table::create(file_names::MAIN_DATA_FILE)?;
+    let main_data_table=table::Table::create(file_names::MAIN_DATA_FILE)?;
 
     //Get current categories
-    let exam_categories=table::Table::create(file_names::CATEGORIES_EXAM_FILE)?;
-    let location_categories=table::Table::create(file_names::CATEGORIES_LOCATION_FILE)?;
+    let exam_categories_table=table::Table::create(file_names::CATEGORIES_EXAM_FILE)?;
+    let location_categories_table=table::Table::create(file_names::CATEGORIES_LOCATION_FILE)?;
 
-    
-    
+    let mut main_exam_categories=main_data_table.getKeyedColumnValueMap(
+        &(main_headers::pertinent_headers::procedure_code.getLabel()),
+        &[(main_headers::pertinent_headers::exam.getLabel())]
+    );
+
+    let mut existing_exam_categories=exam_categories_table.getKeyedColumnValueMap(
+        &(exam_categories::pertinent_headers::procedure_code.getLabel()), 
+        &[]
+    );
+
+    let mut complete_exam_code_list:Vec<exam_categories::exam_category>=Vec::new();
+    for procedure_code in main_exam_categories.keys()
+    {
+
+        let mut next_member:exam_categories::exam_category=exam_categories::exam_category{
+            procedure_code:procedure_code.to_string(),
+            exam:"".to_string(),
+            subspecialty:"".to_string(),
+            comments:"".to_string()
+        };
+
+        match existing_exam_categories.get(procedure_code)
+        {
+            None=>{
+                println!("Couldn't find {}",procedure_code.to_string());
+                match main_exam_categories.get(procedure_code)
+                {
+                    None=>{
+                        println!("How did this happen?");
+                    },
+                    Some(main_exam_category)=>{
+                        next_member.exam=main_exam_category[0].to_string();
+                    }
+                }
+            },
+            Some(existing_exam_category)=>{
+                println("Need to populate this from the csv reader");
+            }
+        }   
+    }
+
     return Ok(());
 }
