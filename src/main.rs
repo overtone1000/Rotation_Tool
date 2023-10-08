@@ -1,10 +1,12 @@
 #![allow(unused_parens)]
 
-use std::{error::Error, collections::HashSet, io::ErrorKind};
+use std::{error::Error, collections::{HashSet, HashMap}, io::{ErrorKind, Write}, fs, path::Path, str::FromStr};
 
+use chrono::{DateTime, Local, NaiveDateTime, Datelike, NaiveDate};
 use main_headers::pertinent_headers;
 
 mod table;
+mod dates;
 
 mod file_names
 {
@@ -41,6 +43,8 @@ mod main_headers {
 }
 
 mod exam_categories {
+    use std::cmp::Ordering;
+
     pub(crate) enum pertinent_headers {
         procedure_code,
         exam,
@@ -59,7 +63,7 @@ mod exam_categories {
             }
         }
     }
-
+    
     pub(crate) struct exam_category {
         pub procedure_code:String,
         pub exam:String,
@@ -67,7 +71,80 @@ mod exam_categories {
         pub comments:String
     }
 
-    impl exam_category {
+    impl Eq for exam_category {}
+
+    impl PartialOrd for exam_category {
+        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+            Some(self.cmp(other))
+        }
+    }
+    
+    impl PartialEq for exam_category {
+        fn eq(&self, other: &Self) -> bool {
+            self.procedure_code == other.procedure_code &&
+            self.exam == other.exam
+            //self.subspecialty == other.subspecialty &&
+            //self.comments == other.comments
+        }
+    }
+
+    impl Ord for exam_category {
+        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+            match self.exam.cmp(&other.exam)
+            {
+                std::cmp::Ordering::Equal => self.procedure_code.cmp(&other.procedure_code),
+                (examcmp) => examcmp
+            }
+        }
+    }
+}
+
+mod location_categories {
+    use std::cmp::Ordering;
+
+    pub(crate) enum pertinent_headers {
+        location,
+        context,
+        comments
+    }
+
+    impl pertinent_headers {
+        pub(crate) fn getLabel(&self)->String
+        {
+            match self{
+                pertinent_headers::location => "Location".to_string(),
+                pertinent_headers::context => "Context".to_string(),
+                pertinent_headers::comments => "Comments".to_string(),
+            }
+        }
+    }
+    
+    pub(crate) struct location_category {
+        pub location:String,
+        pub context:String,
+        pub comments:String
+    }
+
+    impl Eq for location_category {}
+
+    impl PartialOrd for location_category {
+        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+            Some(self.cmp(other))
+        }
+    }
+    
+    impl PartialEq for location_category {
+        fn eq(&self, other: &Self) -> bool {
+            self.location == other.location
+            //self.context == other.context &&
+            //self.comments == other.comments
+        }
+    }
+
+    impl Ord for location_category {
+        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+            self.location.cmp(&other.location)
+        }
     }
 }
 
@@ -140,28 +217,24 @@ mod static_categorization {
 
     pub(crate) const ignored:&str="Ignored";
 }
-fn main()->Result<(), Box<dyn Error>> {
-    
-    let main_data_table=table::Table::create(file_names::MAIN_DATA_FILE)?;
 
-    //Get current categories
-    let exam_categories_table=table::Table::create(file_names::CATEGORIES_EXAM_FILE)?;
-    let location_categories_table=table::Table::create(file_names::CATEGORIES_LOCATION_FILE)?;
-
-    let mut main_exam_categories=main_data_table.getKeyedColumnValueMap(
-        &(main_headers::pertinent_headers::procedure_code.getLabel()),
-        &[(main_headers::pertinent_headers::exam.getLabel())]
+fn get_categories_list(
+    main_data_table:&table::Table,
+    exam_categories_table:&table::Table
+)->Option<Vec<exam_categories::exam_category>>
+{
+    let main_exam_categories=main_data_table.getKeyedColumnSampleMap(
+        &(main_headers::pertinent_headers::procedure_code.getLabel())
     );
 
-    let mut existing_exam_categories=exam_categories_table.getKeyedColumnValueMap(
-        &(exam_categories::pertinent_headers::procedure_code.getLabel()), 
-        &[]
+    let existing_exam_categories=exam_categories_table.getKeyedColumnSampleMap(
+        &(exam_categories::pertinent_headers::procedure_code.getLabel())
     );
 
     let mut complete_exam_code_list:Vec<exam_categories::exam_category>=Vec::new();
+    
     for procedure_code in main_exam_categories.keys()
     {
-
         let mut next_member:exam_categories::exam_category=exam_categories::exam_category{
             procedure_code:procedure_code.to_string(),
             exam:"".to_string(),
@@ -173,21 +246,286 @@ fn main()->Result<(), Box<dyn Error>> {
         {
             None=>{
                 println!("Couldn't find {}",procedure_code.to_string());
-                match main_exam_categories.get(procedure_code)
-                {
-                    None=>{
-                        println!("How did this happen?");
-                    },
-                    Some(main_exam_category)=>{
-                        next_member.exam=main_exam_category[0].to_string();
-                    }
-                }
+                let sample_row_index = main_exam_categories.get(procedure_code)?;
+                next_member.procedure_code=main_data_table.getVal(&main_headers::pertinent_headers::procedure_code.getLabel(), sample_row_index)?;
+                next_member.exam=main_data_table.getVal(&main_headers::pertinent_headers::exam.getLabel(), sample_row_index)?;
             },
-            Some(existing_exam_category)=>{
-                println!("Need to populate this from the csv reader");
+            Some(sample_row_index)=>{
+                next_member.procedure_code=exam_categories_table.getVal(&exam_categories::pertinent_headers::procedure_code.getLabel(), sample_row_index)?;
+                next_member.exam=exam_categories_table.getVal(&exam_categories::pertinent_headers::exam.getLabel(), sample_row_index)?;
+                next_member.subspecialty=exam_categories_table.getVal(&exam_categories::pertinent_headers::subspecialty.getLabel(), sample_row_index)?;
+                next_member.comments=exam_categories_table.getVal(&exam_categories::pertinent_headers::comments.getLabel(), sample_row_index)?;
             }
-        }   
+        }
+
+        complete_exam_code_list.push(next_member);  
     }
 
+    complete_exam_code_list.sort();
+
+    return Some(complete_exam_code_list);
+}
+
+fn get_locations_list(
+    main_data_table:&table::Table,
+    exam_locations_table:&table::Table
+)->Option<Vec<location_categories::location_category>>
+{
+    let main_exam_locations=main_data_table.getKeyedColumnSampleMap(
+        &(main_headers::pertinent_headers::location.getLabel())
+    );
+
+    let existing_exam_locations=exam_locations_table.getKeyedColumnSampleMap(
+        &(location_categories::pertinent_headers::location.getLabel())
+    );
+
+    let mut complete_exam_location_list:Vec<location_categories::location_category>=Vec::new();
+    
+    for location in main_exam_locations.keys()
+    {
+        if location == "300"
+        {
+            println!("Caught it");
+        }
+        let mut next_member:location_categories::location_category=location_categories::location_category{
+            location:location.to_string(),
+            context:"".to_string(),
+            comments:"".to_string()
+        };
+
+        match existing_exam_locations.get(location)
+        {
+            None=>{
+                println!("Couldn't find {}",location.to_string());
+                let sample_row_index = main_exam_locations.get(location)?;
+                next_member.location=main_data_table.getVal(&main_headers::pertinent_headers::location.getLabel(), sample_row_index)?;
+            },
+            Some(sample_row_index)=>{
+                next_member.location=exam_locations_table.getVal(&location_categories::pertinent_headers::location.getLabel(), sample_row_index)?;
+                next_member.context=exam_locations_table.getVal(&location_categories::pertinent_headers::context.getLabel(), sample_row_index)?;
+                next_member.comments=exam_locations_table.getVal(&location_categories::pertinent_headers::comments.getLabel(), sample_row_index)?;
+            }
+        }
+
+        complete_exam_location_list.push(next_member);  
+    }
+
+    complete_exam_location_list.sort();
+
+    return Some(complete_exam_location_list);
+}
+
+fn backup(dt:DateTime<Local>,p:String,label:String)->Result<u64,std::io::Error>
+{
+    let backup_path="./categories/archive/".to_string() + &dt.timestamp().to_string() + " backup of " + &label;
+    println!("Backup to {}",backup_path);
+    return fs::copy(p.to_owned(),backup_path);
+}
+
+const SITES:&[&str]=
+&[
+    "SH",
+    "SC",
+    "SRC",
+    "WVH",
+    "WB",
+    "TPC"
+];
+
+const SUBSPECIALTIES:&[&str]=
+&[
+    "General",
+    "US Procedure (General)",
+    "US Procedure (MSK)",
+    "US Procedure (IR)",
+    "US Procedure (IR or PA)",
+    "Fluoro (General)",
+    "Fluoro Procedure (MSK)",
+    "Screening Mamm",
+    "Diagnostic Mamm",
+    "Complex CTA/MRA",
+    "Angio",
+    "Vascular US",
+    "CT Procedure",
+    "MSK",
+    "Neuro (Brain)",
+    "Neuro (Other)",
+    "Intraop Fluoro"
+];
+
+const CONTEXTS:&[&str]=
+&[
+    "Inpatient",
+    "Outpatient",
+    "ED"
+];
+
+const MODALITIES:&[&str]=
+&[
+    "XR",
+    "CT",
+    "US",
+    "MR",
+    "NM",
+    "PET",
+    "DEXA",
+    "RF",
+    "MG",
+    "XA",
+    "CVUS",
+    "ANG",
+    "CLINIC"
+];
+
+struct MapEntry
+{
+    rvus:f32
+}
+
+struct RVUMap
+{
+    map:HashMap<String,HashMap<String,HashMap<String,HashMap<String,MapEntry>>>>,
+    included_dates:HashSet<NaiveDate>
+}
+
+impl RVUMap
+{
+    fn new()->RVUMap
+    {
+        let mut retval = RVUMap{
+            map:HashMap::new(),
+            included_dates:HashSet::new()
+        };
+
+        for site in SITES
+        {
+            let mut sub_map:HashMap<String,HashMap<String,HashMap<String,MapEntry>>> = HashMap::new();
+            for subspecialty in SUBSPECIALTIES
+            {
+                let mut con_map:HashMap<String,HashMap<String,MapEntry>> = HashMap::new();
+                for context in CONTEXTS
+                {
+                    let mut mod_map:HashMap<String,MapEntry> = HashMap::new();
+                    for modality in MODALITIES
+                    {
+                        mod_map.insert(modality.to_string(),MapEntry{rvus:0.0});
+                    }
+                    con_map.insert(context.to_string(),mod_map);
+                }
+                sub_map.insert(subspecialty.to_string(),con_map);
+            }
+            retval.map.insert(site.to_string(), sub_map);
+        }
+
+        return retval;
+    }
+
+    fn getEntry(&self,site:String,subspecialty:String,context:String,modality:String)->Option<&MapEntry>
+    {
+        return self.map.get(&site)?.get(&subspecialty)?.get(&context)?.get(&modality);
+    }
+
+}
+
+
+fn createMap(main_data_table:&table::Table, exam_categories:&Vec<exam_categories::exam_category>, location_categories:&Vec<location_categories::location_category>)->Option<RVUMap>
+{
+    let mut rvumap = RVUMap::new();
+    
+    for row_i in main_data_table.rowIndices()
+    {
+        let datetimestring=main_data_table.getVal(&main_headers::pertinent_headers::scheduled_datetime.getLabel(), &row_i)?;
+        
+        let date=match NaiveDate::parse_from_str(&datetimestring, "%m/%d/%y %H:%M")
+        {
+            Ok(dt)=>{
+                println!("{},{:?}",datetimestring,dt);
+                dt
+            },
+            Err(e)=>{
+                println!("Bad date {:?}",e);
+                return None;
+            }
+        };
+
+        if dates::checkWeekDay(date) && !dates::checkHoliday(date)
+        {
+            rvumap.included_dates.insert(date);
+
+        }
+    }
+
+    Some(rvumap)
+}
+
+fn main()->Result<(), Box<dyn Error>> {
+    let main_data_table=table::Table::create(file_names::MAIN_DATA_FILE)?;
+
+    //Get current categories
+    let mut exam_categories_table=table::Table::create(file_names::CATEGORIES_EXAM_FILE)?;
+    let mut location_categories_table=table::Table::create(file_names::CATEGORIES_LOCATION_FILE)?;
+
+    let exam_categories_list = match get_categories_list(&main_data_table,&exam_categories_table)
+    {
+        None=>{return Err("Couldn't build categories list.".into());},
+        Some(categories_list)=>categories_list
+    };
+
+    exam_categories_table.clear();
+    for category_row in exam_categories_list.as_slice()
+    {
+        let mut newrow:Vec<String>=Vec::new();
+        newrow.push(category_row.procedure_code.to_owned());
+        newrow.push(category_row.exam.to_owned());
+        newrow.push(category_row.subspecialty.to_owned());
+        newrow.push(category_row.comments.to_owned());
+        exam_categories_table.pushrow(newrow);
+    }
+
+   
+    let location_categories_list = match get_locations_list(&main_data_table,&location_categories_table)
+    {
+        None=>{return Err("Couldn't build location list.".into());},
+        Some(categories_list)=>categories_list
+    };
+
+
+    location_categories_table.clear();
+    for location_row in location_categories_list.as_slice()
+    {
+        let mut newrow:Vec<String>=Vec::new();
+        newrow.push(location_row.location.to_owned());
+        newrow.push(location_row.context.to_owned());
+        newrow.push(location_row.comments.to_owned());
+        location_categories_table.pushrow(newrow);
+    }
+        
+    let dt = chrono::offset::Local::now();
+
+    //Archive and save new file if changed
+    match backup(dt,file_names::CATEGORIES_EXAM_FILE.to_string(),"Categories_Exam.csv".to_owned())
+    {
+        Ok(_)=>{
+            exam_categories_table.write_to_file(file_names::CATEGORIES_EXAM_FILE.to_owned());
+        },
+        Err(x)=>{
+            println!("{}",x);
+            return Err(Box::new(x));
+        }
+    }
+    match backup(dt,file_names::CATEGORIES_LOCATION_FILE.to_string(),"Categories_Location.csv".to_owned())
+    {
+        Ok(_)=>{
+            location_categories_table.write_to_file(file_names::CATEGORIES_LOCATION_FILE.to_owned());
+        },
+        Err(x)=>{
+            println!("{}",x);
+            return Err(Box::new(x));
+        }
+    }
+
+    createMap(&main_data_table,&exam_categories_list,&location_categories_list);
+
+    println!("Finished.");
     return Ok(());
 }

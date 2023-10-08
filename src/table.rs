@@ -60,19 +60,54 @@ impl Table
         Ok(retval)
     }
 
+    pub fn write_to_file(&self, path:String)->bool
+    {
+        let mut writer = match csv::WriterBuilder::new()
+        .delimiter(b',')
+        .quote(b'"')
+        .has_headers(false) //write manually
+        .from_path(path)
+        {
+            Ok(x) => x,
+            Err(_) => {return false;}
+        };
+
+        let mut rows:Vec<&Vec<String>>=Vec::new();
+        rows.push(&self.headers);
+        for row in &self.data
+        {
+            rows.push(row);
+        }
+
+        for row in rows {
+            let res = writer.write_record(row);
+    
+            match res
+            {
+                Err(_) => {return false;},
+                Ok(_) => {}
+            }
+        }
+
+        true
+    }
+
     fn getHeaderColumnIndex(&self, header_label:&String)->Option<&usize>
     {
         self.labelmap.get(header_label)
     }
 
-    pub fn getVal(&self, header_label:&String, row:usize)->Option<String>
+    pub fn getVal(&self, header_label:&String, row:&usize)->Option<String>
     {
         let index=self.getHeaderColumnIndex(header_label)?.to_owned();
-        let datarow=self.data.get(row)?.to_owned();
+        let datarow=self.data.get(row.to_owned())?.to_owned();
         let cell=datarow.get(index);
 
         match cell{
-            None=>None,
+            None=>{
+                println!("Problematic value for {} at row {}.",header_label,row);
+                return None;
+            },
             Some(val)=>Some(val.to_owned())
         }
     }
@@ -82,30 +117,31 @@ impl Table
         0..self.data.len()
     }
 
-    pub fn getKeyedColumnValueMap(&self, key_header_label:&String, adjoined_header_labels:&[String])->HashMap<String,Vec<String>>
+    pub fn getKeyedColumnSampleMap(&self, key_header_label:&String)->HashMap<String,usize>
     {
-        let mut retval:HashMap<String,Vec<String>>=HashMap::new();
+        let mut retval:HashMap<String,usize>=HashMap::new();
         for row_i in self.rowIndices()
         {
-            let key_value=self.getVal(key_header_label, row_i);
+            let key_value=self.getVal(key_header_label, &row_i);
             match key_value
             {
                 None=>{},
                 Some(key_value)=>{
-                    let mut adjoined:Vec<String>=Vec::new();
-                    for adjoined_header_label in adjoined_header_labels
-                    {
-                        let adjoined_value=self.getVal(adjoined_header_label, row_i);
-                        match adjoined_value{
-                            None=>{adjoined.push("".to_string());}
-                            Some(av)=>{adjoined.push(av.to_owned());}
-                        }
-                    }
-                    retval.insert(key_value, adjoined);
+                    retval.insert(key_value, row_i);
                 }
             }
         }
 
         retval
+    }
+
+    pub fn clear(&mut self)
+    {
+        self.data.clear();
+    }
+
+    pub fn pushrow(&mut self, row:Vec<String>)
+    {
+        self.data.push(row);
     }
 }
