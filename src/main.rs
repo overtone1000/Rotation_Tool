@@ -184,7 +184,7 @@ fn main()->Result<(), Box<dyn Error>> {
                 }
             },
             Some(existing_exam_category)=>{
-                println("Need to populate this from the csv reader");
+                println!("Need to populate this from the csv reader");
             }
         }   
     }
