@@ -4,6 +4,9 @@ use std::{error::Error, collections::{HashSet, HashMap}, io::{ErrorKind, Write},
 
 use chrono::{DateTime, Local, NaiveDateTime, Datelike, NaiveDate};
 use main_headers::pertinent_headers;
+use static_categorization::sites;
+
+use crate::dates::checkHoliday;
 
 mod table;
 mod dates;
@@ -428,7 +431,7 @@ impl RVUMap
 }
 
 
-fn createMap(main_data_table:&table::Table, exam_categories:&Vec<exam_categories::exam_category>, location_categories:&Vec<location_categories::location_category>)->Option<RVUMap>
+fn createMap(main_data_table:&table::Table, exam_to_subspecialty_map:&HashMap<String,String>, location_to_context_map:&HashMap<String,String>)->Option<RVUMap>
 {
     let mut rvumap = RVUMap::new();
     
@@ -451,7 +454,20 @@ fn createMap(main_data_table:&table::Table, exam_categories:&Vec<exam_categories
         if dates::checkWeekDay(date) && !dates::checkHoliday(date)
         {
             rvumap.included_dates.insert(date);
+            
+            let listed_site=main_data_table.getVal(&main_headers::pertinent_headers::accession.getLabel(), &row_i)?;
+            for site in SITES
+            {
+                if (&listed_site[0..site.len()])==site.to_string()
+                {
 
+                }
+            }
+
+            let location=main_data_table.getVal(&main_headers::pertinent_headers::location.getLabel(), &row_i)?;
+            let context=location_to_context_map.get(&location)?;
+            let exam_code=main_data_table.getVal(&main_headers::pertinent_headers::exam.getLabel(), &row_i)?;
+            let subspecialty=exam_to_subspecialty_map.get(&exam_code)?;
         }
     }
 
