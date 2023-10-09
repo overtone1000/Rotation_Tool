@@ -1,49 +1,18 @@
 #![allow(unused_parens)]
 
-use std::{error::Error, collections::{HashSet, HashMap}, io::{ErrorKind, Write}, fs, path::Path, str::FromStr};
+use std::{error::Error, fs, collections::HashMap};
 
-use chrono::{DateTime, Local, NaiveDateTime, Datelike, NaiveDate};
-use main_headers::pertinent_headers;
-use static_categorization::sites;
+use chrono::{DateTime, Local};
+use globals::main_headers;
 
-use crate::dates::checkHoliday;
 
+use crate::globals::file_names;
+
+mod globals;
+mod time;
 mod table;
 mod dates;
-
-mod file_names
-{
-    pub(crate) const MAIN_DATA_FILE:&str = "./data/SRC_SC_SH_WVH_WB Business Day Data.csv";
-    pub(crate) const CATEGORIES_LOCATION_FILE:&str = "./categories/Categories_Location.csv";
-    pub(crate) const CATEGORIES_EXAM_FILE:&str = "./categories/Categories_Exam.csv";
-}
-
-mod main_headers {
-    pub(crate) enum pertinent_headers {
-        accession,
-        procedure_code,
-        exam,
-        location,
-        scheduled_datetime,
-        rvu,
-        modality
-    }
-
-    impl pertinent_headers {
-        pub(crate) fn getLabel(&self)->String
-        {
-            match self{
-                pertinent_headers::accession => "Accession".to_string(),
-                pertinent_headers::procedure_code => "ProcedureCodeList".to_string(),
-                pertinent_headers::exam => "ProcedureDescList".to_string(),
-                pertinent_headers::location => "LocationDescription".to_string(),
-                pertinent_headers::scheduled_datetime => "Exam Started".to_string(),
-                pertinent_headers::rvu => "WorkRVU".to_string(),
-                pertinent_headers::modality => "Modality".to_string(),
-            }
-        }
-    }
-}
+mod rvu_map;
 
 mod exam_categories {
     use std::cmp::Ordering;
@@ -151,76 +120,6 @@ mod location_categories {
     }
 }
 
-mod time {
-    pub(crate) const time_start_hour:i32=6;
-    pub(crate) const time_start_minute:i32=0;
-    pub(crate) const time_step_minutes:i32=30;
-    pub(crate) fn time_row_count()->i32{
-        return (((24.0*60.0)/(time_step_minutes as f32))).floor() as i32;
-    }
-    pub(crate) fn getTimeRowIndex(hour:i32, minute:i32)->i32{
-        let mut minute_of_day = hour*60+minute;
-        let start_minute_of_day=time_start_hour*60+time_start_minute;
-        if(minute_of_day<start_minute_of_day){minute_of_day+=24*60;}
-        return (((minute_of_day-start_minute_of_day) as f32)/(time_step_minutes as f32)).floor() as i32;
-    }
-}
-
-mod static_categorization {
-
-    pub(crate) mod sites {
-        pub(crate) const sh:&str="SH";
-        pub(crate) const src:&str="SRC";
-        pub(crate) const sc:&str="SC";
-        pub(crate) const wvh:&str="WVH";
-        pub(crate) const wb:&str="WB";
-        pub(crate) const tpc:&str="TPC";
-      }
-
-      pub(crate) mod modalities{
-        pub(crate) const xr:&str="XR";
-        pub(crate) const ct:&str="CT";
-        pub(crate) const us:&str="US";
-        pub(crate) const mr:&str="MR";
-        pub(crate) const nm:&str="NM";
-        pub(crate) const pet:&str="PET";
-        pub(crate) const dexa:&str="DEXA";
-        pub(crate) const fluoro:&str="RF";
-        pub(crate) const mg:&str="MG";
-        pub(crate) const xa:&str="XA";
-        pub(crate) const cvus:&str="CVUS";
-        pub(crate) const angio:&str="ANG";
-        pub(crate) const clinic:&str="CLINIC"; //ABI at SRC
-    }
-
-    pub(crate) mod contexts {
-        pub(crate) const outpatient:&str="Outpatient";
-        pub(crate) const inpatient:&str="Inpatient";
-        pub(crate) const ed:&str="ED";
-    }
-
-    pub(crate) fn mapSiteToContext(site:&str) -> Option<&str>{
-        match site
-        {
-            sites::sh => Some("Outpatient"),
-            sites::sc => Some("Outpatient"),
-            sites::wb => Some("Outpatient"),
-            _ => None
-        }
-    }
-
-    pub(crate) fn getModalityAliases(modality:&str) -> Option<&str>{
-        match modality
-        {
-            modalities::mg => Some("MAM"),
-            modalities::xr => Some("CR"),
-            _ => None
-        }
-    }
-
-    pub(crate) const ignored:&str="Ignored";
-}
-
 fn get_categories_list(
     main_data_table:&table::Table,
     exam_categories_table:&table::Table
@@ -325,154 +224,6 @@ fn backup(dt:DateTime<Local>,p:String,label:String)->Result<u64,std::io::Error>
     return fs::copy(p.to_owned(),backup_path);
 }
 
-const SITES:&[&str]=
-&[
-    "SH",
-    "SC",
-    "SRC",
-    "WVH",
-    "WB",
-    "TPC"
-];
-
-const SUBSPECIALTIES:&[&str]=
-&[
-    "General",
-    "US Procedure (General)",
-    "US Procedure (MSK)",
-    "US Procedure (IR)",
-    "US Procedure (IR or PA)",
-    "Fluoro (General)",
-    "Fluoro Procedure (MSK)",
-    "Screening Mamm",
-    "Diagnostic Mamm",
-    "Complex CTA/MRA",
-    "Angio",
-    "Vascular US",
-    "CT Procedure",
-    "MSK",
-    "Neuro (Brain)",
-    "Neuro (Other)",
-    "Intraop Fluoro"
-];
-
-const CONTEXTS:&[&str]=
-&[
-    "Inpatient",
-    "Outpatient",
-    "ED"
-];
-
-const MODALITIES:&[&str]=
-&[
-    "XR",
-    "CT",
-    "US",
-    "MR",
-    "NM",
-    "PET",
-    "DEXA",
-    "RF",
-    "MG",
-    "XA",
-    "CVUS",
-    "ANG",
-    "CLINIC"
-];
-
-struct MapEntry
-{
-    rvus:f32
-}
-
-struct RVUMap
-{
-    map:HashMap<String,HashMap<String,HashMap<String,HashMap<String,MapEntry>>>>,
-    included_dates:HashSet<NaiveDate>
-}
-
-impl RVUMap
-{
-    fn new()->RVUMap
-    {
-        let mut retval = RVUMap{
-            map:HashMap::new(),
-            included_dates:HashSet::new()
-        };
-
-        for site in SITES
-        {
-            let mut sub_map:HashMap<String,HashMap<String,HashMap<String,MapEntry>>> = HashMap::new();
-            for subspecialty in SUBSPECIALTIES
-            {
-                let mut con_map:HashMap<String,HashMap<String,MapEntry>> = HashMap::new();
-                for context in CONTEXTS
-                {
-                    let mut mod_map:HashMap<String,MapEntry> = HashMap::new();
-                    for modality in MODALITIES
-                    {
-                        mod_map.insert(modality.to_string(),MapEntry{rvus:0.0});
-                    }
-                    con_map.insert(context.to_string(),mod_map);
-                }
-                sub_map.insert(subspecialty.to_string(),con_map);
-            }
-            retval.map.insert(site.to_string(), sub_map);
-        }
-
-        return retval;
-    }
-
-    fn getEntry(&self,site:String,subspecialty:String,context:String,modality:String)->Option<&MapEntry>
-    {
-        return self.map.get(&site)?.get(&subspecialty)?.get(&context)?.get(&modality);
-    }
-
-}
-
-
-fn createMap(main_data_table:&table::Table, exam_to_subspecialty_map:&HashMap<String,String>, location_to_context_map:&HashMap<String,String>)->Option<RVUMap>
-{
-    let mut rvumap = RVUMap::new();
-    
-    for row_i in main_data_table.rowIndices()
-    {
-        let datetimestring=main_data_table.getVal(&main_headers::pertinent_headers::scheduled_datetime.getLabel(), &row_i)?;
-        
-        let date=match NaiveDate::parse_from_str(&datetimestring, "%m/%d/%y %H:%M")
-        {
-            Ok(dt)=>{
-                println!("{},{:?}",datetimestring,dt);
-                dt
-            },
-            Err(e)=>{
-                println!("Bad date {:?}",e);
-                return None;
-            }
-        };
-
-        if dates::checkWeekDay(date) && !dates::checkHoliday(date)
-        {
-            rvumap.included_dates.insert(date);
-            
-            let listed_site=main_data_table.getVal(&main_headers::pertinent_headers::accession.getLabel(), &row_i)?;
-            for site in SITES
-            {
-                if (&listed_site[0..site.len()])==site.to_string()
-                {
-
-                }
-            }
-
-            let location=main_data_table.getVal(&main_headers::pertinent_headers::location.getLabel(), &row_i)?;
-            let context=location_to_context_map.get(&location)?;
-            let exam_code=main_data_table.getVal(&main_headers::pertinent_headers::exam.getLabel(), &row_i)?;
-            let subspecialty=exam_to_subspecialty_map.get(&exam_code)?;
-        }
-    }
-
-    Some(rvumap)
-}
 
 fn main()->Result<(), Box<dyn Error>> {
     let main_data_table=table::Table::create(file_names::MAIN_DATA_FILE)?;
@@ -540,7 +291,20 @@ fn main()->Result<(), Box<dyn Error>> {
         }
     }
 
-    createMap(&main_data_table,&exam_categories_list,&location_categories_list);
+    let mut exam_to_subspecialty_map:HashMap<String,String>=HashMap::new();
+    let mut location_to_context_map:HashMap<String,String>=HashMap::new();
+
+    for exam_category in exam_categories_list
+    {
+        exam_to_subspecialty_map.insert(exam_category.procedure_code,exam_category.subspecialty);
+    }
+
+    for location_category in location_categories_list
+    {
+        location_to_context_map.insert(location_category.location,location_category.context);
+    }
+
+    rvu_map::createMap(&main_data_table,&exam_to_subspecialty_map,&location_to_context_map);
 
     println!("Finished.");
     return Ok(());
