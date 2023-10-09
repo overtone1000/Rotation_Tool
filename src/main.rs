@@ -123,15 +123,15 @@ mod location_categories {
 fn get_categories_list(
     main_data_table:&table::Table,
     exam_categories_table:&table::Table
-)->Option<Vec<exam_categories::exam_category>>
+)->Result<Vec<exam_categories::exam_category>,String>
 {
-    let main_exam_categories=main_data_table.getKeyedColumnSampleMap(
+    let main_exam_categories= main_data_table.getKeyedColumnSampleMap(
         &(main_headers::pertinent_headers::procedure_code.getLabel())
-    );
+    )?;
 
-    let existing_exam_categories=exam_categories_table.getKeyedColumnSampleMap(
+    let existing_exam_categories= exam_categories_table.getKeyedColumnSampleMap(
         &(exam_categories::pertinent_headers::procedure_code.getLabel())
-    );
+    )?;
 
     let mut complete_exam_code_list:Vec<exam_categories::exam_category>=Vec::new();
     
@@ -148,7 +148,10 @@ fn get_categories_list(
         {
             None=>{
                 println!("Couldn't find {}",procedure_code.to_string());
-                let sample_row_index = main_exam_categories.get(procedure_code)?;
+                let sample_row_index = match main_exam_categories.get(procedure_code){
+                    Some(x)=>x,
+                    None=>{return Err(format!("Coudldn't get sample row {} ",procedure_code));}
+                };
                 next_member.procedure_code=main_data_table.getVal(&main_headers::pertinent_headers::procedure_code.getLabel(), sample_row_index)?;
                 next_member.exam=main_data_table.getVal(&main_headers::pertinent_headers::exam.getLabel(), sample_row_index)?;
             },
@@ -165,21 +168,21 @@ fn get_categories_list(
 
     complete_exam_code_list.sort();
 
-    return Some(complete_exam_code_list);
+    return Ok(complete_exam_code_list);
 }
 
 fn get_locations_list(
     main_data_table:&table::Table,
     exam_locations_table:&table::Table
-)->Option<Vec<location_categories::location_category>>
+)->Result<Vec<location_categories::location_category>,String>
 {
-    let main_exam_locations=main_data_table.getKeyedColumnSampleMap(
+    let main_exam_locations= main_data_table.getKeyedColumnSampleMap(
         &(main_headers::pertinent_headers::location.getLabel())
-    );
+    )?;
 
-    let existing_exam_locations=exam_locations_table.getKeyedColumnSampleMap(
+    let existing_exam_locations= exam_locations_table.getKeyedColumnSampleMap(
         &(location_categories::pertinent_headers::location.getLabel())
-    );
+    )?;
 
     let mut complete_exam_location_list:Vec<location_categories::location_category>=Vec::new();
     
@@ -199,7 +202,10 @@ fn get_locations_list(
         {
             None=>{
                 println!("Couldn't find {}",location.to_string());
-                let sample_row_index = main_exam_locations.get(location)?;
+                let sample_row_index = match main_exam_locations.get(location){
+                    Some(x)=>x,
+                    None=>{return Err(format!("Coudldn't get sample row {} ",location));}
+                };
                 next_member.location=main_data_table.getVal(&main_headers::pertinent_headers::location.getLabel(), sample_row_index)?;
             },
             Some(sample_row_index)=>{
@@ -214,7 +220,7 @@ fn get_locations_list(
 
     complete_exam_location_list.sort();
 
-    return Some(complete_exam_location_list);
+    return Ok(complete_exam_location_list);
 }
 
 fn backup(dt:DateTime<Local>,p:String,label:String)->Result<u64,std::io::Error>
@@ -232,12 +238,8 @@ fn main()->Result<(), Box<dyn Error>> {
     let mut exam_categories_table=table::Table::create(file_names::CATEGORIES_EXAM_FILE)?;
     let mut location_categories_table=table::Table::create(file_names::CATEGORIES_LOCATION_FILE)?;
 
-    let exam_categories_list = match get_categories_list(&main_data_table,&exam_categories_table)
-    {
-        None=>{return Err("Couldn't build categories list.".into());},
-        Some(categories_list)=>categories_list
-    };
-
+    let exam_categories_list = get_categories_list(&main_data_table,&exam_categories_table)?;
+    
     exam_categories_table.clear();
     for category_row in exam_categories_list.as_slice()
     {
@@ -250,12 +252,8 @@ fn main()->Result<(), Box<dyn Error>> {
     }
 
    
-    let location_categories_list = match get_locations_list(&main_data_table,&location_categories_table)
-    {
-        None=>{return Err("Couldn't build location list.".into());},
-        Some(categories_list)=>categories_list
-    };
-
+    let location_categories_list = get_locations_list(&main_data_table,&location_categories_table)?;
+    
 
     location_categories_table.clear();
     for location_row in location_categories_list.as_slice()
@@ -307,5 +305,6 @@ fn main()->Result<(), Box<dyn Error>> {
     rvu_map::createMap(&main_data_table,&exam_to_subspecialty_map,&location_to_context_map);
 
     println!("Finished.");
+    
     return Ok(());
 }

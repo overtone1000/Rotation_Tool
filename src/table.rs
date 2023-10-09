@@ -92,23 +92,38 @@ impl Table
         true
     }
 
-    fn getHeaderColumnIndex(&self, header_label:&String)->Option<&usize>
+    fn getHeaderColumnIndex(&self, header_label:&String)->Result<&usize,String>
     {
-        self.labelmap.get(header_label)
+        match self.labelmap.get(header_label)
+        {
+            None=>{
+                Err(format!("No header {} found",header_label))
+            },
+            Some(x)=>{
+                Ok(x)
+            }
+        }
     }
 
-    pub fn getVal(&self, header_label:&String, row:&usize)->Option<String>
+    pub fn getVal(&self, header_label:&String, row:&usize)->Result<String,String>
     {
         let index=self.getHeaderColumnIndex(header_label)?.to_owned();
-        let datarow=self.data.get(row.to_owned())?.to_owned();
+        
+        let datarow=match self.data.get(row.to_owned())
+        {
+            None=>{
+                return Err(format!("No data row {} exists",row));
+            },
+            Some(x)=>x.to_owned()
+        };
+
         let cell=datarow.get(index);
 
         match cell{
             None=>{
-                println!("Problematic value for {} at row {}.",header_label,row);
-                return None;
+                return Err(format!("No val for {} in row {} ",header_label,row));
             },
-            Some(val)=>Some(val.to_owned())
+            Some(val)=>Ok(val.to_owned())
         }
     }
 
@@ -117,7 +132,7 @@ impl Table
         0..self.data.len()
     }
 
-    pub fn getKeyedColumnSampleMap(&self, key_header_label:&String)->HashMap<String,usize>
+    pub fn getKeyedColumnSampleMap(&self, key_header_label:&String)->Result<HashMap<String,usize>,String>
     {
         let mut retval:HashMap<String,usize>=HashMap::new();
         for row_i in self.rowIndices()
@@ -125,14 +140,14 @@ impl Table
             let key_value=self.getVal(key_header_label, &row_i);
             match key_value
             {
-                None=>{},
-                Some(key_value)=>{
+                Err(x)=>{return Err(x)},
+                Ok(key_value)=>{
                     retval.insert(key_value, row_i);
                 }
             }
         }
 
-        retval
+        Ok(retval)
     }
 
     pub fn clear(&mut self)

@@ -73,36 +73,23 @@ impl RVUMap
         return retval;
     }
 
-    fn getEntry(&self,coords:MapCoords)->Option<&mut MapEntry>
+    fn getEntry(&self,coords:MapCoords)->Option<&MapEntry>
     {
-        match self.map.get(&coords.site)?.get(&coords.subspecialty)?.get(&coords.context)?.get(&coords.modality)
-        {
-            None=>None,
-            Some(me)=>Some<
-        }
-        return retval;
+        self.map.get(&coords.site)?.get(&coords.subspecialty)?.get(&coords.context)?.get(&coords.modality)
     }
 }
 
-
-pub fn createMap(main_data_table:&table::Table, exam_to_subspecialty_map:&HashMap<String,String>, location_to_context_map:&HashMap<String,String>)->Option<RVUMap>
+pub fn createMap(main_data_table:&table::Table, exam_to_subspecialty_map:&HashMap<String,String>, location_to_context_map:&HashMap<String,String>)->Result<RVUMap,String>
 {
     let mut rvumap = RVUMap::new();
     
     for row_i in main_data_table.rowIndices()
     {
-        let datetimestring=main_data_table.getVal(&main_headers::pertinent_headers::scheduled_datetime.getLabel(), &row_i)?;
+        let datetimestring= main_data_table.getVal(&main_headers::pertinent_headers::scheduled_datetime.getLabel(), &row_i)?;
         
-        let date=match NaiveDate::parse_from_str(&datetimestring, "%m/%d/%y %H:%M")
-        {
-            Ok(dt)=>{
-                println!("{},{:?}",datetimestring,dt);
-                dt
-            },
-            Err(e)=>{
-                println!("Bad date {:?}",e);
-                return None;
-            }
+        let date=match NaiveDate::parse_from_str(&datetimestring, "%m/%d/%y %H:%M"){
+            Ok(x)=>x,
+            Err(x)=>{return Err(format!("Couldn't parse date {}",datetimestring));}
         };
 
         if dates::checkWeekDay(date) && !dates::checkHoliday(date)
@@ -122,7 +109,10 @@ pub fn createMap(main_data_table:&table::Table, exam_to_subspecialty_map:&HashMa
             coords.context= match location_to_context_map.get(&location)
             {
                 Some(x)=>x.to_string(),
-                None=>location_to_context_map.get(&location)?.to_string()
+                None=>{
+                    println!("Need to go by site map here!");
+                    return Err(format!("location_to_context_map invalid location {}",location));
+                }
             };
 
             //Try site. If not valid, go by location.
