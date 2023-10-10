@@ -1,14 +1,15 @@
 #![allow(unused_parens)]
 
-use std::{error::Error, fs, collections::HashMap};
+use std::{error::Error, fs::{self, File}, collections::HashMap, io::Write};
 
 use chrono::{DateTime, Local};
 use globals::main_headers;
 
 
-use crate::globals::file_names;
+use crate::{globals::file_names, error::RotationToolError};
 
 mod globals;
+mod error;
 mod time;
 mod table;
 mod dates;
@@ -147,7 +148,7 @@ fn get_categories_list(
         match existing_exam_categories.get(procedure_code)
         {
             None=>{
-                println!("Couldn't find {}",procedure_code.to_string());
+                println!("Couldn't find procedure code {}",procedure_code.to_string());
                 let sample_row_index = match main_exam_categories.get(procedure_code){
                     Some(x)=>x,
                     None=>{return Err(format!("Coudldn't get sample row {} ",procedure_code));}
@@ -188,10 +189,6 @@ fn get_locations_list(
     
     for location in main_exam_locations.keys()
     {
-        if location == "300"
-        {
-            println!("Caught it");
-        }
         let mut next_member:location_categories::location_category=location_categories::location_category{
             location:location.to_string(),
             context:"".to_string(),
@@ -201,7 +198,7 @@ fn get_locations_list(
         match existing_exam_locations.get(location)
         {
             None=>{
-                println!("Couldn't find {}",location.to_string());
+                println!("Couldn't find location {}",location.to_string());
                 let sample_row_index = match main_exam_locations.get(location){
                     Some(x)=>x,
                     None=>{return Err(format!("Coudldn't get sample row {} ",location));}
@@ -302,9 +299,24 @@ fn main()->Result<(), Box<dyn Error>> {
         location_to_context_map.insert(location_category.location,location_category.context);
     }
 
-    rvu_map::createMap(&main_data_table,&exam_to_subspecialty_map,&location_to_context_map);
+    let map = match rvu_map::createMap(&main_data_table,&exam_to_subspecialty_map,&location_to_context_map)
+    {
+        Ok(x)=>x,
+        Err(e)=>{
+            let err=RotationToolError::new(e);
+            return Err(Box::new(err));
+        }
+    };
 
-    println!("Finished.");
+    let mut mapoutfile=File::create(file_names::OUT_FILE)?;
+    let mapstr=map.toJSON()?;
+    let bytes=mapstr.as_bytes();
+        
+    match mapoutfile.write_all(&bytes){
+        Ok(_)=>{},
+        Err(e)=>{return Err(Box::new(RotationToolError::new(e.to_string())));}
+    }
     
+    println!("Finished.");
     return Ok(());
 }

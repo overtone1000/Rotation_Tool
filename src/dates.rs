@@ -2,12 +2,12 @@ use chrono::{NaiveDate, Datelike};
 
 pub fn checkWeekDay(date:NaiveDate)->bool
 {
-    match date.weekday()
-    {
-        chrono::Weekday::Sun=>true,
-        chrono::Weekday::Sat=>true,
-        (_)=>false
-    }
+  match date.weekday()
+  {
+      chrono::Weekday::Sun=>false,
+      chrono::Weekday::Sat=>false,
+      (_)=>true
+  }
 }
 
 fn calcNumberOfDayOfWeekInMonth(date:NaiveDate)->u32
@@ -71,7 +71,7 @@ pub fn checkHoliday(date:NaiveDate)->bool
     let month=date.month(); //january is 1   
     let day_of_month=date.day(); //1st is 1
 
-    println!("Checking {} ({}) ({})",date.to_string(),calcDayOfWeekOfMonth(date),calcNumberOfDayOfWeekInMonth(date));
+    //println!("Checking {} ({}) ({})",date.to_string(),calcDayOfWeekOfMonth(date),calcNumberOfDayOfWeekInMonth(date));
 
     //Memorial Day, last Monday of May
     if(month==chrono::Month::May.number_from_month() && day_of_week==chrono::Weekday::Mon && calcDayOfWeekOfMonth(date)==calcNumberOfDayOfWeekInMonth(date)){

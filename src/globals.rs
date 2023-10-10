@@ -4,6 +4,7 @@ pub mod file_names
     pub(crate) const MAIN_DATA_FILE:&str = "./data/SRC_SC_SH_WVH_WB Business Day Data.csv";
     pub(crate) const CATEGORIES_LOCATION_FILE:&str = "./categories/Categories_Location.csv";
     pub(crate) const CATEGORIES_EXAM_FILE:&str = "./categories/Categories_Exam.csv";
+    pub(crate) const OUT_FILE:&str = "./output/Categorized Weekday RVU Map";
 }
 
 pub mod main_headers {
@@ -42,13 +43,6 @@ const WB:&str="WB";
 const DXR:&str="DXR";
 const BC:&str="BC";
 
-//modalities
-
-const XR:&str="XR";
-const MG:&str="MG";
-
-pub const ignored:&str="Ignored";
-
 pub const SITES:&[&str]=
 &[
     SH,
@@ -77,68 +71,87 @@ pub const SUBSPECIALTIES:&[&str]=
     "MSK",
     "Neuro (Brain)",
     "Neuro (Other)",
-    "Intraop Fluoro"
+    "Intraop Fluoro",
+    "Cardiac",
+    "CT Colonography",
+    "Breast MR",
+    "Non-Radiology"
 ];
+
+const Inpatient:&str="Inpatient";
+const Outpatient:&str="Outpatient";
+const ED:&str="ED";
 
 pub const CONTEXTS:&[&str]=
 &[
-    "Inpatient",
-    "Outpatient",
-    "ED"
+    Inpatient,
+    Outpatient,
+    ED
 ];
 
-
+//modalities
+const XR:&str="XR";
+const MG:&str="MG";
+const ANG:&str="ANG";
+const US:&str="US";
+const PET:&str="PET";
 
 pub const MODALITIES:&[&str]=
 &[
     XR,
     "CT",
-    "US",
+    US,
     "MR",
     "NM",
-    "PET",
+    PET,
     "DEXA",
     "RF",
     MG,
     "XA",
     "CVUS",
-    "ANG",
+    ANG,
     "CLINIC"
 ];
 
-pub fn mapSiteToContext(site:&str) -> Option<&str>{
-    let sh=SH;
-    let sc=SC;
-    let wb=WB;
+pub fn mapSiteToContext(site:&str) -> Option<String>{
     match site
     {
-        sh => Some("Outpatient"),
-        sc => Some("Outpatient"),
-        wb => Some("Outpatient"),
+        SH => Some(Outpatient.to_string()),
+        SC => Some(Outpatient.to_string()),
+        WB => Some(Outpatient.to_string()),
         _ => None
     }
 }
 
-pub fn getModalityAlias(modality:&str) -> Option<&str>{
-    let mg=MG;
-    let xr=XR;
-    match modality
+pub fn getModalityAlias(modality:&String) -> Option<String>{
+    let retval = match modality.as_str()
     {
-        mg => Some("MAM"),
-        xr => Some("CR"),
+       "MAM" => Some(MG.to_string()),
+       "CR" => Some(XR.to_string()),
+       "PT" => Some(PET.to_string()),
+        _ => None
+    };
+    return retval;
+}
+
+pub fn getModalityFromProcedureDesc(desc:String)->Option<String>{
+    match desc.as_str() {
+        "ANG PA LYSIS" => Some(ANG.to_string()),
+        "ANG NEPHROSTOMY REMOVAL" => Some(ANG.to_string()),
+        "US GUIDANCE NEXPLANON REMOVAL" => Some(US.to_string()),
+        "MAM MAGSEED PLACEMENT" => Some(MG.to_string()),
+        "US MAGSEED PLACEMENT" => Some(US.to_string()),
+        "ANG TEMP DIALYSIS CATHETER PLACEMENT" => Some(ANG.to_string()),
         _ => None
     }
 }
 
-pub fn getLocationSiteMapping(location:String)->Option<String>
+pub fn getLocationSiteMapping(location:&String)->Option<String>
 {
-    let dxr=DXR;
-    let bc=BC;
-
-    match location
+    match location.as_str()
     {
-        dxr=>Some(SH.to_string()),
-        bc=>Some(SH.to_string()),
+        DXR=>Some(SH.to_string()),
+        BC=>Some(SH.to_string()),
         (_)=>None
     }
 }

@@ -1,6 +1,5 @@
 Location,Context,Comments
-,,
-3E2,Inpatient,
+300,Inpatient,"Must be inpatient, it includes bedside XR"
 3N2,Inpatient,
 3W2,Inpatient,
 4NE2,Inpatient,

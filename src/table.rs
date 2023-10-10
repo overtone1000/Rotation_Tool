@@ -142,7 +142,13 @@ impl Table
             {
                 Err(x)=>{return Err(x)},
                 Ok(key_value)=>{
-                    retval.insert(key_value, row_i);
+                    if(key_value=="")
+                    {
+                        eprintln!("Row {} header {} is empty.",row_i,key_header_label);
+                    }
+                    else {
+                        retval.insert(key_value, row_i);
+                    }
                 }
             }
         }
