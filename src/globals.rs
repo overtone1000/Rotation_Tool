@@ -2,6 +2,7 @@
 pub mod file_names
 {
     pub(crate) const MAIN_DATA_FILE:&str = "./data/SRC_SC_SH_WVH_WB Business Day Data.csv";
+    pub(crate) const TPC_DATA_FILE:&str = "./data/TPC Whole Year with Salem Code Map.csv";
     pub(crate) const CATEGORIES_LOCATION_FILE:&str = "./categories/Categories_Location.csv";
     pub(crate) const CATEGORIES_EXAM_FILE:&str = "./categories/Categories_Exam.csv";
     pub(crate) const OUT_FILE:&str = "./output/Categorized Weekday RVU Map";
@@ -34,10 +35,28 @@ pub mod main_headers {
     }
 }
 
+pub mod tpc_headers {
+    pub(crate) enum pertinent_headers {
+        number_in_2022,
+        exam_code
+    }
+
+    impl pertinent_headers {
+        pub(crate) fn getLabel(&self)->String
+        {
+            match self{
+                pertinent_headers::number_in_2022 => "2022 Volume".to_string(),
+                pertinent_headers::exam_code => "Exam Code Translation".to_string(),
+            }
+        }
+    }
+}
+
 //sites
 const SH:&str="SH";
 const SC:&str="SC";
 const WB:&str="WB";
+pub const TPC:&str="TPC";
 
 //locations
 const DXR:&str="DXR";
@@ -50,7 +69,7 @@ pub const SITES:&[&str]=
     "SRC",
     "WVH",
     WB,
-    "TPC"
+    TPC
 ];
 
 pub const SUBSPECIALTIES:&[&str]=
@@ -79,7 +98,7 @@ pub const SUBSPECIALTIES:&[&str]=
 ];
 
 const Inpatient:&str="Inpatient";
-const Outpatient:&str="Outpatient";
+pub const Outpatient:&str="Outpatient";
 const ED:&str="ED";
 
 pub const CONTEXTS:&[&str]=

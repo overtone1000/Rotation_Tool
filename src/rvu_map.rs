@@ -3,7 +3,7 @@ use std::{collections::{HashMap, HashSet}, hash::Hash};
 
 use chrono::{NaiveDate, NaiveDateTime, Timelike};
 
-use crate::{table::{Table, self}, globals::{SITES, SUBSPECIALTIES, CONTEXTS, MODALITIES, main_headers}, dates};
+use crate::{table::{Table, self}, globals::{SITES, SUBSPECIALTIES, CONTEXTS, MODALITIES, main_headers, tpc_headers}, dates::{self, business_days_per_year}, tpc};
 
 struct MapEntry
 {
@@ -20,6 +20,11 @@ impl MapEntry
     fn getRVUs(&self)->f32
     {
         return self.rvus.to_owned();
+    }
+
+    fn setRVUs(&mut self,rvu:f32)->()
+    {
+        self.rvus=rvu;
     }
 }
 
@@ -81,8 +86,7 @@ impl MapCoords{
 
 pub struct RVUMap
 {
-    map:HashMap<String,HashMap<String,HashMap<String,HashMap<String,HashMap<usize,MapEntry>>>>>,
-    included_dates:HashSet<NaiveDate>
+    map:HashMap<String,HashMap<String,HashMap<String,HashMap<String,HashMap<usize,MapEntry>>>>>
 }
 
 impl RVUMap
@@ -90,8 +94,7 @@ impl RVUMap
     fn new()->RVUMap
     {
         let mut retval = RVUMap{
-            map:HashMap::new(),
-            included_dates:HashSet::new()
+            map:HashMap::new()
         };
 
         return retval;
@@ -139,13 +142,10 @@ impl RVUMap
         let me= time_map.get_mut(&coords.time_row).expect("Immediate get");
         me.addRVUs(rvus);
         return Ok("good".to_string());
-
     }
 
     pub fn toJSON(&self)->Result<String,String>
     {
-        let days:f32=self.included_dates.len() as f32;
-
         let mut topnode=json::JsonValue::new_object();
         if(self.map.keys().len()>0)
         {
@@ -176,8 +176,7 @@ impl RVUMap
                                             for time_row in time_map.keys()
                                             {
                                                 let me = time_map.get(time_row).expect("No map entry");
-                                                let avg_rvus_per_day=me.rvus/days;
-                                                modalitynode[time_row.to_string()]=avg_rvus_per_day.into();
+                                                modalitynode[time_row.to_string()]=me.rvus.into();
                                             }
                                             contextnode[modality]=modalitynode;
                                         }
@@ -197,10 +196,13 @@ impl RVUMap
     }
 }
 
-
-pub fn createMap(main_data_table:&table::Table, exam_to_subspecialty_map:&HashMap<String,String>, location_to_context_map:&HashMap<String,String>)->Result<RVUMap,String>
+pub fn createMap(main_data_table:&table::Table, tpc_data_table:&table::Table, rvu_map:&HashMap<String,f32>, exam_to_subspecialty_map:&HashMap<String,String>, location_to_context_map:&HashMap<String,String>)->Result<RVUMap,String>
 {
     let mut rvumap = RVUMap::new();
+
+    let mut modality_map:HashMap<String,String>=HashMap::new();
+
+    let mut included_dates:HashSet<NaiveDate>=HashSet::new();
     
     for row_i in main_data_table.rowIndices()
     {
@@ -215,7 +217,7 @@ pub fn createMap(main_data_table:&table::Table, exam_to_subspecialty_map:&HashMa
 
         if dates::checkWeekDay(date) && !dates::checkHoliday(date)
         {
-            rvumap.included_dates.insert(date);
+            included_dates.insert(date);
 
             let mut coords=MapCoords::default();
 
@@ -305,19 +307,87 @@ pub fn createMap(main_data_table:&table::Table, exam_to_subspecialty_map:&HashMa
                     return Err(format!("Could not determine modality for row {}",row_i));
                 }
             };
-
-            let rvus_str = main_data_table.getVal(&main_headers::pertinent_headers::rvu.getLabel(), &row_i)?;
-            let rvus=match rvus_str.parse::<f32>()
+            if(!modality_map.contains_key(&exam_code))
             {
-                Ok(x)=>x,
-                Err(e)=>{
-                    return Err(format!("{:?}",e));
-                }
-            };
+                modality_map.insert(exam_code.to_owned(), coords.modality.to_owned());
+            }
 
+            //let rvus_str = main_data_table.getVal(&main_headers::pertinent_headers::rvu.getLabel(), &row_i)?;
+            let rvus=match rvu_map.get(&exam_code){
+                Some(&x)=>x,
+                None=>{
+                    return Err(format!("Coudn't find exam code {}",exam_code));
+                }
+            }
+            ;
             rvumap.addRVUs(&coords,rvus)?;
         }
     }   
+
+    let days:f32=included_dates.len() as f32;
+
+    //Divide by number of days worth of data to get rvu/day
+    for site in rvumap.map.iter_mut()
+    {
+        let sub_map = site.1;
+        for subspecialty in sub_map.iter_mut()
+        {
+            let con_map=subspecialty.1;
+            for context in con_map.iter_mut()
+            {
+                let mod_map=context.1;
+                for modality in mod_map.iter_mut()
+                {
+                    let time_map=modality.1;
+                    for time_row in time_map.iter_mut()
+                    {
+                        let me = time_row.1;
+                        me.setRVUs(me.rvus/days);
+                    }
+                }
+            }
+        }
+    }
+
+    //Add TPC, which doesn't go by number of dates
+    let weights=crate::time::getTimeRowNormalDistWeights();
+    for row_i in tpc_data_table.rowIndices()
+    {
+        let exam_code = tpc_data_table.getVal(&tpc_headers::pertinent_headers::exam_code.getLabel(),&row_i)?;
+        let number_str = tpc_data_table.getVal(&tpc_headers::pertinent_headers::number_in_2022.getLabel(),&row_i)?;
+        
+        let number=match number_str.parse::<f32>(){
+            Ok(val)=>val,
+            Err(e)=>{return Err(format!("{:?}",e));}
+        };
+
+        let number_per_business_day=number/business_days_per_year;
+        let rvus_per_exam=match rvu_map.get(&exam_code){
+            None=>{return Err(format!("Bad exam code {}",exam_code));}
+            Some(val)=>val.to_owned()
+        };
+
+        let rvus_per_business_day =number_per_business_day*rvus_per_exam;
+
+        let mut coords=MapCoords::default();
+        coords.site=crate::globals::TPC.to_string();
+        coords.subspecialty=match exam_to_subspecialty_map.get(&exam_code){
+            None=>{return Err(format!("Bad exam code {}",exam_code));}
+            Some(val)=>val.to_owned()
+        };
+        coords.context=crate::globals::Outpatient.to_string();
+        coords.modality=match modality_map.get(&exam_code)
+        {
+            None=>{return Err(format!("Bad exam code {}",exam_code));}
+            Some(val)=>val.to_owned()
+        };
+
+        for key in weights.keys() {
+            coords.time_row=*key;
+            let rvu=rvus_per_business_day*(*weights.get(key).expect("Expected")) as f32;
+            rvumap.addRVUs(&coords, rvu);
+        }
+    }
 
     Ok(rvumap)
 }

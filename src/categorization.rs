@@ -1,0 +1,279 @@
+use std::{collections::HashMap, fs};
+
+use chrono::{DateTime, Local};
+
+use crate::{table, globals::main_headers};
+
+
+pub(crate) mod exam_categories {
+    use std::cmp::Ordering;
+
+    pub(crate) enum pertinent_headers {
+        procedure_code,
+        exam,
+        subspecialty,
+        comments
+    }
+
+    impl pertinent_headers {
+        pub(crate) fn getLabel(&self)->String
+        {
+            match self{
+                pertinent_headers::procedure_code => "Exam Code".to_string(),
+                pertinent_headers::exam => "Exam Description".to_string(),
+                pertinent_headers::subspecialty => "Subspecialty".to_string(),
+                pertinent_headers::comments => "Comments".to_string(),
+            }
+        }
+    }
+    
+    pub(crate) struct exam_category {
+        pub procedure_code:String,
+        pub exam:String,
+        pub subspecialty:String,
+        pub comments:String
+    }
+
+    impl Eq for exam_category {}
+
+    impl PartialOrd for exam_category {
+        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+            Some(self.cmp(other))
+        }
+    }
+    
+    impl PartialEq for exam_category {
+        fn eq(&self, other: &Self) -> bool {
+            self.procedure_code == other.procedure_code &&
+            self.exam == other.exam
+            //self.subspecialty == other.subspecialty &&
+            //self.comments == other.comments
+        }
+    }
+
+    impl Ord for exam_category {
+        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+            match self.exam.cmp(&other.exam)
+            {
+                std::cmp::Ordering::Equal => self.procedure_code.cmp(&other.procedure_code),
+                (examcmp) => examcmp
+            }
+        }
+    }
+}
+
+pub(crate) mod location_categories {
+    use std::cmp::Ordering;
+
+    pub(crate) enum pertinent_headers {
+        location,
+        context,
+        comments
+    }
+
+    impl pertinent_headers {
+        pub(crate) fn getLabel(&self)->String
+        {
+            match self{
+                pertinent_headers::location => "Location".to_string(),
+                pertinent_headers::context => "Context".to_string(),
+                pertinent_headers::comments => "Comments".to_string(),
+            }
+        }
+    }
+    
+    pub(crate) struct location_category {
+        pub location:String,
+        pub context:String,
+        pub comments:String
+    }
+
+    impl Eq for location_category {}
+
+    impl PartialOrd for location_category {
+        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+            Some(self.cmp(other))
+        }
+    }
+    
+    impl PartialEq for location_category {
+        fn eq(&self, other: &Self) -> bool {
+            self.location == other.location
+            //self.context == other.context &&
+            //self.comments == other.comments
+        }
+    }
+
+    impl Ord for location_category {
+        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+            self.location.cmp(&other.location)
+        }
+    }
+}
+
+pub(crate) fn get_categories_list(
+    main_data_table:&table::Table,
+    exam_categories_table:&table::Table
+)->Result<Vec<exam_categories::exam_category>,String>
+{
+    let main_exam_categories= main_data_table.getKeyedColumnSampleMap(
+        &(main_headers::pertinent_headers::procedure_code.getLabel())
+    )?;
+
+    let existing_exam_categories= exam_categories_table.getKeyedColumnSampleMap(
+        &(exam_categories::pertinent_headers::procedure_code.getLabel())
+    )?;
+
+    let mut complete_exam_code_list:Vec<exam_categories::exam_category>=Vec::new();
+    
+    for procedure_code in main_exam_categories.keys()
+    {
+        let mut next_member:exam_categories::exam_category=exam_categories::exam_category{
+            procedure_code:procedure_code.to_string(),
+            exam:"".to_string(),
+            subspecialty:"".to_string(),
+            comments:"".to_string()
+        };
+
+        match existing_exam_categories.get(procedure_code)
+        {
+            None=>{
+                println!("Couldn't find procedure code {}",procedure_code.to_string());
+                let sample_row_index = match main_exam_categories.get(procedure_code){
+                    Some(x)=>x,
+                    None=>{return Err(format!("Coudldn't get sample row {} ",procedure_code));}
+                };
+                next_member.procedure_code=main_data_table.getVal(&main_headers::pertinent_headers::procedure_code.getLabel(), sample_row_index)?;
+                next_member.exam=main_data_table.getVal(&main_headers::pertinent_headers::exam.getLabel(), sample_row_index)?;
+            },
+            Some(sample_row_index)=>{
+                next_member.procedure_code=exam_categories_table.getVal(&exam_categories::pertinent_headers::procedure_code.getLabel(), sample_row_index)?;
+                next_member.exam=exam_categories_table.getVal(&exam_categories::pertinent_headers::exam.getLabel(), sample_row_index)?;
+                next_member.subspecialty=exam_categories_table.getVal(&exam_categories::pertinent_headers::subspecialty.getLabel(), sample_row_index)?;
+                next_member.comments=exam_categories_table.getVal(&exam_categories::pertinent_headers::comments.getLabel(), sample_row_index)?;
+            }
+        }
+
+        complete_exam_code_list.push(next_member);  
+    }
+
+    complete_exam_code_list.sort();
+
+    return Ok(complete_exam_code_list);
+}
+
+pub(crate) fn get_locations_list(
+    main_data_table:&table::Table,
+    exam_locations_table:&table::Table
+)->Result<Vec<location_categories::location_category>,String>
+{
+    let main_exam_locations= main_data_table.getKeyedColumnSampleMap(
+        &(main_headers::pertinent_headers::location.getLabel())
+    )?;
+
+    let existing_exam_locations= exam_locations_table.getKeyedColumnSampleMap(
+        &(location_categories::pertinent_headers::location.getLabel())
+    )?;
+
+    let mut complete_exam_location_list:Vec<location_categories::location_category>=Vec::new();
+    
+    for location in main_exam_locations.keys()
+    {
+        let mut next_member:location_categories::location_category=location_categories::location_category{
+            location:location.to_string(),
+            context:"".to_string(),
+            comments:"".to_string()
+        };
+
+        match existing_exam_locations.get(location)
+        {
+            None=>{
+                println!("Couldn't find location {}",location.to_string());
+                let sample_row_index = match main_exam_locations.get(location){
+                    Some(x)=>x,
+                    None=>{return Err(format!("Coudldn't get sample row {} ",location));}
+                };
+                next_member.location=main_data_table.getVal(&main_headers::pertinent_headers::location.getLabel(), sample_row_index)?;
+            },
+            Some(sample_row_index)=>{
+                next_member.location=exam_locations_table.getVal(&location_categories::pertinent_headers::location.getLabel(), sample_row_index)?;
+                next_member.context=exam_locations_table.getVal(&location_categories::pertinent_headers::context.getLabel(), sample_row_index)?;
+                next_member.comments=exam_locations_table.getVal(&location_categories::pertinent_headers::comments.getLabel(), sample_row_index)?;
+            }
+        }
+
+        complete_exam_location_list.push(next_member);  
+    }
+
+    complete_exam_location_list.sort();
+
+    return Ok(complete_exam_location_list);
+}
+
+pub fn backup(dt:DateTime<Local>,p:String,label:String)->Result<u64,std::io::Error>
+{
+    let backup_path="./categories/archive/".to_string() + &dt.timestamp().to_string() + " backup of " + &label;
+    println!("Backup to {}",backup_path);
+    return fs::copy(p.to_owned(),backup_path);
+}
+
+pub fn buildSalemRVUMap(main_data_table:&table::Table)->Result<HashMap<String,f32>,String>{
+    let mut retval:HashMap<String,f32>=HashMap::new();
+
+    let mut rvu_sum:f32=0.0;
+    let mut rvu_disc:f32=0.0;
+    
+    for row_i in main_data_table.rowIndices()
+    {
+        let rvus=match main_data_table.getVal(&main_headers::pertinent_headers::rvu.getLabel(), &row_i)?.parse::<f32>()
+        {
+            Ok(x)=>x,
+            Err(e)=>{
+                return Err(format!("{:?}",e));
+            }
+        };
+        rvu_sum+=rvus;
+
+        let exam_code=main_data_table.getVal(&main_headers::pertinent_headers::procedure_code.getLabel(), &row_i)?;
+
+        let current=retval.get(&exam_code);
+        match current
+        {
+            Some(&x)=>{
+                if x!=rvus
+                {
+                    rvu_disc+=(x-rvus).abs();
+                    if(rvus>x)
+                    {
+                        println!("Replacing RVUs for exam code {} with higher value found {}, previously {}",exam_code,rvus,x);
+                        retval.insert(exam_code,rvus);        
+                    }
+                }
+            }
+            None=>{
+                retval.insert(exam_code,rvus);
+            }
+        };
+    }
+
+    let percentage=rvu_disc/rvu_sum*100.0;
+    println!("RVU discrepancy is {} of {} or {}% of the data set.",rvu_disc,rvu_sum,percentage);
+
+    Ok(retval)
+}
+
+pub fn buildSalemModalityMap(main_data_table:&table::Table)->Result<HashMap<String,String>,String>{
+    let mut retval:HashMap<String,String>=HashMap::new();
+
+    for row_i in main_data_table.rowIndices()
+    {
+        let exam_code=main_data_table.getVal(&main_headers::pertinent_headers::procedure_code.getLabel(), &row_i)?;
+        
+        if(!retval.contains_key(&exam_code)){
+            let listed_modality= main_data_table.getVal(&main_headers::pertinent_headers::modality.getLabel(), &row_i)?;
+            retval.insert(exam_code,listed_modality);
+        }
+    }
+
+    Ok(retval)
+}
