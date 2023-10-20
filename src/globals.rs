@@ -3,9 +3,12 @@ pub mod file_names
 {
     pub(crate) const MAIN_DATA_FILE:&str = "./data/SRC_SC_SH_WVH_WB Business Day Data.csv";
     pub(crate) const TPC_DATA_FILE:&str = "./data/TPC Whole Year with Salem Code Map.csv";
+    pub(crate) const BVU_DATA_FILE:&str = "./data/BVU.csv";
+    pub(crate) const BVU_UPDATE_FILE:&str = "./data/BVU_modified.csv";
     pub(crate) const CATEGORIES_LOCATION_FILE:&str = "./categories/Categories_Location.csv";
     pub(crate) const CATEGORIES_EXAM_FILE:&str = "./categories/Categories_Exam.csv";
     pub(crate) const OUT_FILE:&str = "./output/Categorized Weekday RVU Map";
+    pub(crate) const BVU_OUT_FILE:&str = "./output/Categorized Weekday BVU Map";
 }
 
 pub mod main_headers {
@@ -51,6 +54,29 @@ pub mod tpc_headers {
         }
     }
 }
+
+pub mod bvu_headers {
+    pub(crate) enum pertinent_headers {
+        exam_code,
+        target_percentile,
+        exam_description,
+        comments
+    }
+
+    impl pertinent_headers {
+        pub(crate) fn getLabel(&self)->String
+        {
+            match self{
+                pertinent_headers::target_percentile => "50th".to_string(),
+                pertinent_headers::exam_code => "Location group".to_string(),
+                pertinent_headers::exam_description => "Exam Description".to_string(),
+                pertinent_headers::comments => "Comments".to_string(),
+            }
+        }
+    }
+}
+
+
 
 //sites
 const SH:&str="SH";

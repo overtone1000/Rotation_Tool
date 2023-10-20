@@ -127,6 +127,22 @@ impl Table
         }
     }
 
+    pub fn setVal(&mut self, header_label:&String, row:&usize, val:&String)->Result<(),String>
+    {
+        let index=self.getHeaderColumnIndex(header_label)?.to_owned();
+        
+        let datarow=match self.data.get_mut(row.to_owned())
+        {
+            None=>{
+                return Err(format!("No data row {} exists",row));
+            },
+            Some(x)=>x
+        };
+
+        datarow[index]=val.to_owned();
+        Ok(())
+    }
+
     pub fn rowIndices(&self)->Range<usize>
     {
         0..self.data.len()

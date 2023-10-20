@@ -1,5 +1,5 @@
 
-use std::{collections::{HashMap, HashSet}, hash::Hash};
+use std::{collections::{HashMap, HashSet}, hash::Hash, error::Error, fs::File, io::Write};
 
 use chrono::{NaiveDate, NaiveDateTime, Timelike};
 
@@ -193,6 +193,17 @@ impl RVUMap
         }
 
         Ok(topnode.dump())
+    }
+
+    pub fn toFile(&self, filename:&str)->Result<(), Box<dyn Error>>{
+        let mut mapoutfile=File::create(filename)?;
+        let mapstr=self.toJSON()?;
+        let bytes=mapstr.as_bytes();
+            
+        return match mapoutfile.write_all(&bytes){
+            Ok(_)=>{Ok(())},
+            Err(e)=>{return Err(Box::new(crate::RotationToolError::new(e.to_string())));}
+        }
     }
 }
 

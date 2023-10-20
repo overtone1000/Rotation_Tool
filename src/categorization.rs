@@ -1,8 +1,8 @@
-use std::{collections::HashMap, fs};
+use std::{collections::{HashMap, HashSet}, fs};
 
 use chrono::{DateTime, Local};
 
-use crate::{table, globals::main_headers};
+use crate::{table, globals::{main_headers, bvu_headers, file_names}};
 
 
 pub(crate) mod exam_categories {
@@ -258,6 +258,81 @@ pub fn buildSalemRVUMap(main_data_table:&table::Table)->Result<HashMap<String,f3
 
     let percentage=rvu_disc/rvu_sum*100.0;
     println!("RVU discrepancy is {} of {} or {}% of the data set.",rvu_disc,rvu_sum,percentage);
+
+    Ok(retval)
+}
+
+//Check BVU source for missing exam codes. Also puts all exam descriptions in comments.
+pub fn checkBVUSource(main_data_table:&table::Table, bvu_data_table:&mut table::Table)->(){
+
+    let mut found:HashSet<String>=HashSet::new();
+    for row_i in main_data_table.rowIndices()
+    {
+        let exam_code=main_data_table.getVal(&main_headers::pertinent_headers::procedure_code.getLabel(), &row_i).expect("Couldn't get exam code from table!");
+
+        if !found.contains(&exam_code) {
+            found.insert(exam_code.to_owned());
+
+            let mut bvu_table_row:Option<usize>=None;
+            for row_b in bvu_data_table.rowIndices()
+            {
+                let this_code = bvu_data_table.getVal(&bvu_headers::pertinent_headers::exam_code.getLabel(), &row_b).expect("Couldn't get bvu row");
+                if this_code==exam_code
+                {
+                    bvu_table_row=Some(row_b);
+                    break;
+                }            
+            }
+            let desc = main_data_table.getVal(&main_headers::pertinent_headers::exam.getLabel(), &row_i).expect("Couldn't get exam description from table!");
+
+            match bvu_table_row
+            {
+                Some(bvu_table_row)=>{
+                    bvu_data_table.setVal(&bvu_headers::pertinent_headers::exam_description.getLabel(), &bvu_table_row, &desc).expect("Couldn't modify bvu data table.");
+                },
+                None=>{
+                    let mut newrow:Vec<String>=Vec::new();
+                    newrow.push(exam_code);
+                    for _ in 0..6 {
+                        newrow.push("".to_string());
+                    }
+                    newrow.push(desc);
+                    newrow.push("".to_string());
+                    bvu_data_table.pushrow(newrow);
+                }
+            }
+        }
+    }
+
+    bvu_data_table.write_to_file(file_names::BVU_UPDATE_FILE.to_string());
+}
+
+pub fn buildSalemBVUMap(bvu_data_table:&table::Table)->Result<HashMap<String,f32>,String>{
+    let mut retval:HashMap<String,f32>=HashMap::new();
+
+    for row_i in bvu_data_table.rowIndices()
+    {
+        let rvus=match bvu_data_table.getVal(&bvu_headers::pertinent_headers::target_percentile.getLabel(), &row_i)?.parse::<f32>()
+        {
+            Ok(x)=>x,
+            Err(e)=>{
+                return Err(format!("{:?}",e));
+            }
+        };
+        
+        let exam_code=bvu_data_table.getVal(&bvu_headers::pertinent_headers::exam_code.getLabel(), &row_i)?;
+
+        let current=retval.get(&exam_code);
+        match current
+        {
+            Some(&x)=>{
+                eprintln!("Duplicate BVU table entires for {}",exam_code);
+            }
+            None=>{
+                retval.insert(exam_code,rvus);
+            }
+        };
+    }
 
     Ok(retval)
 }
