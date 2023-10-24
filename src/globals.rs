@@ -98,6 +98,10 @@ pub const SITES:&[&str]=
     TPC
 ];
 
+pub(crate) const MSK:&str="MSK";
+pub(crate) const NEURO_BRAIN:&str="Neuro (Brain)";
+pub(crate) const NEURO_OTHER:&str="Neuro (Other)";
+
 pub const SUBSPECIALTIES:&[&str]=
 &[
     "General",
@@ -113,9 +117,9 @@ pub const SUBSPECIALTIES:&[&str]=
     "Angio",
     "Vascular US",
     "CT Procedure",
-    "MSK",
-    "Neuro (Brain)",
-    "Neuro (Other)",
+    MSK,
+    NEURO_BRAIN,
+    NEURO_OTHER,
     "Intraop Fluoro",
     "Cardiac",
     "CT Colonography",

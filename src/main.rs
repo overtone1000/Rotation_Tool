@@ -2,7 +2,8 @@ use std::{error::Error, fs::{self, File}, collections::HashMap, io::Write};
 
 use categorization::exam_categories::exam_category;
 use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, Datelike, Timelike};
-use globals::main_headers;
+use globals::{main_headers, NEURO_BRAIN, NEURO_OTHER, MSK};
+use rvu_map::{RVUMap, MapCoords};
 use table::Table;
 
 
@@ -174,12 +175,73 @@ fn explainWeekends()->Result<(), Box<dyn Error>>
     let source=ProcessedSource::build()?;
     let rvu_map=buildSalemRVUMap(&source.main_data_table)?;
 
-    //Assumption was no TPC data after 5 PM on Friday or before 8:00 AM on Monday. Don't need to manually exclude TPC here. Just build full maps and query.
+    {
+        let friday = match rvu_map::createMap(&source,&rvu_map,Friday5PM_to_Saturday12AM)
+        {
+            Ok(x)=>x,
+            Err(e)=>{
+                let err=RotationToolError::new(e);
+                return Err(Box::new(err));
+            }
+        };
+        println!("Friday after 5PM, {}", ExplainSegment(friday));
+    }
 
+    {
+        let saturday = match rvu_map::createMap(&source,&rvu_map,SaturdayBefore5PM)
+        {
+            Ok(x)=>x,
+            Err(e)=>{
+                let err=RotationToolError::new(e);
+                return Err(Box::new(err));
+            }
+        };
+        println!("Saturday before 5PM, {}", ExplainSegment(saturday));
+    }
 
+    {
+        let sunday = match rvu_map::createMap(&source,&rvu_map,SundayBefore5PM)
+        {
+            Ok(x)=>x,
+            Err(e)=>{
+                let err=RotationToolError::new(e);
+                return Err(Box::new(err));
+            }
+        };
+        println!("Sunday before 5PM, {}", ExplainSegment(sunday));
+    }
+
+    {
+        let sunday_evening = match rvu_map::createMap(&source,&rvu_map,SundayAfter5PM)
+        {
+            Ok(x)=>x,
+            Err(e)=>{
+                let err=RotationToolError::new(e);
+                return Err(Box::new(err));
+            }
+        };
+        println!("Sunday after 5PM, {}", ExplainSegment(sunday_evening));
+    }
     Ok(())
 }
 
+fn isNeuro(coords:&MapCoords)->bool
+{
+    coords.getSubspecialty()==NEURO_BRAIN || coords.getSubspecialty()==NEURO_OTHER
+}
+
+fn isMSK(coords:&MapCoords)->bool
+{
+    coords.getSubspecialty()==MSK
+}
+
+fn ExplainSegment(map:RVUMap)->String{
+    let total=map.RVU_sum(None,None);
+    let neuro=map.RVU_sum(Some(isNeuro),None);
+    let msk=map.RVU_sum(Some(isMSK),None);
+
+    format!(" RVU total={} ({} is Neuro, and {} is MSK)",total,neuro,msk)
+}
 
 fn Friday5PM_to_Saturday12AM(datetime:NaiveDateTime)->bool{
     match datetime.weekday()
@@ -192,12 +254,27 @@ fn Friday5PM_to_Saturday12AM(datetime:NaiveDateTime)->bool{
 fn SaturdayBefore5PM(datetime:NaiveDateTime)->bool{
     match datetime.weekday()
     {
-        chrono::Weekday::Fri=>datetime.hour()>=17,
+        chrono::Weekday::Sat=>datetime.hour()<=17,
+        _=>false
+    }
+}
+
+fn SundayBefore5PM(datetime:NaiveDateTime)->bool{
+    match datetime.weekday()
+    {
+        chrono::Weekday::Sun=>datetime.hour()<=17,
         _=>false
     }
 }
 
 
+fn SundayAfter5PM(datetime:NaiveDateTime)->bool{
+    match datetime.weekday()
+    {
+        chrono::Weekday::Sun=>datetime.hour()>=17,
+        _=>false
+    }
+}
 
 fn main()->Result<(), Box<dyn Error>> {
     explainWeekends()

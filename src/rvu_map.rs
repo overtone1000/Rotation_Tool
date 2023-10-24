@@ -29,7 +29,7 @@ impl MapEntry
 }
 
 #[derive(Default)]
-struct MapCoords
+pub struct MapCoords
 {
     site:String,
     subspecialty:String,
@@ -82,10 +82,12 @@ impl MapCoords{
         }
         return retval;
     }
+    pub fn getSubspecialty(&self)->&String{return &self.subspecialty}
 }
 
 pub struct RVUMap
 {
+    //site, subspecialty, context, modality, time_row
     map:HashMap<String,HashMap<String,HashMap<String,HashMap<String,HashMap<usize,MapEntry>>>>>
 }
 
@@ -102,6 +104,7 @@ impl RVUMap
 
     fn addRVUs(&mut self,coords:&MapCoords,rvus:f32)->Result<String,String>
     {
+        
         if(!coords.validateSite()){return Err("Invalid site.".to_string());}
         if(!self.map.contains_key(&coords.site))
         {
@@ -208,18 +211,47 @@ impl RVUMap
 
     pub fn totalRVUs(&self)->f32
     {
+        self.RVU_sum(None,None)
+    }
+
+    pub fn RVU_sum(&self, inclusion_function:Option<fn(&MapCoords)->bool>,exclusion_function:Option<fn(&MapCoords)->bool>)->f32
+    {
+        //site, subspecialty, context, modality, time_row
         let mut retval:f32=0.0;
-        for m1 in self.map.values()
+        for (site, m1) in &self.map
         {
-            for m2 in m1.values()
+            for (subspecialty, m2) in m1
             {
-                for m3 in m2.values()
+                for (context, m3) in m2
                 {
-                    for m4 in m3.values()
+                    for (modality, m4) in m3
                     {
-                        for me in m4.values()
+                        for (time_row, me) in m4
                         {
-                            retval+=me.rvus;
+                            let coords = MapCoords{
+                                site: site.to_owned(),
+                                subspecialty: subspecialty.to_owned(),
+                                context: context.to_owned(),
+                                modality: modality.to_owned(),
+                                time_row: time_row.to_owned(),
+                            };
+
+                            let include = match inclusion_function
+                            {
+                                Some(inclusion_function)=>inclusion_function(&coords),
+                                None=>true
+                            };
+
+                            let exclude = match exclusion_function
+                            {
+                                Some(exclusion_function)=>exclusion_function(&coords),
+                                None=>false
+                            };
+
+                            if(include && !exclude)
+                            {
+                                retval+=me.rvus;
+                            }
                         }
                     }
                 }
