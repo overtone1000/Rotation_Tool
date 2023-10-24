@@ -6,7 +6,7 @@ pub fn checkWeekDay(date:NaiveDate)->bool
   {
       chrono::Weekday::Sun=>false,
       chrono::Weekday::Sat=>false,
-      (_)=>true
+      _=>true
   }
 }
 

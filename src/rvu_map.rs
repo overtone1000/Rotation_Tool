@@ -3,7 +3,7 @@ use std::{collections::{HashMap, HashSet}, hash::Hash, error::Error, fs::File, i
 
 use chrono::{NaiveDate, NaiveDateTime, Timelike};
 
-use crate::{table::{Table, self}, globals::{SITES, SUBSPECIALTIES, CONTEXTS, MODALITIES, main_headers, tpc_headers}, dates::{self, business_days_per_year}, tpc};
+use crate::{table::{Table, self}, globals::{SITES, SUBSPECIALTIES, CONTEXTS, MODALITIES, main_headers, tpc_headers}, dates::{self, business_days_per_year}, tpc, ProcessedSource};
 
 struct MapEntry
 {
@@ -205,9 +205,31 @@ impl RVUMap
             Err(e)=>{return Err(Box::new(crate::RotationToolError::new(e.to_string())));}
         }
     }
+
+    pub fn totalRVUs(&self)->f32
+    {
+        let mut retval:f32=0.0;
+        for m1 in self.map.values()
+        {
+            for m2 in m1.values()
+            {
+                for m3 in m2.values()
+                {
+                    for m4 in m3.values()
+                    {
+                        for me in m4.values()
+                        {
+                            retval+=me.rvus;
+                        }
+                    }
+                }
+            }
+        }
+        retval
+    }
 }
 
-pub fn createMap(main_data_table:&table::Table, tpc_data_table:&table::Table, rvu_map:&HashMap<String,f32>, exam_to_subspecialty_map:&HashMap<String,String>, location_to_context_map:&HashMap<String,String>)->Result<RVUMap,String>
+pub fn createMap(source:&ProcessedSource, rvu_map:&HashMap<String,f32>, include_date:fn(NaiveDateTime)->bool)->Result<RVUMap,String>
 {
     let mut rvumap = RVUMap::new();
 
@@ -215,31 +237,29 @@ pub fn createMap(main_data_table:&table::Table, tpc_data_table:&table::Table, rv
 
     let mut included_dates:HashSet<NaiveDate>=HashSet::new();
     
-    for row_i in main_data_table.rowIndices()
+    for row_i in source.main_data_table.rowIndices()
     {
-        let datetimestring= main_data_table.getVal(&main_headers::pertinent_headers::scheduled_datetime.getLabel(), &row_i)?;
+        let datetimestring= source.main_data_table.getVal(&main_headers::pertinent_headers::scheduled_datetime.getLabel(), &row_i)?;
         
         let datetime=match NaiveDateTime::parse_from_str(&datetimestring, "%m/%d/%y %H:%M"){
             Ok(x)=>x,
             Err(x)=>{return Err(format!("Couldn't parse date {}",datetimestring));}
         };
 
-        let date=NaiveDate::from(datetime);
-
-        if dates::checkWeekDay(date) && !dates::checkHoliday(date)
+        if include_date(datetime)
         {
-            included_dates.insert(date);
+            included_dates.insert(NaiveDate::from(datetime));
 
             let mut coords=MapCoords::default();
 
             coords.time_row=crate::time::getTimeRowIndex(datetime.hour(),datetime.minute());
 
             //Trust location and exam code
-            let location=main_data_table.getVal(&main_headers::pertinent_headers::location.getLabel(), &row_i)?;
-            let exam_code=main_data_table.getVal(&main_headers::pertinent_headers::procedure_code.getLabel(), &row_i)?;
+            let location=source.main_data_table.getVal(&main_headers::pertinent_headers::location.getLabel(), &row_i)?;
+            let exam_code=source.main_data_table.getVal(&main_headers::pertinent_headers::procedure_code.getLabel(), &row_i)?;
 
             //Get subspecialty from exam code
-            coords.subspecialty=match exam_to_subspecialty_map.get(&exam_code)
+            coords.subspecialty=match source.exam_to_subspecialty_map.get(&exam_code)
             {
                 Some(x)=>x.to_string(),
                 None=>{
@@ -250,7 +270,7 @@ pub fn createMap(main_data_table:&table::Table, tpc_data_table:&table::Table, rv
 
             //Try site. If not valid, go by location.
             let mut selected_site:Option<String>=None;
-            let listed_site=main_data_table.getVal(&main_headers::pertinent_headers::accession.getLabel(), &row_i)?;
+            let listed_site=source.main_data_table.getVal(&main_headers::pertinent_headers::accession.getLabel(), &row_i)?;
             for site in SITES
             {
                 if (listed_site[0..site.len()]).to_ascii_uppercase()==site.to_string().to_ascii_uppercase()
@@ -272,7 +292,7 @@ pub fn createMap(main_data_table:&table::Table, tpc_data_table:&table::Table, rv
             };
 
             //Try context. If not valid, go by site map.
-            coords.context= match location_to_context_map.get(&location)
+            coords.context= match source.location_to_context_map.get(&location)
             {
                 Some(x)=>x.to_string(),
                 None=>{    
@@ -287,7 +307,7 @@ pub fn createMap(main_data_table:&table::Table, tpc_data_table:&table::Table, rv
             };          
 
             //Get modality, but check for aliases
-            let listed_modality = main_data_table.getVal(&main_headers::pertinent_headers::modality.getLabel(), &row_i)?;
+            let listed_modality = source.main_data_table.getVal(&main_headers::pertinent_headers::modality.getLabel(), &row_i)?;
             let mut selected_modality:Option<String>=None;
             for modality in MODALITIES
             {
@@ -307,7 +327,7 @@ pub fn createMap(main_data_table:&table::Table, tpc_data_table:&table::Table, rv
             match selected_modality
             {
                 None=>{
-                    selected_modality=crate::globals::getModalityFromProcedureDesc(main_data_table.getVal(&main_headers::pertinent_headers::exam.getLabel(), &row_i)?)
+                    selected_modality=crate::globals::getModalityFromProcedureDesc(source.main_data_table.getVal(&main_headers::pertinent_headers::exam.getLabel(), &row_i)?)
                 },
                 _=>{}
             }
@@ -362,10 +382,10 @@ pub fn createMap(main_data_table:&table::Table, tpc_data_table:&table::Table, rv
 
     //Add TPC, which doesn't go by number of dates
     let weights=crate::time::getTimeRowNormalDistWeights();
-    for row_i in tpc_data_table.rowIndices()
+    for row_i in source.tpc_data_table.rowIndices()
     {
-        let exam_code = tpc_data_table.getVal(&tpc_headers::pertinent_headers::exam_code.getLabel(),&row_i)?;
-        let number_str = tpc_data_table.getVal(&tpc_headers::pertinent_headers::number_in_2022.getLabel(),&row_i)?;
+        let exam_code = source.tpc_data_table.getVal(&tpc_headers::pertinent_headers::exam_code.getLabel(),&row_i)?;
+        let number_str = source.tpc_data_table.getVal(&tpc_headers::pertinent_headers::number_in_2022.getLabel(),&row_i)?;
         
         let number=match number_str.parse::<f32>(){
             Ok(val)=>val,
@@ -382,7 +402,7 @@ pub fn createMap(main_data_table:&table::Table, tpc_data_table:&table::Table, rv
 
         let mut coords=MapCoords::default();
         coords.site=crate::globals::TPC.to_string();
-        coords.subspecialty=match exam_to_subspecialty_map.get(&exam_code){
+        coords.subspecialty=match source.exam_to_subspecialty_map.get(&exam_code){
             None=>{return Err(format!("Bad exam code {}",exam_code));}
             Some(val)=>val.to_owned()
         };
