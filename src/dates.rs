@@ -47,7 +47,7 @@ pub fn calcDayOfWeekOfMonth(date:NaiveDate)->u32
   return (day_of_month as f32/7.0).ceil() as u32;
 }
 
-pub(crate) const business_days_per_year:f32=52.0*5.0-7.0;
+pub(crate) const business_days_per_year:f64=52.0*5.0-7.0;
 
 fn holidayTest()->(){
     println!("Memorial day");

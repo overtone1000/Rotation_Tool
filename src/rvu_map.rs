@@ -1,5 +1,5 @@
 
-use std::{collections::{HashMap, HashSet}, hash::Hash, error::Error, fs::File, io::Write};
+use std::{collections::{HashMap, HashSet}, hash::Hash, error::Error, fs::File, io::Write, convert::Infallible};
 
 use chrono::{NaiveDate, NaiveDateTime, Timelike};
 
@@ -7,22 +7,22 @@ use crate::{table::{Table, self}, globals::{SITES, SUBSPECIALTIES, CONTEXTS, MOD
 
 struct MapEntry
 {
-    rvus:f32
+    rvus:f64
 }
 
 impl MapEntry
 {
-    fn addRVUs(&mut self,rvus:f32)
+    fn addRVUs(&mut self,rvus:f64)
     {
         self.rvus+=rvus;
     }
 
-    fn getRVUs(&self)->f32
+    fn getRVUs(&self)->f64
     {
         return self.rvus.to_owned();
     }
 
-    fn setRVUs(&mut self,rvu:f32)->()
+    fn setRVUs(&mut self,rvu:f64)->()
     {
         self.rvus=rvu;
     }
@@ -82,7 +82,10 @@ impl MapCoords{
         }
         return retval;
     }
+    
     pub fn getSubspecialty(&self)->&String{return &self.subspecialty}
+    pub fn getContext(&self)->&String{return &self.context}
+    pub fn getSite(&self)->&String{return &self.site}
 }
 
 pub struct RVUMap
@@ -102,7 +105,7 @@ impl RVUMap
         return retval;
     }
 
-    fn addRVUs(&mut self,coords:&MapCoords,rvus:f32)->Result<String,String>
+    fn addRVUs(&mut self,coords:&MapCoords,rvus:f64)->Result<String,String>
     {
         
         if(!coords.validateSite()){return Err("Invalid site.".to_string());}
@@ -209,15 +212,15 @@ impl RVUMap
         }
     }
 
-    pub fn totalRVUs(&self)->f32
+    pub fn totalAverageRVUs(&self)->f64
     {
-        self.RVU_sum(None,None)
+        self.sliceAverageRVUs(None,None)
     }
 
-    pub fn RVU_sum(&self, inclusion_function:Option<fn(&MapCoords)->bool>,exclusion_function:Option<fn(&MapCoords)->bool>)->f32
+    pub fn sliceAverageRVUs(&self, inclusion_function:Option<fn(&MapCoords)->bool>,exclusion_function:Option<fn(&MapCoords)->bool>)->f64
     {
         //site, subspecialty, context, modality, time_row
-        let mut retval:f32=0.0;
+        let mut retval:f64=0.0;
         for (site, m1) in &self.map
         {
             for (subspecialty, m2) in m1
@@ -248,9 +251,17 @@ impl RVUMap
                                 None=>false
                             };
 
-                            if(include && !exclude)
+                            if include && !exclude
                             {
+                                if(me.rvus.is_infinite())
+                                {
+                                    eprintln!("Infinite RVUs!");
+                                }
                                 retval+=me.rvus;
+                                if(retval.is_infinite())
+                                {
+                                    eprintln!("Infinite retval!");
+                                }
                             }
                         }
                     }
@@ -261,7 +272,7 @@ impl RVUMap
     }
 }
 
-pub fn createMap(source:&ProcessedSource, rvu_map:&HashMap<String,f32>, include_date:fn(NaiveDateTime)->bool)->Result<RVUMap,String>
+pub fn createMap(source:&ProcessedSource, rvu_map:&HashMap<String,f64>, include_date:fn(NaiveDateTime)->bool)->Result<RVUMap,String>
 {
     let mut rvumap = RVUMap::new();
 
@@ -278,17 +289,13 @@ pub fn createMap(source:&ProcessedSource, rvu_map:&HashMap<String,f32>, include_
             Err(x)=>{return Err(format!("Couldn't parse date {}",datetimestring));}
         };
 
-        if include_date(datetime)
+        let location=source.main_data_table.getVal(&main_headers::pertinent_headers::location.getLabel(), &row_i)?;
+        let exam_code=source.main_data_table.getVal(&main_headers::pertinent_headers::procedure_code.getLabel(), &row_i)?;
+
+        //Build coords and populate maps with this row.
+        let mut coords=MapCoords::default();
         {
-            included_dates.insert(NaiveDate::from(datetime));
-
-            let mut coords=MapCoords::default();
-
             coords.time_row=crate::time::getTimeRowIndex(datetime.hour(),datetime.minute());
-
-            //Trust location and exam code
-            let location=source.main_data_table.getVal(&main_headers::pertinent_headers::location.getLabel(), &row_i)?;
-            let exam_code=source.main_data_table.getVal(&main_headers::pertinent_headers::procedure_code.getLabel(), &row_i)?;
 
             //Get subspecialty from exam code
             coords.subspecialty=match source.exam_to_subspecialty_map.get(&exam_code)
@@ -374,6 +381,12 @@ pub fn createMap(source:&ProcessedSource, rvu_map:&HashMap<String,f32>, include_
             {
                 modality_map.insert(exam_code.to_owned(), coords.modality.to_owned());
             }
+        }
+
+        //Check if this date should be included in RVU totals. If so, add rvus.
+        if include_date(datetime)
+        {
+            included_dates.insert(NaiveDate::from(datetime));
 
             //let rvus_str = main_data_table.getVal(&main_headers::pertinent_headers::rvu.getLabel(), &row_i)?;
             let rvus=match rvu_map.get(&exam_code){
@@ -381,13 +394,18 @@ pub fn createMap(source:&ProcessedSource, rvu_map:&HashMap<String,f32>, include_
                 None=>{
                     return Err(format!("Coudn't find exam code {}",exam_code));
                 }
-            }
-            ;
+            };
+
             rvumap.addRVUs(&coords,rvus)?;
         }
     }   
 
-    let days:f32=included_dates.len() as f32;
+    let days:f64=included_dates.len() as f64;
+
+    if days==0.0
+    {
+        eprintln!("Zero days!!");
+    }
 
     //Divide by number of days worth of data to get rvu/day
     for site in rvumap.map.iter_mut()
@@ -419,7 +437,7 @@ pub fn createMap(source:&ProcessedSource, rvu_map:&HashMap<String,f32>, include_
         let exam_code = source.tpc_data_table.getVal(&tpc_headers::pertinent_headers::exam_code.getLabel(),&row_i)?;
         let number_str = source.tpc_data_table.getVal(&tpc_headers::pertinent_headers::number_in_2022.getLabel(),&row_i)?;
         
-        let number=match number_str.parse::<f32>(){
+        let number=match number_str.parse::<f64>(){
             Ok(val)=>val,
             Err(e)=>{return Err(format!("{:?}",e));}
         };
@@ -447,7 +465,7 @@ pub fn createMap(source:&ProcessedSource, rvu_map:&HashMap<String,f32>, include_
 
         for key in weights.keys() {
             coords.time_row=*key;
-            let rvu=rvus_per_business_day*(*weights.get(key).expect("Expected")) as f32;
+            let rvu=rvus_per_business_day*(*weights.get(key).expect("Expected")) as f64;
             rvumap.addRVUs(&coords, rvu);
         }
     }

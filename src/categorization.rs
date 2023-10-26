@@ -217,15 +217,15 @@ pub fn backup(dt:DateTime<Local>,p:String,label:String)->Result<u64,std::io::Err
     return fs::copy(p.to_owned(),backup_path);
 }
 
-pub fn buildSalemRVUMap(main_data_table:&table::Table)->Result<HashMap<String,f32>,String>{
-    let mut retval:HashMap<String,f32>=HashMap::new();
+pub fn buildSalemRVUMap(main_data_table:&table::Table)->Result<HashMap<String,f64>,String>{
+    let mut retval:HashMap<String,f64>=HashMap::new();
 
-    let mut rvu_sum:f32=0.0;
-    let mut rvu_disc:f32=0.0;
+    let mut rvu_sum:f64=0.0;
+    let mut rvu_disc:f64=0.0;
     
     for row_i in main_data_table.rowIndices()
     {
-        let rvus=match main_data_table.getVal(&main_headers::pertinent_headers::rvu.getLabel(), &row_i)?.parse::<f32>()
+        let rvus=match main_data_table.getVal(&main_headers::pertinent_headers::rvu.getLabel(), &row_i)?.parse::<f64>()
         {
             Ok(x)=>x,
             Err(e)=>{
@@ -307,12 +307,12 @@ pub fn checkBVUSource(main_data_table:&table::Table, bvu_data_table:&mut table::
     bvu_data_table.write_to_file(file_names::BVU_UPDATE_FILE.to_string());
 }
 
-pub fn buildSalemBVUMap(bvu_data_table:&table::Table)->Result<HashMap<String,f32>,String>{
-    let mut retval:HashMap<String,f32>=HashMap::new();
+pub fn buildSalemBVUMap(bvu_data_table:&table::Table)->Result<HashMap<String,f64>,String>{
+    let mut retval:HashMap<String,f64>=HashMap::new();
 
     for row_i in bvu_data_table.rowIndices()
     {
-        let rvus=match bvu_data_table.getVal(&bvu_headers::pertinent_headers::target_percentile.getLabel(), &row_i)?.parse::<f32>()
+        let rvus=match bvu_data_table.getVal(&bvu_headers::pertinent_headers::target_percentile.getLabel(), &row_i)?.parse::<f64>()
         {
             Ok(x)=>x,
             Err(e)=>{
