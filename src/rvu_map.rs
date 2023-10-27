@@ -3,7 +3,7 @@ use std::{collections::{HashMap, HashSet}, hash::Hash, error::Error, fs::File, i
 
 use chrono::{NaiveDate, NaiveDateTime, Timelike};
 
-use crate::{table::{Table, self}, globals::{SITES, SUBSPECIALTIES, CONTEXTS, MODALITIES, main_headers, tpc_headers}, dates::{self, business_days_per_year}, tpc, ProcessedSource};
+use crate::{table::{Table, self}, globals::{SITES, SUBSPECIALTIES, CONTEXTS, MODALITIES, main_headers, tpc_headers}, dates::{self, business_days_per_year}, tpc, ProcessedSource, constraints::ConstraintSet};
 
 struct MapEntry
 {
@@ -214,10 +214,10 @@ impl RVUMap
 
     pub fn totalAverageRVUs(&self)->f64
     {
-        self.sliceAverageRVUs(None,None)
+        self.sliceAverageRVUs(None)
     }
 
-    pub fn sliceAverageRVUs(&self, inclusion_function:Option<fn(&MapCoords)->bool>,exclusion_function:Option<fn(&MapCoords)->bool>)->f64
+    pub fn sliceAverageRVUs(&self, inclusion_function:Option<fn(&MapCoords)->bool>)->f64
     {
         //site, subspecialty, context, modality, time_row
         let mut retval:f64=0.0;
@@ -245,13 +245,7 @@ impl RVUMap
                                 None=>true
                             };
 
-                            let exclude = match exclusion_function
-                            {
-                                Some(exclusion_function)=>exclusion_function(&coords),
-                                None=>false
-                            };
-
-                            if include && !exclude
+                            if include
                             {
                                 if(me.rvus.is_infinite())
                                 {
@@ -272,7 +266,7 @@ impl RVUMap
     }
 }
 
-pub fn createMap(source:&ProcessedSource, rvu_map:&HashMap<String,f64>, include_date:fn(NaiveDateTime)->bool)->Result<RVUMap,String>
+pub fn createMap<'a>(source:&ProcessedSource, rvu_map:&HashMap<String,f64>, date_constraints:ConstraintSet<'a,NaiveDateTime>)->Result<RVUMap,String>
 {
     let mut rvumap = RVUMap::new();
 
@@ -384,7 +378,7 @@ pub fn createMap(source:&ProcessedSource, rvu_map:&HashMap<String,f64>, include_
         }
 
         //Check if this date should be included in RVU totals. If so, add rvus.
-        if include_date(datetime)
+        if date_constraints.include(&datetime)
         {
             included_dates.insert(NaiveDate::from(datetime));
 

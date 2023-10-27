@@ -2,9 +2,12 @@ use std::{error::Error, fs::{self, File}, collections::HashMap, io::Write};
 
 use categorization::exam_categories::exam_category;
 use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, Datelike, Timelike};
+use constraints::{ConstraintSet, is_not_holiday, is_weekday};
 use globals::{main_headers, NEURO_BRAIN, NEURO_OTHER, MSK, Outpatient, TPC};
 use rvu_map::{RVUMap, MapCoords};
 use table::Table;
+
+use crate::explain::explain;
 
 
 use crate::{globals::file_names, error::RotationToolError, categorization::{buildSalemRVUMap, get_categories_list, get_locations_list, backup, buildSalemBVUMap}, time::getTimeRowNormalDistWeights};
@@ -17,6 +20,8 @@ mod dates;
 mod rvu_map;
 mod tpc;
 mod categorization;
+mod constraints;
+mod explain;
 
 pub struct ProcessedSource
 {
@@ -119,19 +124,24 @@ impl ProcessedSource
     }
 }
 
-fn is_business_day(datetime:NaiveDateTime)->bool{
-    let date=NaiveDate::from(datetime);
-    dates::checkWeekDay(date) && !dates::checkHoliday(date)
+fn is_business_day<'a>()->ConstraintSet<'a,NaiveDateTime>{
+    let mut is_business_day:ConstraintSet<'a,NaiveDateTime>=ConstraintSet::new();
+    is_business_day.add(is_not_holiday);
+    is_business_day.add(is_weekday);
+    is_business_day
 }
+
 
 fn buildMaps()->Result<(), Box<dyn Error>> {
             
     let source=ProcessedSource::build()?;
 
+    let is_business_day_constraintset = is_business_day();
+
     //Create the conventional RVU map
     {
         let rvu_map=buildSalemRVUMap(&source.main_data_table)?;
-        let map = match rvu_map::createMap(&source,&rvu_map,is_business_day)
+        let map = match rvu_map::createMap(&source,&rvu_map,is_business_day_constraintset)
         {
             Ok(x)=>x,
             Err(e)=>{
@@ -150,7 +160,7 @@ fn buildMaps()->Result<(), Box<dyn Error>> {
     //Create BVU map
     {
         let bvu_map: HashMap<String, f64>=buildSalemBVUMap(&source.bvu_data_table)?;
-        let map = match rvu_map::createMap(&source, &bvu_map,is_business_day)
+        let map = match rvu_map::createMap(&source, &bvu_map,is_business_day_constraintset)
         {
             Ok(x)=>x,
             Err(e)=>{
@@ -170,107 +180,7 @@ fn buildMaps()->Result<(), Box<dyn Error>> {
     return Ok(());
 }
 
-fn explainWeekends()->Result<(), Box<dyn Error>>
-{
-    let source=ProcessedSource::build()?;
-    let rvu_map=buildSalemRVUMap(&source.main_data_table)?;
-
-    ExplainTimeRegion("Friday before 5PM",Friday5PM_to_Saturday12AM,&source,&rvu_map)?;
-    ExplainTimeRegion("Saturday before 5PM",SaturdayBefore5PM,&source,&rvu_map)?;
-    ExplainTimeRegion("Sunday before 5PM",SundayBefore5PM,&source,&rvu_map)?;
-    ExplainTimeRegion("Sunday after 5PM",SundayAfter5PM,&source,&rvu_map)?;
-
-    Ok(())
-}
-
-fn isOutpatient(coords:&MapCoords)->bool
-{
-    if coords.getSite()==TPC {return false;}
-    coords.getContext()==Outpatient
-}
-
-fn isOutpatientNeuro(coords:&MapCoords)->bool
-{
-    isOutpatient(coords) && 
-    (coords.getSubspecialty()==NEURO_BRAIN || coords.getSubspecialty()==NEURO_OTHER)
-}
-
-fn isOutpatientMSK(coords:&MapCoords)->bool
-{
-    isOutpatient(coords) &&  
-    coords.getSubspecialty()==MSK
-}
-
-fn ExplainTimeRegion(desc:&str, date_inclusion:fn(datetime:NaiveDateTime)->bool, source:&ProcessedSource, rvu_map:&HashMap<String, f64>)->Result<(), Box<dyn Error>>
-{
-    let map = match rvu_map::createMap(&source,&rvu_map,date_inclusion)
-    {
-        Ok(x)=>x,
-        Err(e)=>{
-            let err=RotationToolError::new(e);
-            return Err(Box::new(err));
-        }
-    };
-    println!("{}, {}", desc, ExplainSegment(map));
-    Ok(())
-}
-
-fn ExplainSegment(map:RVUMap)->String{
-    let total=map.sliceAverageRVUs(Some(isOutpatient),None);
-    let neuro=map.sliceAverageRVUs(Some(isOutpatientNeuro),None);
-    let msk=map.sliceAverageRVUs(Some(isOutpatientMSK),None);
-
-
-
-    format!(" RVU total={:.1} ({:.1} is Neuro, and {:.1} is MSK)",total,neuro,msk)
-}
-
-fn Friday5PM_to_Saturday12AM(datetime:NaiveDateTime)->bool{
-    if dates::checkHoliday(NaiveDate::from(datetime)){
-        return false;
-    }
-    match datetime.weekday()
-    {
-        chrono::Weekday::Fri=>datetime.hour()>=17,
-        _=>false
-    }
-}
-
-fn SaturdayBefore5PM(datetime:NaiveDateTime)->bool{
-    if dates::checkHoliday(NaiveDate::from(datetime)){
-        return false;
-    }
-    match datetime.weekday()
-    {
-        chrono::Weekday::Sat=>datetime.hour()<=17,
-        _=>false
-    }
-}
-
-fn SundayBefore5PM(datetime:NaiveDateTime)->bool{
-    if dates::checkHoliday(NaiveDate::from(datetime)){
-        return false;
-    }
-    match datetime.weekday()
-    {
-        chrono::Weekday::Sun=>datetime.hour()<=17,
-        _=>false
-    }
-}
-
-
-fn SundayAfter5PM(datetime:NaiveDateTime)->bool{
-    if dates::checkHoliday(NaiveDate::from(datetime)){
-        return false;
-    }
-    match datetime.weekday()
-    {
-        chrono::Weekday::Sun=>datetime.hour()>=17,
-        _=>false
-    }
-}
-
 fn main()->Result<(), Box<dyn Error>> {
-    explainWeekends()
+    explain()
 }
 
