@@ -217,7 +217,7 @@ impl RVUMap
         self.sliceAverageRVUs(None)
     }
 
-    pub fn sliceAverageRVUs(&self, inclusion_function:Option<fn(&MapCoords)->bool>)->f64
+    pub fn sliceAverageRVUs(&self, constraints:Option<ConstraintSet<MapCoords>>)->f64
     {
         //site, subspecialty, context, modality, time_row
         let mut retval:f64=0.0;
@@ -239,9 +239,9 @@ impl RVUMap
                                 time_row: time_row.to_owned(),
                             };
 
-                            let include = match inclusion_function
+                            let include = match &constraints
                             {
-                                Some(inclusion_function)=>inclusion_function(&coords),
+                                Some(constraints)=>constraints.include(&coords),
                                 None=>true
                             };
 
@@ -266,7 +266,7 @@ impl RVUMap
     }
 }
 
-pub fn createMap<'a>(source:&ProcessedSource, rvu_map:&HashMap<String,f64>, date_constraints:ConstraintSet<'a,NaiveDateTime>)->Result<RVUMap,String>
+pub fn createMap<'a>(source:&ProcessedSource, rvu_map:&HashMap<String,f64>, date_constraints:&ConstraintSet<'a,NaiveDateTime>)->Result<RVUMap,String>
 {
     let mut rvumap = RVUMap::new();
 

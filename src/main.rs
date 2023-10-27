@@ -141,7 +141,7 @@ fn buildMaps()->Result<(), Box<dyn Error>> {
     //Create the conventional RVU map
     {
         let rvu_map=buildSalemRVUMap(&source.main_data_table)?;
-        let map = match rvu_map::createMap(&source,&rvu_map,is_business_day_constraintset)
+        let map = match rvu_map::createMap(&source,&rvu_map,&is_business_day_constraintset)
         {
             Ok(x)=>x,
             Err(e)=>{
@@ -160,7 +160,7 @@ fn buildMaps()->Result<(), Box<dyn Error>> {
     //Create BVU map
     {
         let bvu_map: HashMap<String, f64>=buildSalemBVUMap(&source.bvu_data_table)?;
-        let map = match rvu_map::createMap(&source, &bvu_map,is_business_day_constraintset)
+        let map = match rvu_map::createMap(&source, &bvu_map,&is_business_day_constraintset)
         {
             Ok(x)=>x,
             Err(e)=>{

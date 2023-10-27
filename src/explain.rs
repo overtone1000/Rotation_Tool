@@ -2,35 +2,95 @@ use std::{error::Error, collections::HashMap};
 
 use chrono::NaiveDateTime;
 
-use crate::{ProcessedSource, categorization::buildSalemRVUMap, rvu_map::{RVUMap, self}, error::RotationToolError};
-
+use crate::{ProcessedSource, categorization::buildSalemRVUMap, rvu_map::{RVUMap, self, MapCoords}, error::RotationToolError, constraints::{ConstraintSet, is_not_holiday, is_this_day, exclude_site, is_after_this_hour, only_this_context, only_these_subspecialties, is_before_this_hour}, globals::{TPC, Outpatient, NEURO_BRAIN, NEURO_OTHER, MSK}};
 
 pub(crate) fn explain()->Result<(), Box<dyn Error>>
 {
     let source=ProcessedSource::build()?;
     let rvu_map=buildSalemRVUMap(&source.main_data_table)?;
 
-    //ExplainTimeRegion("Friday before 5PM",Friday5PM_to_Saturday12AM,&source,&rvu_map)?;
-    //ExplainTimeRegion("Saturday before 5PM",SaturdayBefore5PM,&source,&rvu_map)?;
-    //ExplainTimeRegion("Sunday before 5PM",SundayBefore5PM,&source,&rvu_map)?;
-    //ExplainTimeRegion("Sunday after 5PM",SundayAfter5PM,&source,&rvu_map)?;
+    {
+        let mut tcs:ConstraintSet<NaiveDateTime>=ConstraintSet::new();
+        tcs.add(is_not_holiday);
+        tcs.add(is_this_day(chrono::Weekday::Fri));
+        tcs.add(is_after_this_hour(17));
+
+        ExplainTimeRegion("Friday before 5PM",&tcs,&source,&rvu_map)?;
+    }
+
+    {
+        let mut tcs:ConstraintSet<NaiveDateTime>=ConstraintSet::new();
+        tcs.add(is_not_holiday);
+        tcs.add(is_this_day(chrono::Weekday::Sat));
+        tcs.add(is_after_this_hour(17));
+
+        ExplainTimeRegion("Saturday before 5PM",&tcs,&source,&rvu_map)?;
+    }
+
+    {
+        let mut tcs:ConstraintSet<NaiveDateTime>=ConstraintSet::new();
+        tcs.add(is_not_holiday);
+        tcs.add(is_this_day(chrono::Weekday::Sun));
+        tcs.add(is_before_this_hour(17));
+
+        ExplainTimeRegion("Sunday before 5PM",&tcs,&source,&rvu_map)?;
+    }
+
+    {
+        let mut tcs:ConstraintSet<NaiveDateTime>=ConstraintSet::new();
+        tcs.add(is_not_holiday);
+        tcs.add(is_this_day(chrono::Weekday::Sun));
+        tcs.add(is_after_this_hour(17));
+
+        ExplainTimeRegion("Sunday after 5PM",&tcs,&source,&rvu_map)?;
+    }
 
     Ok(())
 }
 
-
 fn ExplainSegment(map:RVUMap)->String{
-    let total=map.sliceAverageRVUs(Some(isOutpatient),None);
-    let neuro=map.sliceAverageRVUs(Some(isOutpatientNeuro),None);
-    let msk=map.sliceAverageRVUs(Some(isOutpatientMSK),None);
 
+    let mut total:f64=0.0;
+    let mut neuro:f64=0.0;
+    let mut msk:f64=0.0;
 
+    {
+        let mut ccs:ConstraintSet<MapCoords>=ConstraintSet::new();
+        ccs.add(exclude_site(TPC.to_string()));
+        ccs.add(only_this_context(Outpatient.to_string()));
+        total=map.sliceAverageRVUs(Some(ccs));
+    }
+
+    {
+        let mut subspecialties:Vec<String>=Vec::new();
+        subspecialties.push(NEURO_BRAIN.to_string());
+        subspecialties.push(NEURO_OTHER.to_string());
+
+        let mut ccs:ConstraintSet<MapCoords>=ConstraintSet::new();
+        ccs.add(exclude_site(TPC.to_string()));
+        ccs.add(only_this_context(Outpatient.to_string()));
+        ccs.add(only_these_subspecialties(subspecialties));
+
+        neuro=map.sliceAverageRVUs(Some(ccs));
+    }
+
+    {
+        let mut subspecialties:Vec<String>=Vec::new();
+        subspecialties.push(MSK.to_string());
+
+        let mut ccs:ConstraintSet<MapCoords>=ConstraintSet::new();
+        ccs.add(exclude_site(TPC.to_string()));
+        ccs.add(only_this_context(Outpatient.to_string()));
+        ccs.add(only_these_subspecialties(subspecialties));
+
+        msk=map.sliceAverageRVUs(Some(ccs));
+    }
 
     format!(" RVU total={:.1} ({:.1} is Neuro, and {:.1} is MSK)",total,neuro,msk)
 }
 
 
-fn ExplainTimeRegion(desc:&str, date_inclusion:fn(datetime:NaiveDateTime)->bool, source:&ProcessedSource, rvu_map:&HashMap<String, f64>)->Result<(), Box<dyn Error>>
+fn ExplainTimeRegion(desc:&str, date_inclusion:&ConstraintSet<NaiveDateTime>, source:&ProcessedSource, rvu_map:&HashMap<String, f64>)->Result<(), Box<dyn Error>>
 {
     let map = match rvu_map::createMap(&source,&rvu_map,date_inclusion)
     {

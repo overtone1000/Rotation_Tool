@@ -13,16 +13,16 @@ impl<'a, T> ConstraintSet<'a, T>{
     }
 
     pub fn include(&self, t:&T)->bool{
-        for constraint in self.constraints
+        for constraint in &self.constraints
         {
             if !constraint(t) {return false;}
         }
         true
     }
 
-    pub fn add(&mut self, fun:impl Fn(&T)->bool)
+    pub fn add(&mut self, fun:&'a impl Fn(&T)->bool)
     {
-        self.constraints.push(&fun);
+        self.constraints.push(fun);
     }
 }
 
@@ -72,50 +72,5 @@ pub(crate) fn is_before_this_hour(hour:u32)->impl Fn(&NaiveDateTime)->bool{
 pub(crate) fn is_after_this_hour(hour:u32)->impl Fn(&NaiveDateTime)->bool{
     move |datetime:&NaiveDateTime| {
         !(is_before_this_hour(hour)(datetime))
-    }
-}
-
-fn Friday5PM_to_Saturday12AM(datetime:NaiveDateTime)->bool{
-    if dates::checkHoliday(NaiveDate::from(datetime)){
-        return false;
-    }
-    match datetime.weekday()
-    {
-        chrono::Weekday::Fri=>datetime.hour()>=17,
-        _=>false
-    }
-}
-
-fn SaturdayBefore5PM(datetime:NaiveDateTime)->bool{
-    if dates::checkHoliday(NaiveDate::from(datetime)){
-        return false;
-    }
-    match datetime.weekday()
-    {
-        chrono::Weekday::Sat=>datetime.hour()<=17,
-        _=>false
-    }
-}
-
-fn SundayBefore5PM(datetime:NaiveDateTime)->bool{
-    if dates::checkHoliday(NaiveDate::from(datetime)){
-        return false;
-    }
-    match datetime.weekday()
-    {
-        chrono::Weekday::Sun=>datetime.hour()<=17,
-        _=>false
-    }
-}
-
-
-fn SundayAfter5PM(datetime:NaiveDateTime)->bool{
-    if dates::checkHoliday(NaiveDate::from(datetime)){
-        return false;
-    }
-    match datetime.weekday()
-    {
-        chrono::Weekday::Sun=>datetime.hour()>=17,
-        _=>false
     }
 }
