@@ -6,8 +6,7 @@ use constraints::{ConstraintSet, is_not_holiday, is_weekday};
 use globals::{main_headers, NEURO_BRAIN, NEURO_OTHER, MSK, Outpatient, TPC};
 use rvu_map::{RVUMap, MapCoords};
 use table::Table;
-
-use crate::explain::explain;
+use explain::*;
 
 
 use crate::{globals::file_names, error::RotationToolError, categorization::{buildSalemRVUMap, get_categories_list, get_locations_list, backup, buildSalemBVUMap}, time::getTimeRowNormalDistWeights};
@@ -183,6 +182,6 @@ fn buildMaps()->Result<(), Box<dyn Error>> {
 }
 
 fn main()->Result<(), Box<dyn Error>> {
-    explain()
+    explain_weekday_variance()
 }
 

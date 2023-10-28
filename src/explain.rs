@@ -4,7 +4,7 @@ use chrono::NaiveDateTime;
 
 use crate::{ProcessedSource, categorization::buildSalemRVUMap, rvu_map::{RVUMap, self, MapCoords}, error::RotationToolError, constraints::{ConstraintSet, is_not_holiday, is_this_day, exclude_site, is_after_this_hour, only_this_context, only_these_subspecialties, is_before_this_hour}, globals::{TPC, Outpatient, NEURO_BRAIN, NEURO_OTHER, MSK}};
 
-pub(crate) fn explain()->Result<(), Box<dyn Error>>
+pub(crate) fn explain_weekend_outpatient_volumes()->Result<(), Box<dyn Error>>
 {
     let source=ProcessedSource::build()?;
     let rvu_map=buildSalemRVUMap(&source.main_data_table)?;
@@ -53,6 +53,49 @@ pub(crate) fn explain()->Result<(), Box<dyn Error>>
         tcs.add(is_hour_ref);
 
         ExplainTimeRegion("Sunday after 5PM",&tcs,&source,&rvu_map)?;
+    }
+
+    Ok(())
+}
+
+pub(crate) extern fn explain_weekday_variance()->Result<(), Box<dyn Error>>
+{
+    let source=ProcessedSource::build()?;
+    let rvu_map=buildSalemRVUMap(&source.main_data_table)?;
+
+    let weekdays = [
+        chrono::Weekday::Mon,
+        chrono::Weekday::Tue,
+        chrono::Weekday::Wed,
+        chrono::Weekday::Thu,
+        chrono::Weekday::Fri
+    ];
+
+    let is_not_holiday_ref = &is_not_holiday;
+
+    for weekday in weekdays
+    {
+        let is_this_day_ref = &(is_this_day(weekday));
+
+        {
+            let mut tcs:ConstraintSet<NaiveDateTime>=ConstraintSet::new();
+            tcs.add(is_not_holiday_ref);
+            tcs.add(is_this_day_ref);
+            let is_hour_ref = &(is_before_this_hour(15));
+            tcs.add(is_hour_ref);
+
+            ExplainTimeRegion(&format!("{} before 3PM",weekday),&tcs,&source,&rvu_map)?;
+        }
+
+        {
+            let mut tcs:ConstraintSet<NaiveDateTime>=ConstraintSet::new();
+            tcs.add(is_not_holiday_ref);
+            tcs.add(is_this_day_ref);
+            let is_hour_ref = &(is_after_this_hour(15));
+            tcs.add(is_hour_ref);
+
+            ExplainTimeRegion(&format!("{} after 3PM",weekday),&tcs,&source,&rvu_map)?;
+        }
     }
 
     Ok(())
