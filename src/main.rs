@@ -126,8 +126,10 @@ impl ProcessedSource
 
 fn is_business_day<'a>()->ConstraintSet<'a,NaiveDateTime>{
     let mut is_business_day:ConstraintSet<'a,NaiveDateTime>=ConstraintSet::new();
-    is_business_day.add(is_not_holiday);
-    is_business_day.add(is_weekday);
+    let is_not_holiday_ref=&is_not_holiday;
+    let is_weekday_ref=&is_weekday;
+    is_business_day.add(is_not_holiday_ref);
+    is_business_day.add(is_weekday_ref);
     is_business_day
 }
 

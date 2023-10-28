@@ -35,8 +35,8 @@ pub(crate) fn is_weekday(datetime:&NaiveDateTime)->bool{
 }
 
 
-pub(crate) fn is_this_day(day:chrono::Weekday)->impl Fn(&NaiveDateTime)->bool{
-    move |datetime:&NaiveDateTime| {
+pub(crate) fn is_this_day<'a>(day:chrono::Weekday)->impl Fn(&NaiveDateTime)->bool{
+     move |datetime:&NaiveDateTime| {
         datetime.weekday()==day
     }
 }

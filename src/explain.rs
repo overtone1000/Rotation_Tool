@@ -9,38 +9,48 @@ pub(crate) fn explain()->Result<(), Box<dyn Error>>
     let source=ProcessedSource::build()?;
     let rvu_map=buildSalemRVUMap(&source.main_data_table)?;
 
+    let is_not_holiday_ref = &is_not_holiday;
+    
     {
         let mut tcs:ConstraintSet<NaiveDateTime>=ConstraintSet::new();
-        tcs.add(is_not_holiday);
-        tcs.add(is_this_day(chrono::Weekday::Fri));
-        tcs.add(is_after_this_hour(17));
+        tcs.add(is_not_holiday_ref);
+        let is_this_day_ref = &(is_this_day(chrono::Weekday::Fri));
+        tcs.add(is_this_day_ref);
+        let is_hour_ref = &(is_after_this_hour(17));
+        tcs.add(is_hour_ref);
 
-        ExplainTimeRegion("Friday before 5PM",&tcs,&source,&rvu_map)?;
+        ExplainTimeRegion("Friday after 5PM",&tcs,&source,&rvu_map)?;
     }
 
     {
         let mut tcs:ConstraintSet<NaiveDateTime>=ConstraintSet::new();
-        tcs.add(is_not_holiday);
-        tcs.add(is_this_day(chrono::Weekday::Sat));
-        tcs.add(is_after_this_hour(17));
+        tcs.add(is_not_holiday_ref);
+        let is_this_day_ref = &(is_this_day(chrono::Weekday::Sat));
+        tcs.add(is_this_day_ref);
+        let is_hour_ref = &(is_before_this_hour(17));
+        tcs.add(is_hour_ref);
 
         ExplainTimeRegion("Saturday before 5PM",&tcs,&source,&rvu_map)?;
     }
 
     {
         let mut tcs:ConstraintSet<NaiveDateTime>=ConstraintSet::new();
-        tcs.add(is_not_holiday);
-        tcs.add(is_this_day(chrono::Weekday::Sun));
-        tcs.add(is_before_this_hour(17));
+        tcs.add(is_not_holiday_ref);
+        let is_this_day_ref = &(is_this_day(chrono::Weekday::Sun));
+        tcs.add(is_this_day_ref);
+        let is_hour_ref = &(is_before_this_hour(17));
+        tcs.add(is_hour_ref);
 
         ExplainTimeRegion("Sunday before 5PM",&tcs,&source,&rvu_map)?;
     }
 
     {
         let mut tcs:ConstraintSet<NaiveDateTime>=ConstraintSet::new();
-        tcs.add(is_not_holiday);
-        tcs.add(is_this_day(chrono::Weekday::Sun));
-        tcs.add(is_after_this_hour(17));
+        tcs.add(is_not_holiday_ref);
+        let is_this_day_ref = &(is_this_day(chrono::Weekday::Sun));
+        tcs.add(is_this_day_ref);
+        let is_hour_ref = &(is_after_this_hour(17));
+        tcs.add(is_hour_ref);
 
         ExplainTimeRegion("Sunday after 5PM",&tcs,&source,&rvu_map)?;
     }
@@ -54,10 +64,13 @@ fn ExplainSegment(map:RVUMap)->String{
     let mut neuro:f64=0.0;
     let mut msk:f64=0.0;
 
+    let exclude_tpc_ref = &exclude_site(TPC.to_string());
+    let only_outpatient_ref = &only_this_context(Outpatient.to_string());
+
     {
         let mut ccs:ConstraintSet<MapCoords>=ConstraintSet::new();
-        ccs.add(exclude_site(TPC.to_string()));
-        ccs.add(only_this_context(Outpatient.to_string()));
+        ccs.add(exclude_tpc_ref);
+        ccs.add(only_outpatient_ref);
         total=map.sliceAverageRVUs(Some(ccs));
     }
 
@@ -67,9 +80,10 @@ fn ExplainSegment(map:RVUMap)->String{
         subspecialties.push(NEURO_OTHER.to_string());
 
         let mut ccs:ConstraintSet<MapCoords>=ConstraintSet::new();
-        ccs.add(exclude_site(TPC.to_string()));
-        ccs.add(only_this_context(Outpatient.to_string()));
-        ccs.add(only_these_subspecialties(subspecialties));
+        ccs.add(exclude_tpc_ref);
+        ccs.add(only_outpatient_ref);
+        let only_these_subspecialties_ref=&only_these_subspecialties(subspecialties);
+        ccs.add(only_these_subspecialties_ref);
 
         neuro=map.sliceAverageRVUs(Some(ccs));
     }
@@ -79,9 +93,10 @@ fn ExplainSegment(map:RVUMap)->String{
         subspecialties.push(MSK.to_string());
 
         let mut ccs:ConstraintSet<MapCoords>=ConstraintSet::new();
-        ccs.add(exclude_site(TPC.to_string()));
-        ccs.add(only_this_context(Outpatient.to_string()));
-        ccs.add(only_these_subspecialties(subspecialties));
+        ccs.add(exclude_tpc_ref);
+        ccs.add(only_outpatient_ref);
+        let only_these_subspecialties_ref=&only_these_subspecialties(subspecialties);
+        ccs.add(only_these_subspecialties_ref);
 
         msk=map.sliceAverageRVUs(Some(ccs));
     }
