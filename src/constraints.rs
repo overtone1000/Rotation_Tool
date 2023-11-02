@@ -31,7 +31,7 @@ pub(crate) fn is_not_holiday(datetime:&NaiveDateTime)->bool{
 }
 
 pub(crate) fn is_weekday(datetime:&NaiveDateTime)->bool{
-    !dates::checkWeekDay(NaiveDate::from(*datetime))    
+    dates::checkWeekDay(NaiveDate::from(*datetime))    
 }
 
 

@@ -189,8 +189,8 @@ fn main()->Result<(), Box<dyn Error>> {
     let mut ccs:ConstraintSet<MapCoords>=ConstraintSet::new();
     ccs.add(exclude_tpc_ref);
 
-    //buildMaps(Some(ccs))
+    buildMaps(Some(ccs))
 
-    buildMaps(None)
+    //buildMaps(None)
 }
 
