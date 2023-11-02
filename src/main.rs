@@ -2,7 +2,7 @@ use std::{error::Error, fs::{self, File}, collections::HashMap, io::Write};
 
 use categorization::exam_categories::exam_category;
 use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, Datelike, Timelike};
-use constraints::{ConstraintSet, is_not_holiday, is_weekday};
+use constraints::{ConstraintSet, is_not_holiday, is_weekday, exclude_site};
 use globals::{main_headers, NEURO_BRAIN, NEURO_OTHER, MSK, Outpatient, TPC};
 use rvu_map::{RVUMap, MapCoords};
 use table::Table;
@@ -133,7 +133,7 @@ fn is_business_day<'a>()->ConstraintSet<'a,NaiveDateTime>{
 }
 
 
-fn buildMaps()->Result<(), Box<dyn Error>> {
+fn buildMaps(constraints:Option<ConstraintSet<MapCoords>>)->Result<(), Box<dyn Error>> {
             
     let source=ProcessedSource::build()?;
 
@@ -151,7 +151,7 @@ fn buildMaps()->Result<(), Box<dyn Error>> {
             }
         };
 
-        match map.toFile(file_names::OUT_FILE)
+        match map.toFile(&constraints, file_names::OUT_FILE)
         {
             Ok(_)=>{},
             Err(e)=>{return Err(e);}
@@ -170,7 +170,7 @@ fn buildMaps()->Result<(), Box<dyn Error>> {
             }
         };
         
-        match map.toFile(file_names::BVU_OUT_FILE)
+        match map.toFile(&constraints, file_names::BVU_OUT_FILE)
         {
             Ok(_)=>{},
             Err(e)=>{return Err(e);}
@@ -182,6 +182,15 @@ fn buildMaps()->Result<(), Box<dyn Error>> {
 }
 
 fn main()->Result<(), Box<dyn Error>> {
-    explain_weekday_variance()
+    //explain_weekday_variance()
+
+    let exclude_tpc_ref = &exclude_site(TPC.to_string());
+
+    let mut ccs:ConstraintSet<MapCoords>=ConstraintSet::new();
+    ccs.add(exclude_tpc_ref);
+
+    //buildMaps(Some(ccs))
+
+    buildMaps(None)
 }
 

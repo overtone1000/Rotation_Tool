@@ -150,7 +150,7 @@ impl RVUMap
         return Ok("good".to_string());
     }
 
-    pub fn toJSON(&self)->Result<String,String>
+    pub fn toJSON(&self, constraints:&Option<ConstraintSet<MapCoords>>)->Result<String,String>
     {
         let mut topnode=json::JsonValue::new_object();
         if(self.map.keys().len()>0)
@@ -181,8 +181,25 @@ impl RVUMap
                                             let mut modalitynode=json::JsonValue::new_object();
                                             for time_row in time_map.keys()
                                             {
-                                                let me = time_map.get(time_row).expect("No map entry");
-                                                modalitynode[time_row.to_string()]=me.rvus.into();
+                                                let coords = MapCoords{
+                                                    site: site.to_owned(),
+                                                    subspecialty: subspecialty.to_owned(),
+                                                    context: context.to_owned(),
+                                                    modality: modality.to_owned(),
+                                                    time_row: time_row.to_owned(),
+                                                };
+                    
+                                                let include = match &constraints
+                                                {
+                                                    Some(constraints)=>constraints.include(&coords),
+                                                    None=>true
+                                                };
+                    
+                                                if include
+                                                {
+                                                    let me = time_map.get(time_row).expect("No map entry");
+                                                    modalitynode[time_row.to_string()]=me.rvus.into();
+                                                }
                                             }
                                             contextnode[modality]=modalitynode;
                                         }
@@ -201,9 +218,9 @@ impl RVUMap
         Ok(topnode.dump())
     }
 
-    pub fn toFile(&self, filename:&str)->Result<(), Box<dyn Error>>{
+    pub fn toFile(&self, constraints:&Option<ConstraintSet<MapCoords>>, filename:&str)->Result<(), Box<dyn Error>>{
         let mut mapoutfile=File::create(filename)?;
-        let mapstr=self.toJSON()?;
+        let mapstr=self.toJSON(constraints)?;
         let bytes=mapstr.as_bytes();
             
         return match mapoutfile.write_all(&bytes){
