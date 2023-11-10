@@ -1,4 +1,6 @@
-use chrono::{NaiveDate, Datelike};
+use chrono::{NaiveDate, Datelike, NaiveDateTime};
+
+use crate::constraints::{ConstraintSet, is_not_holiday, is_weekday};
 
 pub fn checkWeekDay(date:NaiveDate)->bool
 {
@@ -66,6 +68,9 @@ fn holidayTest()->(){
     checkHoliday(NaiveDate::from_ymd_opt(1999, 1,1).unwrap_or_default());
 
 }
+
+
+
 
 pub fn checkHoliday(date:NaiveDate)->bool
 {

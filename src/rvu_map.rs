@@ -3,7 +3,7 @@ use std::{collections::{HashMap, HashSet}, hash::Hash, error::Error, fs::File, i
 
 use chrono::{NaiveDate, NaiveDateTime, Timelike};
 
-use crate::{table::{Table, self}, globals::{SITES, SUBSPECIALTIES, CONTEXTS, MODALITIES, main_headers, tpc_headers}, dates::{self, business_days_per_year}, tpc, ProcessedSource, constraints::ConstraintSet};
+use crate::{globals::{SITES, SUBSPECIALTIES, CONTEXTS, MODALITIES, main_headers, tpc_headers, file_names}, dates::{business_days_per_year}, constraints::ConstraintSet, categorization::{buildSalemRVUMap, buildSalemBVUMap}, rvu_map, error::RotationToolError, processed_source::ProcessedSource};
 
 struct MapEntry
 {
@@ -482,4 +482,51 @@ pub fn createMap<'a>(source:&ProcessedSource, rvu_map:&HashMap<String,f64>, date
     }
 
     Ok(rvumap)
+}
+
+
+pub fn buildMaps(date_constraints:&ConstraintSet<NaiveDateTime>, classification_constraints:Option<ConstraintSet<MapCoords>>)->Result<(), Box<dyn Error>> {
+            
+    let source=ProcessedSource::build()?;
+
+    //Create the conventional RVU map
+    {
+        let rvu_map=buildSalemRVUMap(&source.main_data_table)?;
+        let map = match rvu_map::createMap(&source,&rvu_map,&date_constraints)
+        {
+            Ok(x)=>x,
+            Err(e)=>{
+                let err=RotationToolError::new(e);
+                return Err(Box::new(err));
+            }
+        };
+
+        match map.toFile(&classification_constraints, file_names::OUT_FILE)
+        {
+            Ok(_)=>{},
+            Err(e)=>{return Err(e);}
+        }
+    }
+
+    //Create BVU map
+    {
+        let bvu_map: HashMap<String, f64>=buildSalemBVUMap(&source.bvu_data_table)?;
+        let map = match rvu_map::createMap(&source, &bvu_map,&date_constraints)
+        {
+            Ok(x)=>x,
+            Err(e)=>{
+                let err=RotationToolError::new(e);
+                return Err(Box::new(err));
+            }
+        };
+        
+        match map.toFile(&classification_constraints, file_names::BVU_OUT_FILE)
+        {
+            Ok(_)=>{},
+            Err(e)=>{return Err(e);}
+        }
+    }
+    
+    println!("Finished.");
+    return Ok(());
 }

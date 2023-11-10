@@ -9,6 +9,7 @@ pub mod file_names
     pub(crate) const CATEGORIES_EXAM_FILE:&str = "./categories/Categories_Exam.csv";
     pub(crate) const OUT_FILE:&str = "./output/Categorized Weekday RVU Map";
     pub(crate) const BVU_OUT_FILE:&str = "./output/Categorized Weekday BVU Map";
+    pub(crate) const EXAMPLE_ROTATION_DESCRIPTIONS:&str = "./rotations/Example.yml";
 }
 
 pub mod main_headers {

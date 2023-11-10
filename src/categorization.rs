@@ -5,7 +5,7 @@ use chrono::{DateTime, Local};
 use crate::{table, globals::{main_headers, bvu_headers, file_names}};
 
 
-pub(crate) mod exam_categories {
+pub mod exam_categories {
     use std::cmp::Ordering;
 
     pub(crate) enum pertinent_headers {
@@ -27,7 +27,7 @@ pub(crate) mod exam_categories {
         }
     }
     
-    pub(crate) struct exam_category {
+    pub struct exam_category {
         pub procedure_code:String,
         pub exam:String,
         pub subspecialty:String,

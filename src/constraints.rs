@@ -74,3 +74,13 @@ pub(crate) fn is_after_this_hour(hour:u32)->impl Fn(&NaiveDateTime)->bool{
         !(is_before_this_hour(hour)(datetime))
     }
 }
+
+
+pub fn is_business_day<'a>()->ConstraintSet<'a,NaiveDateTime>{
+    let mut is_business_day:ConstraintSet<'a,NaiveDateTime>=ConstraintSet::new();
+    let is_not_holiday_ref=&is_not_holiday;
+    let is_weekday_ref=&is_weekday;
+    is_business_day.add(is_not_holiday_ref);
+    is_business_day.add(is_weekday_ref);
+    is_business_day
+  }

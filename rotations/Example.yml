@@ -1,0 +1,28 @@
+title: Rotation Description Example
+descriptions:
+- rotation_name: Rotation A
+  responsibilities:
+  - site: Site 1
+    subspecialty: Specialty 1
+    context: Context 1
+    modality: Modality 1
+    time_period: 10:00-11:00
+    day: previous business day
+  - site:
+    - Site A
+    - Site B
+    subspecialty:
+    - Specialty A
+    - Specialty B
+    context:
+    - Context A
+    - Context B
+    modality:
+    - Modality A
+    - Modality B
+    time_period:
+    - 8:00-12:00
+    - 13:00-17:00
+    day: every business day
+baselines:
+- rotation_name: Rotation A
