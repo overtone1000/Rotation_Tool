@@ -2,7 +2,6 @@
 #[serde(untagged)]
 enum StringTypes
 {
-    Singleton(String),
     SlashSeparatedStringVec(SlashSeparatedStringVec),
     Array(Vec<String>)
 }

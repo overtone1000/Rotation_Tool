@@ -40,12 +40,12 @@ impl Manifest
                 rotation_name: "Rotation A".to_string(),
                 responsibilities: vec![
                     RotationResponsibility{
-                        site:StringTypes::Singleton("Site 1".to_string()),
-                        subspecialty:StringTypes::Singleton("Specialty 1".to_string()),
-                        context:StringTypes::Singleton("Context 1".to_string()),
-                        modality:StringTypes::Singleton("Modality 1".to_string()),
-                        time_period:StringTypes::Singleton("10:00-11:00".to_string()),
-                        day:"previous business day".to_string()
+                        site:"Site 1/Site 2",
+                        subspecialty:"Subspecialty 1/Subspecialty 2",
+                        context:"Context 1/Context 2",
+                        modality:"Modality 1/Modality 2",
+                        time_period:StringTypes::Array(vec!["8:00-12:00".to_string(), "13:00-17:00".to_string()]),
+                        day:"every business day".to_string()
                     },
                     RotationResponsibility{
                         site:StringTypes::Array(vec!["Site A".to_string(),"Site B".to_string()]),

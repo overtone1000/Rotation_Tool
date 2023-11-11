@@ -6,5 +6,6 @@ pub struct RotationResponsibility
     context:StringTypes,
     modality:StringTypes,
     time_period:StringTypes,
-    day:String
+    day:StringTypes,
+    time_modifier:StringTypes
 }
