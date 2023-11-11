@@ -22,7 +22,7 @@ mod categorization;
 mod constraints;
 mod explain;
 mod processed_source;
-mod rotation_descriptions;
+mod rotations;
 
 fn build_maps()->Result<(), Box<dyn Error>> {
     let date_constraints = is_business_day();
