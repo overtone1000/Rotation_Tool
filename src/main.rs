@@ -4,7 +4,6 @@ use categorization::exam_categories::exam_category;
 use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, Datelike, Timelike};
 use constraints::{ConstraintSet, is_not_holiday, is_weekday, exclude_site, is_business_day};
 use globals::{main_headers, NEURO_BRAIN, NEURO_OTHER, MSK, Outpatient, TPC};
-use rotation_descriptions::RotationDescriptionsDocument;
 use rvu_map::{RVUMap, MapCoords, buildMaps};
 use table::Table;
 use explain::*;
@@ -42,7 +41,7 @@ fn build_maps()->Result<(), Box<dyn Error>> {
 
 fn analyze_rotations()->Result<(), Box<dyn Error>> {
     
-    RotationDescriptionsDocument::create_example();
+    crate::rotations::manifest:: Manifest::create_example();
     //RotationDescriptionsDocument::parse(filename);
 
     Ok(())
