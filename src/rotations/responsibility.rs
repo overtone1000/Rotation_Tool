@@ -1,3 +1,7 @@
+use serde::{Serialize, Deserialize};
+
+use super::stringtypes::StringTypes;
+
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct RotationResponsibility
 {

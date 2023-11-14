@@ -1,6 +1,13 @@
+use std::fmt;
+
+use chrono::NaiveTime;
+use serde::{Serialize, Deserialize, de::{Visitor, self}, Serializer};
+
+use super::timespan::Timespan;
+
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
-enum StringTypes
+pub enum StringTypes
 {
     SlashSeparatedStringVec(SlashSeparatedStringVec),
     Array(Vec<String>)
@@ -9,9 +16,24 @@ enum StringTypes
 const delimiter:String="/".to_string();
 
 #[derive(Debug, PartialEq)]
-struct SlashSeparatedStringVec
+pub struct SlashSeparatedStringVec
 {
     values:Vec<String>
+}
+
+impl SlashSeparatedStringVec
+{
+    pub fn new(val:&str)->SlashSeparatedStringVec{
+        let mut vec:Vec<String>=Vec::new();
+        let values=val.split(&delimiter);
+        for value in values
+        {
+            vec.push(value.to_string());
+        }
+        SlashSeparatedStringVec{
+            values:vec
+        }
+    }
 }
 
 impl Serialize for SlashSeparatedStringVec
@@ -19,32 +41,32 @@ impl Serialize for SlashSeparatedStringVec
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer {
-            for value of &self.values
+            let mut retval:Result<S::Ok, S::Error>;
+            for value in &self.values
             {
-                serializer.serialize_string(value+delimiter)
+                let cc = value.to_string()+&delimiter;
+                retval=serializer.serialize_str(&cc);
+                if retval.is_err() {return retval;}
             }
+           retval
     }
 }
 
 struct StringStringVisitor;
 impl<'de> Visitor<'de> for StringStringVisitor {
-    type Value = Timespan;
+    type Value = SlashSeparatedStringVec;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        formatter.write_str("A set of strings separated by ".to_string() + delimiter)
+        let str="A set of strings separated by ".to_string() + &delimiter;
+        formatter.write_str(&str)
     }
 
     fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
     where
         E: de::Error,
-    {
-        let mut vec:Vec<NaiveTime>=Vec::new();
-        let values=value.split(delimiter);
-        
+    {        
         Ok(
-            SlashSeparatedStringVec{
-                value:values
-            }
+            SlashSeparatedStringVec::new(value)
         )
     }
 }
@@ -54,6 +76,6 @@ impl<'de> Deserialize<'de> for SlashSeparatedStringVec
     fn deserialize<D>(deserializer:D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de> {
-        Ok(deserializer.deserialize_str(NaiveTimeVisitor)?)
+        Ok(deserializer.deserialize_str(StringStringVisitor)?)
     }
 }

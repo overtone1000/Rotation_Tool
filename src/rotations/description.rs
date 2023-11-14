@@ -1,6 +1,10 @@
+use serde::{Serialize, Deserialize};
+
+use super::responsibility::RotationResponsibility;
+
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct RotationDescription
 {
-    rotation_name:String,
-    responsibilities:Vec<RotationResponsibility>
+    pub(crate) rotation_name:String,
+    pub(crate) responsibilities:Vec<RotationResponsibility>
 }

@@ -9,6 +9,12 @@ use serde::{Serialize, Deserialize, de::Visitor};
 
 use crate::globals::file_names::EXAMPLE_ROTATION_DESCRIPTIONS;
 
+use super::baseline::RotationBaseline;
+use super::description::RotationDescription;
+use super::responsibility::RotationResponsibility;
+use super::special;
+use super::stringtypes::{StringTypes, SlashSeparatedStringVec};
+
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Manifest
 {
@@ -40,12 +46,18 @@ impl Manifest
                 rotation_name: "Rotation A".to_string(),
                 responsibilities: vec![
                     RotationResponsibility{
-                        site:"Site 1/Site 2",
+                        site:SlashSeparatedStringVec::new("Site 1/Site 2".to_string()),
                         subspecialty:"Subspecialty 1/Subspecialty 2",
                         context:"Context 1/Context 2",
                         modality:"Modality 1/Modality 2",
                         time_period:StringTypes::Array(vec!["8:00-12:00".to_string(), "13:00-17:00".to_string()]),
-                        day:"every business day".to_string()
+                        day:"every business day".to_string(),
+                        time_modifier:
+                            special::Days::monday+"/"+
+                            &special::Days::tuesday+"/"+
+                            &special::Days::wednesday+"/"+
+                            &special::Days::thursday+"/"+
+                            &special::Days::friday
                     },
                     RotationResponsibility{
                         site:StringTypes::Array(vec!["Site A".to_string(),"Site B".to_string()]),
@@ -53,7 +65,8 @@ impl Manifest
                         context:StringTypes::Array(vec!["Context A".to_string(),"Context B".to_string()]),
                         modality:StringTypes::Array(vec!["Modality A".to_string(),"Modality B".to_string()]),
                         time_period:StringTypes::Array(vec!["8:00-12:00".to_string(), "13:00-17:00".to_string()]),
-                        day:"every business day".to_string()
+                        day:"every business day".to_string(),
+                        time_modifier:StringTypes::Array(vec![special::Days::saturday,special::Days::sunday])
                     }
                 ]
             }
