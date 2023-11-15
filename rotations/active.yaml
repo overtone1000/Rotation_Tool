@@ -1,0 +1,11 @@
+title: Rotation Draft 1 (Jared)
+rotation_manifest:
+- rotation: Neuro
+  responsibilities:
+  - sites: All
+    subspecialties: Neuro (Other)
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PBD-15:00 CD

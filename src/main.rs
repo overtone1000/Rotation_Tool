@@ -22,6 +22,7 @@ mod constraints;
 mod explain;
 mod processed_source;
 mod rotations;
+mod analysis;
 
 fn build_maps()->Result<(), Box<dyn Error>> {
     let date_constraints = is_business_day();
@@ -41,9 +42,15 @@ fn build_maps()->Result<(), Box<dyn Error>> {
 
 fn analyze_rotations()->Result<(), Box<dyn Error>> {
     
-    crate::rotations::manifest:: Manifest::create_example();
-    //RotationDescriptionsDocument::parse(filename);
+    //crate::rotations::manifest:: Manifest::create_example();
 
+    let filename="./rotations/active.yaml";
+    let manifest=match crate::rotations::manifest::Manifest::parse(filename)
+    {
+        Ok(x)=>x,
+        Err(e)=>{return Err(e);}
+    };
+    
     Ok(())
 }
 

@@ -5,3 +5,5 @@ pub mod responsibility;
 pub mod special;
 pub mod stringtypes;
 pub mod timespan;
+pub mod time_modifiers;
+pub mod rotation_error;

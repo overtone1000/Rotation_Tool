@@ -1,28 +1,34 @@
 title: Rotation Description Example
-descriptions:
-- rotation_name: Rotation A
+rotation_manifest:
+- rotation: Rotation A
   responsibilities:
-  - site: Site 1
-    subspecialty: Specialty 1
-    context: Context 1
-    modality: Modality 1
-    time_period: 10:00-11:00
-    day: previous business day
-  - site:
+  - sites: Site 1/Site 2
+    subspecialties: Subspecialty 1/Subspecialty 2
+    contexts: Context 1/Context 2
+    modalities: Modality 1/Modality 2
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 17:00 PBD-12:00 CD
+    - 13:00 CD-17:00 CD
+  - sites:
     - Site A
     - Site B
-    subspecialty:
+    subspecialties:
     - Specialty A
     - Specialty B
-    context:
+    contexts:
     - Context A
     - Context B
-    modality:
+    modalities:
     - Modality A
     - Modality B
-    time_period:
-    - 8:00-12:00
-    - 13:00-17:00
-    day: every business day
+    days:
+    - Sat
+    - Sun
+    time_periods:
+    - 17:00 PD-12:00 CD
+    - 13:00 CD-17:00 CD
 baselines:
-- rotation_name: Rotation A
+- rotation: Rotation A
+  RVU: 71.2
+  BVU: 2100.2

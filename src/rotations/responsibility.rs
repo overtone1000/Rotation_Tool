@@ -5,11 +5,10 @@ use super::stringtypes::StringTypes;
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct RotationResponsibility
 {
-    site:StringTypes,
-    subspecialty:StringTypes,
-    context:StringTypes,
-    modality:StringTypes,
-    time_period:StringTypes,
-    day:StringTypes,
-    time_modifier:StringTypes
+    pub sites:StringTypes,
+    pub subspecialties:StringTypes,
+    pub contexts:StringTypes,
+    pub modalities:StringTypes,
+    pub days:StringTypes,
+    pub time_periods:StringTypes,
 }

@@ -37,7 +37,6 @@ impl ProcessedSource
             newrow.push(category_row.comments.to_owned());
             exam_categories_table.pushrow(newrow);
         }
-
     
         let location_categories_list = get_locations_list(&main_data_table,&location_categories_table)?;
         
@@ -54,6 +53,7 @@ impl ProcessedSource
         let dt = chrono::offset::Local::now();
 
         //Archive and save new file if changed
+        /*
         match backup(dt,file_names::CATEGORIES_EXAM_FILE.to_string(),"Categories_Exam.csv".to_owned())
         {
             Ok(_)=>{
@@ -74,6 +74,7 @@ impl ProcessedSource
                 return Err(Box::new(x));
             }
         }
+        */
 
         for exam_category in &exam_categories_list
         {

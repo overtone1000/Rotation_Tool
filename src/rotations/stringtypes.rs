@@ -13,7 +13,15 @@ pub enum StringTypes
     Array(Vec<String>)
 }
 
-const delimiter:String="/".to_string();
+impl StringTypes
+{
+    pub fn new_slash_separated_string_vec(val:&str)->StringTypes
+    {
+        StringTypes::SlashSeparatedStringVec(SlashSeparatedStringVec::new(val))
+    }
+}
+
+const delimiter:&str="/";
 
 #[derive(Debug, PartialEq)]
 pub struct SlashSeparatedStringVec
@@ -41,14 +49,20 @@ impl Serialize for SlashSeparatedStringVec
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer {
-            let mut retval:Result<S::Ok, S::Error>;
+            let mut str:Option<String>=None;
             for value in &self.values
             {
-                let cc = value.to_string()+&delimiter;
-                retval=serializer.serialize_str(&cc);
-                if retval.is_err() {return retval;}
+                match str
+                {
+                    None=>{str=Some(value.to_string())},
+                    Some(x)=>{str=Some(x+&delimiter+value)}
+                }
             }
-           retval
+            match str
+            {
+                None=>{serializer.serialize_none()},
+                Some(x)=>{serializer.serialize_str(&x)}
+            }
     }
 }
 

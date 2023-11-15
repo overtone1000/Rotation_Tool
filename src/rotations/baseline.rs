@@ -3,5 +3,7 @@ use serde::{Serialize, Deserialize};
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct RotationBaseline
 {
-    rotation_name:String,
+    pub rotation:String,
+    pub RVU:f64,
+    pub BVU:f64
 }

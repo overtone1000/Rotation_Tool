@@ -12,20 +12,20 @@ use crate::globals::file_names::EXAMPLE_ROTATION_DESCRIPTIONS;
 use super::baseline::RotationBaseline;
 use super::description::RotationDescription;
 use super::responsibility::RotationResponsibility;
-use super::special;
+use super::special::{self, weekdays};
 use super::stringtypes::{StringTypes, SlashSeparatedStringVec};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Manifest
 {
     title:String,
-    descriptions:Vec<RotationDescription>,
-    baselines:Vec<RotationBaseline>
+    rotation_manifest:Vec<RotationDescription>,
+    baselines:Option<Vec<RotationBaseline>>
 }
 
 impl Manifest
 {
-    pub fn parse(filename:&String)->Result<Manifest, Box<dyn Error>>
+    pub fn parse(filename:&str)->Result<Manifest, Box<dyn Error>>
     {
         let rdr = fs::File::open(filename)?;
         let retval:Manifest=serde_yaml::from_reader(rdr)?;
@@ -37,51 +37,58 @@ impl Manifest
     {
         let mut example=Manifest{
             title:"Rotation Description Example".to_string(),
-            descriptions:Vec::new(),
-            baselines:Vec::new()
+            rotation_manifest:Vec::new(),
+            baselines:None
         };
 
-        example.descriptions.push(
+        example.rotation_manifest.push(
             RotationDescription { 
-                rotation_name: "Rotation A".to_string(),
+                rotation: "Rotation A".to_string(),
                 responsibilities: vec![
                     RotationResponsibility{
-                        site:SlashSeparatedStringVec::new("Site 1/Site 2".to_string()),
-                        subspecialty:"Subspecialty 1/Subspecialty 2",
-                        context:"Context 1/Context 2",
-                        modality:"Modality 1/Modality 2",
-                        time_period:StringTypes::Array(vec!["8:00-12:00".to_string(), "13:00-17:00".to_string()]),
-                        day:"every business day".to_string(),
-                        time_modifier:
-                            special::Days::monday+"/"+
-                            &special::Days::tuesday+"/"+
-                            &special::Days::wednesday+"/"+
-                            &special::Days::thursday+"/"+
-                            &special::Days::friday
+                        sites:StringTypes::new_slash_separated_string_vec("Site 1/Site 2"),
+                        subspecialties:StringTypes::new_slash_separated_string_vec("Subspecialty 1/Subspecialty 2"),
+                        contexts:StringTypes::new_slash_separated_string_vec("Context 1/Context 2"),
+                        modalities:StringTypes::new_slash_separated_string_vec("Modality 1/Modality 2"),
+                        time_periods:StringTypes::Array(vec!["17:00 PBD-12:00 CD".to_string(), "13:00 CD-17:00 CD".to_string()]),
+                        days:
+                            StringTypes::new_slash_separated_string_vec(
+                                &(weekdays::weekday_to_str(chrono::Weekday::Mon)+"/"+
+                                &weekdays::weekday_to_str(chrono::Weekday::Tue)+"/"+
+                                &weekdays::weekday_to_str(chrono::Weekday::Wed)+"/"+
+                                &weekdays::weekday_to_str(chrono::Weekday::Thu)+"/"+
+                                &weekdays::weekday_to_str(chrono::Weekday::Fri))
+                            )
                     },
                     RotationResponsibility{
-                        site:StringTypes::Array(vec!["Site A".to_string(),"Site B".to_string()]),
-                        subspecialty:StringTypes::Array(vec!["Specialty A".to_string(),"Specialty B".to_string()]),
-                        context:StringTypes::Array(vec!["Context A".to_string(),"Context B".to_string()]),
-                        modality:StringTypes::Array(vec!["Modality A".to_string(),"Modality B".to_string()]),
-                        time_period:StringTypes::Array(vec!["8:00-12:00".to_string(), "13:00-17:00".to_string()]),
-                        day:"every business day".to_string(),
-                        time_modifier:StringTypes::Array(vec![special::Days::saturday,special::Days::sunday])
+                        sites:StringTypes::Array(vec!["Site A".to_string(),"Site B".to_string()]),
+                        subspecialties:StringTypes::Array(vec!["Specialty A".to_string(),"Specialty B".to_string()]),
+                        contexts:StringTypes::Array(vec!["Context A".to_string(),"Context B".to_string()]),
+                        modalities:StringTypes::Array(vec!["Modality A".to_string(),"Modality B".to_string()]),
+                        time_periods:StringTypes::Array(vec!["17:00 PD-12:00 CD".to_string(), "13:00 CD-17:00 CD".to_string()]),
+                        days:StringTypes::Array(vec![
+                            weekdays::weekday_to_str(chrono::Weekday::Sat),
+                            weekdays::weekday_to_str(chrono::Weekday::Sun)
+                            ]
+                        )
                     }
                 ]
             }
         );
 
-        example.baselines.push(
+        let baselines = vec![
             RotationBaseline { 
-                rotation_name: "Rotation A".to_string()
+                rotation: "Rotation A".to_string(),
+                RVU: 71.2,
+                BVU: 2100.2
             }
-        );
+        ];
+
+        example.baselines=Some(baselines);
 
         let writer = fs::File::create(EXAMPLE_ROTATION_DESCRIPTIONS)?;
-        serde_yaml::to_writer(writer, &example);
-        //serde_json::to_writer_pretty(writer, &example);
-
+        
+        serde_yaml::to_writer(writer, &example)?;
         Ok(())
     }
 }
