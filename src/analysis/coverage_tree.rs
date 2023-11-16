@@ -1,8 +1,10 @@
 use std::collections::HashMap;
 
-use chrono::NaiveTime;
+use chrono::{NaiveTime, NaiveDateTime, Datelike};
 
-use crate::processed_source::ProcessedSource;
+use crate::{processed_source::ProcessedSource, globals::{main_headers, SITES, MODALITIES, tpc_headers}, constraints::ConstraintSet, dates::business_days_per_year};
+
+use super::source_error::SourceError;
 
 pub struct CoverageCoordinates
 {
@@ -21,30 +23,39 @@ pub struct CoverageUnit
 }
 
 #[derive(Default)]
-pub struct CoverageDay
+pub struct WorkUnit
 {
-    coverages:Vec<CoverageUnit>
+    datetime:NaiveDateTime,
+    rvu:f64,
+    bvu:f64
+}
+
+#[derive(Default)]
+pub struct CoverageAndWorkDay
+{
+    coverages:Vec<CoverageUnit>,
+    work:Vec<WorkUnit>
 }
 
 pub struct WeekdayMap {
-    map:HashMap<chrono::Weekday,CoverageDay>
+    map:HashMap<chrono::Weekday,CoverageAndWorkDay>
 }
 impl WeekdayMap
 {
     fn default()->WeekdayMap{
-        let mut map:HashMap<chrono::Weekday,CoverageDay>=HashMap::new();
-        map.insert(chrono::Weekday::Mon, CoverageDay::default());
-        map.insert(chrono::Weekday::Tue,  CoverageDay::default());
-        map.insert(chrono::Weekday::Wed,  CoverageDay::default());
-        map.insert(chrono::Weekday::Thu,  CoverageDay::default());
-        map.insert(chrono::Weekday::Fri,  CoverageDay::default());
-        map.insert(chrono::Weekday::Sat,  CoverageDay::default());
-        map.insert(chrono::Weekday::Sun,  CoverageDay::default());
+        let mut map:HashMap<chrono::Weekday,CoverageAndWorkDay>=HashMap::new();
+        map.insert(chrono::Weekday::Mon, CoverageAndWorkDay::default());
+        map.insert(chrono::Weekday::Tue,  CoverageAndWorkDay::default());
+        map.insert(chrono::Weekday::Wed,  CoverageAndWorkDay::default());
+        map.insert(chrono::Weekday::Thu,  CoverageAndWorkDay::default());
+        map.insert(chrono::Weekday::Fri,  CoverageAndWorkDay::default());
+        map.insert(chrono::Weekday::Sat,  CoverageAndWorkDay::default());
+        map.insert(chrono::Weekday::Sun,  CoverageAndWorkDay::default());
         WeekdayMap { 
             map: map
         }
     }
-    fn get_weekday(&mut self, wd:chrono::Weekday)->Option<&mut CoverageDay>{self.map.get_mut(&wd)}
+    fn get_weekday(&mut self, wd:chrono::Weekday)->Option<&mut CoverageAndWorkDay>{self.map.get_mut(&wd)}
 }
 
 #[derive(Default)]
@@ -55,7 +66,7 @@ impl ContextMap
 {
     fn get_context(&mut self, context:&String)->Option<&mut WeekdayMap>{self.map.get_mut(context)}
 
-    fn add_branch(&mut self, coords:&CoverageCoordinates){
+    fn add_leaf(&mut self, coords:&CoverageCoordinates, work:WorkUnit){
         match self.get_context(&coords.context)
         {
             None=>{
@@ -75,15 +86,15 @@ impl SubspecialtyMap
 {
     fn get_subspecialty(&mut self, subspecialty:&String)->Option<&mut ContextMap>{self.map.get_mut(subspecialty)}
 
-    fn add_branch(&mut self, coords:&CoverageCoordinates){
+    fn add_leaf(&mut self, coords:&CoverageCoordinates, work:WorkUnit){
         match self.get_subspecialty(&coords.subspecialty)
         {
             Some(x)=>{
-                x.add_branch(coords)
+                x.add_leaf(coords,work)
             }
             None=>{
                 let mut newbranch=ContextMap::default();
-                newbranch.add_branch(coords);
+                newbranch.add_leaf(coords,work);
                 self.map.insert(coords.subspecialty.to_string(),newbranch);
             }
         }
@@ -98,21 +109,21 @@ impl CoverageTree
 {
    fn get_site(&mut self, site:&String)->Option<&mut SubspecialtyMap>{self.map.get_mut(site)}
 
-   fn add_branch(&mut self, coords:&CoverageCoordinates){
+   fn add_leaf(&mut self, coords:&CoverageCoordinates, work:WorkUnit){
     match self.get_site(&coords.site)
     {
         Some(x)=>{
-            x.add_branch(coords)
+            x.add_leaf(coords,work)
         }
         None=>{
             let mut newbranch=SubspecialtyMap::default();
-            newbranch.add_branch(coords);
+            newbranch.add_leaf(coords,work);
             self.map.insert(coords.site.to_string(),newbranch);
         }
     }
    }
 
-   fn build(source:ProcessedSource)->CoverageTree
+   fn build<'a>(&self, source:ProcessedSource, exam_rvu_map:&HashMap<String,f64>, date_constraints:&ConstraintSet<'a,NaiveDateTime>)->Result<CoverageTree,Box<dyn std::error::Error>>
    {
 
     let retval=CoverageTree::default();
@@ -125,117 +136,121 @@ impl CoverageTree
         
         let datetime=match NaiveDateTime::parse_from_str(&datetimestring, "%m/%d/%y %H:%M"){
             Ok(x)=>x,
-            Err(x)=>{return Err(format!("Couldn't parse date {}",datetimestring));}
+            Err(x)=>{return Err(Box::new(x));}
         };
 
-        let location=source.main_data_table.getVal(&main_headers::pertinent_headers::location.getLabel(), &row_i)?;
-        let exam_code=source.main_data_table.getVal(&main_headers::pertinent_headers::procedure_code.getLabel(), &row_i)?;
-
-        //Build coords and populate maps with this row.
-        let mut coords=MapCoords::default();
-        {
-            coords.time_row=crate::time::getTimeRowIndex(datetime.hour(),datetime.minute());
-
-            //Get subspecialty from exam code
-            coords.subspecialty=match source.exam_to_subspecialty_map.get(&exam_code)
-            {
-                Some(x)=>x.to_string(),
-                None=>{
-                    return Err(format!("Invalid exam_code {} in exam_to_subspeciality_map",exam_code));
-                }
-            };
-
-
-            //Try site. If not valid, go by location.
-            let mut selected_site:Option<String>=None;
-            let listed_site=source.main_data_table.getVal(&main_headers::pertinent_headers::accession.getLabel(), &row_i)?;
-            for site in SITES
-            {
-                if (listed_site[0..site.len()]).to_ascii_uppercase()==site.to_string().to_ascii_uppercase()
-                {
-                    selected_site=Some(site.to_string());
-                    break;
-                }
-            }
-            if selected_site.is_none()
-            {
-                selected_site=crate::globals::getLocationSiteMapping(&location);  
-            }
-            coords.site=match selected_site
-            {
-                Some(x)=>x,
-                None=>{
-                    return Err(format!("Could not determine site for row {}",row_i));
-                }
-            };
-
-            //Try context. If not valid, go by site map.
-            coords.context= match source.location_to_context_map.get(&location)
-            {
-                Some(x)=>x.to_string(),
-                None=>{    
-                    match crate::globals::getLocationSiteMapping(&location)
-                    {
-                        Some(x)=>x,
-                        None=>{
-                            return Err(format!("Could not determine context for location {}",location));
-                        }
-                    }
-                }
-            };          
-
-            //Get modality, but check for aliases
-            let listed_modality = source.main_data_table.getVal(&main_headers::pertinent_headers::modality.getLabel(), &row_i)?;
-            let mut selected_modality:Option<String>=None;
-            for modality in MODALITIES
-            {
-                if modality.to_string()==listed_modality
-                {
-                    selected_modality=Some(modality.to_string());
-                    break;
-                }
-            }
-            match selected_modality
-            {
-                None=>{
-                    selected_modality=crate::globals::getModalityAlias(&listed_modality);
-                },
-                _=>{}
-            }
-            match selected_modality
-            {
-                None=>{
-                    selected_modality=crate::globals::getModalityFromProcedureDesc(source.main_data_table.getVal(&main_headers::pertinent_headers::exam.getLabel(), &row_i)?)
-                },
-                _=>{}
-            }
-            coords.modality=match selected_modality
-            {
-                Some(x)=>x,
-                None=>{
-                    return Err(format!("Could not determine modality for row {}",row_i));
-                }
-            };
-            if(!modality_map.contains_key(&exam_code))
-            {
-                modality_map.insert(exam_code.to_owned(), coords.modality.to_owned());
-            }
-        }
-
-        //Check if this date should be included in RVU totals. If so, add rvus.
         if date_constraints.include(&datetime)
         {
-            included_dates.insert(NaiveDate::from(datetime));
 
-            //let rvus_str = main_data_table.getVal(&main_headers::pertinent_headers::rvu.getLabel(), &row_i)?;
-            let rvus=match rvu_map.get(&exam_code){
-                Some(&x)=>x,
-                None=>{
-                    return Err(format!("Coudn't find exam code {}",exam_code));
+            let location=source.main_data_table.getVal(&main_headers::pertinent_headers::location.getLabel(), &row_i)?;
+            let exam_code=source.main_data_table.getVal(&main_headers::pertinent_headers::procedure_code.getLabel(), &row_i)?;
+
+            //Build coords and populate maps with this row.
+            let coords:CoverageCoordinates =
+            {
+                //Get subspecialty from exam code
+                let subspecialty=match source.exam_to_subspecialty_map.get(&exam_code)
+                {
+                    Some(x)=>x.to_string(),
+                    None=>{
+                        return SourceError::generate_boxed(format!("Invalid exam_code {} in exam_to_subspeciality_map",exam_code));
+                    }
+                };
+
+
+                //Try site. If not valid, go by location.
+                let mut selected_site:Option<String>=None;
+                let listed_site=source.main_data_table.getVal(&main_headers::pertinent_headers::accession.getLabel(), &row_i)?;
+                for site in SITES
+                {
+                    if (listed_site[0..site.len()]).to_ascii_uppercase()==site.to_string().to_ascii_uppercase()
+                    {
+                        selected_site=Some(site.to_string());
+                        break;
+                    }
+                }
+                if selected_site.is_none()
+                {
+                    selected_site=crate::globals::getLocationSiteMapping(&location);  
+                }
+                let site=match selected_site
+                {
+                    Some(x)=>x,
+                    None=>{
+                        return SourceError::generate_boxed(format!("Could not determine site for row {}",row_i));
+                    }
+                };
+
+                //Try context. If not valid, go by site map.
+                let context= match source.location_to_context_map.get(&location)
+                {
+                    Some(x)=>x.to_string(),
+                    None=>{    
+                        match crate::globals::getLocationSiteMapping(&location)
+                        {
+                            Some(x)=>x,
+                            None=>{
+                                return SourceError::generate_boxed(format!("Could not determine context for location {}",location));
+                            }
+                        }
+                    }
+                };          
+
+                //Get modality, but check for aliases
+                let listed_modality = source.main_data_table.getVal(&main_headers::pertinent_headers::modality.getLabel(), &row_i)?;
+                let mut selected_modality:Option<String>=None;
+                for modality in MODALITIES
+                {
+                    if modality.to_string()==listed_modality
+                    {
+                        selected_modality=Some(modality.to_string());
+                        break;
+                    }
+                }
+                match selected_modality
+                {
+                    None=>{
+                        selected_modality=crate::globals::getModalityAlias(&listed_modality);
+                    },
+                    _=>{}
+                }
+                match selected_modality
+                {
+                    None=>{
+                        selected_modality=crate::globals::getModalityFromProcedureDesc(source.main_data_table.getVal(&main_headers::pertinent_headers::exam.getLabel(), &row_i)?)
+                    },
+                    _=>{}
+                }
+                let modality=match selected_modality
+                {
+                    Some(x)=>x,
+                    None=>{
+                        return SourceError::generate_boxed(format!("Could not determine modality for row {}",row_i));
+                    }
+                };
+                if !modality_map.contains_key(&exam_code)
+                {
+                    modality_map.insert(exam_code.to_owned(), modality);
+                }
+
+                CoverageCoordinates{
+                    site:site,
+                    subspecialty:subspecialty,
+                    context:context,
+                    weekday:datetime.weekday(),
                 }
             };
 
-            rvumap.addRVUs(&coords,rvus)?;
+            let work:WorkUnit =
+            {
+                let rvu = exam_rvu_map.get()
+                WorkUnit {
+                    datetime:datetime,
+                    
+                }
+            };
+
+            self.add_leaf(&coords,work);
         }
     }
     //Add TPC, which doesn't go by number of dates
@@ -247,27 +262,27 @@ impl CoverageTree
         
         let number=match number_str.parse::<f64>(){
             Ok(val)=>val,
-            Err(e)=>{return Err(format!("{:?}",e));}
+            Err(e)=>{return SourceError::generate_boxed(format!("{:?}",e));}
         };
 
         let number_per_business_day=number/business_days_per_year;
-        let rvus_per_exam=match rvu_map.get(&exam_code){
-            None=>{return Err(format!("Bad exam code {}",exam_code));}
+        let rvus_per_exam=match exam_rvu_map.get(&exam_code){
+            None=>{SourceError::generate(format!("Bad exam code {}",exam_code));}
             Some(val)=>val.to_owned()
         };
 
         let rvus_per_business_day =number_per_business_day*rvus_per_exam;
 
-        let mut coords=MapCoords::default();
+        let mut coords=CoverageCoordinates::default();
         coords.site=crate::globals::TPC.to_string();
         coords.subspecialty=match source.exam_to_subspecialty_map.get(&exam_code){
-            None=>{return Err(format!("Bad exam code {}",exam_code));}
+            None=>{SourceError::generate(format!("Bad exam code {}",exam_code));}
             Some(val)=>val.to_owned()
         };
         coords.context=crate::globals::Outpatient.to_string();
         coords.modality=match modality_map.get(&exam_code)
         {
-            None=>{return Err(format!("Bad exam code {}",exam_code));}
+            None=>{SourceError::generate(format!("Bad exam code {}",exam_code));}
             Some(val)=>val.to_owned()
         };
 
