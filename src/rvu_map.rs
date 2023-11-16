@@ -283,7 +283,7 @@ impl RVUMap
     }
 }
 
-pub fn createMap<'a>(source:&ProcessedSource, rvu_map:&HashMap<String,f64>, date_constraints:&ConstraintSet<'a,NaiveDateTime>)->Result<RVUMap,String>
+pub fn createMap<'a>(source:&ProcessedSource, exam_rvu_map:&HashMap<String,f64>, date_constraints:&ConstraintSet<'a,NaiveDateTime>)->Result<RVUMap,String>
 {
     let mut rvumap = RVUMap::new();
 
@@ -400,7 +400,7 @@ pub fn createMap<'a>(source:&ProcessedSource, rvu_map:&HashMap<String,f64>, date
             included_dates.insert(NaiveDate::from(datetime));
 
             //let rvus_str = main_data_table.getVal(&main_headers::pertinent_headers::rvu.getLabel(), &row_i)?;
-            let rvus=match rvu_map.get(&exam_code){
+            let rvus=match exam_rvu_map.get(&exam_code){
                 Some(&x)=>x,
                 None=>{
                     return Err(format!("Coudn't find exam code {}",exam_code));
@@ -454,7 +454,7 @@ pub fn createMap<'a>(source:&ProcessedSource, rvu_map:&HashMap<String,f64>, date
         };
 
         let number_per_business_day=number/business_days_per_year;
-        let rvus_per_exam=match rvu_map.get(&exam_code){
+        let rvus_per_exam=match exam_rvu_map.get(&exam_code){
             None=>{return Err(format!("Bad exam code {}",exam_code));}
             Some(val)=>val.to_owned()
         };

@@ -205,3 +205,11 @@ pub fn getLocationSiteMapping(location:&String)->Option<String>
         (_)=>None
     }
 }
+
+pub const business_days:&[&chrono::Weekday] = &[
+    &chrono::Weekday::Mon,
+    &chrono::Weekday::Tue,
+    &chrono::Weekday::Wed,
+    &chrono::Weekday::Thu,
+    &chrono::Weekday::Fri
+];
