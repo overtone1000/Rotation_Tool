@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, hash_map::Entry};
 
 use chrono::{NaiveTime, NaiveDateTime, Datelike, NaiveDate, Duration, Days};
 
@@ -50,20 +50,15 @@ pub trait CoordinateMap<T,U>
     fn get_coordinate(coords:&CoverageCoordinates)->&T;
     fn get_branch(&mut self, coords:&CoverageCoordinates)->&mut U
     {
-        match self.get_map().get_mut(Self::get_coordinate(coords))
+        match self.get_map().entry(*Self::get_coordinate(coords))
         {
-            Some(x)=>{
-                x
-            }
-            None=>{
-                let mut newbranch=U::default();
-                self.get_map().try_insert(*Self::get_coordinate(coords),newbranch).expect("Checked")
-            }
+            Entry::Occupied(o) => o.into_mut(),
+            Entry::Vacant(v) => v.insert(U::default())
         }
     }
 }
 
-pub trait ParentCoordinateMap<T,U>:CoordinateMap<T,U>+WorkCoverageMap
+pub trait ParentCoordinateMap<T,U>:CoordinateMap<T,U>
     where T:std::fmt::Debug,T:Eq,T:PartialEq,T:std::hash::Hash,U:Default,U:std::fmt::Debug,
     U:WorkCoverageMap
 {
@@ -72,6 +67,18 @@ pub trait ParentCoordinateMap<T,U>:CoordinateMap<T,U>+WorkCoverageMap
     }
     fn add_coverage(&self,coords:&CoverageCoordinates,coverage:CoverageUnit){
         self.get_branch(coords).add_coverage(coords, coverage);
+    }
+}
+
+impl<S> WorkCoverageMap for S
+where S:ParentCoordinateMap<T,U>
+{
+    fn add_work(&self,coords:&CoverageCoordinates,work:WorkUnit) {
+        self.add_work(coords, work)
+    }
+
+    fn add_coverage(&self,coords:&CoverageCoordinates,coverage:CoverageUnit) {
+        self.add_coverage(coords, coverage)
     }
 }
 
@@ -133,6 +140,7 @@ impl CoordinateMap<String,WeekdayMap> for ContextMap
         &coords.context
     }
 }
+impl WorkCoverageMap for ContextMap{}
 impl ParentCoordinateMap<String,WeekdayMap> for ContextMap{}
 
 #[derive(Default,Debug)]
@@ -148,6 +156,7 @@ impl CoordinateMap<String,ContextMap> for SubspecialtyMap
         &coords.subspecialty
     }
 }
+impl WorkCoverageMap for SubspecialtyMap{}
 impl ParentCoordinateMap<String,ContextMap> for SubspecialtyMap{}
 
 #[derive(Default)]
@@ -385,4 +394,5 @@ impl CoordinateMap<String,SubspecialtyMap> for CoverageTree
         &coords.site
     }
 }
+impl WorkCoverageMap for CoverageTree{}
 impl ParentCoordinateMap<String,SubspecialtyMap> for CoverageTree{}
