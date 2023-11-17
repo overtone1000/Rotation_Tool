@@ -19,6 +19,15 @@ impl StringTypes
     {
         StringTypes::SlashSeparatedStringVec(SlashSeparatedStringVec::new(val))
     }
+
+    pub fn to_vec(&self)->Vec<String>
+    {
+        match self
+        {
+            StringTypes::SlashSeparatedStringVec(x) => x.values,
+            StringTypes::Array(x) => *x,
+        }
+    }
 }
 
 const delimiter:&str="/";

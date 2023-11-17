@@ -18,9 +18,9 @@ use super::stringtypes::{StringTypes, SlashSeparatedStringVec};
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct Manifest
 {
-    title:String,
-    rotation_manifest:Vec<RotationDescription>,
-    baselines:Option<Vec<RotationBaseline>>
+    pub title:String,
+    pub rotation_manifest:Vec<RotationDescription>,
+    pub baselines:Option<Vec<RotationBaseline>>
 }
 
 impl Manifest

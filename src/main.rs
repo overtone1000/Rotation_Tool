@@ -9,7 +9,7 @@ use rvu_map::{RVUMap, MapCoords, buildMaps};
 use table::Table;
 use explain::*;
 
-use crate::{globals::file_names, error::RotationToolError, categorization::{buildSalemRVUMap, get_categories_list, get_locations_list, backup, buildSalemBVUMap}, time::{getTimeRowNormalDistWeights, getNormalDistWeights}};
+use crate::{globals::file_names, error::RotationToolError, categorization::{buildSalemRVUMap, get_categories_list, get_locations_list, backup, buildSalemBVUMap}, time::{getTimeRowNormalDistWeights, getNormalDistWeights}, analysis::coverage_tree::CoverageMap};
 
 mod globals;
 mod error;
@@ -45,6 +45,7 @@ fn analyze_rotations()->Result<(), Box<dyn Error>> {
     
     //crate::rotations::manifest:: Manifest::create_example();
 
+    println!("Parsing manifest.");
     let filename="./rotations/active.yaml";
     let manifest=match crate::rotations::manifest::Manifest::parse(filename)
     {
@@ -52,15 +53,19 @@ fn analyze_rotations()->Result<(), Box<dyn Error>> {
         Err(e)=>{return Err(e);}
     };
 
+    println!("Processing source.");
     let source= match ProcessedSource::build()
     {
         Ok(x)=>x,
         Err(e)=>{return Err(e);}
     };
 
+    println!("Building coverage tree.");
     let mut date_constraint_set:ConstraintSet<NaiveDateTime>=ConstraintSet::new();
     date_constraint_set.add(&is_not_holiday);
-    let converage_tree=match analysis::coverage_tree::CoverageTree::build(source, &date_constraint_set)
+    
+    let mut coverage_tree=CoverageMap::default();
+    match coverage_tree.add_work_from_source(source, &date_constraint_set)
     {
         Ok(x)=>x,
         Err(e)=>{return Err(e);}

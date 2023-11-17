@@ -1,7 +1,14 @@
+use std::collections::HashSet;
 use std::collections::{HashMap, hash_map::Entry};
+
+use std::fmt::Debug;
+
+use std::hash::Hash;
 
 use chrono::{NaiveTime, NaiveDateTime, Datelike, NaiveDate, Duration, Days};
 
+use crate::rotations::manifest::Manifest;
+use crate::rotations::timespan::parse_time_span;
 use crate::{processed_source::ProcessedSource, globals::{main_headers, SITES, MODALITIES, tpc_headers, business_days}, constraints::ConstraintSet, dates::business_days_per_year, categorization::{buildSalemRVUMap, buildSalemBVUMap}};
 
 use super::source_error::SourceError;
@@ -15,12 +22,12 @@ pub struct CoverageCoordinates
     weekday:chrono::Weekday
 }
 
-#[derive(Default,Debug)]
+#[derive(Default,Debug,PartialEq,Eq,PartialOrd,Ord)]
 pub struct CoverageUnit
 {
-    rotation:String,
-    start:NaiveTime,
-    end:NaiveTime
+    start:NaiveTime, //Make first so it's sorted on start time first!
+    end:NaiveTime, //Make second so it's sorted on end time next!
+    rotation:String
 }
 
 #[derive(Default,Debug)]
@@ -38,47 +45,80 @@ pub struct CoverageAndWorkDay
     work:Vec<WorkUnit>
 }
 
+#[derive(Default)]
+struct CovaregeErrors
+{
+    gaps:Vec<(NaiveTime,NaiveTime)>,
+    overlaps:Vec<(String,String)>
+}
+
+impl CoverageAndWorkDay
+{
+    fn audit_coverage(&mut self)->CovaregeErrors
+    {
+        let mut retval=CovaregeErrors::default();
+        let midnight=NaiveTime::from_hms_opt(0,0,0).expect("Midnight");
+
+        if self.coverages.is_empty()
+        {
+            retval.gaps.push((midnight,midnight));
+            return retval;
+        }
+        
+        self.coverages.sort(); //Sorting puts them in order with respect to start time and then end time!
+
+        let mut prior=CoverageUnit
+        {
+            start:midnight,
+            end:midnight,
+            rotation:"".to_string()
+        };
+
+        for cu in &self.coverages
+        {
+            //Check overlap
+            if cu.start<prior.end
+            {
+                retval.overlaps.push((prior.rotation.to_string(),cu.rotation.to_string()));
+            }
+            //Check gap
+            if(cu.start>prior.end)
+            {
+                retval.gaps.push((prior.end,cu.start));
+            }
+        }
+
+        //Check through midnight
+        let last = self.coverages.last().expect("Shouldn't be empty!").end;
+        if last != midnight
+        {
+            retval.gaps.push((last,midnight));
+        }
+        
+        retval
+    }
+}
+
 pub trait WorkCoverageMap
 {
-    fn add_work(&self,coords:&CoverageCoordinates,work:WorkUnit);
-    fn add_coverage(&self,coords:&CoverageCoordinates,coverage:CoverageUnit);
+    fn add_work(&mut self,coords:&CoverageCoordinates,work:WorkUnit);
+    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit);
 }
-pub trait CoordinateMap<T,U> 
-    where T:std::fmt::Debug,T:Eq,T:PartialEq,T:std::hash::Hash,U:Default,U:std::fmt::Debug
+pub trait  CoordinateMap<'a,T,U> 
+    where T:'a + Debug + Eq + PartialEq + Hash,
+    U:Default+Debug
 {
-    fn get_map(&self)->HashMap<T,U>;
-    fn get_coordinate(coords:&CoverageCoordinates)->&T;
-    fn get_branch(&mut self, coords:&CoverageCoordinates)->&mut U
+    fn get_map(&mut self)->&mut HashMap<T,U>;
+    fn get_coordinate(coords:&CoverageCoordinates)->T;
+    fn get_branch(&'a mut self, coords:&'a CoverageCoordinates)->&mut U
     {
-        match self.get_map().entry(*Self::get_coordinate(coords))
+        let key=Self::get_coordinate(&coords);
+        let retval = match (*self.get_map()).entry(key)
         {
             Entry::Occupied(o) => o.into_mut(),
             Entry::Vacant(v) => v.insert(U::default())
-        }
-    }
-}
-
-pub trait ParentCoordinateMap<T,U>:CoordinateMap<T,U>
-    where T:std::fmt::Debug,T:Eq,T:PartialEq,T:std::hash::Hash,U:Default,U:std::fmt::Debug,
-    U:WorkCoverageMap
-{
-    fn add_work(&self,coords:&CoverageCoordinates,work:WorkUnit){
-        self.get_branch(coords).add_work(coords,work);
-    }
-    fn add_coverage(&self,coords:&CoverageCoordinates,coverage:CoverageUnit){
-        self.get_branch(coords).add_coverage(coords, coverage);
-    }
-}
-
-impl<S> WorkCoverageMap for S
-where S:ParentCoordinateMap<T,U>
-{
-    fn add_work(&self,coords:&CoverageCoordinates,work:WorkUnit) {
-        self.add_work(coords, work)
-    }
-
-    fn add_coverage(&self,coords:&CoverageCoordinates,coverage:CoverageUnit) {
-        self.add_coverage(coords, coverage)
+        };
+        retval
     }
 }
 
@@ -104,81 +144,144 @@ impl WeekdayMap
 }
 impl WorkCoverageMap for WeekdayMap
 {
-    fn add_work(&self,coords:&CoverageCoordinates,work:WorkUnit){
+    fn add_work(&mut self,coords:&CoverageCoordinates,work:WorkUnit){
         self.get_branch(coords).work.push(work);
     }
-    fn add_coverage(&self,coords:&CoverageCoordinates,coverage:CoverageUnit){
+    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit){
         self.get_branch(coords).coverages.push(coverage);
     }
 }
-impl CoordinateMap<chrono::Weekday,CoverageAndWorkDay> for WeekdayMap
+impl <'a> CoordinateMap<'a,chrono::Weekday,CoverageAndWorkDay> for WeekdayMap
 {
-    fn get_map(&self)->HashMap<chrono::Weekday,CoverageAndWorkDay> {
-        self.map
+    fn get_map(&mut self)->&mut HashMap<chrono::Weekday,CoverageAndWorkDay> {
+        &mut self.map
     }
-    fn get_coordinate(coords:&CoverageCoordinates)->&chrono::Weekday {
-        &coords.weekday
+    fn get_coordinate(coords:&CoverageCoordinates)->chrono::Weekday {
+        coords.weekday.clone()
+    }
+}
+
+
+#[derive(Default, Debug)]
+pub struct ModalityMap {
+    map:HashMap<String, WeekdayMap>
+}
+impl <'a> CoordinateMap<'a,String,WeekdayMap> for ModalityMap
+{
+    fn get_map(&mut self)->&mut HashMap<String,WeekdayMap> {
+        &mut self.map
+    }
+    fn get_coordinate(coords:&CoverageCoordinates) -> String {
+        coords.modality.clone()
+    }
+}
+impl WorkCoverageMap for ModalityMap{
+    fn add_work(&mut self,coords:&CoverageCoordinates,work:WorkUnit) {
+        self.get_branch(coords).add_work(coords, work)
+    }
+
+    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit) {
+        self.get_branch(coords).add_coverage(coords, coverage)
     }
 }
 
 #[derive(Default, Debug)]
 pub struct ContextMap {
-    map:HashMap<String, WeekdayMap>
+    map:HashMap<String, ModalityMap>
 }
-impl ContextMap
+impl <'a> CoordinateMap<'a,String,ModalityMap> for ContextMap
 {
-    fn add_work(&mut self, coords:&CoverageCoordinates, work:WorkUnit){
-        
+    fn get_map(&mut self)->&mut HashMap<String,ModalityMap> {
+        &mut self.map
+    }
+    fn get_coordinate(coords:&CoverageCoordinates) -> String {
+        coords.context.clone()
     }
 }
-impl CoordinateMap<String,WeekdayMap> for ContextMap
-{
-    fn get_map(&self)->HashMap<String,WeekdayMap> {
-        self.map
+impl WorkCoverageMap for ContextMap{
+    fn add_work(&mut self,coords:&CoverageCoordinates,work:WorkUnit) {
+        self.get_branch(coords).add_work(coords, work)
     }
-    fn get_coordinate(coords:&CoverageCoordinates)->&String {
-        &coords.context
+
+    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit) {
+        self.get_branch(coords).add_coverage(coords, coverage)
     }
 }
-impl WorkCoverageMap for ContextMap{}
-impl ParentCoordinateMap<String,WeekdayMap> for ContextMap{}
+
 
 #[derive(Default,Debug)]
 pub struct SubspecialtyMap {
      map:HashMap<String, ContextMap>
 }
-impl CoordinateMap<String,ContextMap> for SubspecialtyMap
+impl <'a> CoordinateMap<'a,String,ContextMap> for SubspecialtyMap
 {
-    fn get_map(&self)->HashMap<String,ContextMap> {
-        self.map
+    fn get_map(&mut self)->&mut HashMap<String,ContextMap> {
+        &mut self.map
     }
-    fn get_coordinate(coords:&CoverageCoordinates)->&String {
-        &coords.subspecialty
+    fn get_coordinate(coords:&CoverageCoordinates)->String {
+        coords.subspecialty.clone()
     }
 }
-impl WorkCoverageMap for SubspecialtyMap{}
-impl ParentCoordinateMap<String,ContextMap> for SubspecialtyMap{}
+impl WorkCoverageMap for SubspecialtyMap{
+    fn add_work(&mut self,coords:&CoverageCoordinates,work:WorkUnit) {
+        self.get_branch(coords).add_work(coords, work)
+    }
+
+    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit) {
+        self.get_branch(coords).add_coverage(coords, coverage)
+    }
+}
+
 
 #[derive(Default)]
-pub struct CoverageTree {
+pub struct CoverageMap {
     map:HashMap<String, SubspecialtyMap>
 }
-impl CoverageTree
+impl CoverageMap
 {
-   fn add_work(&mut self, coords:&CoverageCoordinates, work:WorkUnit){
-    
-   }
-
-   pub fn build<'a>(source:ProcessedSource, date_constraints:&ConstraintSet<'a,NaiveDateTime>)->Result<CoverageTree,Box<dyn std::error::Error>>
+   pub fn add_work_from_source<'a>(&mut self, source:ProcessedSource, date_constraints:&ConstraintSet<'a,NaiveDateTime>)->Result<(),Box<dyn std::error::Error>>
    {
-
-    let mut retval=CoverageTree::default();
+    let mut retval=CoverageMap::default();
 
     let mut modality_map:HashMap<String,String>=HashMap::new();
 
     let exam_rvu_map=buildSalemRVUMap(&source.main_data_table)?;
     let exam_bvu_map: HashMap<String, f64>=buildSalemBVUMap(&source.bvu_data_table)?;
     
+    let mut salem_weekday_count :HashMap<chrono::Weekday,u64>=HashMap::new();
+    //Determine how many days worth for each weekday
+    {
+        let mut dateset:HashSet<NaiveDate>=HashSet::new();
+        for row_i in source.main_data_table.rowIndices()
+        {
+            let datetimestring= source.main_data_table.getVal(&main_headers::pertinent_headers::scheduled_datetime.getLabel(), &row_i)?;
+            
+            let datetime=match NaiveDateTime::parse_from_str(&datetimestring, "%m/%d/%y %H:%M"){
+                Ok(x)=>x,
+                Err(x)=>{return Err(Box::new(x));}
+            };
+
+            if date_constraints.include(&datetime)
+            {
+                dateset.insert(NaiveDate::from(datetime));
+            }
+        }
+
+        for date in dateset
+        {
+            match salem_weekday_count.entry(date.weekday())
+            {
+                Entry::Occupied(x) => {
+                    let mutable = x.into_mut();
+                    *mutable+=1;
+                },
+                Entry::Vacant(x) => {
+                    x.insert(1);
+                },
+            };
+        }
+    }
+    //Process Salem Data
     for row_i in source.main_data_table.rowIndices()
     {
         let datetimestring= source.main_data_table.getVal(&main_headers::pertinent_headers::scheduled_datetime.getLabel(), &row_i)?;
@@ -190,6 +293,7 @@ impl CoverageTree
 
         if date_constraints.include(&datetime)
         {
+            let denominator = *salem_weekday_count.get(&NaiveDate::from(datetime).weekday()).expect("All weekdays should be populated") as f64;
 
             let location=source.main_data_table.getVal(&main_headers::pertinent_headers::location.getLabel(), &row_i)?;
             let exam_code=source.main_data_table.getVal(&main_headers::pertinent_headers::procedure_code.getLabel(), &row_i)?;
@@ -307,12 +411,12 @@ impl CoverageTree
 
                 WorkUnit {
                     datetime:datetime,
-                    rvu:*rvu,
-                    bvu:*bvu
+                    rvu:*rvu/denominator, //divide by denominator to account for aggregation of many days of data
+                    bvu:*bvu/denominator, //divide by denominator to account for aggregation of many days of data
                 }
             };
 
-            retval.add_work(&coords,work);
+            self.add_work(&coords,work);
         }
     }
     //Add TPC, which doesn't go by number of dates
@@ -376,23 +480,81 @@ impl CoverageTree
                     rvu:rvus_per_business_day*(*weights.get(key).expect("Expected")) as f64,
                     bvu:bvus_per_business_day*(*weights.get(key).expect("Expected")) as f64
                 };
-                retval.add_work(&coords,work);
+                self.add_work(&coords,work);
             }
         }        
     }
 
-    Ok(retval)
+    Ok(())
 
    }
+
+   pub fn add_coverage(&self, manifest:Manifest)->Result<(),Box<dyn std::error::Error>>
+   {
+    for rotation_description in &manifest.rotation_manifest
+    {
+        for responsibility in &rotation_description.responsibilities
+        {
+            for site in responsibility.sites.to_vec()
+            {
+                for subspecialty in responsibility.subspecialties.to_vec()
+                {
+                    for context in responsibility.contexts.to_vec()
+                    {
+                        for modality in responsibility.modalities.to_vec()
+                        {
+                            for weekday in responsibility.days.to_vec()
+                            {
+                                for time_period in responsibility.time_periods.to_vec()
+                                {
+                                    let timespan = parse_time_span(time_period.as_str()).expect("Erroneous timespan in manifest.");
+                                    timespan.start.
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Ok(())
+   }
+
+   pub fn audit(&self)
+   {
+    for (site, subspecialtymap) in &self.map
+    {
+        for(subspecialty, contextmap) in &subspecialtymap.map
+        {
+            for(context, modalitymap) in &contextmap.map
+            {
+                for(modality, weekdaymap) in &modalitymap.map
+                {
+                    for(weekday, coverage_and_workday) in &weekdaymap.map
+                    {
+                        coverage_and_workday.audit_coverage()
+                    }
+                }
+            }
+        }
+    }
+   }
 }
-impl CoordinateMap<String,SubspecialtyMap> for CoverageTree
+impl <'a> CoordinateMap<'a,String,SubspecialtyMap> for CoverageMap
 {
-    fn get_map(&self)->HashMap<String,SubspecialtyMap> {
-        self.map
+    fn get_map(&mut self)->&mut HashMap<String,SubspecialtyMap> {
+        &mut self.map
     }
-    fn get_coordinate(coords:&CoverageCoordinates)->&String {
-        &coords.site
+    fn get_coordinate(coords:&CoverageCoordinates)->String {
+        coords.site.clone()
     }
 }
-impl WorkCoverageMap for CoverageTree{}
-impl ParentCoordinateMap<String,SubspecialtyMap> for CoverageTree{}
+impl WorkCoverageMap for CoverageMap{
+    fn add_work(&mut self,coords:&CoverageCoordinates,work:WorkUnit){
+        self.get_branch(coords).add_work(coords,work);
+    }
+    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit){
+        self.get_branch(coords).add_coverage(coords, coverage);
+    }
+}

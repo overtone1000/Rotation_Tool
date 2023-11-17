@@ -8,8 +8,8 @@ use super::{time_modifiers::{RelativeTime, parse_relative_time}, rotation_error:
 #[derive(Debug, PartialEq)]
 pub struct Timespan
 {
-    start:RelativeTime,
-    end:RelativeTime
+    pub start:RelativeTime,
+    pub end:RelativeTime
 }
 
 impl Serialize for Timespan
