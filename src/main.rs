@@ -71,6 +71,14 @@ fn analyze_rotations()->Result<(), Box<dyn Error>> {
         Err(e)=>{return Err(e);}
     };
     
+    match coverage_tree.add_coverage_from_manifest(manifest)
+    {
+        Ok(x)=>x,
+        Err(e)=>{return Err(e);}
+    };
+
+    coverage_tree.audit();
+
     Ok(())
 }
 

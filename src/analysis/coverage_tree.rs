@@ -4,11 +4,13 @@ use std::collections::{HashMap, hash_map::Entry};
 use std::fmt::Debug;
 
 use std::hash::Hash;
+use std::str::FromStr;
 
 use chrono::{NaiveTime, NaiveDateTime, Datelike, NaiveDate, Duration, Days};
 
 use crate::rotations::manifest::Manifest;
-use crate::rotations::timespan::parse_time_span;
+use crate::rotations::rotation_error::RotationManifestParseError;
+use crate::rotations::timespan::{parse_time_span, midnight};
 use crate::{processed_source::ProcessedSource, globals::{main_headers, SITES, MODALITIES, tpc_headers, business_days}, constraints::ConstraintSet, dates::business_days_per_year, categorization::{buildSalemRVUMap, buildSalemBVUMap}};
 
 use super::source_error::SourceError;
@@ -20,6 +22,13 @@ pub struct CoverageCoordinates
     context:String,
     modality:String,
     weekday:chrono::Weekday
+}
+
+impl Default for CoverageCoordinates
+{
+    fn default() -> Self {
+        Self { site: Default::default(), subspecialty: Default::default(), context: Default::default(), modality: Default::default(), weekday: chrono::Weekday::Sun }
+    }
 }
 
 #[derive(Default,Debug,PartialEq,Eq,PartialOrd,Ord)]
@@ -57,11 +66,10 @@ impl CoverageAndWorkDay
     fn audit_coverage(&mut self)->CovaregeErrors
     {
         let mut retval=CovaregeErrors::default();
-        let midnight=NaiveTime::from_hms_opt(0,0,0).expect("Midnight");
 
         if self.coverages.is_empty()
         {
-            retval.gaps.push((midnight,midnight));
+            retval.gaps.push((midnight(),midnight()));
             return retval;
         }
         
@@ -69,8 +77,8 @@ impl CoverageAndWorkDay
 
         let mut prior=CoverageUnit
         {
-            start:midnight,
-            end:midnight,
+            start:midnight(),
+            end:midnight(),
             rotation:"".to_string()
         };
 
@@ -90,9 +98,9 @@ impl CoverageAndWorkDay
 
         //Check through midnight
         let last = self.coverages.last().expect("Shouldn't be empty!").end;
-        if last != midnight
+        if last != midnight()
         {
-            retval.gaps.push((last,midnight));
+            retval.gaps.push((last,midnight()));
         }
         
         retval
@@ -489,26 +497,45 @@ impl CoverageMap
 
    }
 
-   pub fn add_coverage(&self, manifest:Manifest)->Result<(),Box<dyn std::error::Error>>
+   pub fn add_coverage_from_manifest(&mut self, manifest:Manifest)->Result<(),Box<dyn std::error::Error>>
    {
+    let mut coords:CoverageCoordinates=CoverageCoordinates::default();
     for rotation_description in &manifest.rotation_manifest
     {
         for responsibility in &rotation_description.responsibilities
         {
             for site in responsibility.sites.to_vec()
             {
+                coords.site=site.to_string();
                 for subspecialty in responsibility.subspecialties.to_vec()
                 {
+                    coords.subspecialty=subspecialty.to_string();
                     for context in responsibility.contexts.to_vec()
                     {
+                        coords.context=context.to_string();
                         for modality in responsibility.modalities.to_vec()
                         {
-                            for weekday in responsibility.days.to_vec()
+                            coords.modality=modality.to_string();
+                            for weekday_string in responsibility.days.to_vec()
                             {
+                                let weekday = match chrono::Weekday::from_str(&weekday_string){
+                                    Ok(x) => x,
+                                    Err(_) => return RotationManifestParseError::generate_boxed(0,"".to_string()),
+                                };
                                 for time_period in responsibility.time_periods.to_vec()
                                 {
                                     let timespan = parse_time_span(time_period.as_str()).expect("Erroneous timespan in manifest.");
-                                    timespan.start.
+                                    let periods = timespan.instantiate_periods(weekday);
+                                    for (day,start,end) in periods
+                                    {
+                                        coords.weekday=day;
+                                        let coverage:CoverageUnit=CoverageUnit{
+                                            start:start,
+                                            end:end,
+                                            rotation:rotation_description.rotation.to_string()
+                                        };
+                                        self.add_coverage(&coords, coverage)
+                                    }
                                 }
                             }
                         }
@@ -521,19 +548,19 @@ impl CoverageMap
     Ok(())
    }
 
-   pub fn audit(&self)
+   pub fn audit(&mut self)
    {
-    for (site, subspecialtymap) in &self.map
+    for (_site, subspecialtymap) in self.map.iter_mut()
     {
-        for(subspecialty, contextmap) in &subspecialtymap.map
+        for(_subspecialty, contextmap) in subspecialtymap.map.iter_mut()
         {
-            for(context, modalitymap) in &contextmap.map
+            for(_context, modalitymap) in contextmap.map.iter_mut()
             {
-                for(modality, weekdaymap) in &modalitymap.map
+                for(_modality, weekdaymap) in modalitymap.map.iter_mut()
                 {
-                    for(weekday, coverage_and_workday) in &weekdaymap.map
+                    for(_weekday, coverage_and_workday) in weekdaymap.map.iter_mut()
                     {
-                        coverage_and_workday.audit_coverage()
+                        coverage_and_workday.audit_coverage();
                     }
                 }
             }

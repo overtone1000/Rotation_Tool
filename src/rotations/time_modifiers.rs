@@ -12,8 +12,8 @@ pub const PREVIOUS_DAY:&str="PD";
 pub enum RelativeTime
 {
     PreviousBusinessDay(NaiveTime),
-    CurrentDay(NaiveTime),
     PreviousDay(NaiveTime),
+    CurrentDay(NaiveTime),
 }
 
 const delimiter:&str=" ";
