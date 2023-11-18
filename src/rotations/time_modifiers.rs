@@ -40,8 +40,8 @@ pub fn parse_relative_time(strval:&str)->Result<RelativeTime,RotationManifestPar
     match *members.get(1).expect("Checked")
     {
         PREVIOUS_BUSINESS_DAY=>{Ok(RelativeTime::PreviousBusinessDay(time))},
-        CURRENT_DAY=>{Ok(RelativeTime::PreviousBusinessDay(time))},
-        PREVIOUS_DAY=>{Ok(RelativeTime::PreviousBusinessDay(time))},
+        PREVIOUS_DAY=>{Ok(RelativeTime::PreviousDay(time))},
+        CURRENT_DAY=>{Ok(RelativeTime::CurrentDay(time))},
         _=>{err}
     }
 }

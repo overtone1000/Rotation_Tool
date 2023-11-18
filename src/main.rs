@@ -53,6 +53,19 @@ fn analyze_rotations()->Result<(), Box<dyn Error>> {
         Err(e)=>{return Err(e);}
     };
 
+    println!("Building coverage tree.");
+    let mut date_constraint_set:ConstraintSet<NaiveDateTime>=ConstraintSet::new();
+    date_constraint_set.add(&is_not_holiday);
+    
+    let mut coverage_tree=CoverageMap::default();
+        
+    match coverage_tree.add_coverage_from_manifest(manifest)
+    {
+        Ok(x)=>x,
+        Err(e)=>{return Err(e);}
+    };
+
+
     println!("Processing source.");
     let source= match ProcessedSource::build()
     {
@@ -60,24 +73,18 @@ fn analyze_rotations()->Result<(), Box<dyn Error>> {
         Err(e)=>{return Err(e);}
     };
 
-    println!("Building coverage tree.");
-    let mut date_constraint_set:ConstraintSet<NaiveDateTime>=ConstraintSet::new();
-    date_constraint_set.add(&is_not_holiday);
-    
-    let mut coverage_tree=CoverageMap::default();
+    println!("Adding work to tree.");
     match coverage_tree.add_work_from_source(source, &date_constraint_set)
     {
         Ok(x)=>x,
         Err(e)=>{return Err(e);}
     };
-    
-    match coverage_tree.add_coverage_from_manifest(manifest)
-    {
-        Ok(x)=>x,
-        Err(e)=>{return Err(e);}
-    };
 
-    coverage_tree.audit();
+    let coverage_errors=coverage_tree.audit();
+    for ce in coverage_errors
+    {
+        println!("{ce}");
+    }
 
     Ok(())
 }

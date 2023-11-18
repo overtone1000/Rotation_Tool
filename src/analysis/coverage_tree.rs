@@ -55,17 +55,26 @@ pub struct CoverageAndWorkDay
 }
 
 #[derive(Default)]
-struct CovaregeErrors
+pub struct CoverageErrors
 {
     gaps:Vec<(NaiveTime,NaiveTime)>,
     overlaps:Vec<(String,String)>
 }
 
+impl CoverageErrors
+{
+    pub fn concat(&mut self,other:&mut Self)->()
+    {
+        self.gaps.append(&mut other.gaps);
+        self.overlaps.append(&mut other.overlaps);
+    }
+}
+
 impl CoverageAndWorkDay
 {
-    fn audit_coverage(&mut self)->CovaregeErrors
+    fn audit_coverage(&mut self)->CoverageErrors
     {
-        let mut retval=CovaregeErrors::default();
+        let mut retval=CoverageErrors::default();
 
         if self.coverages.is_empty()
         {
@@ -548,24 +557,43 @@ impl CoverageMap
     Ok(())
    }
 
-   pub fn audit(&mut self)
+   pub fn audit(&mut self)->Vec<String>
    {
-    for (_site, subspecialtymap) in self.map.iter_mut()
+    let mut retval:Vec<String> = Vec::new();
+    for (site, subspecialtymap) in self.map.iter_mut()
     {
-        for(_subspecialty, contextmap) in subspecialtymap.map.iter_mut()
+        for(subspecialty, contextmap) in subspecialtymap.map.iter_mut()
         {
-            for(_context, modalitymap) in contextmap.map.iter_mut()
+            for(context, modalitymap) in contextmap.map.iter_mut()
             {
-                for(_modality, weekdaymap) in modalitymap.map.iter_mut()
+                for(modality, weekdaymap) in modalitymap.map.iter_mut()
                 {
-                    for(_weekday, coverage_and_workday) in weekdaymap.map.iter_mut()
+                    for(weekday, coverage_and_workday) in weekdaymap.map.iter_mut()
                     {
-                        coverage_and_workday.audit_coverage();
+                        let errs=coverage_and_workday.audit_coverage();
+
+                        if errs.gaps.len()>0
+                        {
+                            for gap in errs.gaps
+                            {
+                                retval.push(format!("Coverage gap: {site}, {subspecialty}, {context}, {modality}, {weekday}: {}-{}",
+                                gap.0,gap.1));
+                            }
+                        }
+                        if errs.overlaps.len()>0
+                        {
+                            for overlap in errs.overlaps
+                            {
+                                retval.push(format!("Coverage overlap: {site}, {subspecialty}, {context}, {modality}, {weekday}: {} and {} have overlapping coverage",
+                                overlap.0,overlap.1));
+                            }
+                        }
                     }
                 }
             }
         }
     }
+    retval
    }
 }
 impl <'a> CoordinateMap<'a,String,SubspecialtyMap> for CoverageMap

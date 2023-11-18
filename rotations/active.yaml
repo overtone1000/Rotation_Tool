@@ -9,3 +9,12 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 15:00 PBD-15:00 CD
+- rotation: SRC
+  responsibilities:
+  - sites: All
+    subspecialties: Neuro (Other)
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 08:00 PBD-15:00 CD

@@ -180,7 +180,7 @@ pub fn parse_time_span(strval:&str)->Result<Timespan,RotationManifestParseError>
     };
 
     let ts =Timespan { start: start, stop: end };
-    if(ts.is_valid())
+    if ts.is_valid()
     {
         Ok(ts)
     }
