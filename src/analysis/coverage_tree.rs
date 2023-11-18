@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 use std::collections::{HashMap, hash_map::Entry};
 
+use std::f32::consts::E;
 use std::fmt::Debug;
 
 use std::hash::Hash;
@@ -8,6 +9,7 @@ use std::str::FromStr;
 
 use chrono::{NaiveTime, NaiveDateTime, Datelike, NaiveDate, Duration, Days};
 
+use crate::globals;
 use crate::rotations::manifest::Manifest;
 use crate::rotations::rotation_error::RotationManifestParseError;
 use crate::rotations::timespan::{parse_time_span, midnight};
@@ -76,6 +78,12 @@ impl CoverageAndWorkDay
     {
         let mut retval=CoverageErrors::default();
 
+        //If no work was found, report no errors
+        if self.work.is_empty()
+        {
+            return retval;
+        }
+
         if self.coverages.is_empty()
         {
             retval.gaps.push((midnight(),midnight()));
@@ -84,24 +92,47 @@ impl CoverageAndWorkDay
         
         self.coverages.sort(); //Sorting puts them in order with respect to start time and then end time!
 
-        let mut prior=CoverageUnit
-        {
-            start:midnight(),
-            end:midnight(),
-            rotation:"".to_string()
-        };
+        let mut farthest_rotation = "";
+        let mut farthest_end = midnight();
+        let mut started=false;
 
         for cu in &self.coverages
         {
-            //Check overlap
-            if cu.start<prior.end
+            if started 
             {
-                retval.overlaps.push((prior.rotation.to_string(),cu.rotation.to_string()));
+                //Check overlap
+                if cu.start<farthest_end
+                {
+                    retval.overlaps.push((farthest_rotation.to_string(),cu.rotation.to_string()));
+                }
+
+                //Check gap
+                if cu.start>farthest_end
+                {
+                    retval.gaps.push((farthest_end,cu.start));
+                }
             }
-            //Check gap
-            if(cu.start>prior.end)
+            else {
+                //Check from midnight
+                if cu.start>farthest_end
+                {
+                    retval.gaps.push((farthest_end,cu.start))
+                }
+                started=true;
+            }
+
+            //Adjust prior_end
+            if farthest_end!=midnight()
             {
-                retval.gaps.push((prior.end,cu.start));
+                if cu.end == midnight()
+                {
+                    farthest_end=midnight();
+                }
+            }
+            else if cu.end>farthest_end
+            {
+                farthest_end=cu.end;
+                farthest_rotation=&cu.rotation;
             }
         }
 
@@ -508,30 +539,41 @@ impl CoverageMap
 
    pub fn add_coverage_from_manifest(&mut self, manifest:Manifest)->Result<(),Box<dyn std::error::Error>>
    {
+
+    let all_weekdays_strings:&[&str;7]=&[
+        &chrono::Weekday::Mon.to_string(),
+        &chrono::Weekday::Tue.to_string(),
+        &chrono::Weekday::Wed.to_string(),
+        &chrono::Weekday::Thu.to_string(),
+        &chrono::Weekday::Fri.to_string(),
+        &chrono::Weekday::Sat.to_string(),
+        &chrono::Weekday::Sun.to_string(),
+    ];
+
     let mut coords:CoverageCoordinates=CoverageCoordinates::default();
     for rotation_description in &manifest.rotation_manifest
     {
         for responsibility in &rotation_description.responsibilities
         {
-            for site in responsibility.sites.to_vec()
+            for site in responsibility.sites.to_vec(globals::SITES)
             {
                 coords.site=site.to_string();
-                for subspecialty in responsibility.subspecialties.to_vec()
+                for subspecialty in responsibility.subspecialties.to_vec(globals::SUBSPECIALTIES)
                 {
                     coords.subspecialty=subspecialty.to_string();
-                    for context in responsibility.contexts.to_vec()
+                    for context in responsibility.contexts.to_vec(globals::CONTEXTS)
                     {
                         coords.context=context.to_string();
-                        for modality in responsibility.modalities.to_vec()
+                        for modality in responsibility.modalities.to_vec(globals::MODALITIES)
                         {
                             coords.modality=modality.to_string();
-                            for weekday_string in responsibility.days.to_vec()
+                            for weekday_string in responsibility.days.to_vec(all_weekdays_strings)
                             {
                                 let weekday = match chrono::Weekday::from_str(&weekday_string){
                                     Ok(x) => x,
                                     Err(_) => return RotationManifestParseError::generate_boxed(0,"".to_string()),
                                 };
-                                for time_period in responsibility.time_periods.to_vec()
+                                for time_period in responsibility.time_periods.to_vec(&[])
                                 {
                                     let timespan = parse_time_span(time_period.as_str()).expect("Erroneous timespan in manifest.");
                                     let periods = timespan.instantiate_periods(weekday);

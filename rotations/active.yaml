@@ -8,7 +8,8 @@ rotation_manifest:
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 15:00 PBD-15:00 CD
+    - 15:00 PBD-24:00 PBD
+    - 00:00 CD-15:00 CD
 - rotation: SRC
   responsibilities:
   - sites: All

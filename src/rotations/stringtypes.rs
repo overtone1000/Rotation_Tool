@@ -9,6 +9,7 @@ use super::timespan::Timespan;
 #[serde(untagged)]
 pub enum StringTypes
 {
+    All(AllType),
     SlashSeparatedStringVec(SlashSeparatedStringVec),
     Array(Vec<String>)
 }
@@ -20,17 +21,74 @@ impl StringTypes
         StringTypes::SlashSeparatedStringVec(SlashSeparatedStringVec::new(val))
     }
 
-    pub fn to_vec(&self)->&Vec<String>
+    pub fn to_vec(&self, all_case:&[&str])->Vec<String>
     {
         match self
         {
-            StringTypes::SlashSeparatedStringVec(x) => &x.values,
-            StringTypes::Array(x) => x,
+            StringTypes::All(_) => {
+                let mut i:Vec<String> =Vec::new();
+                for str in all_case
+                {
+                    i.push(str.to_string());
+                };
+                i
+            },
+            StringTypes::SlashSeparatedStringVec(x) => x.values.to_vec(),
+            StringTypes::Array(x) => x.to_vec(),
         }
     }
 }
 
 const delimiter:&str="/";
+
+const all:&str="All";
+
+#[derive(Debug,PartialEq)]
+pub struct AllType
+{}
+
+impl Serialize for AllType
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer {
+            serializer.serialize_str(all)
+    }
+}
+
+struct AllTypeVisitor;
+impl<'de> Visitor<'de> for AllTypeVisitor {
+    type Value = AllType;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        let str=format!("Just the word {}",all);
+        formatter.write_str(&str)
+    }
+
+    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+    where
+        E: de::Error,
+    {      
+        if value==all
+        {  
+            Ok(
+                AllType{}
+            )
+        }
+        else {
+            Err(E::custom("Not an all"))
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for AllType
+{
+    fn deserialize<D>(deserializer:D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de> {
+        Ok(deserializer.deserialize_str(AllTypeVisitor)?)
+    }
+}
 
 #[derive(Debug, PartialEq)]
 pub struct SlashSeparatedStringVec
@@ -75,8 +133,8 @@ impl Serialize for SlashSeparatedStringVec
     }
 }
 
-struct StringStringVisitor;
-impl<'de> Visitor<'de> for StringStringVisitor {
+struct SlashSeparateddStringVisitor;
+impl<'de> Visitor<'de> for SlashSeparateddStringVisitor {
     type Value = SlashSeparatedStringVec;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
@@ -99,6 +157,6 @@ impl<'de> Deserialize<'de> for SlashSeparatedStringVec
     fn deserialize<D>(deserializer:D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de> {
-        Ok(deserializer.deserialize_str(StringStringVisitor)?)
+        Ok(deserializer.deserialize_str(SlashSeparateddStringVisitor)?)
     }
 }

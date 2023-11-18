@@ -68,30 +68,35 @@ impl Timespan
 {
     fn is_valid(&self)->bool
     {
+        let check = |start:NaiveTime,startnextmidnight:bool,end:NaiveTime,endnextmidnight:bool|->bool
+        {
+            (endnextmidnight && !startnextmidnight) || start<end
+        };
+
         match self.start
         {
-            RelativeTime::PreviousBusinessDay(start) => 
+            RelativeTime::PreviousBusinessDay(start, startnextmidnight) => 
             {
                 match self.stop{
-                    RelativeTime::PreviousBusinessDay(end) => start<end,
-                    RelativeTime::PreviousDay(end) => start<end,
-                    RelativeTime::CurrentDay(_) => true,
+                    RelativeTime::PreviousBusinessDay(end, endnextmidnight) => check(start,startnextmidnight,end,endnextmidnight),
+                    RelativeTime::PreviousDay(end, endnextmidnight) => check(start,startnextmidnight,end,endnextmidnight),
+                    RelativeTime::CurrentDay(_, endnextmidnight) => true,
                 }
             },
-            RelativeTime::PreviousDay(start) => 
+            RelativeTime::PreviousDay(start, startnextmidnight) => 
             {
                 match self.stop{
-                    RelativeTime::PreviousBusinessDay(end) => start<end,
-                    RelativeTime::PreviousDay(end) => start<end,
-                    RelativeTime::CurrentDay(_) => true,
+                    RelativeTime::PreviousBusinessDay(end,endnextmidnight) => check(start,startnextmidnight,end,endnextmidnight),
+                    RelativeTime::PreviousDay(end,endnextmidnight) => check(start,startnextmidnight,end,endnextmidnight),
+                    RelativeTime::CurrentDay(_,endnextmidnight) => true,
                 }
             },
-            RelativeTime::CurrentDay(start) => 
+            RelativeTime::CurrentDay(start, startnextmidnight) => 
             {
                 match self.stop{
-                    RelativeTime::PreviousBusinessDay(_) => false,
-                    RelativeTime::PreviousDay(_) => false,
-                    RelativeTime::CurrentDay(end) => start<end,
+                    RelativeTime::PreviousBusinessDay(_,_) => false,
+                    RelativeTime::PreviousDay(_,_) => false,
+                    RelativeTime::CurrentDay(end,endnextmidnight) => check(start,startnextmidnight,end,endnextmidnight),
                 }
             },
         }
@@ -100,40 +105,46 @@ impl Timespan
     {
         let mut retval :Vec<(chrono::Weekday,NaiveTime,NaiveTime)>=Vec::new();
 
-        let startday:chrono::Weekday;
-        let stopday:chrono::Weekday;
+        let mut startday:chrono::Weekday;
+        let mut stopday:chrono::Weekday;
         let start:NaiveTime;
         let stop:NaiveTime;
 
         match self.start
         {
-            RelativeTime::PreviousBusinessDay(x) => {
+            RelativeTime::PreviousBusinessDay(x,startnextmidnight) => {
                 startday=day;
                 start=x;
+                if startnextmidnight {startday=day.succ();}
             },
-            RelativeTime::PreviousDay(x) => {
+            RelativeTime::PreviousDay(x,startnextmidnight) => {
                 startday=day.pred();
                 start=x;
+                if startnextmidnight {startday=day.succ();}
             },
-            RelativeTime::CurrentDay(x) => {
+            RelativeTime::CurrentDay(x,startnextmidnight) => {
                 startday=get_previous_business_day(day);
                 start=x;
+                if startnextmidnight {startday=day.succ();}
             },
         };
 
         match self.stop
         {
-            RelativeTime::PreviousBusinessDay(x) => {
+            RelativeTime::PreviousBusinessDay(x,endnextmidnight) => {
                 stopday=day;
                 stop=x;
+                if endnextmidnight {stopday=day.succ();}
             },
-            RelativeTime::PreviousDay(x) => {
+            RelativeTime::PreviousDay(x,endnextmidnight) => {
                 stopday=day.pred();
                 stop=x;
+                if endnextmidnight {stopday=day.succ();}
             },
-            RelativeTime::CurrentDay(x) => {
+            RelativeTime::CurrentDay(x,endnextmidnight) => {
                 stopday=get_previous_business_day(day);
                 stop=x;
+                if endnextmidnight {stopday=day.succ();}
             },
         };
 
