@@ -1,8 +1,10 @@
-use std::{collections::HashMap, error::Error};
+use std::{collections::HashMap, error::Error, fs::File, io::{BufWriter, BufReader}};
+
+use serde::{Deserialize, Serialize};
 
 use crate::{table::{Table, self}, categorization::{exam_categories::exam_category, get_categories_list, get_locations_list, backup}, globals::file_names};
 
-
+#[derive(Serialize,Deserialize)]
 pub struct ProcessedSource
 {
     pub main_data_table:Table,
@@ -96,6 +98,26 @@ impl ProcessedSource
             exam_to_subspecialty_map:exam_to_subspecialty_map,
             location_to_context_map:location_to_context_map,
         })
+    }
+
+    pub fn save_to_cache(&self,filename:&str)->Result<(),Box<dyn Error>>
+    {
+        println!("Saving processed source to cache.");
+        let cachefile=File::create(filename)?;
+        let bufwriter = BufWriter::new(cachefile);
+        let mut serializer = serde_json::Serializer::new(bufwriter);
+
+        Ok(self.serialize(&mut serializer)?)
+    }
+
+    pub fn load_from_cache(filename:&str)->Result<ProcessedSource,Box<dyn Error>>
+    {
+        println!("Reading processed source from cache.");
+        let cachefile=File::open(filename)?;
+        let bufreader = BufReader::new(cachefile);
+        let mut deserializer = serde_json::Deserializer::from_reader(bufreader);
+        
+        Ok(ProcessedSource::deserialize(&mut deserializer)?)
     }
 
     pub fn checkBVUSource(&mut self)

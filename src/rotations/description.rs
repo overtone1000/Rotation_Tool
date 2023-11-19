@@ -6,5 +6,5 @@ use super::responsibility::RotationResponsibility;
 pub struct RotationDescription
 {
     pub(crate) rotation:String,
-    pub(crate) responsibilities:Vec<RotationResponsibility>
+    pub(crate) responsibilities:Vec<RotationResponsibility>,
 }

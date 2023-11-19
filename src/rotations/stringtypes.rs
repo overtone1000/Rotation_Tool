@@ -37,6 +37,33 @@ impl StringTypes
             StringTypes::Array(x) => x.to_vec(),
         }
     }
+
+    pub fn validate(&self, allowed_members:&[&str])->Result<(),Vec<String>>
+    {
+        let vec = match self
+        {
+            StringTypes::All(_) => {return Ok(());},
+            StringTypes::SlashSeparatedStringVec(x) => x.values.to_vec(),
+            StringTypes::Array(x) => x.to_vec(),
+        };
+
+        let mut invalids:Vec<String>=Vec::new();
+
+        for str in vec
+        {
+            if !allowed_members.contains(&str.as_str()) {
+                invalids.push(str);
+            }
+        }
+
+        if invalids.len()>0
+        {
+            Err(invalids)
+        }
+        else {
+            Ok(())
+        }
+    }
 }
 
 const delimiter:&str="/";

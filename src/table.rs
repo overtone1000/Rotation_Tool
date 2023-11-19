@@ -6,6 +6,10 @@ use std::io::Error;
 use std::io::ErrorKind;
 use std::collections::HashMap;
 
+use serde::Deserialize;
+use serde::Serialize;
+
+#[derive(Serialize,Deserialize)]
 pub struct Table
 {
     headers:Vec<String>,

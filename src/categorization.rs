@@ -8,6 +8,8 @@ use crate::{table, globals::{main_headers, bvu_headers, file_names}};
 pub mod exam_categories {
     use std::cmp::Ordering;
 
+    use serde::{Serialize, Deserialize};
+
     pub(crate) enum pertinent_headers {
         procedure_code,
         exam,
@@ -27,6 +29,7 @@ pub mod exam_categories {
         }
     }
     
+    #[derive(Serialize,Deserialize)]
     pub struct exam_category {
         pub procedure_code:String,
         pub exam:String,

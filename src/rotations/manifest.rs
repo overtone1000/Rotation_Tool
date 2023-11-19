@@ -30,7 +30,32 @@ impl Manifest
         let rdr = fs::File::open(filename)?;
         let retval:Manifest=serde_yaml::from_reader(rdr)?;
 
-        Ok(retval)
+        let mut noerrs = true;
+        for desc in &retval.rotation_manifest
+        {
+            for resp in &desc.responsibilities
+            {
+                match resp.validate()
+                {
+                    Err(x) => {
+                        noerrs=false;
+                        for e in x
+                        {
+                            eprintln!("Error in {} rotation. {}",desc.rotation,e);
+                        }
+                    },
+                    _=>()
+                }
+            }
+        }
+
+        if noerrs
+        {
+            Ok(retval)
+        }
+        else {
+            Err("Malformed manifest".into())
+        }
     }
 
     pub fn create_example()->Result<(), Box<dyn Error>>
@@ -58,7 +83,8 @@ impl Manifest
                                 &weekdays::weekday_to_str(chrono::Weekday::Wed)+"/"+
                                 &weekdays::weekday_to_str(chrono::Weekday::Thu)+"/"+
                                 &weekdays::weekday_to_str(chrono::Weekday::Fri))
-                            )
+                            ),
+                        comments: Some(vec!("Comments can go here.".to_string(),"Comments are an array.".to_string(),"But this section can be omitted entirely.".to_string()))
                     },
                     RotationResponsibility{
                         sites:StringTypes::Array(vec!["Site A".to_string(),"Site B".to_string()]),
@@ -70,9 +96,10 @@ impl Manifest
                             weekdays::weekday_to_str(chrono::Weekday::Sat),
                             weekdays::weekday_to_str(chrono::Weekday::Sun)
                             ]
-                        )
+                        ),
+                        comments: None
                     }
-                ]
+                ],
             }
         );
 

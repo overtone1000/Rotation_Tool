@@ -13,7 +13,7 @@ use crate::rotations::manifest::Manifest;
 use crate::rotations::rotation_error::RotationManifestParseError;
 use crate::rotations::time_modifiers::{this_midnight, TimeSinceMidnight, next_midnight};
 use crate::rotations::timespan::{parse_time_span};
-use crate::{processed_source::ProcessedSource, globals::{main_headers, SITES, MODALITIES, tpc_headers, business_days}, constraints::ConstraintSet, dates::business_days_per_year, categorization::{buildSalemRVUMap, buildSalemBVUMap}};
+use crate::{processed_source::ProcessedSource, globals::{main_headers, SITES, MODALITIES, tpc_headers, BUSINESS_DAYS}, constraints::ConstraintSet, dates::business_days_per_year, categorization::{buildSalemRVUMap, buildSalemBVUMap}};
 
 use super::source_error::SourceError;
 
@@ -94,40 +94,35 @@ pub struct CoverageAndWorkDay
     work:Vec<WorkUnit>
 }
 
-#[derive(Default)]
-pub struct CoverageErrors
+#[derive(Default,Debug)]
+pub struct MalformedCoverage
 {
     gaps:Vec<(TimeSinceMidnight,TimeSinceMidnight)>,
-    overlaps:Vec<(String,String)>
+    overlaps:Vec<(String,String)>,
 }
 
-impl CoverageErrors
+pub enum CoverageError
 {
-    pub fn concat(&mut self,other:&mut Self)->()
-    {
-        self.gaps.append(&mut other.gaps);
-        self.overlaps.append(&mut other.overlaps);
-    }
+    NoWork,
+    NoCoverage,
+    MalformedCoverage(MalformedCoverage)
 }
 
 impl CoverageAndWorkDay
 {
-    fn audit_coverage(&mut self)->CoverageErrors
+    fn audit_coverage(&mut self)->CoverageError
     {
-        let mut retval=CoverageErrors::default();
-
-        //If no work was found, report no errors
         if self.work.is_empty()
         {
-            return retval;
+            return CoverageError::NoWork;
         }
-
         if self.coverages.is_empty()
         {
-            retval.gaps.push((this_midnight,this_midnight));
-            return retval;
+            return CoverageError::NoCoverage;
         }
         
+        let mut retval = MalformedCoverage::default();
+
         self.coverages.sort(); //Sorting puts them in order with respect to start time and then end time!
 
         let mut farthest_rotation = "";
@@ -173,8 +168,8 @@ impl CoverageAndWorkDay
         {
             retval.gaps.push((last,next_midnight));
         }
-        
-        retval
+
+        return CoverageError::MalformedCoverage(retval);
     }
 }
 
@@ -535,7 +530,7 @@ impl CoverageMap
             Some(val)=>val.to_owned()
         };
 
-        for weekday in business_days
+        for weekday in BUSINESS_DAYS
         {
             let coords=CoverageCoordinates{
                 site: crate::globals::TPC.to_string(),
@@ -646,22 +641,33 @@ impl CoverageMap
                     {
                         let errs=coverage_and_workday.audit_coverage();
 
-                        if errs.gaps.len()>0
-                        {
-                            for gap in errs.gaps
-                            {
-                                retval.push(format!("Coverage gap: {site}, {subspecialty}, {context}, {modality}, {weekday}: {}-{}",
-                                gap.0,gap.1));
-                            }
-                        }
-                        if errs.overlaps.len()>0
-                        {
-                            for overlap in errs.overlaps
-                            {
-                                retval.push(format!("Coverage overlap: {site}, {subspecialty}, {context}, {modality}, {weekday}: {} and {} have overlapping coverage",
-                                overlap.0,overlap.1));
-                            }
-                        }
+                        match errs{
+                            CoverageError::NoWork => {
+                                //Too verbose, skip these for now                                
+                                //retval.push(format!("No work for: {site}, {subspecialty}, {context}, {modality}, {weekday}"));
+                            },
+                            CoverageError::NoCoverage => {
+                                retval.push(format!("No coverage for: {site}, {subspecialty}, {context}, {modality}, {weekday}"));
+                            },
+                            CoverageError::MalformedCoverage(errs) => {
+                                if errs.gaps.len()>0
+                                {
+                                    for gap in errs.gaps
+                                    {
+                                        retval.push(format!("Coverage gap: {site}, {subspecialty}, {context}, {modality}, {weekday}: {}-{}",
+                                        gap.0,gap.1));
+                                    }
+                                }
+                                if errs.overlaps.len()>0
+                                {
+                                    for overlap in errs.overlaps
+                                    {
+                                        retval.push(format!("Coverage overlap: {site}, {subspecialty}, {context}, {modality}, {weekday}: {} and {} have overlapping coverage",
+                                        overlap.0,overlap.1));
+                                    }
+                                }
+                            },
+                        };
                     }
                 }
             }

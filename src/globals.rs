@@ -10,6 +10,7 @@ pub mod file_names
     pub(crate) const OUT_FILE:&str = "./output/Categorized Weekday RVU Map";
     pub(crate) const BVU_OUT_FILE:&str = "./output/Categorized Weekday BVU Map";
     pub(crate) const EXAMPLE_ROTATION_DESCRIPTIONS:&str = "./rotations/Example.yml";
+    pub(crate) const SOURCE_CACHE:&str = "./cache/ProcessedSource.yml";
 }
 
 pub mod main_headers {
@@ -136,7 +137,8 @@ pub const CONTEXTS:&[&str]=
 &[
     Inpatient,
     Outpatient,
-    ED
+    ED,
+    "Wet Read"
 ];
 
 //modalities
@@ -206,7 +208,7 @@ pub fn getLocationSiteMapping(location:&String)->Option<String>
     }
 }
 
-pub const business_days:&[&chrono::Weekday] = &[
+pub const BUSINESS_DAYS:&[&chrono::Weekday] = &[
     &chrono::Weekday::Mon,
     &chrono::Weekday::Tue,
     &chrono::Weekday::Wed,
@@ -214,7 +216,7 @@ pub const business_days:&[&chrono::Weekday] = &[
     &chrono::Weekday::Fri
 ];
 
-pub const all_weekdays:&[&chrono::Weekday] = &[
+pub const ALL_DAYS:&[&chrono::Weekday] = &[
     &chrono::Weekday::Mon,
     &chrono::Weekday::Tue,
     &chrono::Weekday::Wed,

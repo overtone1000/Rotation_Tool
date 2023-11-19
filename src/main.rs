@@ -9,7 +9,7 @@ use rvu_map::{RVUMap, MapCoords, buildMaps};
 use table::Table;
 use explain::*;
 
-use crate::{globals::file_names, error::RotationToolError, categorization::{buildSalemRVUMap, get_categories_list, get_locations_list, backup, buildSalemBVUMap}, time::{getTimeRowNormalDistWeights, getNormalDistWeights}, analysis::coverage_tree::{CoverageMap, CoordinateMap, CoverageCoordinates}};
+use crate::{globals::file_names::{self, SOURCE_CACHE}, error::RotationToolError, categorization::{buildSalemRVUMap, get_categories_list, get_locations_list, backup, buildSalemBVUMap}, time::{getTimeRowNormalDistWeights, getNormalDistWeights}, analysis::coverage_tree::{CoverageMap, CoordinateMap, CoverageCoordinates}};
 
 mod globals;
 mod error;
@@ -58,12 +58,9 @@ fn analyze_rotations()->Result<(), Box<dyn Error>> {
     date_constraint_set.add(&is_not_holiday);
     
     let mut coverage_tree=CoverageMap::default();
-        
-    match coverage_tree.add_coverage_from_manifest(manifest)
-    {
-        Ok(x)=>x,
-        Err(e)=>{return Err(e);}
-    };
+
+    println!("Adding coverage.")   ;
+    coverage_tree.add_coverage_from_manifest(manifest)?;
 
     /*
     let test = coverage_tree.get_map().get_mut("SH").expect("Testing")
@@ -72,19 +69,11 @@ fn analyze_rotations()->Result<(), Box<dyn Error>> {
         .get_map().get_mut("MR").expect("Testing");
     */  
 
-    println!("Processing source.");
-    let source= match ProcessedSource::build()
-    {
-        Ok(x)=>x,
-        Err(e)=>{return Err(e);}
-    };
+    let source= ProcessedSource::load_from_cache(SOURCE_CACHE)?;
+    println!("Finished loading source from cache.");
 
     println!("Adding work to tree.");
-    match coverage_tree.add_work_from_source(source, &date_constraint_set)
-    {
-        Ok(x)=>x,
-        Err(e)=>{return Err(e);}
-    };
+    coverage_tree.add_work_from_source(source, &date_constraint_set)?;
 
     let coverage_errors=coverage_tree.audit();
     for ce in coverage_errors
@@ -95,9 +84,24 @@ fn analyze_rotations()->Result<(), Box<dyn Error>> {
     Ok(())
 }
 
+fn cache_source()->Result<(), Box<dyn Error>> {
+    println!("Processing source.");
+    let source= match ProcessedSource::build()
+    {
+        Ok(x)=>x,
+        Err(e)=>{return Err(e);}
+    };
+
+    let retval = source.save_to_cache(SOURCE_CACHE);
+    println!("Finished caching source.");
+    retval
+}
+
 
 fn main()->Result<(), Box<dyn Error>> {
     println!("Starting.");
+
+    //cache_source()?;
 
     let retval=analyze_rotations();
     
