@@ -1,18 +1,18 @@
 use std::collections::HashSet;
 use std::collections::{HashMap, hash_map::Entry};
 
-use std::f32::consts::E;
 use std::fmt::Debug;
 
 use std::hash::Hash;
 use std::str::FromStr;
 
-use chrono::{NaiveTime, NaiveDateTime, Datelike, NaiveDate, Duration, Days};
+use chrono::{NaiveDateTime, Datelike, NaiveDate, Duration};
 
 use crate::globals;
 use crate::rotations::manifest::Manifest;
 use crate::rotations::rotation_error::RotationManifestParseError;
-use crate::rotations::timespan::{parse_time_span, midnight};
+use crate::rotations::time_modifiers::{this_midnight, TimeSinceMidnight, next_midnight};
+use crate::rotations::timespan::{parse_time_span};
 use crate::{processed_source::ProcessedSource, globals::{main_headers, SITES, MODALITIES, tpc_headers, business_days}, constraints::ConstraintSet, dates::business_days_per_year, categorization::{buildSalemRVUMap, buildSalemBVUMap}};
 
 use super::source_error::SourceError;
@@ -33,12 +33,50 @@ impl Default for CoverageCoordinates
     }
 }
 
-#[derive(Default,Debug,PartialEq,Eq,PartialOrd,Ord)]
+#[derive(Debug,PartialEq,Eq)]
 pub struct CoverageUnit
 {
-    start:NaiveTime, //Make first so it's sorted on start time first!
-    end:NaiveTime, //Make second so it's sorted on end time next!
-    rotation:String
+    start:TimeSinceMidnight, //Make first so it's sorted on start time first!
+    end:TimeSinceMidnight, //Make second so it's sorted on end time next!
+    rotation:String,
+    day:chrono::Weekday
+}
+
+impl Default for CoverageUnit
+{
+    fn default() -> Self {
+        Self { start: Default::default(), end: Default::default(), rotation: Default::default(), day: chrono::Weekday::Sun}
+    }
+}
+
+impl PartialOrd for CoverageUnit
+{
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        match self.start.partial_cmp(&other.start) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        match self.end.partial_cmp(&other.end) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        match self.rotation.partial_cmp(&other.rotation) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        self.day.num_days_from_sunday().partial_cmp(&other.day.num_days_from_sunday())
+    }
+}
+
+impl Ord for CoverageUnit
+{
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        match self.partial_cmp(other)
+        {
+            Some(x)=>x,
+            None=>core::cmp::Ordering::Equal
+        }
+    }
 }
 
 #[derive(Default,Debug)]
@@ -59,7 +97,7 @@ pub struct CoverageAndWorkDay
 #[derive(Default)]
 pub struct CoverageErrors
 {
-    gaps:Vec<(NaiveTime,NaiveTime)>,
+    gaps:Vec<(TimeSinceMidnight,TimeSinceMidnight)>,
     overlaps:Vec<(String,String)>
 }
 
@@ -86,14 +124,14 @@ impl CoverageAndWorkDay
 
         if self.coverages.is_empty()
         {
-            retval.gaps.push((midnight(),midnight()));
+            retval.gaps.push((this_midnight,this_midnight));
             return retval;
         }
         
         self.coverages.sort(); //Sorting puts them in order with respect to start time and then end time!
 
         let mut farthest_rotation = "";
-        let mut farthest_end = midnight();
+        let mut farthest_end = this_midnight;
         let mut started=false;
 
         for cu in &self.coverages
@@ -122,14 +160,7 @@ impl CoverageAndWorkDay
             }
 
             //Adjust prior_end
-            if farthest_end!=midnight()
-            {
-                if cu.end == midnight()
-                {
-                    farthest_end=midnight();
-                }
-            }
-            else if cu.end>farthest_end
+            if cu.end>farthest_end
             {
                 farthest_end=cu.end;
                 farthest_rotation=&cu.rotation;
@@ -138,9 +169,9 @@ impl CoverageAndWorkDay
 
         //Check through midnight
         let last = self.coverages.last().expect("Shouldn't be empty!").end;
-        if last != midnight()
+        if last != next_midnight
         {
-            retval.gaps.push((last,midnight()));
+            retval.gaps.push((last,next_midnight));
         }
         
         retval
@@ -583,7 +614,8 @@ impl CoverageMap
                                         let coverage:CoverageUnit=CoverageUnit{
                                             start:start,
                                             end:end,
-                                            rotation:rotation_description.rotation.to_string()
+                                            rotation:rotation_description.rotation.to_string(),
+                                            day:weekday //This has to be weekday of the shift, not weekday of the work!
                                         };
                                         self.add_coverage(&coords, coverage)
                                     }

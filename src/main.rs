@@ -9,7 +9,7 @@ use rvu_map::{RVUMap, MapCoords, buildMaps};
 use table::Table;
 use explain::*;
 
-use crate::{globals::file_names, error::RotationToolError, categorization::{buildSalemRVUMap, get_categories_list, get_locations_list, backup, buildSalemBVUMap}, time::{getTimeRowNormalDistWeights, getNormalDistWeights}, analysis::coverage_tree::CoverageMap};
+use crate::{globals::file_names, error::RotationToolError, categorization::{buildSalemRVUMap, get_categories_list, get_locations_list, backup, buildSalemBVUMap}, time::{getTimeRowNormalDistWeights, getNormalDistWeights}, analysis::coverage_tree::{CoverageMap, CoordinateMap, CoverageCoordinates}};
 
 mod globals;
 mod error;
@@ -65,6 +65,12 @@ fn analyze_rotations()->Result<(), Box<dyn Error>> {
         Err(e)=>{return Err(e);}
     };
 
+    /*
+    let test = coverage_tree.get_map().get_mut("SH").expect("Testing")
+        .get_map().get_mut("Neuro (Other)").expect("Testing")
+        .get_map().get_mut("ED").expect("Testing")
+        .get_map().get_mut("MR").expect("Testing");
+    */  
 
     println!("Processing source.");
     let source= match ProcessedSource::build()

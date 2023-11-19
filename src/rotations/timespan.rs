@@ -1,11 +1,9 @@
-use std::{fmt::{self, Display}, f32::consts::E};
+use std::{fmt::{self, Display}};
 
-use chrono::NaiveTime;
+use chrono::{NaiveTime, Duration};
 use serde::{Serialize, de::{Visitor, self}, Deserialize};
 
-use super::{time_modifiers::{RelativeTime, parse_relative_time}, rotation_error::RotationManifestParseError};
-
-pub fn midnight()->NaiveTime{NaiveTime::from_hms_opt(0,0,0).expect("Midnight")}
+use super::{time_modifiers::{RelativeTime, parse_relative_time, TimeSinceMidnight, next_midnight, this_midnight}, rotation_error::RotationManifestParseError};
 
 #[derive(Debug, PartialEq)]
 pub struct Timespan
@@ -17,7 +15,7 @@ pub struct Timespan
 impl Display for Timespan
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}-{}", self.start.to_string(), self.stop.to_string())
+        write!(f, "{}{}{}", self.start.to_string(), DELIMITER, self.stop.to_string())
     }
 }
 
@@ -28,26 +26,15 @@ impl Serialize for Timespan
         S: serde::Serializer {
         serializer.serialize_str(&(
             self.start.to_string()
-            +delimiter+
+            +DELIMITER+
             &self.stop.to_string()))
     }
 }
 
-const delimiter:&str="-";
+const DELIMITER:&str="-";
 
 
-fn get_previous_business_day(day:chrono::Weekday)->chrono::Weekday{
-    match day
-    {
-        chrono::Weekday::Mon => chrono::Weekday::Fri,
-        chrono::Weekday::Tue => chrono::Weekday::Mon,
-        chrono::Weekday::Wed => chrono::Weekday::Tue,
-        chrono::Weekday::Thu => chrono::Weekday::Wed,
-        chrono::Weekday::Fri => chrono::Weekday::Thu,
-        chrono::Weekday::Sat => chrono::Weekday::Fri,
-        chrono::Weekday::Sun => chrono::Weekday::Fri,
-    }
-}
+
 
 fn get_intervening_days(start:chrono::Weekday, end:chrono::Weekday)->Vec<chrono::Weekday>{
     let mut retval:Vec<chrono::Weekday>=Vec::new();
@@ -66,87 +53,14 @@ fn get_intervening_days(start:chrono::Weekday, end:chrono::Weekday)->Vec<chrono:
 
 impl Timespan
 {
-    fn is_valid(&self)->bool
+    pub fn instantiate_periods(&self, day:chrono::Weekday)->Vec<(chrono::Weekday,TimeSinceMidnight,TimeSinceMidnight)>
     {
-        let check = |start:NaiveTime,startnextmidnight:bool,end:NaiveTime,endnextmidnight:bool|->bool
-        {
-            (endnextmidnight && !startnextmidnight) || start<end
-        };
+        let mut retval :Vec<(chrono::Weekday,TimeSinceMidnight,TimeSinceMidnight)>=Vec::new();
 
-        match self.start
-        {
-            RelativeTime::PreviousBusinessDay(start, startnextmidnight) => 
-            {
-                match self.stop{
-                    RelativeTime::PreviousBusinessDay(end, endnextmidnight) => check(start,startnextmidnight,end,endnextmidnight),
-                    RelativeTime::PreviousDay(end, endnextmidnight) => check(start,startnextmidnight,end,endnextmidnight),
-                    RelativeTime::CurrentDay(_, endnextmidnight) => true,
-                }
-            },
-            RelativeTime::PreviousDay(start, startnextmidnight) => 
-            {
-                match self.stop{
-                    RelativeTime::PreviousBusinessDay(end,endnextmidnight) => check(start,startnextmidnight,end,endnextmidnight),
-                    RelativeTime::PreviousDay(end,endnextmidnight) => check(start,startnextmidnight,end,endnextmidnight),
-                    RelativeTime::CurrentDay(_,endnextmidnight) => true,
-                }
-            },
-            RelativeTime::CurrentDay(start, startnextmidnight) => 
-            {
-                match self.stop{
-                    RelativeTime::PreviousBusinessDay(_,_) => false,
-                    RelativeTime::PreviousDay(_,_) => false,
-                    RelativeTime::CurrentDay(end,endnextmidnight) => check(start,startnextmidnight,end,endnextmidnight),
-                }
-            },
-        }
-    }
-    pub fn instantiate_periods(&self, day:chrono::Weekday)->Vec<(chrono::Weekday,NaiveTime,NaiveTime)>
-    {
-        let mut retval :Vec<(chrono::Weekday,NaiveTime,NaiveTime)>=Vec::new();
-
-        let mut startday:chrono::Weekday;
-        let mut stopday:chrono::Weekday;
-        let start:NaiveTime;
-        let stop:NaiveTime;
-
-        match self.start
-        {
-            RelativeTime::PreviousBusinessDay(x,startnextmidnight) => {
-                startday=day;
-                start=x;
-                if startnextmidnight {startday=day.succ();}
-            },
-            RelativeTime::PreviousDay(x,startnextmidnight) => {
-                startday=day.pred();
-                start=x;
-                if startnextmidnight {startday=day.succ();}
-            },
-            RelativeTime::CurrentDay(x,startnextmidnight) => {
-                startday=get_previous_business_day(day);
-                start=x;
-                if startnextmidnight {startday=day.succ();}
-            },
-        };
-
-        match self.stop
-        {
-            RelativeTime::PreviousBusinessDay(x,endnextmidnight) => {
-                stopday=day;
-                stop=x;
-                if endnextmidnight {stopday=day.succ();}
-            },
-            RelativeTime::PreviousDay(x,endnextmidnight) => {
-                stopday=day.pred();
-                stop=x;
-                if endnextmidnight {stopday=day.succ();}
-            },
-            RelativeTime::CurrentDay(x,endnextmidnight) => {
-                stopday=get_previous_business_day(day);
-                stop=x;
-                if endnextmidnight {stopday=day.succ();}
-            },
-        };
+        let mut startday=self.start.get_day(day);
+        let mut stopday=self.stop.get_day(day);
+        let start=*self.start.get_time();
+        let stop=*self.stop.get_time();
 
         if startday==stopday
         {
@@ -154,12 +68,12 @@ impl Timespan
         }
         else
         {
-            retval.push((startday,start,midnight()));
+            retval.push((startday,start,next_midnight));
             for day in get_intervening_days(startday,stopday)
             {
-                retval.push((day,midnight(),midnight()));
+                retval.push((day,this_midnight,next_midnight));
             }
-            retval.push((stopday,midnight(),stop));    
+            retval.push((stopday,this_midnight,stop));    
         }
 
         retval
@@ -170,7 +84,7 @@ pub fn parse_time_span(strval:&str)->Result<Timespan,RotationManifestParseError>
 {
     let err=RotationManifestParseError::generate(0,format!("Malformed relative time {}",strval));
 
-    let spl=strval.split(delimiter);
+    let spl=strval.split(DELIMITER);
     let mut members = Vec::new();
     for item in spl
     {
@@ -182,22 +96,20 @@ pub fn parse_time_span(strval:&str)->Result<Timespan,RotationManifestParseError>
     let start=match parse_relative_time(members.get(0).expect("Checked"))
     {
         Ok(x)=>x,
-        Err(e)=>{return Err(e);}
+        Err(e)=>{
+            return Err(e);
+        }
     };
     let end = match parse_relative_time(members.get(1).expect("Checked"))
     {
         Ok(x)=>x,
-        Err(e)=>{return Err(e);}
+        Err(e)=>{
+            return Err(e);
+        }
     };
 
     let ts =Timespan { start: start, stop: end };
-    if ts.is_valid()
-    {
-        Ok(ts)
-    }
-    else {
-        RotationManifestParseError::generate(0, format!("Invalid timespan {}",ts))
-    }
+    Ok(ts)
 }
 
 struct TimespanVisitor;
