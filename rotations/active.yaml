@@ -58,6 +58,7 @@ rotation_manifest:
   - Read at least 7 body MR per day, but do not leave more than 5 for the next day
 - rotation: WVH
   responsibilities:
+    #Outpatient general work Tue-Fri from previous day 3 pm through current day 3 pm
   - sites: WVH
     subspecialties: General
     contexts: Outpatient
@@ -65,6 +66,7 @@ rotation_manifest:
     days: Tue/Wed/Thu/Fri
     time_periods:
     - 15:00 PBD-15:00 CD
+    #Outpatient general work Mon through current day 3 pm
   - sites: WVH
     subspecialties: General
     contexts: Outpatient
@@ -72,20 +74,47 @@ rotation_manifest:
     days: Mon
     time_periods:
     - 00:00 PD-15:00 CD
+    #Inpatient work
   - sites: WVH
     subspecialties: General
     contexts: Inpatient
     modalities: XR/CT/US
-    days: Mon
+    days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 00:00 PD-15:00 CD
+    - 08:00 PD-15:00 CD
+    #US Procedures
+  - sites: WVH
+    subspecialties: US Procedure (General)
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 08:00 CD-17:00 CD
+    #SRC CT from prior day Tues-Fri
   - sites: SRC
     subspecialties: General
-    contexts: Outpatient
+    contexts: All
+    modalities: CT
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PBD-00:00 CD
+    #Monday only CT/XR/US
+  - sites: All
+    subspecialties: General
+    contexts: All
+    modalities: CT/US/XR
+    days: Mon
+    time_periods:
+    - 00:00 PD-13:00 PD
+    #Monday only SRC work
+  - sites: SRC
+    subspecialties: General
+    contexts: All
     modalities: All
     days: Mon
     time_periods:
     - 08:00 CD-11:00 CD
+    #Monday only SRC work
   - sites: SRC
     subspecialties: General
     contexts: Wet Read
