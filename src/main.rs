@@ -99,6 +99,11 @@ fn cache_source()->Result<(), Box<dyn Error>> {
 
 
 fn main()->Result<(), Box<dyn Error>> {
+    print!("{}[2J", 27 as char);
+    for _ in 1..10
+    {
+        println!();
+    }
     println!("Starting.");
 
     //cache_source()?;

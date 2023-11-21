@@ -74,7 +74,7 @@ impl fmt::Debug for TimeSinceMidnight
 impl fmt::Display for TimeSinceMidnight
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let str=self.hours().to_string()+":"+&self.minutes().to_string();
+        let str=format!("{:02}:{:02}",self.hours(),self.minutes());
         write!(f,"{}",str)
     }
 }

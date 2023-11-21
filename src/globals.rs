@@ -115,7 +115,7 @@ pub const SUBSPECIALTIES:&[&str]=
     "Fluoro Procedure (MSK)",
     "Screening Mamm",
     "Diagnostic Mamm",
-    "Complex CTA/MRA",
+    "Complex CTA+MRA",
     "Angio",
     "Vascular US",
     "CT Procedure",
