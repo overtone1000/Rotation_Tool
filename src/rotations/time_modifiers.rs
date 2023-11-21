@@ -8,7 +8,7 @@ const PREVIOUS_BUSINESS_DAY:&str="PBD";
 //const DAY_AFTER_PREVIOUS_BUSINESS_DAY:&str="PBD+1";
 const PREVIOUS_DAY:&str="PD";
 const CURRENT_DAY:&str="CD";
-//const NEXT_DAY:&str="CD+1";
+const NEXT_DAY:&str="ND";
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Default, Clone, Copy)]
 pub struct TimeSinceMidnight
@@ -86,7 +86,7 @@ pub enum RelativeTime
     //DayAfterPreviousBusinessDay(NaiveTime),
     PreviousDay(TimeSinceMidnight),
     CurrentDay(TimeSinceMidnight),
-    //NextDay(NaiveTime)
+    NextDay(TimeSinceMidnight)
 }
 
 const delimiter:&str=" ";
@@ -113,7 +113,7 @@ impl RelativeTime
             //Self::DayAfterPreviousBusinessDay(_)=>DAY_AFTER_PREVIOUS_BUSINESS_DAY,
             Self::PreviousDay(_)=>PREVIOUS_DAY,
             Self::CurrentDay(_)=>CURRENT_DAY,
-            //Self::NextDay(_)=>NEXT_DAY
+            Self::NextDay(_)=>NEXT_DAY
         }
     }
 
@@ -125,7 +125,7 @@ impl RelativeTime
             //RelativeTime::DayAfterPreviousBusinessDay(x) => x,
             RelativeTime::PreviousDay(x) => x,
             RelativeTime::CurrentDay(x) => x,
-            //RelativeTime::NextDay(x) => x,
+            RelativeTime::NextDay(x) => x,
         }
     }
 
@@ -143,9 +143,9 @@ impl RelativeTime
             RelativeTime::CurrentDay(x) => {
                 day
             },
-            //RelativeTime::NextDay(x) => {
-            //    day.succ()
-            //},
+            RelativeTime::NextDay(x) => {
+                day.succ()
+            },
         }
     }
 }
@@ -183,7 +183,7 @@ pub fn parse_relative_time(strval:&str)->Result<RelativeTime,RotationManifestPar
         //DAY_AFTER_PREVIOUS_BUSINESS_DAY=>{Ok(RelativeTime::DayAfterPreviousBusinessDay(time))},
         PREVIOUS_DAY=>{Ok(RelativeTime::PreviousDay(time))},
         CURRENT_DAY=>{Ok(RelativeTime::CurrentDay(time))},
-        //NEXT_DAY=>{Ok(RelativeTime::NextDay(time))},
+        NEXT_DAY=>{Ok(RelativeTime::NextDay(time))},
         _=>{
             err
         }
