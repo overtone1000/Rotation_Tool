@@ -5,7 +5,7 @@ use std::fmt;
 use super::{rotation_error::RotationManifestParseError};
 
 const PREVIOUS_BUSINESS_DAY:&str="PBD";
-//const DAY_AFTER_PREVIOUS_BUSINESS_DAY:&str="PBD+1";
+const DAY_AFTER_PREVIOUS_BUSINESS_DAY:&str="PBD+1";
 const PREVIOUS_DAY:&str="PD";
 const CURRENT_DAY:&str="CD";
 const NEXT_DAY:&str="ND";
@@ -83,7 +83,7 @@ impl fmt::Display for TimeSinceMidnight
 pub enum RelativeTime
 {
     PreviousBusinessDay(TimeSinceMidnight),
-    //DayAfterPreviousBusinessDay(NaiveTime),
+    DayAfterPreviousBusinessDay(TimeSinceMidnight),
     PreviousDay(TimeSinceMidnight),
     CurrentDay(TimeSinceMidnight),
     NextDay(TimeSinceMidnight)
@@ -110,7 +110,7 @@ impl RelativeTime
         match self 
         {
             Self::PreviousBusinessDay(_)=>PREVIOUS_BUSINESS_DAY,
-            //Self::DayAfterPreviousBusinessDay(_)=>DAY_AFTER_PREVIOUS_BUSINESS_DAY,
+            Self::DayAfterPreviousBusinessDay(_)=>DAY_AFTER_PREVIOUS_BUSINESS_DAY,
             Self::PreviousDay(_)=>PREVIOUS_DAY,
             Self::CurrentDay(_)=>CURRENT_DAY,
             Self::NextDay(_)=>NEXT_DAY
@@ -122,7 +122,7 @@ impl RelativeTime
         match self
         {
             RelativeTime::PreviousBusinessDay(x) => x,
-            //RelativeTime::DayAfterPreviousBusinessDay(x) => x,
+            RelativeTime::DayAfterPreviousBusinessDay(x) => x,
             RelativeTime::PreviousDay(x) => x,
             RelativeTime::CurrentDay(x) => x,
             RelativeTime::NextDay(x) => x,
@@ -134,9 +134,9 @@ impl RelativeTime
             RelativeTime::PreviousBusinessDay(x) => {
                 get_previous_business_day(day)
             },
-            //RelativeTime::DayAfterPreviousBusinessDay(_) => {
-            //    get_previous_business_day(day).succ()
-            //},
+            RelativeTime::DayAfterPreviousBusinessDay(_) => {
+                get_previous_business_day(day).succ()
+            },
             RelativeTime::PreviousDay(x) => {
                 day.pred()
             },
@@ -180,7 +180,7 @@ pub fn parse_relative_time(strval:&str)->Result<RelativeTime,RotationManifestPar
     match *members.get(1).expect("Checked")
     {
         PREVIOUS_BUSINESS_DAY=>{Ok(RelativeTime::PreviousBusinessDay(time))},
-        //DAY_AFTER_PREVIOUS_BUSINESS_DAY=>{Ok(RelativeTime::DayAfterPreviousBusinessDay(time))},
+        DAY_AFTER_PREVIOUS_BUSINESS_DAY=>{Ok(RelativeTime::DayAfterPreviousBusinessDay(time))},
         PREVIOUS_DAY=>{Ok(RelativeTime::PreviousDay(time))},
         CURRENT_DAY=>{Ok(RelativeTime::CurrentDay(time))},
         NEXT_DAY=>{Ok(RelativeTime::NextDay(time))},

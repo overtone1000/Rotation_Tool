@@ -11,7 +11,7 @@ use crate::globals::file_names::EXAMPLE_ROTATION_DESCRIPTIONS;
 
 use super::baseline::RotationBaseline;
 use super::description::RotationDescription;
-use super::responsibility::RotationResponsibility;
+use super::responsibility::{RotationResponsibility, self};
 use super::special::{self, weekdays};
 use super::stringtypes::{StringTypes, SlashSeparatedStringVec};
 
@@ -33,20 +33,26 @@ impl Manifest
         let mut noerrs = true;
         for desc in &retval.rotation_manifest
         {
-            for resp in &desc.responsibilities
+            match &desc.responsibilities
             {
-                match resp.validate()
-                {
-                    Err(x) => {
-                        noerrs=false;
-                        for e in x
+                Some(responsibilities)=>{
+                    for resp in responsibilities
+                    {
+                        match resp.validate()
                         {
-                            eprintln!("Error in {} rotation. {}",desc.rotation,e);
+                            Err(x) => {
+                                noerrs=false;
+                                for e in x
+                                {
+                                    eprintln!("Error in {} rotation. {}",desc.rotation,e);
+                                }
+                            },
+                            _=>()
                         }
-                    },
-                    _=>()
-                }
-            }
+                    }
+                },
+                None=>()
+            };
         }
 
         if noerrs
@@ -69,7 +75,8 @@ impl Manifest
         example.rotation_manifest.push(
             RotationDescription { 
                 rotation: "Rotation A".to_string(),
-                responsibilities: vec![
+                location: "Rot A Location".to_string(),
+                responsibilities: Some(vec![
                     RotationResponsibility{
                         sites:StringTypes::new_slash_separated_string_vec("Site 1/Site 2"),
                         subspecialties:StringTypes::new_slash_separated_string_vec("Subspecialty 1/Subspecialty 2"),
@@ -99,7 +106,7 @@ impl Manifest
                         ),
                         comments: None
                     }
-                ],
+                ]),
             }
         );
 

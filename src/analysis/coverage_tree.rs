@@ -579,48 +579,54 @@ impl CoverageMap
     let mut coords:CoverageCoordinates=CoverageCoordinates::default();
     for rotation_description in &manifest.rotation_manifest
     {
-        for responsibility in &rotation_description.responsibilities
+        match &rotation_description.responsibilities
         {
-            for site in responsibility.sites.to_vec(globals::SITES)
-            {
-                coords.site=site.to_string();
-                for subspecialty in responsibility.subspecialties.to_vec(globals::SUBSPECIALTIES)
+            Some(responsibilities)=>{
+                for responsibility in responsibilities
                 {
-                    coords.subspecialty=subspecialty.to_string();
-                    for context in responsibility.contexts.to_vec(globals::CONTEXTS)
+                    for site in responsibility.sites.to_vec(globals::SITES)
                     {
-                        coords.context=context.to_string();
-                        for modality in responsibility.modalities.to_vec(globals::MODALITIES)
+                        coords.site=site.to_string();
+                        for subspecialty in responsibility.subspecialties.to_vec(globals::SUBSPECIALTIES)
                         {
-                            coords.modality=modality.to_string();
-                            for weekday_string in responsibility.days.to_vec(all_weekdays_strings)
+                            coords.subspecialty=subspecialty.to_string();
+                            for context in responsibility.contexts.to_vec(globals::CONTEXTS)
                             {
-                                let weekday = match chrono::Weekday::from_str(&weekday_string){
-                                    Ok(x) => x,
-                                    Err(_) => return RotationManifestParseError::generate_boxed(0,"".to_string()),
-                                };
-                                for time_period in responsibility.time_periods.to_vec(&[])
+                                coords.context=context.to_string();
+                                for modality in responsibility.modalities.to_vec(globals::MODALITIES)
                                 {
-                                    let timespan = parse_time_span(time_period.as_str()).expect("Erroneous timespan in manifest.");
-                                    let periods = timespan.instantiate_periods(weekday);
-                                    for (day,start,end) in periods
+                                    coords.modality=modality.to_string();
+                                    for weekday_string in responsibility.days.to_vec(all_weekdays_strings)
                                     {
-                                        coords.weekday=day;
-                                        let coverage:CoverageUnit=CoverageUnit{
-                                            start:start,
-                                            end:end,
-                                            rotation:rotation_description.rotation.to_string(),
-                                            day:weekday //This has to be weekday of the shift, not weekday of the work!
+                                        let weekday = match chrono::Weekday::from_str(&weekday_string){
+                                            Ok(x) => x,
+                                            Err(_) => return RotationManifestParseError::generate_boxed(0,"".to_string()),
                                         };
-                                        self.add_coverage(&coords, coverage)
+                                        for time_period in responsibility.time_periods.to_vec(&[])
+                                        {
+                                            let timespan = parse_time_span(time_period.as_str()).expect("Erroneous timespan in manifest.");
+                                            let periods = timespan.instantiate_periods(weekday);
+                                            for (day,start,end) in periods
+                                            {
+                                                coords.weekday=day;
+                                                let coverage:CoverageUnit=CoverageUnit{
+                                                    start:start,
+                                                    end:end,
+                                                    rotation:rotation_description.rotation.to_string(),
+                                                    day:weekday //This has to be weekday of the shift, not weekday of the work!
+                                                };
+                                                self.add_coverage(&coords, coverage)
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 }
-            }
-        }
+            },
+            None=>()
+        };
     }
 
     Ok(())

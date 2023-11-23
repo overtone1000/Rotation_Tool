@@ -1,4 +1,4 @@
-use std::{collections::HashMap, error::Error, fs::File, io::{BufWriter, BufReader}};
+use std::{collections::HashMap, error::Error, fs::File, io::{BufWriter, BufReader, Read}};
 
 use serde::{Deserialize, Serialize};
 
@@ -104,8 +104,9 @@ impl ProcessedSource
     {
         println!("Saving processed source to cache.");
         let cachefile=File::create(filename)?;
-        let bufwriter = BufWriter::new(cachefile);
-        let mut serializer = serde_json::Serializer::new(bufwriter);
+        let writer = BufWriter::new(cachefile);
+        let mut serializer = serde_json::Serializer::new(writer);
+
 
         Ok(self.serialize(&mut serializer)?)
     }
@@ -113,9 +114,15 @@ impl ProcessedSource
     pub fn load_from_cache(filename:&str)->Result<ProcessedSource,Box<dyn Error>>
     {
         println!("Reading processed source from cache.");
-        let cachefile=File::open(filename)?;
-        let bufreader = BufReader::new(cachefile);
-        let mut deserializer = serde_json::Deserializer::from_reader(bufreader);
+        let mut cachefile=File::open(filename)?;
+        //let reader = BufReader::new(cachefile); //Still slow! They're not big enough. Just load straight to memory.
+        let mut str=String::new();
+        match cachefile.read_to_string(&mut str)
+        {
+            Err(e)=>{return Err(Box::new(e));}
+            Ok(_)=>()
+        };
+        let mut deserializer = serde_json::Deserializer::from_str(&str);
         
         Ok(ProcessedSource::deserialize(&mut deserializer)?)
     }
