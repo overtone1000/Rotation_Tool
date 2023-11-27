@@ -1,4 +1,4 @@
-use std::{error::Error, fs::{self, File}, collections::HashMap, io::Write};
+use std::{error::Error, fs::{self, File}, collections::HashMap, io::{Write, BufWriter}};
 
 use categorization::exam_categories::exam_category;
 use chrono::{DateTime, Local, NaiveDate, NaiveDateTime, Datelike, Timelike};
@@ -9,7 +9,7 @@ use rvu_map::{RVUMap, MapCoords, buildMaps};
 use table::Table;
 use explain::*;
 
-use crate::{globals::file_names::{self, SOURCE_CACHE}, error::RotationToolError, categorization::{buildSalemRVUMap, get_categories_list, get_locations_list, backup, buildSalemBVUMap}, time::{getTimeRowNormalDistWeights, getNormalDistWeights}, analysis::coverage_tree::{CoverageMap, CoordinateMap, CoverageCoordinates}};
+use crate::{globals::file_names::{self, SOURCE_CACHE, COVERAGE_AUDIT_OUT}, error::RotationToolError, categorization::{buildSalemRVUMap, get_categories_list, get_locations_list, backup, buildSalemBVUMap}, time::{getTimeRowNormalDistWeights, getNormalDistWeights}, analysis::coverage_tree::{CoverageMap, CoordinateMap, CoverageCoordinates}};
 
 mod globals;
 mod error;
@@ -75,11 +75,10 @@ fn analyze_rotations()->Result<(), Box<dyn Error>> {
     println!("Adding work to tree.");
     coverage_tree.add_work_from_source(source, &date_constraint_set)?;
 
-    let coverage_errors=coverage_tree.audit();
-    for ce in coverage_errors
-    {
-        println!("{ce}");
-    }
+
+    let auditfile=File::create(COVERAGE_AUDIT_OUT)?;
+    let mut writer = BufWriter::new(auditfile);
+    coverage_tree.audit_to_stream(&mut writer);
 
     Ok(())
 }

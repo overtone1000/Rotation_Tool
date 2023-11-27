@@ -11,6 +11,7 @@ pub mod file_names
     pub(crate) const BVU_OUT_FILE:&str = "./output/Categorized Weekday BVU Map";
     pub(crate) const EXAMPLE_ROTATION_DESCRIPTIONS:&str = "./rotations/Example.yml";
     pub(crate) const SOURCE_CACHE:&str = "./cache/ProcessedSource.yml";
+    pub(crate) const COVERAGE_AUDIT_OUT:&str = "./err/Coverage_Audit";
 }
 
 pub mod main_headers {

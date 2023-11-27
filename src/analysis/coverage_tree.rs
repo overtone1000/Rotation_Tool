@@ -4,6 +4,7 @@ use std::collections::{HashMap, hash_map::Entry};
 use std::fmt::Debug;
 
 use std::hash::Hash;
+use std::io::Write;
 use std::str::FromStr;
 
 use chrono::{NaiveDateTime, Datelike, NaiveDate, Duration};
@@ -17,6 +18,7 @@ use crate::{processed_source::ProcessedSource, globals::{main_headers, SITES, MO
 
 use super::source_error::SourceError;
 
+#[derive(Eq, Hash, PartialEq)]
 pub struct CoverageCoordinates
 {
     site:String,
@@ -24,6 +26,40 @@ pub struct CoverageCoordinates
     context:String,
     modality:String,
     weekday:chrono::Weekday
+}
+
+impl PartialOrd for CoverageCoordinates
+{
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        match self.site.partial_cmp(&other.site) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        match self.subspecialty.partial_cmp(&other.subspecialty) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        match self.context.partial_cmp(&other.context) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        match self.modality.partial_cmp(&other.modality) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        self.weekday.num_days_from_sunday().partial_cmp(&other.weekday.num_days_from_sunday())
+    }
+}
+
+impl Ord for CoverageCoordinates
+{
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        match self.partial_cmp(other)
+        {
+            Some(x)=>x,
+            None=>std::cmp::Ordering::Equal
+        }
+    }
 }
 
 impl Default for CoverageCoordinates
@@ -580,7 +616,7 @@ impl CoverageMap
     for rotation_description in &manifest.rotation_manifest
     {
         match &rotation_description.responsibilities
-        {
+{
             Some(responsibilities)=>{
                 for responsibility in responsibilities
                 {
@@ -624,7 +660,7 @@ impl CoverageMap
                         }
                     }
                 }
-            },
+},
             None=>()
         };
     }
@@ -632,9 +668,18 @@ impl CoverageMap
     Ok(())
    }
 
-   pub fn audit(&mut self)->Vec<String>
+   pub fn audit(&mut self)->HashMap<CoverageCoordinates,CoverageError>
    {
-    let mut retval:Vec<String> = Vec::new();
+    let mut retval:HashMap<CoverageCoordinates,CoverageError> = HashMap::new();
+
+    let testcoords = CoverageCoordinates {
+        site:"SC".to_string(),
+        subspecialty:"Fluoro (General)".to_string(),
+        context:"Outpatient".to_string(),
+        modality:"RF".to_string(),
+        weekday:chrono::Weekday::Mon
+    };
+    
     for (site, subspecialtymap) in self.map.iter_mut()
     {
         for(subspecialty, contextmap) in subspecialtymap.map.iter_mut()
@@ -645,41 +690,76 @@ impl CoverageMap
                 {
                     for(weekday, coverage_and_workday) in weekdaymap.map.iter_mut()
                     {
-                        let errs=coverage_and_workday.audit_coverage();
-
-                        match errs{
-                            CoverageError::NoWork => {
-                                //Too verbose, skip these for now                                
-                                //retval.push(format!("No work for: {site}, {subspecialty}, {context}, {modality}, {weekday}"));
-                            },
-                            CoverageError::NoCoverage => {
-                                retval.push(format!("No coverage for: {site}, {subspecialty}, {context}, {modality}, {weekday}"));
-                            },
-                            CoverageError::MalformedCoverage(errs) => {
-                                if errs.gaps.len()>0
-                                {
-                                    for gap in errs.gaps
-                                    {
-                                        retval.push(format!("Coverage gap: {site}, {subspecialty}, {context}, {modality}, {weekday}: {}-{}",
-                                        gap.0,gap.1));
-                                    }
-                                }
-                                if errs.overlaps.len()>0
-                                {
-                                    for overlap in errs.overlaps
-                                    {
-                                        retval.push(format!("Coverage overlap: {site}, {subspecialty}, {context}, {modality}, {weekday}: {} and {} have overlapping coverage",
-                                        overlap.0,overlap.1));
-                                    }
-                                }
-                            },
+                        let coords = CoverageCoordinates{
+                            site:site.to_string(),
+                            subspecialty:subspecialty.to_string(),
+                            context:context.to_string(),
+                            modality:modality.to_string(),
+                            weekday:*weekday
                         };
+
+                        /*
+                        if coords == testcoords
+                        {
+                            println!("Found test element.");
+                        }
+                        */
+
+                        let errs=coverage_and_workday.audit_coverage();
+                        
+                        retval.insert(coords, errs);
                     }
                 }
             }
         }
     }
     retval
+   }
+
+   pub fn audit_to_stream<T:Write>(&mut self, writer:&mut T)->Result<(),std::io::Error>
+   {
+    let audit_result = self.audit();
+
+    let mut sorted_keys:Vec<&CoverageCoordinates> = audit_result.keys().collect();
+    sorted_keys.sort();
+
+    for coords in sorted_keys
+    {
+        let errs = audit_result.get(coords).expect("Should be a key");
+        match errs{
+            CoverageError::NoWork => {
+                //Too verbose, skip these for now                                
+                //retval.push(format!("No work for: {site}, {subspecialty}, {context}, {modality}, {weekday}"));
+            },
+            CoverageError::NoCoverage => {
+                    writeln!(writer,"No coverage for: {}, {}, {}, {}, {}"
+                    ,coords.site,coords.subspecialty,coords.context,coords.modality,coords.weekday
+                )?;
+            },
+            CoverageError::MalformedCoverage(errs) => {
+                if errs.gaps.len()>0
+                {
+                    for gap in &errs.gaps
+                    {
+                        writeln!(writer,"Coverage gap: {}, {}, {}, {}, {}: {}-{}",
+                        coords.site,coords.subspecialty,coords.context,coords.modality,coords.weekday,
+                        gap.0,gap.1)?;
+                    }
+                }
+                if errs.overlaps.len()>0
+                {
+                    for overlap in &errs.overlaps
+                    {
+                        writeln!(writer,"Coverage overlap: {}, {}, {}, {}, {}: {} and {} have overlapping coverage",
+                        coords.site,coords.subspecialty,coords.context,coords.modality,coords.weekday,
+                        overlap.0,overlap.1)?;
+                    }
+                }
+            },
+        };
+    }
+    
+    Ok(())
    }
 }
 impl <'a> CoordinateMap<'a,String,SubspecialtyMap> for CoverageMap

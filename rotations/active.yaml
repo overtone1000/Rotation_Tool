@@ -31,11 +31,18 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 00:00 CD-15:00 CD
+  - sites: SC
+    subspecialties: US Procedure (General)
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 07:30 CD-16:30 CD
 - rotation: NM
   location: SH
   responsibilities:
   - sites: All
-    subspecialties: All
+    subspecialties: General
     contexts: Outpatient
     modalities: PET/NM
     days: Mon/Tue/Wed/Thu/Fri
@@ -201,18 +208,12 @@ rotation_manifest:
     time_periods:
     - 07:30 CD-16:00 CD
   - sites: SC
-    subspecialties: Fluoro (General)
-    contexts: All
-    modalities: All
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 07:30 CD-16:30 CD
-  - sites: SC
     subspecialties: Fluoro (General)/Fluoro Procedure (MSK)
     contexts: All
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
+    - 07:30 CD-08:00 CD
     - 12:30 CD-16:30 CD
 - rotation: Neuro 2
   location: Remote
@@ -337,16 +338,23 @@ rotation_manifest:
     subspecialties: Angio
     contexts: All
     modalities: All
-    days: Mon/Tue/Wed/Thu/Fri
+    days: Mon/Tue/Wed/Thu
     time_periods:
     - 07:30 CD-07:30 ND
+  - sites: SH
+    subspecialties: Angio
+    contexts: All
+    modalities: All
+    days: Fri
+    time_periods:
+    - 07:30 CD-07:00 ND
   - sites: All
     subspecialties: Vascular US
     contexts: All
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 15:00 PD-15:00 CD
+    - 15:00 PBD-15:00 CD
 - rotation: IR2
   location: SH and SRC
   responsibilities:
@@ -395,7 +403,7 @@ rotation_manifest:
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 07:30 CD-15:00 CD
+    - 15:00 PBD-15:00 CD
   - sites: All
     subspecialties: Complex CTA+MRA
     contexts: Inpatient/ED
@@ -547,17 +555,17 @@ rotation_manifest:
   location: Remote
   responsibilities:
   - sites: All
-    subspecialties: All
+    subspecialties: General/Complex CTA+MRA/MSK/Neuro (Brain)/Neuro (Other)
     contexts: ED/Wet Read/Inpatient
     modalities: All
-    days: Mon/Tue/Wed/Thu/Fri
+    days: Sun/Mon/Tue/Wed/Thu
     time_periods:
     - 22:00 CD-06:00 ND
   - sites: All
-    subspecialties: All
+    subspecialties: General/Complex CTA+MRA/MSK/Neuro (Brain)/Neuro (Other)
     contexts: ED/Wet Read/Inpatient
     modalities: All
-    days: Sat/Sun
+    days: Fri/Sat
     time_periods:
     - 22:00 CD-07:00 ND
   comments:
@@ -569,6 +577,13 @@ rotation_manifest:
     subspecialties: General
     contexts: Outpatient
     modalities: CT/US/XR/MR
+    days: Mon
+    time_periods:
+    - 15:00 PBD-24:00 PBD
+  - sites: SC
+    subspecialties: General
+    contexts: Outpatient
+    modalities: CVUS
     days: Mon
     time_periods:
     - 15:00 PBD-24:00 PBD
@@ -718,6 +733,20 @@ rotation_manifest:
     days: Sat/Sun
     time_periods:
     - 15:30 CD-22:00 CD
+  - sites: SH
+    subspecialties: US Procedure (General)/US Procedure (IR or PA)/Fluoro (General)/Fluoro Procedure (MSK)
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu
+    time_periods:
+    - 19:00 CD-07:30 ND
+  - sites: SH
+    subspecialties: US Procedure (General)/US Procedure (IR or PA)/Fluoro (General)/Fluoro Procedure (MSK)
+    contexts: All
+    modalities: All
+    days: Fri/Sat
+    time_periods:
+    - 19:00 CD-06:00 ND
 - rotation: PA-US
   location: SH
   responsibilities:
@@ -769,9 +798,9 @@ rotation_manifest:
   - TDC and port removals
   - H&Ps and preprocedural and postprocedural care of all IR procedure patients
   - Assist PA-GI and PA-US if available
-- rotation: PA-Clinic
-  location: SC-Union/SH/SRC
-  responsibilites:
+- rotation: PA Clinic
+  location: SC Union SH SRC
+  responsibilities:
   - sites: SC
     subspecialties: Fluoro (General)/Fluoro Procedure (MSK)
     contexts: All
@@ -780,7 +809,7 @@ rotation_manifest:
     time_periods:
     - 08:00 CD-12:30 CD
   - sites: SRC
-    subspecialties: US Procedure (General)
+    subspecialties: US Procedure (General)/US Procedure (MSK)
     contexts: All
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
@@ -795,7 +824,7 @@ rotation_manifest:
   - Call patients with results
 - rotation: PA-Weekend
   location: SH
-  responsibilites:
+  responsibilities:
   - sites: SH
     subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (MSK)
     contexts: All
@@ -821,10 +850,32 @@ rotation_manifest:
   - These subspecialty exams are read through AH0C.
   - This list is not complete as many subspecialty exam types cannot be differentiated based on the available fields.
 - rotation: Schedule Block
-  location: SH
-  responsibilites:
+  location: n/a
+  responsibilities:
+  - sites: SC/SRC
+    subspecialties: General
+    contexts: All
+    modalities: RF
+    days: Sat/Sun
+    time_periods:
+    - 00:00 CD-24:00 CD
   - sites: SC
     subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (MSK)/Angio
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-07:30 CD
+    - 16:30 CD-24:00 CD
+  - sites: SC
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (MSK)/Angio
+    contexts: All
+    modalities: All
+    days: Sat/Sun
+    time_periods:
+    - 00:00 CD-24:00 CD
+  - sites: SRC
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (MSK)/Angio/Diagnostic Mamm
     contexts: All
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
@@ -832,13 +883,12 @@ rotation_manifest:
     - 00:00 CD-08:00 CD
     - 16:30 CD-24:00 CD
   - sites: SRC
-    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (MSK)/Angio
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (MSK)/Angio/Diagnostic Mamm
     contexts: All
     modalities: All
-    days: Mon/Tue/Wed/Thu/Fri
+    days: Sat/Sun
     time_periods:
-    - 00:00 CD-08:00 CD
-    - 16:30 CD-24:00 CD
+    - 00:00 CD-24:00 CD
   - sites: WVH
     subspecialties: Diagnostic Mamm
     contexts: All

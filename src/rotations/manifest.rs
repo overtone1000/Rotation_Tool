@@ -16,6 +16,7 @@ use super::special::{self, weekdays};
 use super::stringtypes::{StringTypes, SlashSeparatedStringVec};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct Manifest
 {
     pub title:String,
@@ -34,23 +35,23 @@ impl Manifest
         for desc in &retval.rotation_manifest
         {
             match &desc.responsibilities
-            {
+{
                 Some(responsibilities)=>{
                     for resp in responsibilities
-                    {
-                        match resp.validate()
+            {
+                match resp.validate()
+                {
+                    Err(x) => {
+                        noerrs=false;
+                        for e in x
                         {
-                            Err(x) => {
-                                noerrs=false;
-                                for e in x
-                                {
-                                    eprintln!("Error in {} rotation. {}",desc.rotation,e);
-                                }
-                            },
-                            _=>()
+                            eprintln!("Error in {} rotation. {}",desc.rotation,e);
                         }
-                    }
-                },
+                    },
+                    _=>()
+                }
+            }
+},
                 None=>()
             };
         }
@@ -91,7 +92,6 @@ impl Manifest
                                 &weekdays::weekday_to_str(chrono::Weekday::Thu)+"/"+
                                 &weekdays::weekday_to_str(chrono::Weekday::Fri))
                             ),
-                        comments: Some(vec!("Comments can go here.".to_string(),"Comments are an array.".to_string(),"But this section can be omitted entirely.".to_string()))
                     },
                     RotationResponsibility{
                         sites:StringTypes::Array(vec!["Site A".to_string(),"Site B".to_string()]),
@@ -103,10 +103,10 @@ impl Manifest
                             weekdays::weekday_to_str(chrono::Weekday::Sat),
                             weekdays::weekday_to_str(chrono::Weekday::Sun)
                             ]
-                        ),
-                        comments: None
+                        )
                     }
                 ]),
+                comments:Some(vec!("Comments can go here.".to_string(),"Comments are an array.".to_string(),"But this section can be omitted entirely.".to_string()))
             }
         );
 

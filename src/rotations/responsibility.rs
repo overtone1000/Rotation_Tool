@@ -7,6 +7,7 @@ use crate::globals;
 use super::stringtypes::StringTypes;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct RotationResponsibility
 {
     pub sites:StringTypes,
@@ -15,7 +16,6 @@ pub struct RotationResponsibility
     pub modalities:StringTypes,
     pub days:StringTypes,
     pub time_periods:StringTypes,
-    pub(crate) comments:Option<Vec<String>>
 }
 
 impl RotationResponsibility
