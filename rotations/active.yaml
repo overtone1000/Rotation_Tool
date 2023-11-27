@@ -27,10 +27,10 @@ rotation_manifest:
   - sites: SC
     subspecialties: General
     contexts: All
-    modalities: CT/US/XR
+    modalities: CT/US/XR/CVUS/RF
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 15:00 PD-15:00 CD
+    - 00:00 CD-15:00 CD
 - rotation: NM
   location: SH
   responsibilities:
@@ -89,6 +89,14 @@ rotation_manifest:
     subspecialties: General
     contexts: Inpatient
     modalities: XR/CT/US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 08:00 CD-15:00 CD
+    #Mamms
+  - sites: WVH
+    subspecialties: Diagnostic Mamm
+    contexts: All
+    modalities: All
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 08:00 PD-15:00 CD
@@ -158,7 +166,7 @@ rotation_manifest:
     - 00:00 CD-15:00 CD
   - sites: SH
     subspecialties: Intraop Fluoro
-    contexts: All
+    contexts: Inpatient
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
@@ -184,6 +192,7 @@ rotation_manifest:
     days: Tue/Wed/Thu/Fri
     time_periods:
     - 15:00 PD-15:00 CD
+  #Every day
   - sites: All
     subspecialties: Neuro (Other)/Neuro (Brain)
     contexts: Inpatient/ED
@@ -198,6 +207,13 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 07:30 CD-16:30 CD
+  - sites: SC
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 12:30 CD-16:30 CD
 - rotation: Neuro 2
   location: Remote
   responsibilities:
@@ -346,7 +362,7 @@ rotation_manifest:
   - sites: SC
     subspecialties: General
     contexts: All
-    modalities: CT/US/XR
+    modalities: CT/US/XR/CVUS/RF
     days: Tue/Wed/Thu/Fri
     time_periods:
     - 15:00 PD-24:00 PD
@@ -359,12 +375,12 @@ rotation_manifest:
     - 15:00 PD-24:00 PD
   - sites: SH/WB
     subspecialties: General
-    contexts: All
+    contexts: Outpatient
     modalities: CT/US/XR
     days: Tue/Wed/Thu/Fri
     time_periods:
     - 19:00 PD-24:00 PD
-  # Every day
+    # Mon SRC XR
   - sites: SRC
     subspecialties: General
     contexts: All
@@ -372,6 +388,7 @@ rotation_manifest:
     days: Mon
     time_periods:
     - 11:30 CD-15:00 CD
+    # Every day
   - sites: All
     subspecialties: Complex CTA+MRA
     contexts: Outpatient
@@ -566,7 +583,7 @@ rotation_manifest:
     modalities: CT/US/XR/MR
     days: Mon
     time_periods:
-    - 00:00 PBD+1-00:00 PBD+1
+    - 00:00 PBD+1-24:00 PBD+1
 - rotation: TPC
   location: Remote
   responsibilities:
@@ -643,7 +660,7 @@ rotation_manifest:
     time_periods:
     - 07:00 CD-11:00 CD
   - sites: WVH
-    subspecialties: General/MSK/Neuro (Brain)/Neuro (Other)/Intraop Fluoro/Complex CTA+MRA
+    subspecialties: General
     contexts: Outpatient
     modalities: XR
     days: Sat/Sun
@@ -752,7 +769,7 @@ rotation_manifest:
   - TDC and port removals
   - H&Ps and preprocedural and postprocedural care of all IR procedure patients
   - Assist PA-GI and PA-US if available
-- rotation: PA-IR
+- rotation: PA-Clinic
   location: SC-Union/SH/SRC
   responsibilites:
   - sites: SC
@@ -790,3 +807,45 @@ rotation_manifest:
   - Carry IR phone and take consults
   - Round on IR patients and write progress notes
   - Okay to leave the hospital but must be no more than 20 minutes away and available by page for procedures through 6 PM
+- rotation: Subspecialty Work
+  location: Remote
+  responsibilities:
+  - sites: All
+    subspecialties: Breast MR/Cardiac/CT Colonography
+    contexts: All
+    modalities: All
+    days: All
+    time_periods:
+    - 00:00 CD-24:00 CD
+  comments:
+  - These subspecialty exams are read through AH0C.
+  - This list is not complete as many subspecialty exam types cannot be differentiated based on the available fields.
+- rotation: Schedule Block
+  location: SH
+  responsibilites:
+  - sites: SC
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (MSK)/Angio
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-08:00 CD
+    - 16:30 CD-24:00 CD
+  - sites: SRC
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (MSK)/Angio
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-08:00 CD
+    - 16:30 CD-24:00 CD
+  - sites: WVH
+    subspecialties: Diagnostic Mamm
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-08:00 CD
+    - 15:00 CD-24:00 CD
+  comments:
+  - Responsibilities listed here represent schedule blocks. Such studies should not be scheduled and so are not accounted for in these rotations.
