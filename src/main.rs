@@ -95,8 +95,6 @@ fn cache_source()->Result<(), Box<dyn Error>> {
     println!("Finished caching source.");
     retval
 }
-
-
 fn main()->Result<(), Box<dyn Error>> {
     print!("{}[2J", 27 as char);
     for _ in 1..10

@@ -129,7 +129,7 @@ impl RelativeTime
         }
     }
 
-    pub fn get_day(&self,day:chrono::Weekday)->chrono::Weekday{
+    fn get_day(&self,day:chrono::Weekday)->chrono::Weekday{
         match self{
             RelativeTime::PreviousBusinessDay(x) => {
                 get_previous_business_day(day)
@@ -145,6 +145,34 @@ impl RelativeTime
             },
             RelativeTime::NextDay(x) => {
                 day.succ()
+            },
+        }
+    }
+
+    pub fn get_day_offset(&self,day:chrono::Weekday)->i64{
+        match self{
+            RelativeTime::PreviousBusinessDay(_) => {
+                match day{
+                    chrono::Weekday::Mon => -3,
+                    chrono::Weekday::Sun => -2,
+                    _ => -1
+                }
+            },
+            RelativeTime::DayAfterPreviousBusinessDay(_) => {
+                match day{
+                    chrono::Weekday::Mon => -2,
+                    chrono::Weekday::Sun => -1,
+                    _ => 0
+                }
+            },
+            RelativeTime::PreviousDay(x) => {
+                -1
+            },
+            RelativeTime::CurrentDay(x) => {
+                0
+            },
+            RelativeTime::NextDay(x) => {
+                1
             },
         }
     }

@@ -53,12 +53,12 @@ fn get_intervening_days(start:chrono::Weekday, end:chrono::Weekday)->Vec<chrono:
 
 impl Timespan
 {
-    pub fn instantiate_periods(&self, day:chrono::Weekday)->Vec<(chrono::Weekday,TimeSinceMidnight,TimeSinceMidnight)>
+    pub fn instantiate_periods(&self, day:chrono::Weekday)->Vec<(i64,TimeSinceMidnight,TimeSinceMidnight)>
     {
-        let mut retval :Vec<(chrono::Weekday,TimeSinceMidnight,TimeSinceMidnight)>=Vec::new();
+        let mut retval :Vec<(i64,TimeSinceMidnight,TimeSinceMidnight)>=Vec::new();
 
-        let mut startday=self.start.get_day(day);
-        let mut stopday=self.stop.get_day(day);
+        let startday=self.start.get_day_offset(day);
+        let stopday=self.stop.get_day_offset(day);
         let start=*self.start.get_time();
         let stop=*self.stop.get_time();
 
@@ -69,7 +69,7 @@ impl Timespan
         else
         {
             retval.push((startday,start,next_midnight));
-            for day in get_intervening_days(startday,stopday)
+            for day in startday+1..stopday
             {
                 retval.push((day,this_midnight,next_midnight));
             }

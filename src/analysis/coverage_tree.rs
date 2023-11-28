@@ -16,6 +16,7 @@ use crate::rotations::time_modifiers::{this_midnight, TimeSinceMidnight, next_mi
 use crate::rotations::timespan::{parse_time_span};
 use crate::{processed_source::ProcessedSource, globals::{main_headers, SITES, MODALITIES, tpc_headers, BUSINESS_DAYS}, constraints::ConstraintSet, dates::business_days_per_year, categorization::{buildSalemRVUMap, buildSalemBVUMap}};
 
+use super::coverage_unit::{CoverageUnit, weekday_plus};
 use super::source_error::SourceError;
 
 #[derive(Eq, Hash, PartialEq)]
@@ -47,7 +48,7 @@ impl PartialOrd for CoverageCoordinates
             Some(core::cmp::Ordering::Equal) => {}
             ord => return ord,
         }
-        self.weekday.num_days_from_sunday().partial_cmp(&other.weekday.num_days_from_sunday())
+        self.weekday.num_days_from_monday().partial_cmp(&other.weekday.num_days_from_monday())
     }
 }
 
@@ -69,52 +70,6 @@ impl Default for CoverageCoordinates
     }
 }
 
-#[derive(Debug,PartialEq,Eq)]
-pub struct CoverageUnit
-{
-    start:TimeSinceMidnight, //Make first so it's sorted on start time first!
-    end:TimeSinceMidnight, //Make second so it's sorted on end time next!
-    rotation:String,
-    day:chrono::Weekday
-}
-
-impl Default for CoverageUnit
-{
-    fn default() -> Self {
-        Self { start: Default::default(), end: Default::default(), rotation: Default::default(), day: chrono::Weekday::Sun}
-    }
-}
-
-impl PartialOrd for CoverageUnit
-{
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        match self.start.partial_cmp(&other.start) {
-            Some(core::cmp::Ordering::Equal) => {}
-            ord => return ord,
-        }
-        match self.end.partial_cmp(&other.end) {
-            Some(core::cmp::Ordering::Equal) => {}
-            ord => return ord,
-        }
-        match self.rotation.partial_cmp(&other.rotation) {
-            Some(core::cmp::Ordering::Equal) => {}
-            ord => return ord,
-        }
-        self.day.num_days_from_sunday().partial_cmp(&other.day.num_days_from_sunday())
-    }
-}
-
-impl Ord for CoverageUnit
-{
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        match self.partial_cmp(other)
-        {
-            Some(x)=>x,
-            None=>core::cmp::Ordering::Equal
-        }
-    }
-}
-
 #[derive(Default,Debug)]
 pub struct WorkUnit
 {
@@ -133,36 +88,47 @@ pub struct CoverageAndWorkDay
 #[derive(Default,Debug)]
 pub struct MalformedCoverage
 {
-    gaps:Vec<(TimeSinceMidnight,TimeSinceMidnight)>,
-    overlaps:Vec<(String,String)>,
+    gaps:Vec<(TimeSinceMidnight,TimeSinceMidnight,String,f64)>,
+    overlaps:Vec<String>,
 }
 
 pub enum CoverageError
 {
     NoWork,
-    NoCoverage,
+    NoCoverage(f64),
     MalformedCoverage(MalformedCoverage)
 }
 
 impl CoverageAndWorkDay
 {
-    fn audit_coverage(&mut self)->CoverageError
+    fn get_compare(farthest_unit:&CoverageUnit, farthest_end:&TimeSinceMidnight,cu:&CoverageUnit,base_weekday:chrono::Weekday)->String{
+        farthest_unit.to_string(base_weekday) + " goes to " + farthest_end.to_string().as_str() + " and " + cu.to_string(base_weekday).as_str() + " starts at " + cu.start.to_string().as_str()
+    }
+
+    fn audit_coverage(&mut self, base_weekday:chrono::Weekday)->CoverageError
     {
         if self.work.is_empty()
         {
             return CoverageError::NoWork;
         }
+
+        let mut rvus:f64=0.0;
+        for wu in &self.work
+        {
+            rvus+=wu.rvu;
+        }
+
         if self.coverages.is_empty()
         {
-            return CoverageError::NoCoverage;
+            return CoverageError::NoCoverage(rvus);
         }
         
         let mut retval = MalformedCoverage::default();
 
-        self.coverages.sort(); //Sorting puts them in order with respect to start time and then end time!
+        self.coverages.sort(); //Sorting puts them in order with respect to the day offset, then by start time and then last by end time!
 
-        let mut farthest_rotation = "";
-        let mut farthest_end = this_midnight;
+        let mut farthest_unit = self.coverages.first().expect("Checked");
+        let mut farthest_end = &this_midnight;
         let mut started=false;
 
         for cu in &self.coverages
@@ -170,39 +136,39 @@ impl CoverageAndWorkDay
             if started 
             {
                 //Check overlap
-                if cu.start<farthest_end
+                if cu.start<*farthest_end
                 {
-                    retval.overlaps.push((farthest_rotation.to_string(),cu.rotation.to_string()));
+                    retval.overlaps.push(CoverageAndWorkDay::get_compare(farthest_unit,farthest_end,&cu, base_weekday));
                 }
 
                 //Check gap
-                if cu.start>farthest_end
+                if cu.start>*farthest_end
                 {
-                    retval.gaps.push((farthest_end,cu.start));
+
+                    retval.gaps.push((*farthest_end,cu.start,CoverageAndWorkDay::get_compare(farthest_unit,farthest_end,&cu, base_weekday),rvus));
                 }
             }
             else {
                 //Check from midnight
-                if cu.start>farthest_end
+                if cu.start>*farthest_end
                 {
-                    retval.gaps.push((farthest_end,cu.start))
+                    retval.gaps.push((*farthest_end,cu.start,cu.to_string(base_weekday) + " starts after midnight",rvus))
                 }
                 started=true;
             }
 
             //Adjust prior_end
-            if cu.end>farthest_end
+            if cu.end>=*farthest_end
             {
-                farthest_end=cu.end;
-                farthest_rotation=&cu.rotation;
+                farthest_end=&cu.end;
+                farthest_unit=cu;
             }
         }
 
         //Check through midnight
-        let last = self.coverages.last().expect("Shouldn't be empty!").end;
-        if last != next_midnight
+        if *farthest_end<next_midnight
         {
-            retval.gaps.push((last,next_midnight));
+            retval.gaps.push((*farthest_end,next_midnight,farthest_unit.to_string(base_weekday) + " ends before midnight",rvus));
         }
 
         return CoverageError::MalformedCoverage(retval);
@@ -342,6 +308,13 @@ impl WorkCoverageMap for SubspecialtyMap{
     }
 }
 
+fn testcoords()->CoverageCoordinates {CoverageCoordinates {
+    site:"SH".to_string(),
+    subspecialty:"Diagnostic Mamm".to_string(),
+    context:"Inpatient".to_string(),
+    modality:"MG".to_string(),
+    weekday:chrono::Weekday::Mon
+}}
 
 #[derive(Default)]
 pub struct CoverageMap {
@@ -612,7 +585,10 @@ impl CoverageMap
         &chrono::Weekday::Sun.to_string(),
     ];
 
+
     let mut coords:CoverageCoordinates=CoverageCoordinates::default();
+    let testcoords=testcoords();
+                                        
     for rotation_description in &manifest.rotation_manifest
     {
         match &rotation_description.responsibilities
@@ -638,19 +614,27 @@ impl CoverageMap
                                             Ok(x) => x,
                                             Err(_) => return RotationManifestParseError::generate_boxed(0,"".to_string()),
                                         };
+
+                                        if coords==testcoords
+                                        {
+                                            println!("Found test coords");
+                                        }
+
                                         for time_period in responsibility.time_periods.to_vec(&[])
                                         {
                                             let timespan = parse_time_span(time_period.as_str()).expect("Erroneous timespan in manifest.");
                                             let periods = timespan.instantiate_periods(weekday);
-                                            for (day,start,end) in periods
+                                            for (day_offset,start,end) in periods
                                             {
-                                                coords.weekday=day;
-                                                let coverage:CoverageUnit=CoverageUnit{
-                                                    start:start,
-                                                    end:end,
-                                                    rotation:rotation_description.rotation.to_string(),
-                                                    day:weekday //This has to be weekday of the shift, not weekday of the work!
-                                                };
+                                                coords.weekday=weekday_plus(weekday,day_offset);
+
+                                                let coverage=CoverageUnit::create(
+                                                    start,
+                                                    end,
+                                                    rotation_description.rotation.to_string(),
+                                                    day_offset
+                                                );
+                                                
                                                 self.add_coverage(&coords, coverage)
                                             }
                                         }
@@ -672,13 +656,7 @@ impl CoverageMap
    {
     let mut retval:HashMap<CoverageCoordinates,CoverageError> = HashMap::new();
 
-    let testcoords = CoverageCoordinates {
-        site:"SC".to_string(),
-        subspecialty:"Fluoro (General)".to_string(),
-        context:"Outpatient".to_string(),
-        modality:"RF".to_string(),
-        weekday:chrono::Weekday::Mon
-    };
+    let testcoords=testcoords();
     
     for (site, subspecialtymap) in self.map.iter_mut()
     {
@@ -705,7 +683,7 @@ impl CoverageMap
                         }
                         */
 
-                        let errs=coverage_and_workday.audit_coverage();
+                        let errs=coverage_and_workday.audit_coverage(*weekday);
                         
                         retval.insert(coords, errs);
                     }
@@ -731,28 +709,29 @@ impl CoverageMap
                 //Too verbose, skip these for now                                
                 //retval.push(format!("No work for: {site}, {subspecialty}, {context}, {modality}, {weekday}"));
             },
-            CoverageError::NoCoverage => {
-                    writeln!(writer,"No coverage for: {}, {}, {}, {}, {}"
-                    ,coords.site,coords.subspecialty,coords.context,coords.modality,coords.weekday
+            CoverageError::NoCoverage(rvus) => {
+                    writeln!(writer,"No coverage for: {}, {}, {}, {}, {} ({} rvus)"
+                    ,coords.site,coords.subspecialty,coords.context,coords.modality,coords.weekday,
+                    rvus
                 )?;
             },
             CoverageError::MalformedCoverage(errs) => {
                 if errs.gaps.len()>0
                 {
-                    for gap in &errs.gaps
+                    for (rotation1, rotation2, desc, rvus) in &errs.gaps
                     {
-                        writeln!(writer,"Coverage gap: {}, {}, {}, {}, {}: {}-{}",
+                        writeln!(writer,"Coverage gap: {}, {}, {}, {}, {}: {}-{} {} ({} rvus)",
                         coords.site,coords.subspecialty,coords.context,coords.modality,coords.weekday,
-                        gap.0,gap.1)?;
+                        rotation1, rotation2, desc, rvus)?;
                     }
                 }
                 if errs.overlaps.len()>0
                 {
                     for overlap in &errs.overlaps
                     {
-                        writeln!(writer,"Coverage overlap: {}, {}, {}, {}, {}: {} and {} have overlapping coverage",
+                        writeln!(writer,"Coverage overlap: {}, {}, {}, {}, {}: {}",
                         coords.site,coords.subspecialty,coords.context,coords.modality,coords.weekday,
-                        overlap.0,overlap.1)?;
+                        overlap)?;
                     }
                 }
             },
