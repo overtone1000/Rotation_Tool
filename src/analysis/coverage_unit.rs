@@ -4,16 +4,16 @@ use crate::rotations::time_modifiers::TimeSinceMidnight;
 
 pub fn weekday_plus(base_weekday:chrono::Weekday, delta:i64)->chrono::Weekday{
     let mut retval = base_weekday;
-    if delta>1
+    if delta>0
     {
         for _ in 0..delta
         {
             retval=retval.succ();
         }
     }
-    else if delta<1
+    else if delta<0
     {
-        for _ in 0..delta
+        for _ in delta..0
         {
             retval=retval.pred();
         }

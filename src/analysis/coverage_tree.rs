@@ -127,9 +127,17 @@ impl CoverageAndWorkDay
 
         self.coverages.sort(); //Sorting puts them in order with respect to the day offset, then by start time and then last by end time!
 
+        if self.coverages.len()>1
+        {
+            println!("multiple coverages");
+        }
+
         let mut farthest_unit = self.coverages.first().expect("Checked");
         let mut farthest_end = &this_midnight;
         let mut started=false;
+
+        printerr!("The problem is here. Comparisons between TimeSinceMidnights are happening and not accounted for day offsets!");
+        !("Either convert coverage unit to a more absolute time type or account for offsets here. The former would be more rigorous and instructive.");
 
         for cu in &self.coverages
         {
