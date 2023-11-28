@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::rotations::time_modifiers::TimeSinceMidnight;
+use crate::rotations::time_modifiers::{TimeSinceMidnight, this_midnight, next_midnight};
 
 pub fn weekday_plus(base_weekday:chrono::Weekday, delta:i64)->chrono::Weekday{
     let mut retval = base_weekday;
@@ -24,8 +24,8 @@ pub fn weekday_plus(base_weekday:chrono::Weekday, delta:i64)->chrono::Weekday{
 #[derive(Debug,PartialEq,Eq)]
 pub struct CoverageUnit
 {
-    pub start:TimeSinceMidnight, //Make first so it's sorted on start time first!
-    pub end:TimeSinceMidnight, //Make second so it's sorted on end time next!
+    pub start:TimeSinceMidnight,
+    pub end:TimeSinceMidnight,
     rotation:String,
     weekday_offset:i64
 }
@@ -43,10 +43,50 @@ impl CoverageUnit
         }
     }
 
+    pub fn end_overlaps_other(&self, other:&CoverageUnit)->bool
+    {
+        self.weekday_offset>other.weekday_offset || 
+        (self.weekday_offset==other.weekday_offset && self.end>other.start)
+    }
+
+    pub fn gap_between_end_and_other(&self, other:&CoverageUnit)->bool
+    {
+        !(
+            (self.weekday_offset==other.weekday_offset-1 && self.end==next_midnight && other.start==this_midnight) ||  //checks next_midnight/this_midnight contiguous
+            (other.weekday_offset==self.weekday_offset-1 && self.end==this_midnight && other.start==next_midnight)     //checks this_midnight/next_midnight contiguous; it's an odd case that would require a zero-length coverage unit, but just check it      
+        )
+        &&
+        (
+            self.weekday_offset<other.weekday_offset ||
+            (self.end<other.start)
+        )
+    }
+
+    pub fn ends_after_other(&self, other:&CoverageUnit)->bool
+    {
+        self.weekday_offset>other.weekday_offset ||
+        self.end>other.end
+    }
+
+    pub fn starts_after_midnight_on_day_zero(&self)->bool
+    {
+        self.weekday_offset>0 ||
+        (self.weekday_offset==0 && 
+            self.start>this_midnight)
+    }
+
+    pub fn ends_before_midnight_on_day_one(&self)->bool
+    {
+        self.weekday_offset<0 ||
+        (self.weekday_offset==0 && 
+            self.end<next_midnight)
+    }
+
     fn get_shift_weekday(&self, base_weekday:chrono::Weekday)->chrono::Weekday
     {
         weekday_plus(base_weekday,-self.weekday_offset) //This back calculates the shift's weekday from the coverage info
     }
+
     pub fn to_string(&self, base_weekday:chrono::Weekday)->String
     {
         format!("{} ({})",self.rotation,self.get_shift_weekday(base_weekday))

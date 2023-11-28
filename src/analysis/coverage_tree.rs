@@ -101,8 +101,8 @@ pub enum CoverageError
 
 impl CoverageAndWorkDay
 {
-    fn get_compare(farthest_unit:&CoverageUnit, farthest_end:&TimeSinceMidnight,cu:&CoverageUnit,base_weekday:chrono::Weekday)->String{
-        farthest_unit.to_string(base_weekday) + " goes to " + farthest_end.to_string().as_str() + " and " + cu.to_string(base_weekday).as_str() + " starts at " + cu.start.to_string().as_str()
+    fn get_overlap_desc(farthest_unit:&CoverageUnit, cu:&CoverageUnit,base_weekday:chrono::Weekday)->String{
+        farthest_unit.to_string(base_weekday) + " goes to " + farthest_unit.end.to_string().as_str() + " and " + cu.to_string(base_weekday).as_str() + " starts at " + cu.start.to_string().as_str()
     }
 
     fn audit_coverage(&mut self, base_weekday:chrono::Weekday)->CoverageError
@@ -132,52 +132,45 @@ impl CoverageAndWorkDay
             println!("multiple coverages");
         }
 
-        let mut farthest_unit = self.coverages.first().expect("Checked");
-        let mut farthest_end = &this_midnight;
-        let mut started=false;
-
-        printerr!("The problem is here. Comparisons between TimeSinceMidnights are happening and not accounted for day offsets!");
-        !("Either convert coverage unit to a more absolute time type or account for offsets here. The former would be more rigorous and instructive.");
-
-        for cu in &self.coverages
+        match self.coverages.split_first()
         {
-            if started 
-            {
-                //Check overlap
-                if cu.start<*farthest_end
-                {
-                    retval.overlaps.push(CoverageAndWorkDay::get_compare(farthest_unit,farthest_end,&cu, base_weekday));
-                }
-
-                //Check gap
-                if cu.start>*farthest_end
-                {
-
-                    retval.gaps.push((*farthest_end,cu.start,CoverageAndWorkDay::get_compare(farthest_unit,farthest_end,&cu, base_weekday),rvus));
-                }
-            }
-            else {
+            Some((mut farthest_unit,rest)) => {
+                
                 //Check from midnight
-                if cu.start>*farthest_end
+                if farthest_unit.starts_after_midnight_on_day_zero()
                 {
-                    retval.gaps.push((*farthest_end,cu.start,cu.to_string(base_weekday) + " starts after midnight",rvus))
+                    retval.gaps.push((this_midnight,farthest_unit.start,farthest_unit.to_string(base_weekday) + " starts after midnight",rvus))
                 }
-                started=true;
-            }
 
-            //Adjust prior_end
-            if cu.end>=*farthest_end
-            {
-                farthest_end=&cu.end;
-                farthest_unit=cu;
-            }
-        }
+                for cu in rest
+                {
+                    //Check overlap
+                    if farthest_unit.end_overlaps_other(cu)
+                    {
+                        retval.overlaps.push(CoverageAndWorkDay::get_overlap_desc(farthest_unit,&cu, base_weekday));
+                    }
 
-        //Check through midnight
-        if *farthest_end<next_midnight
-        {
-            retval.gaps.push((*farthest_end,next_midnight,farthest_unit.to_string(base_weekday) + " ends before midnight",rvus));
-        }
+                    //Check gap
+                    if farthest_unit.gap_between_end_and_other(cu)
+                    {
+
+                        retval.gaps.push((farthest_unit.end,cu.start,CoverageAndWorkDay::get_overlap_desc(farthest_unit,&cu, base_weekday),rvus));
+                    }
+
+                    //Adjust prior_end
+                    if cu.ends_after_other(farthest_unit)
+                    {
+                        farthest_unit=cu;
+                    }
+                }
+                //Check through midnight
+                if farthest_unit.ends_before_midnight_on_day_one()
+                {
+                    retval.gaps.push((farthest_unit.end,next_midnight,farthest_unit.to_string(base_weekday) + " ends before midnight",rvus));
+                }
+            },
+            None => (),
+        };        
 
         return CoverageError::MalformedCoverage(retval);
     }
