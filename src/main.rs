@@ -9,7 +9,7 @@ use rvu_map::{RVUMap, MapCoords, buildMaps};
 use table::Table;
 use explain::*;
 
-use crate::{globals::file_names::{self, SOURCE_CACHE, COVERAGE_AUDIT_OUT}, error::RotationToolError, categorization::{buildSalemRVUMap, get_categories_list, get_locations_list, backup, buildSalemBVUMap}, time::{getTimeRowNormalDistWeights, getNormalDistWeights}, analysis::coverage_tree::{CoverageMap, CoordinateMap, CoverageCoordinates}};
+use crate::{globals::file_names::{self, SOURCE_CACHE, COVERAGE_AUDIT_OUT}, error::RotationToolError, categorization::{buildSalemRVUMap, get_categories_list, get_locations_list, backup, buildSalemBVUMap}, time::{getTimeRowNormalDistWeights, getNormalDistWeights}, analysis::coverage_tree::{CoverageMap, CoordinateMap, CoverageCoordinates}, rotations::time_modifiers::TimeSinceMidnight};
 
 mod globals;
 mod error;
@@ -95,6 +95,7 @@ fn cache_source()->Result<(), Box<dyn Error>> {
     println!("Finished caching source.");
     retval
 }
+
 fn main()->Result<(), Box<dyn Error>> {
     print!("{}[2J", 27 as char);
     for _ in 1..10
@@ -102,6 +103,7 @@ fn main()->Result<(), Box<dyn Error>> {
         println!();
     }
     println!("Starting.");
+
 
     //cache_source()?;
 

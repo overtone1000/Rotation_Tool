@@ -127,11 +127,7 @@ impl CoverageAndWorkDay
 
         self.coverages.sort(); //Sorting puts them in order with respect to the day offset, then by start time and then last by end time!
 
-        if self.coverages.len()>1
-        {
-            println!("multiple coverages");
-        }
-
+    
         match self.coverages.split_first()
         {
             Some((mut farthest_unit,rest)) => {
@@ -144,14 +140,11 @@ impl CoverageAndWorkDay
 
                 for cu in rest
                 {
-                    //Check overlap
-                    if farthest_unit.end_overlaps_other(cu)
+                    if farthest_unit.end_overlaps_other(cu)//Check overlap
                     {
                         retval.overlaps.push(CoverageAndWorkDay::get_overlap_desc(farthest_unit,&cu, base_weekday));
                     }
-
-                    //Check gap
-                    if farthest_unit.gap_between_end_and_other(cu)
+                    else if farthest_unit.gap_between_end_and_other(cu) //Check gap
                     {
 
                         retval.gaps.push((farthest_unit.end,cu.start,CoverageAndWorkDay::get_overlap_desc(farthest_unit,&cu, base_weekday),rvus));
@@ -616,19 +609,18 @@ impl CoverageMap
                                             Err(_) => return RotationManifestParseError::generate_boxed(0,"".to_string()),
                                         };
 
+                                        /*
                                         if coords==testcoords
                                         {
                                             println!("Found test coords");
                                         }
+                                        */
 
                                         for time_period in responsibility.time_periods.to_vec(&[])
                                         {
                                             let timespan = parse_time_span(time_period.as_str()).expect("Erroneous timespan in manifest.");
                                             let periods = timespan.instantiate_periods(weekday);
-                                            if periods.len()>1
-                                            {
-                                                println!("Multiple periods");
-                                            }
+                                            
                                             for (day_offset,start,end) in periods
                                             {
                                                 coords.weekday=weekday_plus(weekday,day_offset);

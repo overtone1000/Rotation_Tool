@@ -21,6 +21,10 @@ pub const next_midnight:TimeSinceMidnight = TimeSinceMidnight{minutes:24*60};
 
 impl TimeSinceMidnight
 {
+    pub fn new(minutes:u64)->TimeSinceMidnight{
+        TimeSinceMidnight { minutes: minutes }
+    }
+
     pub fn hours(&self)->u64{
         self.minutes/60
     }

@@ -47,7 +47,7 @@ impl CoverageUnit
     {
         //self.weekday_offset>other.weekday_offset || 
         //(self.weekday_offset==other.weekday_offset && self.end>other.start)
-        self.start>other.end
+        self.start > other.end
     }
 
     pub fn gap_between_end_and_other(&self, other:&CoverageUnit)->bool
