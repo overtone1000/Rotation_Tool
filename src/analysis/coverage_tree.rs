@@ -137,7 +137,7 @@ impl CoverageAndWorkDay
             Some((mut farthest_unit,rest)) => {
                 
                 //Check from midnight
-                if farthest_unit.starts_after_midnight_on_day_zero()
+                if farthest_unit.starts_after_this_midnight()
                 {
                     retval.gaps.push((this_midnight,farthest_unit.start,farthest_unit.to_string(base_weekday) + " starts after midnight",rvus))
                 }
@@ -164,7 +164,7 @@ impl CoverageAndWorkDay
                     }
                 }
                 //Check through midnight
-                if farthest_unit.ends_before_midnight_on_day_one()
+                if farthest_unit.ends_before_next_midnight()
                 {
                     retval.gaps.push((farthest_unit.end,next_midnight,farthest_unit.to_string(base_weekday) + " ends before midnight",rvus));
                 }
@@ -625,6 +625,10 @@ impl CoverageMap
                                         {
                                             let timespan = parse_time_span(time_period.as_str()).expect("Erroneous timespan in manifest.");
                                             let periods = timespan.instantiate_periods(weekday);
+                                            if periods.len()>1
+                                            {
+                                                println!("Multiple periods");
+                                            }
                                             for (day_offset,start,end) in periods
                                             {
                                                 coords.weekday=weekday_plus(weekday,day_offset);
