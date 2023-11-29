@@ -178,7 +178,7 @@ rotation_manifest:
     modalities: MG
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 00:00 PBD-24:00 PBD
+    - 00:00 PBD-24:00 PD
   - sites: SH
     subspecialties: Diagnostic Mamm/Mamm Procedure
     contexts: Outpatient
@@ -194,7 +194,7 @@ rotation_manifest:
     time_periods:
     - 07:15 CD-16:00 CD
   - sites: SH/WB
-    subspecialties: General
+    subspecialties: General/Intraop Fluoro
     contexts: Outpatient
     modalities: XR/RF/US
     days: Mon/Tue/Wed/Thu/Fri
@@ -261,15 +261,15 @@ rotation_manifest:
   - sites: All
     subspecialties: MSK
     contexts: ED
-    modalities: MR/US/DEXA
+    modalities: All
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 08:00 CD-16:00 CD
+    - 08:00 CD-16:30 CD
   # Monday
   - sites: All
     subspecialties: MSK
     contexts: Inpatient/Outpatient
-    modalities: MR/US/DEXA
+    modalities: All
     days: Mon
     time_periods:
     - 15:00 PBD-15:00 CD
@@ -277,7 +277,7 @@ rotation_manifest:
   - sites: All
     subspecialties: MSK
     contexts: Inpatient/Outpatient
-    modalities: MR/US/DEXA
+    modalities: All
     days: Tue/Wed/Thu/Fri
     time_periods:
     - 15:00 PD-15:00 CD
@@ -505,7 +505,14 @@ rotation_manifest:
     time_periods:
     - 06:00 CD-07:15 CD
   - sites: All
-    subspecialties: Neuro (Brain)/Complex CTA+MRA
+    subspecialties: MSK
+    contexts: ED
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 06:00 CD-08:00 CD
+  - sites: All
+    subspecialties: Neuro (Brain)/Neuro (Other)/Complex CTA+MRA
     contexts: ED/Inpatient
     modalities: CT/MR
     days: Mon/Tue/Wed/Thu/Fri
@@ -541,7 +548,7 @@ rotation_manifest:
     - 06:00 CD-09:30 CD
     - 12:00 CD-13:00 CD
   - sites: All
-    subspecialties: General
+    subspecialties: General/Intraop Fluoro
     contexts: ED/Wet Read
     modalities: CT/US/XR/NM/RF
     days: Mon/Tue/Wed/Thu/Fri
@@ -579,6 +586,13 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 14:00 CD-20:00 CD
+  - sites: SH/WVH
+    subspecialties: Intraop Fluoro
+    contexts: All
+    modalities: XR/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 14:00 CD-20:00 CD
   - sites: SH
     subspecialties: General
     contexts: Inpatient
@@ -590,13 +604,6 @@ rotation_manifest:
     subspecialties: General
     contexts: Inpatient
     modalities: XR/US/CT
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 15:00 CD-20:00 CD
-  - sites: SH/WVH
-    subspecialties: Intraop Fluoro
-    contexts: All
-    modalities: XR/RF
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 15:00 CD-20:00 CD
@@ -650,7 +657,7 @@ rotation_manifest:
   - sites: All
     subspecialties: General/Complex CTA+MRA/MSK/Neuro (Brain)/Neuro (Other)/Diagnostic Mamm/Intraop Fluoro
     contexts: ED/Wet Read/Inpatient
-    modalities: CT/US/XR/MR/NM/RF/MG/US
+    modalities: CT/US/XR/MR/NM/RF/MG/US/DEXA
     days: Sun/Mon/Tue/Wed/Thu
     time_periods:
     - 22:00 CD-06:00 ND
@@ -664,7 +671,7 @@ rotation_manifest:
   - sites: All
     subspecialties: General/Complex CTA+MRA/MSK/Neuro (Brain)/Neuro (Other)/Diagnostic Mamm/Intraop Fluoro
     contexts: ED/Wet Read/Inpatient
-    modalities: CT/US/XR/MR/NM/RF/MG/US
+    modalities: CT/US/XR/MR/NM/RF/MG/US/DEXA
     days: Fri/Sat
     time_periods:
     - 22:00 CD-07:00 ND
@@ -737,16 +744,23 @@ rotation_manifest:
   location: SH
   responsibilities:
   - sites: All
-    subspecialties: General/MSK/Neuro (Brain)/Neuro (Other)/Intraop Fluoro/Complex CTA+MRA
+    subspecialties: General/MSK/Neuro (Brain)/Neuro (Other)/Complex CTA+MRA
     contexts: ED/Wet Read
     modalities: CT/US/XR/NM/MR/RF
     days: Sat/Sun
     time_periods:
     - 11:00 CD-15:30 CD
   - sites: All
-    subspecialties: General/MSK/Neuro (Brain)/Neuro (Other)/Intraop Fluoro/Complex CTA+MRA
+    subspecialties: General/MSK/Neuro (Brain)/Neuro (Other)/Complex CTA+MRA
     contexts: Inpatient
     modalities: CT/US/XR/NM/MR/RF
+    days: Sat/Sun
+    time_periods:
+    - 11:00 CD-19:00 CD
+  - sites: SH/WVH
+    subspecialties: Intraop Fluoro
+    contexts: All
+    modalities: XR/RF
     days: Sat/Sun
     time_periods:
     - 11:00 CD-19:00 CD
@@ -826,7 +840,7 @@ rotation_manifest:
   - sites: All
     subspecialties: General/Neuro (Brain)/Neuro (Other)/MSK/Complex CTA+MRA
     contexts: ED
-    modalities: CT/NM/MR
+    modalities: CT/NM/MR/DEXA
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 16:00 CD-20:00 CD
@@ -840,7 +854,14 @@ rotation_manifest:
   - sites: All
     subspecialties: General/Neuro (Brain)/Neuro (Other)/MSK/Complex CTA+MRA/Diagnostic Mamm/Mamm Procedure
     contexts: ED/Inpatient/Wet Read
-    modalities: CT/US/XR/MR/NM/RF/MG
+    modalities: CT/US/XR/MR/NM/RF/MG/DEXA
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 20:00 CD-22:00 CD
+  - sites: SH/WVH
+    subspecialties: Intraop Fluoro
+    contexts: All
+    modalities: XR/RF
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 20:00 CD-22:00 CD
@@ -856,6 +877,13 @@ rotation_manifest:
     subspecialties: General/Neuro (Brain)/Neuro (Other)/MSK/Complex CTA+MRA/Diagnostic Mamm/Mamm Procedure
     contexts: Inpatient
     modalities: CT/US/XR/MR/NM/RF/MG
+    days: Sat/Sun
+    time_periods:
+    - 19:00 CD-22:00 CD
+  - sites: SH/WVH
+    subspecialties: Intraop Fluoro
+    contexts: All
+    modalities: XR/RF
     days: Sat/Sun
     time_periods:
     - 19:00 CD-22:00 CD
@@ -990,6 +1018,18 @@ rotation_manifest:
   comments:
   - These subspecialty exams are read through AH0C.
   - This list is not complete as many subspecialty exam types cannot be differentiated based on the available fields.
+- rotation: Schedule Blocks
+  location: n/a
+  responsibilities:
+  - sites: All
+    subspecialties: Non-Radiology
+    contexts: All
+    modalities: All
+    days: All
+    time_periods:
+    - 00:00 CD-24:00 CD
+  comments:
+  - These are studies that are not interpreted by a radiologist.
 - rotation: Schedule Blocks
   location: n/a
   responsibilities:

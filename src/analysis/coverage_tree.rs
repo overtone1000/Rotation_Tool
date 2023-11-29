@@ -16,7 +16,7 @@ use crate::rotations::time_modifiers::{this_midnight, TimeSinceMidnight, next_mi
 use crate::rotations::timespan::{parse_time_span};
 use crate::{processed_source::ProcessedSource, globals::{main_headers, SITES, MODALITIES, tpc_headers, BUSINESS_DAYS}, constraints::ConstraintSet, dates::business_days_per_year, categorization::{buildSalemRVUMap, buildSalemBVUMap}};
 
-use super::coverage_unit::{CoverageUnit, weekday_plus};
+use super::temporal_coverage::{CoverageUnit, weekday_plus, TemporalCoverageUnit};
 use super::source_error::SourceError;
 
 #[derive(Eq, Hash, PartialEq)]
@@ -78,10 +78,15 @@ pub struct WorkUnit
     bvu:f64
 }
 
-#[derive(Default,Debug)]
-pub struct CoverageAndWorkDay
+pub trait CoverageUnit
 {
-    coverages:Vec<CoverageUnit>,
+
+}
+
+#[derive(Default,Debug)]
+pub struct CoverageAndWorkDay<T:CoverageUnit>
+{
+    coverages:Vec<T>,
     work:Vec<WorkUnit>
 }
 
@@ -101,7 +106,7 @@ pub enum CoverageError
 
 impl CoverageAndWorkDay
 {
-    fn get_overlap_desc(farthest_unit:&CoverageUnit, cu:&CoverageUnit,base_weekday:chrono::Weekday)->String{
+    fn get_overlap_desc(farthest_unit:&TemporalCoverageUnit, cu:&TemporalCoverageUnit,base_weekday:chrono::Weekday)->String{
         farthest_unit.to_string(base_weekday) + " goes to " + farthest_unit.end.to_string().as_str() + " and " + cu.to_string(base_weekday).as_str() + " starts at " + cu.start.to_string().as_str()
     }
 
@@ -629,7 +634,7 @@ impl CoverageMap
                                                     start,
                                                     end,
                                                     rotation_description.rotation.to_string(),
-                                                    day_offset
+                                                    responsibility.fraction
                                                 );
                                                 
                                                 self.add_coverage(&coords, coverage)

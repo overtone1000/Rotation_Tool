@@ -21,36 +21,45 @@ pub fn weekday_plus(base_weekday:chrono::Weekday, delta:i64)->chrono::Weekday{
     retval
 }
 
-#[derive(Debug,PartialEq,Eq)]
-pub struct CoverageUnit
+#[derive(Debug,PartialEq)]
+pub struct TemporalCoverageUnit
 {
     pub start:TimeSinceMidnight,
     pub end:TimeSinceMidnight,
-    rotation:String,
+    rotation:String
     //weekday_offset:i64
 }
 
-impl CoverageUnit
+#[derive(Debug,PartialEq)]
+pub struct FractionalCoverageUnit
 {
-    pub fn create(start:TimeSinceMidnight,end:TimeSinceMidnight,rotation:String,offset:i64)->CoverageUnit
+    rotation:String,
+    fraction:f64
+}
+
+impl Eq for TemporalCoverageUnit{}
+
+impl TemporalCoverageUnit
+{
+    pub fn create(start:TimeSinceMidnight,end:TimeSinceMidnight,rotation:String)->TemporalCoverageUnit
     {
-        CoverageUnit
+        TemporalCoverageUnit
         {
             start:start,
             end:end,
-            rotation:rotation,
+            rotation:rotation
             //weekday_offset:offset //This is limited to one 24 hour period inclusive on each end.
         }
     }
 
-    pub fn end_overlaps_other(&self, other:&CoverageUnit)->bool
+    pub fn end_overlaps_other(&self, other:&TemporalCoverageUnit)->bool
     {
         //self.weekday_offset>other.weekday_offset || 
         //(self.weekday_offset==other.weekday_offset && self.end>other.start)
         self.start > other.end
     }
 
-    pub fn gap_between_end_and_other(&self, other:&CoverageUnit)->bool
+    pub fn gap_between_end_and_other(&self, other:&TemporalCoverageUnit)->bool
     {
         /*
         !(
@@ -66,7 +75,7 @@ impl CoverageUnit
         self.end<other.start
     }
 
-    pub fn ends_after_other(&self, other:&CoverageUnit)->bool
+    pub fn ends_after_other(&self, other:&TemporalCoverageUnit)->bool
     {
         //self.weekday_offset>other.weekday_offset ||
         self.end>other.end
@@ -105,7 +114,7 @@ impl CoverageUnit
     }
 }
 
-impl PartialOrd for CoverageUnit
+impl PartialOrd for TemporalCoverageUnit
 {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         match self.start.partial_cmp(&other.start) {
@@ -120,7 +129,7 @@ impl PartialOrd for CoverageUnit
     }
 }
 
-impl Ord for CoverageUnit
+impl Ord for TemporalCoverageUnit
 {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         match self.partial_cmp(other)

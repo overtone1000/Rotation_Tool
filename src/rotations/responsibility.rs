@@ -15,6 +15,7 @@ pub struct RotationResponsibility
     pub contexts:StringTypes,
     pub modalities:StringTypes,
     pub days:StringTypes,
+    pub fraction:Option<f64>,
     pub time_periods:StringTypes,
 }
 

@@ -84,6 +84,7 @@ impl Manifest
                         contexts:StringTypes::new_slash_separated_string_vec("Context 1/Context 2"),
                         modalities:StringTypes::new_slash_separated_string_vec("Modality 1/Modality 2"),
                         time_periods:StringTypes::Array(vec!["17:00 PBD-12:00 CD".to_string(), "13:00 CD-17:00 CD".to_string()]),
+                        fraction:None,
                         days:
                             StringTypes::new_slash_separated_string_vec(
                                 &(weekdays::weekday_to_str(chrono::Weekday::Mon)+"/"+
@@ -99,6 +100,7 @@ impl Manifest
                         contexts:StringTypes::Array(vec!["Context A".to_string(),"Context B".to_string()]),
                         modalities:StringTypes::Array(vec!["Modality A".to_string(),"Modality B".to_string()]),
                         time_periods:StringTypes::Array(vec!["17:00 PD-12:00 CD".to_string(), "13:00 CD-17:00 CD".to_string()]),
+                        fraction:None,
                         days:StringTypes::Array(vec![
                             weekdays::weekday_to_str(chrono::Weekday::Sat),
                             weekdays::weekday_to_str(chrono::Weekday::Sun)
