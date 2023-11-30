@@ -286,8 +286,7 @@ rotation_manifest:
     contexts: All
     modalities: MG
     days: Tue/Wed/Thu/Fri
-    time_periods:
-    - 12:00 PBD-24:00 PBD
+    fraction: 0.1
   - sites: SRC
     subspecialties: General
     contexts: Wet Read
@@ -328,8 +327,7 @@ rotation_manifest:
     contexts: All
     modalities: All
     days: Mon
-    time_periods:
-    - 00:00 PBD-24:00 PBD
+    fraction: 0.2
   - sites: SRC
     subspecialties: General
     contexts: Wet Read
@@ -343,8 +341,7 @@ rotation_manifest:
     contexts: All
     modalities: All
     days: Tue/Wed/Thu/Fri
-    time_periods:
-    - 00:00 PBD-12:00 PBD
+    fraction: 0.7
   - sites: SRC
     subspecialties: General
     contexts: All
@@ -1018,7 +1015,7 @@ rotation_manifest:
   comments:
   - These subspecialty exams are read through AH0C.
   - This list is not complete as many subspecialty exam types cannot be differentiated based on the available fields.
-- rotation: Schedule Blocks
+- rotation: Non-Radiologist Interpreted
   location: n/a
   responsibilities:
   - sites: All

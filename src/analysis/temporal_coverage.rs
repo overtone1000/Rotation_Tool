@@ -30,13 +30,6 @@ pub struct TemporalCoverageUnit
     //weekday_offset:i64
 }
 
-#[derive(Debug,PartialEq)]
-pub struct FractionalCoverageUnit
-{
-    rotation:String,
-    fraction:f64
-}
-
 impl Eq for TemporalCoverageUnit{}
 
 impl TemporalCoverageUnit
@@ -107,6 +100,10 @@ impl TemporalCoverageUnit
         weekday_plus(base_weekday,-self.weekday_offset) //This back calculates the shift's weekday from the coverage info
     }
     */
+
+    pub fn get_overlap_desc(farthest_unit:&TemporalCoverageUnit, cu:&TemporalCoverageUnit,base_weekday:chrono::Weekday)->String{
+        farthest_unit.to_string(base_weekday) + " goes to " + farthest_unit.end.to_string().as_str() + " and " + cu.to_string(base_weekday).as_str() + " starts at " + cu.start.to_string().as_str()
+    }
 
     pub fn to_string(&self, base_weekday:chrono::Weekday)->String
     {
