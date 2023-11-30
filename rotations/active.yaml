@@ -286,7 +286,7 @@ rotation_manifest:
     contexts: All
     modalities: MG
     days: Tue/Wed/Thu/Fri
-    fraction: 0.1
+    weekly_fraction: 0.1
   - sites: SRC
     subspecialties: General
     contexts: Wet Read
@@ -327,7 +327,7 @@ rotation_manifest:
     contexts: All
     modalities: All
     days: Mon
-    fraction: 0.2
+    weekly_fraction: 0.2
   - sites: SRC
     subspecialties: General
     contexts: Wet Read
@@ -341,7 +341,7 @@ rotation_manifest:
     contexts: All
     modalities: All
     days: Tue/Wed/Thu/Fri
-    fraction: 0.7
+    weekly_fraction: 0.1
   - sites: SRC
     subspecialties: General
     contexts: All

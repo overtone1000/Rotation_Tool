@@ -21,7 +21,7 @@ pub fn weekday_plus(base_weekday:chrono::Weekday, delta:i64)->chrono::Weekday{
     retval
 }
 
-#[derive(Debug,PartialEq)]
+#[derive(Debug,PartialEq,Clone)]
 pub struct TemporalCoverageUnit
 {
     pub start:TimeSinceMidnight,

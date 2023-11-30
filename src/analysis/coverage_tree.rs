@@ -9,7 +9,7 @@ use std::str::FromStr;
 
 use chrono::{NaiveDateTime, Datelike, NaiveDate, Duration};
 
-use crate::globals;
+use crate::globals::{self, ALL_DAYS};
 use crate::rotations::manifest::Manifest;
 use crate::rotations::rotation_error::RotationManifestParseError;
 use crate::rotations::time_modifiers::{this_midnight, TimeSinceMidnight, next_midnight};
@@ -20,7 +20,7 @@ use super::fractional_coverage::{FractionalCoverageUnit, self};
 use super::temporal_coverage::{weekday_plus, TemporalCoverageUnit};
 use super::source_error::SourceError;
 
-#[derive(Eq, Hash, PartialEq)]
+#[derive(Eq, Hash, PartialEq, Clone)]
 pub struct CoverageCoordinates
 {
     site:String,
@@ -79,10 +79,11 @@ pub struct WorkUnit
     bvu:f64
 }
 
+#[derive(Clone)]
 pub enum CoverageUnit
 {
     Temporal(TemporalCoverageUnit),
-    Fractional(FractionalCoverageUnit)
+    WeekFraction(FractionalCoverageUnit)
 }
 
 #[derive(Debug)]
@@ -104,7 +105,7 @@ impl Coverage
                     CoverageUnit::Temporal(new_coverage) => {
                         coverages.push(new_coverage);
                     },
-                    CoverageUnit::Fractional(new_coverage) => {
+                    CoverageUnit::WeekFraction(new_coverage) => {
                         return SourceError::generate_boxed("Mixing fractional and temporal coverage types is not allowed.".to_string());
                     },
                 }
@@ -115,7 +116,7 @@ impl Coverage
                     CoverageUnit::Temporal(new_coverage) => {
                         return SourceError::generate_boxed("Mixing fractional and temporal coverage types is not allowed.".to_string());
                     },
-                    CoverageUnit::Fractional(new_coverage) => {
+                    CoverageUnit::WeekFraction(new_coverage) => {
                         coverages.push(new_coverage);
                     },
                 }
@@ -150,7 +151,7 @@ impl CoverageAndWorkDay
                     CoverageUnit::Temporal(_) => {
                         Coverage::Temporal(Vec::new())
                     },
-                    CoverageUnit::Fractional(_) => {
+                    CoverageUnit::WeekFraction(_) => {
                         Coverage::Fractional(Vec::new())
                     }
                 };
@@ -268,7 +269,7 @@ impl CoverageAndWorkDay
 pub trait WorkCoverageMap
 {
     fn add_work(&mut self,coords:&CoverageCoordinates,work:WorkUnit);
-    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit);
+    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit)->Result<(),Box<dyn std::error::Error>>;
 }
 pub trait  CoordinateMap<'a,T,U> 
     where T:'a + Debug + Eq + PartialEq + Hash,
@@ -313,8 +314,27 @@ impl WorkCoverageMap for WeekdayMap
     fn add_work(&mut self,coords:&CoverageCoordinates,work:WorkUnit){
         self.get_branch(coords).add_work(work);
     }
-    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit){
-        self.get_branch(coords).add_coverage(coverage);
+    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit)->Result<(),Box<dyn std::error::Error>>{
+        match &coverage{
+            CoverageUnit::Temporal(_) => 
+            {
+                self.get_branch(coords).add_coverage(coverage)
+            },
+            CoverageUnit::WeekFraction(_) => 
+            {
+                for weekday in ALL_DAYS
+                {
+                    let mut pseudocoords = coords.clone();
+                    pseudocoords.weekday=**weekday;
+                    match self.get_branch(&pseudocoords).add_coverage(coverage.to_owned())
+                    {
+                        Ok(_)=>(),
+                        Err(e)=>{return Err(e);}
+                    }
+                }
+                Ok(())
+            },
+        }            
     }
 }
 impl <'a> CoordinateMap<'a,chrono::Weekday,CoverageAndWorkDay> for WeekdayMap
@@ -346,7 +366,7 @@ impl WorkCoverageMap for ModalityMap{
         self.get_branch(coords).add_work(coords, work)
     }
 
-    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit) {
+    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit)->Result<(),Box<dyn std::error::Error>> {
         self.get_branch(coords).add_coverage(coords, coverage)
     }
 }
@@ -369,7 +389,7 @@ impl WorkCoverageMap for ContextMap{
         self.get_branch(coords).add_work(coords, work)
     }
 
-    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit) {
+    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit) ->Result<(),Box<dyn std::error::Error>>{
         self.get_branch(coords).add_coverage(coords, coverage)
     }
 }
@@ -393,7 +413,7 @@ impl WorkCoverageMap for SubspecialtyMap{
         self.get_branch(coords).add_work(coords, work)
     }
 
-    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit) {
+    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit)->Result<(),Box<dyn std::error::Error>> {
         self.get_branch(coords).add_coverage(coords, coverage)
     }
 }
@@ -733,7 +753,11 @@ impl CoverageMap
                                                             rotation_description.rotation.to_string()
                                                         );
                                                         
-                                                        self.add_coverage(&coords, CoverageUnit::Temporal(coverage))
+                                                        match self.add_coverage(&coords, CoverageUnit::Temporal(coverage))
+                                                        {
+                                                            Ok(_) => (),
+                                                            Err(e) => {return Err(e);},
+                                                        }
                                                     }
                                                 }
                                             }
@@ -749,7 +773,7 @@ impl CoverageMap
                                                     rotation_description.rotation.to_string(),
                                                     fraction.to_owned()
                                                 );
-                                                self.add_coverage(&coords, CoverageUnit::Fractional(coverage));
+                                                self.add_coverage(&coords, CoverageUnit::WeekFraction(coverage));
                                             },
                                             None => (),
                                         }
@@ -878,7 +902,7 @@ impl WorkCoverageMap for CoverageMap{
     fn add_work(&mut self,coords:&CoverageCoordinates,work:WorkUnit){
         self.get_branch(coords).add_work(coords,work);
     }
-    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit){
-        self.get_branch(coords).add_coverage(coords, coverage);
+    fn add_coverage(&mut self,coords:&CoverageCoordinates,coverage:CoverageUnit)->Result<(),Box<dyn std::error::Error>>{
+        self.get_branch(coords).add_coverage(coords, coverage)
     }
 }
