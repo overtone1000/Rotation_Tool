@@ -33,6 +33,10 @@ impl TimeSinceMidnight
         self.minutes%60
     }
 
+    pub fn from_minutes(minutes:u64)->TimeSinceMidnight{
+        TimeSinceMidnight { minutes: minutes }
+    }
+
     pub fn parse_from_str(str:&str)->Result<TimeSinceMidnight,()>{
         let split:Vec<&str> = str.split(":").collect();
         if split.len()!=2 {return Err(());}
@@ -169,13 +173,13 @@ impl RelativeTime
                     _ => 0
                 }
             },
-            RelativeTime::PreviousDay(x) => {
+            RelativeTime::PreviousDay(_) => {
                 -1
             },
-            RelativeTime::CurrentDay(x) => {
+            RelativeTime::CurrentDay(_) => {
                 0
             },
-            RelativeTime::NextDay(x) => {
+            RelativeTime::NextDay(_) => {
                 1
             },
         }

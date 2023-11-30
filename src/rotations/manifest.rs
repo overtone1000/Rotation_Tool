@@ -1,5 +1,5 @@
 use std::{arch::x86_64, fmt};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashSet};
 use std::error::Error;
 use std::fs;
 use std::io::Read;
@@ -13,7 +13,7 @@ use super::baseline::RotationBaseline;
 use super::description::RotationDescription;
 use super::responsibility::{RotationResponsibility, self};
 use super::special::{self, weekdays};
-use super::stringtypes::{StringTypes, SlashSeparatedStringVec};
+use super::stringtypes::{StringTypes, SlashSeparatedStringSet};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -83,7 +83,7 @@ impl Manifest
                         subspecialties:StringTypes::new_slash_separated_string_vec("Subspecialty 1/Subspecialty 2"),
                         contexts:StringTypes::new_slash_separated_string_vec("Context 1/Context 2"),
                         modalities:StringTypes::new_slash_separated_string_vec("Modality 1/Modality 2"),
-                        time_periods:Some(StringTypes::Array(vec!["17:00 PBD-12:00 CD".to_string(), "13:00 CD-17:00 CD".to_string()])),
+                        time_periods:Some(StringTypes::Array(HashSet::from(["17:00 PBD-12:00 CD".to_string(), "13:00 CD-17:00 CD".to_string()]))),
                         weekly_fraction:None,
                         days:
                             StringTypes::new_slash_separated_string_vec(
@@ -95,20 +95,20 @@ impl Manifest
                             ),
                     },
                     RotationResponsibility{
-                        sites:StringTypes::Array(vec!["Site A".to_string(),"Site B".to_string()]),
-                        subspecialties:StringTypes::Array(vec!["Specialty A".to_string(),"Specialty B".to_string()]),
-                        contexts:StringTypes::Array(vec!["Context A".to_string(),"Context B".to_string()]),
-                        modalities:StringTypes::Array(vec!["Modality A".to_string(),"Modality B".to_string()]),
-                        time_periods:Some(StringTypes::Array(vec!["17:00 PD-12:00 CD".to_string(), "13:00 CD-17:00 CD".to_string()])),
+                        sites:StringTypes::Array(HashSet::from(["Site A".to_string(),"Site B".to_string()])),
+                        subspecialties:StringTypes::Array(HashSet::from(["Specialty A".to_string(),"Specialty B".to_string()])),
+                        contexts:StringTypes::Array(HashSet::from(["Context A".to_string(),"Context B".to_string()])),
+                        modalities:StringTypes::Array(HashSet::from(["Modality A".to_string(),"Modality B".to_string()])),
+                        time_periods:Some(StringTypes::Array(HashSet::from(["17:00 PD-12:00 CD".to_string(), "13:00 CD-17:00 CD".to_string()]))),
                         weekly_fraction:None,
-                        days:StringTypes::Array(vec![
+                        days:StringTypes::Array(HashSet::from([
                             weekdays::weekday_to_str(chrono::Weekday::Sat),
                             weekdays::weekday_to_str(chrono::Weekday::Sun)
                             ]
-                        )
+                        ))
                     }
                 ]),
-                comments:Some(vec!("Comments can go here.".to_string(),"Comments are an array.".to_string(),"But this section can be omitted entirely.".to_string()))
+                comments:Some(HashSet::from(["Comments can go here.".to_string(),"Comments are an array.".to_string(),"But this section can be omitted entirely.".to_string()]))
             }
         );
 

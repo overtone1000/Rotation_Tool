@@ -26,21 +26,22 @@ pub struct TemporalCoverageUnit
 {
     pub start:TimeSinceMidnight,
     pub end:TimeSinceMidnight,
-    rotation:String
-    //weekday_offset:i64
+    rotation:String,
+    rotation_day:chrono::Weekday
 }
 
 impl Eq for TemporalCoverageUnit{}
 
 impl TemporalCoverageUnit
 {
-    pub fn create(start:TimeSinceMidnight,end:TimeSinceMidnight,rotation:String)->TemporalCoverageUnit
+    pub fn create(start:TimeSinceMidnight,end:TimeSinceMidnight,rotation:String,day:chrono::Weekday)->TemporalCoverageUnit
     {
         TemporalCoverageUnit
         {
             start:start,
             end:end,
-            rotation:rotation
+            rotation:rotation,
+            rotation_day:day
             //weekday_offset:offset //This is limited to one 24 hour period inclusive on each end.
         }
     }
@@ -49,7 +50,7 @@ impl TemporalCoverageUnit
     {
         //self.weekday_offset>other.weekday_offset || 
         //(self.weekday_offset==other.weekday_offset && self.end>other.start)
-        self.start > other.end
+        self.end > other.start
     }
 
     pub fn gap_between_end_and_other(&self, other:&TemporalCoverageUnit)->bool
@@ -101,13 +102,13 @@ impl TemporalCoverageUnit
     }
     */
 
-    pub fn get_overlap_desc(farthest_unit:&TemporalCoverageUnit, cu:&TemporalCoverageUnit,base_weekday:chrono::Weekday)->String{
-        farthest_unit.to_string(base_weekday) + " goes to " + farthest_unit.end.to_string().as_str() + " and " + cu.to_string(base_weekday).as_str() + " starts at " + cu.start.to_string().as_str()
+    pub fn get_overlap_desc(farthest_unit:&TemporalCoverageUnit, cu:&TemporalCoverageUnit)->String{
+        farthest_unit.to_string() + " goes to " + farthest_unit.end.to_string().as_str() + " and " + cu.to_string().as_str() + " starts at " + cu.start.to_string().as_str()
     }
 
-    pub fn to_string(&self, base_weekday:chrono::Weekday)->String
+    pub fn to_string(&self)->String
     {
-        format!("{}",self.rotation)
+        format!("{} ({})",self.rotation, self.rotation_day)
     }
 }
 

@@ -7,13 +7,13 @@ use std::hash::Hash;
 use std::io::Write;
 use std::str::FromStr;
 
-use chrono::{NaiveDateTime, Datelike, NaiveDate, Duration};
+use chrono::{NaiveDateTime, Datelike, NaiveDate, Duration, Timelike};
 
 use crate::globals::{self, ALL_DAYS};
 use crate::rotations::manifest::Manifest;
 use crate::rotations::rotation_error::RotationManifestParseError;
 use crate::rotations::time_modifiers::{this_midnight, TimeSinceMidnight, next_midnight};
-use crate::rotations::timespan::{parse_time_span};
+use crate::rotations::timespan::{parse_time_span, Timespan};
 use crate::{processed_source::ProcessedSource, globals::{main_headers, SITES, MODALITIES, tpc_headers, BUSINESS_DAYS}, constraints::ConstraintSet, dates::business_days_per_year, categorization::{buildSalemRVUMap, buildSalemBVUMap}};
 
 use super::fractional_coverage::{FractionalCoverageUnit, self};
@@ -187,29 +187,62 @@ pub enum CoverageError
 
 impl CoverageAndWorkDay
 {
-    fn audit_coverage(&mut self, base_weekday:chrono::Weekday)->CoverageError
+    fn sort_coverage(&mut self)->()
+    {
+        match &mut self.coverages
+        {
+            Some(coverages)=>{
+                match coverages
+                {
+                    Coverage::Temporal(temporal_coverages) => {
+                        temporal_coverages.sort();
+                    },
+                    Coverage::Fractional(_) => ()
+                }
+            }
+            None=>()
+        }
+    }
+
+    fn get_work_in_timespan(&self, start:TimeSinceMidnight, stop:TimeSinceMidnight)->Vec<&WorkUnit>{
+        let mut retval:Vec<&WorkUnit>=Vec::new();
+        for work in &self.work
+        {
+            let tsm = TimeSinceMidnight::from_minutes((work.datetime.num_seconds_from_midnight()/60).into());
+            if start <= tsm && tsm < stop
+            {
+                retval.push(work);
+            }
+        }
+        retval
+    }
+
+    fn get_rvus_in_timespan(&self, start:TimeSinceMidnight, stop:TimeSinceMidnight)->f64{
+        let mut retval:f64=0.0;
+        for work in self.get_work_in_timespan(start, stop)
+        {
+            retval+=work.rvu;
+        }
+        retval
+    }
+
+    fn audit_coverage(&mut self)->CoverageError
     {
         if self.work.is_empty()
         {
             return CoverageError::NoWork;
         }
 
-        let mut rvus:f64=0.0;
-        for wu in &self.work
-        {
-            rvus+=wu.rvu;
-        }
+        self.sort_coverage();
 
-        match &mut self.coverages
+        match &self.coverages
         {
-            None=>{return CoverageError::NoCoverage(rvus);}
+            None=>{return CoverageError::NoCoverage(self.get_rvus_in_timespan(this_midnight, next_midnight));}
             Some(coverages)=>{
                 let mut retval = MalformedCoverage::default();
                 match coverages
                 {
-                    Coverage::Temporal(temporal_coverages) => {
-                        temporal_coverages.sort(); //Sorting puts them in order with respect to the day offset, then by start time and then last by end time!
-                    
+                    Coverage::Temporal(temporal_coverages) => {                    
                         match temporal_coverages.split_first()
                         {
                             Some((mut farthest_unit,rest)) => {
@@ -217,19 +250,20 @@ impl CoverageAndWorkDay
                                 //Check from midnight
                                 if farthest_unit.starts_after_this_midnight()
                                 {
-                                    retval.gaps.push((this_midnight,farthest_unit.start,farthest_unit.to_string(base_weekday) + " starts after midnight",rvus))
+                                    let rvus = &self.get_rvus_in_timespan(this_midnight, farthest_unit.start);
+                                    retval.gaps.push((this_midnight,farthest_unit.start,farthest_unit.to_string() + " starts after midnight",*rvus))
                                 }
                 
                                 for cu in rest
                                 {
                                     if farthest_unit.end_overlaps_other(cu)//Check overlap
                                     {
-                                        retval.overlaps.push(TemporalCoverageUnit::get_overlap_desc(farthest_unit,&cu, base_weekday));
+                                        retval.overlaps.push(TemporalCoverageUnit::get_overlap_desc(farthest_unit,&cu, ));
                                     }
                                     else if farthest_unit.gap_between_end_and_other(cu) //Check gap
                                     {
-                
-                                        retval.gaps.push((farthest_unit.end,cu.start,TemporalCoverageUnit::get_overlap_desc(farthest_unit,&cu, base_weekday),rvus));
+                                        let rvus = &self.get_rvus_in_timespan(farthest_unit.end, cu.start);
+                                        retval.gaps.push((farthest_unit.end,cu.start,TemporalCoverageUnit::get_overlap_desc(farthest_unit,&cu, ),*rvus));
                                     }
                 
                                     //Adjust prior_end
@@ -241,7 +275,8 @@ impl CoverageAndWorkDay
                                 //Check through midnight
                                 if farthest_unit.ends_before_next_midnight()
                                 {
-                                    retval.gaps.push((farthest_unit.end,next_midnight,farthest_unit.to_string(base_weekday) + " ends before midnight",rvus));
+                                    let rvus = &self.get_rvus_in_timespan(farthest_unit.end, next_midnight);
+                                    retval.gaps.push((farthest_unit.end,next_midnight,farthest_unit.to_string() + " ends before midnight",*rvus));
                                 }
                             },
                             None => (),
@@ -421,8 +456,8 @@ impl WorkCoverageMap for SubspecialtyMap{
 fn testcoords()->CoverageCoordinates {CoverageCoordinates {
     site:"SH".to_string(),
     subspecialty:"Diagnostic Mamm".to_string(),
-    context:"Inpatient".to_string(),
-    modality:"MG".to_string(),
+    context:"ED".to_string(),
+    modality:"US".to_string(),
     weekday:chrono::Weekday::Mon
 }}
 
@@ -750,7 +785,8 @@ impl CoverageMap
                                                         let coverage=TemporalCoverageUnit::create(
                                                             start,
                                                             end,
-                                                            rotation_description.rotation.to_string()
+                                                            rotation_description.rotation.to_string(),
+                                                            weekday //the NOMINAL weekday
                                                         );
                                                         
                                                         match self.add_coverage(&coords, CoverageUnit::Temporal(coverage))
@@ -815,14 +851,7 @@ impl CoverageMap
                             weekday:*weekday
                         };
 
-                        /*
-                        if coords == testcoords
-                        {
-                            println!("Found test element.");
-                        }
-                        */
-
-                        let errs=coverage_and_workday.audit_coverage(*weekday);
+                        let errs=coverage_and_workday.audit_coverage();
                         
                         retval.insert(coords, errs);
                     }
