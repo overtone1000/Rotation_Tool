@@ -12,6 +12,7 @@ pub mod file_names
     pub(crate) const EXAMPLE_ROTATION_DESCRIPTIONS:&str = "./rotations/Example.yml";
     pub(crate) const SOURCE_CACHE:&str = "./cache/ProcessedSource.yml";
     pub(crate) const COVERAGE_AUDIT_OUT:&str = "./err/Coverage_Audit";
+    pub(crate) const COVERAGE_ANALYSIS_OUT:&str = "./output/WeekAnalysis";
 }
 
 pub mod main_headers {

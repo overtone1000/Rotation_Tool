@@ -5,6 +5,7 @@ use std::fmt::Debug;
 
 use std::hash::Hash;
 use std::io::Write;
+use std::ops::{Add, AddAssign, MulAssign};
 use std::str::FromStr;
 
 use chrono::{NaiveDateTime, Datelike, NaiveDate, Duration, Timelike};
@@ -86,6 +87,32 @@ pub enum CoverageUnit
     WeekFraction(FractionalCoverageUnit)
 }
 
+pub trait WorkCollector
+{
+    fn collect_work(&self, workday:&CoverageAndWorkDay)->AnalysisDatum;
+}
+
+impl WorkCollector for CoverageUnit
+{
+    fn collect_work(&self, workday:&CoverageAndWorkDay)->AnalysisDatum
+    {
+        let mut retval:AnalysisDatum=AnalysisDatum{
+            total_rvu:0.0,
+            total_bvu:0.0
+        };
+
+        match self
+        {
+            CoverageUnit::Temporal(s) => {
+                s.collect_work(workday)
+            },
+            CoverageUnit::WeekFraction(s) => {
+                s.collect_work(workday)
+            },
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum Coverage
 {
@@ -129,8 +156,8 @@ impl Coverage
 #[derive(Debug)]
 pub struct CoverageAndWorkDay
 {
-    coverages:Option<Coverage>,
-    work:Vec<WorkUnit>
+    pub coverages:Option<Coverage>,
+    pub work:Vec<WorkUnit>
 }
 
 impl CoverageAndWorkDay
@@ -204,24 +231,16 @@ impl CoverageAndWorkDay
         }
     }
 
-    fn get_work_in_timespan(&self, start:TimeSinceMidnight, stop:TimeSinceMidnight)->Vec<&WorkUnit>{
-        let mut retval:Vec<&WorkUnit>=Vec::new();
+    pub fn get_work_in_timespan(&self, start:TimeSinceMidnight,end:TimeSinceMidnight)->AnalysisDatum
+    {
+        let mut retval:AnalysisDatum=AnalysisDatum{total_rvu:0.0,total_bvu:0.0};
         for work in &self.work
         {
             let tsm = TimeSinceMidnight::from_minutes((work.datetime.num_seconds_from_midnight()/60).into());
-            if start <= tsm && tsm < stop
+            if start <= tsm && tsm < end
             {
-                retval.push(work);
+                retval.add_workunit(&work);
             }
-        }
-        retval
-    }
-
-    fn get_rvus_in_timespan(&self, start:TimeSinceMidnight, stop:TimeSinceMidnight)->f64{
-        let mut retval:f64=0.0;
-        for work in self.get_work_in_timespan(start, stop)
-        {
-            retval+=work.rvu;
         }
         retval
     }
@@ -237,7 +256,7 @@ impl CoverageAndWorkDay
 
         match &self.coverages
         {
-            None=>{return CoverageError::NoCoverage(self.get_rvus_in_timespan(this_midnight, next_midnight));}
+            None=>{return CoverageError::NoCoverage(self.get_work_in_timespan(this_midnight, next_midnight).total_rvu);}
             Some(coverages)=>{
                 let mut retval = MalformedCoverage::default();
                 match coverages
@@ -250,8 +269,8 @@ impl CoverageAndWorkDay
                                 //Check from midnight
                                 if farthest_unit.starts_after_this_midnight()
                                 {
-                                    let rvus = &self.get_rvus_in_timespan(this_midnight, farthest_unit.start);
-                                    retval.gaps.push((this_midnight,farthest_unit.start,farthest_unit.to_string() + " starts after midnight",*rvus))
+                                    let rvus = &self.get_work_in_timespan(this_midnight, farthest_unit.start);
+                                    retval.gaps.push((this_midnight,farthest_unit.start,farthest_unit.to_string() + " starts after midnight",rvus.total_rvu))
                                 }
                 
                                 for cu in rest
@@ -262,8 +281,8 @@ impl CoverageAndWorkDay
                                     }
                                     else if farthest_unit.gap_between_end_and_other(cu) //Check gap
                                     {
-                                        let rvus = &self.get_rvus_in_timespan(farthest_unit.end, cu.start);
-                                        retval.gaps.push((farthest_unit.end,cu.start,TemporalCoverageUnit::get_overlap_desc(farthest_unit,&cu, ),*rvus));
+                                        let rvus = &self.get_work_in_timespan(farthest_unit.end, cu.start);
+                                        retval.gaps.push((farthest_unit.end,cu.start,TemporalCoverageUnit::get_overlap_desc(farthest_unit,&cu, ),rvus.total_rvu));
                                     }
                 
                                     //Adjust prior_end
@@ -275,8 +294,8 @@ impl CoverageAndWorkDay
                                 //Check through midnight
                                 if farthest_unit.ends_before_next_midnight()
                                 {
-                                    let rvus = &self.get_rvus_in_timespan(farthest_unit.end, next_midnight);
-                                    retval.gaps.push((farthest_unit.end,next_midnight,farthest_unit.to_string() + " ends before midnight",*rvus));
+                                    let rvus = &self.get_work_in_timespan(farthest_unit.end, next_midnight);
+                                    retval.gaps.push((farthest_unit.end,next_midnight,farthest_unit.to_string() + " ends before midnight",rvus.total_rvu));
                                 }
                             },
                             None => (),
@@ -460,6 +479,36 @@ fn testcoords()->CoverageCoordinates {CoverageCoordinates {
     modality:"US".to_string(),
     weekday:chrono::Weekday::Mon
 }}
+
+pub struct AnalysisDatum
+{
+    pub total_rvu:f64,
+    pub total_bvu:f64
+}
+
+impl AddAssign for AnalysisDatum
+{
+    fn add_assign(&mut self, rhs: Self) {
+        self.total_rvu+=rhs.total_rvu;
+        self.total_bvu+=rhs.total_bvu;
+    }
+}
+
+impl AnalysisDatum
+{
+    pub fn scale(&mut self, scale: f64)
+    {
+        self.total_rvu*=scale;
+        self.total_bvu*=scale;
+    }
+
+    pub fn add_workunit(&mut self, rhs: &WorkUnit)
+    {
+        self.total_rvu+=rhs.rvu;
+        self.total_bvu+=rhs.bvu;
+    }
+}
+
 
 #[derive(Default)]
 pub struct CoverageMap {
@@ -737,7 +786,7 @@ impl CoverageMap
     for rotation_description in &manifest.rotation_manifest
     {
         match &rotation_description.responsibilities
-{
+        {
             Some(responsibilities)=>{
                 for responsibility in responsibilities
                 {
@@ -807,6 +856,7 @@ impl CoverageMap
                                                 coords.weekday=weekday;
                                                 let coverage=FractionalCoverageUnit::create(
                                                     rotation_description.rotation.to_string(),
+                                                    weekday:weekday,
                                                     fraction.to_owned()
                                                 );
                                                 self.add_coverage(&coords, CoverageUnit::WeekFraction(coverage));
@@ -827,39 +877,177 @@ impl CoverageMap
     Ok(())
    }
 
-   pub fn audit(&mut self)->HashMap<CoverageCoordinates,CoverageError>
+   fn foreach(&mut self, mut func:impl FnMut(&CoverageCoordinates, &mut CoverageAndWorkDay)->())
    {
-    let mut retval:HashMap<CoverageCoordinates,CoverageError> = HashMap::new();
-
-    let testcoords=testcoords();
-    
-    for (site, subspecialtymap) in self.map.iter_mut()
-    {
-        for(subspecialty, contextmap) in subspecialtymap.map.iter_mut()
+        for (site, subspecialtymap) in self.map.iter_mut()
         {
-            for(context, modalitymap) in contextmap.map.iter_mut()
+            for(subspecialty, contextmap) in subspecialtymap.map.iter_mut()
             {
-                for(modality, weekdaymap) in modalitymap.map.iter_mut()
+                for(context, modalitymap) in contextmap.map.iter_mut()
                 {
-                    for(weekday, coverage_and_workday) in weekdaymap.map.iter_mut()
+                    for(modality, weekdaymap) in modalitymap.map.iter_mut()
                     {
-                        let coords = CoverageCoordinates{
-                            site:site.to_string(),
-                            subspecialty:subspecialty.to_string(),
-                            context:context.to_string(),
-                            modality:modality.to_string(),
-                            weekday:*weekday
-                        };
-
-                        let errs=coverage_and_workday.audit_coverage();
-                        
-                        retval.insert(coords, errs);
+                        for(weekday, coverage_and_workday) in weekdaymap.map.iter_mut()
+                        {
+                            let coords = CoverageCoordinates{
+                                site:site.to_string(),
+                                subspecialty:subspecialty.to_string(),
+                                context:context.to_string(),
+                                modality:modality.to_string(),
+                                weekday:*weekday
+                            };
+                            
+                            func(&coords, coverage_and_workday);
+                        }
                     }
                 }
             }
         }
-    }
+   }
+
+   pub fn audit(&mut self)->HashMap<CoverageCoordinates,CoverageError>
+   {
+    let mut retval:HashMap<CoverageCoordinates,CoverageError> = HashMap::new();
+
+    //let testcoords=testcoords();
+    
+    let func = |coords:&CoverageCoordinates,coverage_and_workday:&mut CoverageAndWorkDay|->()
+    {
+        let errs=coverage_and_workday.audit_coverage();
+        
+        retval.insert(coords.to_owned(), errs);
+    };
+
+    self.foreach(func);
+    
     retval
+   }
+
+   
+   pub fn analyze(&mut self)->HashMap<String,HashMap<chrono::Weekday,AnalysisDatum>>
+   {
+    let mut retval:HashMap<String,HashMap<chrono::Weekday,AnalysisDatum>>=HashMap::new();
+
+    let mut addfunc = |rotation:String, weekday:chrono::Weekday, data:AnalysisDatum|->()
+    {
+        let daymap:&mut HashMap<chrono::Weekday,AnalysisDatum>=match retval.entry(rotation)
+        {
+            Entry::Occupied(entry) => {
+                entry.into_mut()
+            },
+            Entry::Vacant(empty) => {
+                let entry=empty.insert(HashMap::new());
+                entry
+            },
+        };
+
+        let datum:&mut AnalysisDatum = match daymap.entry(weekday)
+        {
+            Entry::Occupied(entry) => {
+                entry.into_mut()
+            },
+            Entry::Vacant(empty) => {
+                let entry=empty.insert(AnalysisDatum{total_bvu:0.0, total_rvu:0.0});
+                entry
+            },
+        };
+
+        *datum+=data;
+    };
+    
+    let func = |coords:&CoverageCoordinates,coverage_and_workday:&mut CoverageAndWorkDay|->()
+    {
+        match &coverage_and_workday.coverages
+        {
+            Some(coverage)=>{
+                
+                match coverage
+                {
+                    Coverage::Temporal(coverages) => 
+                    {
+                        for coverage in coverages
+                        {
+                            let collection = coverage.collect_work(&coverage_and_workday);
+                            addfunc(coverage.get_rotation(),coverage.get_day(), collection);
+                        }
+                    }
+                    ,
+                    Coverage::Fractional(coverages) => 
+                    {
+                        for coverage in coverages
+                        {
+                            let collection = coverage.collect_work(&coverage_and_workday);
+                            addfunc(coverage.get_rotation(),coords.weekday, collection);
+                        }
+                    }
+                    ,
+                }
+            },
+            None=>{
+                eprintln!("Uncovered work!");
+                panic!("Uncovered work!");
+            }
+        }
+    };
+
+    self.foreach(func);
+    
+    retval
+   }
+
+   pub fn analysis_to_file(&mut self, path:String, use_rvu:bool)
+   {
+        let analysis=self.analyze();
+        let mut writer = match csv::WriterBuilder::new()
+        .delimiter(b',')
+        .quote(b'"')
+        .has_headers(false) //write manually
+        .from_path(path)
+        {
+            Ok(x) => x,
+            Err(_) => {panic!();}
+        };
+
+        let mut headers:Vec<String>=Vec::new();
+        headers.push("".to_string());
+        for weekday in ALL_DAYS
+        {
+            headers.push(weekday.to_string());
+        }
+        match writer.write_record(headers)
+        {
+            Ok(_) => (),
+            Err(_) => panic!(),
+        }
+
+        for (rotation, daymap) in analysis
+        {
+            let mut v:Vec<String>=Vec::new();
+            v.push(rotation);
+
+            for weekday in ALL_DAYS
+            {
+                let val = match daymap.get(weekday)
+                {
+                    Some(x) => {
+                        if use_rvu{
+                            x.total_rvu.to_string()
+                        }
+                        else {
+                            x.total_bvu.to_string()
+                        }
+                    },
+                    None => "".to_string(),
+                };
+                v.push(val);
+            }
+
+            match writer.write_record(v)
+            {
+                Ok(_) => (),
+                Err(_) => panic!(),
+            }
+        }
    }
 
    pub fn audit_to_stream<T:Write>(&mut self, writer:&mut T)->Result<(),std::io::Error>

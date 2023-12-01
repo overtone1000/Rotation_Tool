@@ -2,6 +2,8 @@ use std::fmt::Display;
 
 use crate::rotations::time_modifiers::{TimeSinceMidnight, this_midnight, next_midnight};
 
+use super::coverage_tree::{CoverageAndWorkDay, WorkCollector, AnalysisDatum};
+
 pub fn weekday_plus(base_weekday:chrono::Weekday, delta:i64)->chrono::Weekday{
     let mut retval = base_weekday;
     if delta>0
@@ -106,6 +108,10 @@ impl TemporalCoverageUnit
         farthest_unit.to_string() + " goes to " + farthest_unit.end.to_string().as_str() + " and " + cu.to_string().as_str() + " starts at " + cu.start.to_string().as_str()
     }
 
+    pub fn get_rotation(&self)->String{self.rotation.to_string()}
+    pub fn get_day(&self)->chrono::Weekday{self.rotation_day}
+
+
     pub fn to_string(&self)->String
     {
         format!("{} ({})",self.rotation, self.rotation_day)
@@ -135,5 +141,13 @@ impl Ord for TemporalCoverageUnit
             Some(x)=>x,
             None=>core::cmp::Ordering::Equal
         }
+    }
+}
+
+impl WorkCollector for TemporalCoverageUnit
+{
+    fn collect_work(&self, workday:&CoverageAndWorkDay)->AnalysisDatum
+    {
+        workday.get_work_in_timespan(self.start, self.end)
     }
 }

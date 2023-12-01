@@ -9,7 +9,7 @@ use rvu_map::{RVUMap, MapCoords, buildMaps};
 use table::Table;
 use explain::*;
 
-use crate::{globals::file_names::{self, SOURCE_CACHE, COVERAGE_AUDIT_OUT}, error::RotationToolError, categorization::{buildSalemRVUMap, get_categories_list, get_locations_list, backup, buildSalemBVUMap}, time::{getTimeRowNormalDistWeights, getNormalDistWeights}, analysis::coverage_tree::{CoverageMap, CoordinateMap, CoverageCoordinates}, rotations::time_modifiers::TimeSinceMidnight};
+use crate::{globals::file_names::{self, SOURCE_CACHE, COVERAGE_AUDIT_OUT, COVERAGE_ANALYSIS_OUT}, error::RotationToolError, categorization::{buildSalemRVUMap, get_categories_list, get_locations_list, backup, buildSalemBVUMap}, time::{getTimeRowNormalDistWeights, getNormalDistWeights}, analysis::coverage_tree::{CoverageMap, CoordinateMap, CoverageCoordinates}, rotations::time_modifiers::TimeSinceMidnight};
 
 mod globals;
 mod error;
@@ -78,7 +78,10 @@ fn analyze_rotations()->Result<(), Box<dyn Error>> {
 
     let auditfile=File::create(COVERAGE_AUDIT_OUT)?;
     let mut writer = BufWriter::new(auditfile);
-    coverage_tree.audit_to_stream(&mut writer);
+    coverage_tree.audit_to_stream(&mut writer)?;
+
+    coverage_tree.analysis_to_file(COVERAGE_ANALYSIS_OUT.to_owned()+"_rvu",true);
+    coverage_tree.analysis_to_file(COVERAGE_ANALYSIS_OUT.to_owned()+"_bvu",false);
 
     Ok(())
 }
@@ -104,8 +107,12 @@ fn main()->Result<(), Box<dyn Error>> {
     }
     println!("Starting.");
 
+    let rebuild_source:bool=false;
 
-    //cache_source()?;
+    if rebuild_source
+    {
+        cache_source()?;
+    }
 
     let retval=analyze_rotations();
     
