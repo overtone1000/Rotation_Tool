@@ -101,6 +101,13 @@ rotation_manifest:
     subspecialties: General
     contexts: Outpatient
     modalities: XR/CT/US/RF
+    days: Mon
+    time_periods:
+    - 00:00 CD-15:00 CD
+  - sites: WVH
+    subspecialties: General
+    contexts: Outpatient
+    modalities: XR/CT/US/RF
     days: Tue/Wed/Thu/Fri
     time_periods:
     - 15:00 PD-15:00 CD
@@ -169,10 +176,25 @@ rotation_manifest:
   - sites: All
     subspecialties: General
     contexts: Outpatient
-    modalities: CT/US/XR/RF
+    modalities: CT/US/RF
     days: Mon
     time_periods:
     - 00:00 PD-13:00 PD
+  - sites: SH/WB/SC/SRC/TPC
+    subspecialties: General
+    contexts: Outpatient
+    modalities: XR
+    days: Mon
+    time_periods:
+    - 00:00 PD-13:00 PD
+  - sites: WVH
+    subspecialties: General
+    contexts: Outpatient
+    modalities: XR
+    days: Mon
+    time_periods:
+    - 00:00 PD-07:00 PD
+    - 11:00 PD-13:00 PD
     #Monday only SRC work
   - sites: SRC
     subspecialties: General
@@ -768,10 +790,25 @@ rotation_manifest:
   - sites: All
     subspecialties: General
     contexts: Outpatient
-    modalities: CT/US/XR/MR/RF
+    modalities: CT/US/MR/RF
     days: Mon
     time_periods:
     - 00:00 PBD+1-24:00 PBD+1
+  - sites: SH/WB/SC/SRC/TPC
+    subspecialties: General
+    contexts: Outpatient
+    modalities: XR
+    days: Mon
+    time_periods:
+    - 00:00 PBD+1-24:00 PBD+1
+  - sites: WVH
+    subspecialties: General
+    contexts: Outpatient
+    modalities: XR
+    days: Mon
+    time_periods:
+    - 00:00 PBD+1-07:00 PBD+1
+    - 11:00 PBD+1-24:00 PBD+1
 - rotation: TPC
   location: Remote
   responsibilities:
