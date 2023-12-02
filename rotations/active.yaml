@@ -7,16 +7,8 @@ rotation_manifest:
     subspecialties: Screening Mamm
     contexts: All
     modalities: All
-    days: Mon
-    time_periods:
-    - 00:00 PBD-00:00 CD
-  - sites: SC
-    subspecialties: Screening Mamm
-    contexts: All
-    modalities: All
-    days: Tue/Wed/Thu/Fri
-    time_periods:
-    - 00:00 PBD-00:00 CD
+    days: Mon/Tue/Wed/Thu/Fri
+    weekly_fraction: 0.2
   - sites: SC
     subspecialties: Diagnostic Mamm/Mamm Procedure
     contexts: All
@@ -43,8 +35,14 @@ rotation_manifest:
   responsibilities:
   - sites: All
     subspecialties: General
+    contexts: Outpatient/Inpatient
+    modalities: PET
+    days: Mon/Tue/Wed/Thu/Fri
+    weekly_fraction: 0.2
+  - sites: All
+    subspecialties: General
     contexts: Outpatient
-    modalities: PET/NM
+    modalities: NM
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 15:00 PBD-15:00 CD
@@ -72,7 +70,7 @@ rotation_manifest:
   - sites: All
     subspecialties: General
     contexts: Inpatient
-    modalities: NM/PET
+    modalities: NM
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 07:30 CD-16:30 CD
@@ -211,8 +209,7 @@ rotation_manifest:
     contexts: All
     modalities: MG
     days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 00:00 PBD-24:00 PD
+    weekly_fraction: 0.2
   - sites: SH
     subspecialties: Diagnostic Mamm/Mamm Procedure
     contexts: Outpatient
@@ -774,14 +771,14 @@ rotation_manifest:
     modalities: CT/US/XR/MR/RF
     days: Mon
     time_periods:
-    - 15:00 PBD-24:00 PBD
+    - 15:00 PBD-18:00 PBD
   - sites: SC
     subspecialties: General
     contexts: Outpatient
     modalities: CVUS
     days: Mon
     time_periods:
-    - 15:00 PBD-24:00 PBD
+    - 15:00 PBD-18:00 PBD
   comments:
   - Contrast coverage 
 - rotation: OP2
@@ -793,21 +790,21 @@ rotation_manifest:
     modalities: CT/US/MR/RF
     days: Mon
     time_periods:
-    - 00:00 PBD+1-24:00 PBD+1
+    - 18:00 PBD-24:00 PBD+1
   - sites: SH/WB/SC/SRC/TPC
     subspecialties: General
     contexts: Outpatient
     modalities: XR
     days: Mon
     time_periods:
-    - 00:00 PBD+1-24:00 PBD+1
+    - 18:00 PBD-24:00 PBD+1
   - sites: WVH
     subspecialties: General
     contexts: Outpatient
     modalities: XR
     days: Mon
     time_periods:
-    - 00:00 PBD+1-07:00 PBD+1
+    - 18:00 PBD-07:00 PBD+1
     - 11:00 PBD+1-24:00 PBD+1
 - rotation: TPC
   location: Remote
@@ -1319,12 +1316,5 @@ rotation_manifest:
     time_periods:
     - 00:00 CD-07:30 CD
     - 19:00 CD-24:00 CD
-  - sites: All
-    subspecialties: General
-    contexts: Inpatient
-    modalities: PET
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 16:30 PBD-07:30 CD
   comments:
   - Responsibilities listed here represent schedule blocks. Such studies should not be scheduled and so are not accounted for in these rotations.

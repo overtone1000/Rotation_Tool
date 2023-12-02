@@ -856,10 +856,10 @@ impl CoverageMap
                                                 coords.weekday=weekday;
                                                 let coverage=FractionalCoverageUnit::create(
                                                     rotation_description.rotation.to_string(),
-                                                    weekday:weekday,
+                                                    weekday,
                                                     fraction.to_owned()
                                                 );
-                                                self.add_coverage(&coords, CoverageUnit::WeekFraction(coverage));
+                                                self.add_coverage(&coords, CoverageUnit::WeekFraction(coverage))?;
                                             },
                                             None => (),
                                         }
@@ -977,7 +977,7 @@ impl CoverageMap
                         for coverage in coverages
                         {
                             let collection = coverage.collect_work(&coverage_and_workday);
-                            addfunc(coverage.get_rotation(),coords.weekday, collection);
+                            addfunc(coverage.get_rotation(),coverage.get_day(), collection);
                         }
                     }
                     ,
@@ -1020,10 +1020,18 @@ impl CoverageMap
             Err(_) => panic!(),
         }
 
-        for (rotation, daymap) in analysis
+        let mut rotations:Vec<String>=Vec::new();
+        for key in analysis.keys()
         {
+            rotations.push(key.to_string());
+        }
+        rotations.sort();
+
+        for rotation in &rotations
+        {
+            let daymap = analysis.get(rotation).expect("Should be a key");
             let mut v:Vec<String>=Vec::new();
-            v.push(rotation);
+            v.push(rotation.to_string());
 
             for weekday in ALL_DAYS
             {

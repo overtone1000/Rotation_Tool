@@ -80,8 +80,8 @@ fn analyze_rotations()->Result<(), Box<dyn Error>> {
     let mut writer = BufWriter::new(auditfile);
     coverage_tree.audit_to_stream(&mut writer)?;
 
-    coverage_tree.analysis_to_file(COVERAGE_ANALYSIS_OUT.to_owned()+"_rvu",true);
-    coverage_tree.analysis_to_file(COVERAGE_ANALYSIS_OUT.to_owned()+"_bvu",false);
+    coverage_tree.analysis_to_file(COVERAGE_ANALYSIS_OUT.to_owned()+"_rvu.csv",true);
+    coverage_tree.analysis_to_file(COVERAGE_ANALYSIS_OUT.to_owned()+"_bvu.csv",false);
 
     Ok(())
 }
