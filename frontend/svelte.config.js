@@ -11,14 +11,14 @@ const config = {
 		adapter: adapter({
 			// default options are shown. On some platforms
 			// these options are set automatically — see below
-			pages: '../../backend/src/main/resources/static/svelte',
-			assets: '../../backend/src/main/resources/static/svelte',
+			pages: './build',
+			assets: './build',
 			fallback: null,
 			precompress: false,
 			strict: true
 		}),
 		paths: {
-			base: '/svelte'
+			base: ''
 		}
 		//alias: {
 		//	"@@migration" : "../../frontend/src/ts/"
