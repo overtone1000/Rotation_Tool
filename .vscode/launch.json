@@ -12,7 +12,8 @@
                 "args": [
                     "build",
                     "--bin=rotation_tool",
-                    "--package=rotation_tool"
+                    "--package=rotation_tool",
+                    "--manifest-path=${workspaceFolder}/core/Cargo.toml"
                 ],
                 "filter": {
                     "name": "rotation_tool",
@@ -20,7 +21,7 @@
                 }
             },
             "args": [],
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}/core"
         },
         {
             "type": "lldb",
@@ -31,7 +32,8 @@
                     "test",
                     "--no-run",
                     "--bin=rotation_tool",
-                    "--package=rotation_tool"
+                    "--package=rotation_tool",
+                    "--manifest-path=${workspaceFolder}/core/Cargo.toml"
                 ],
                 "filter": {
                     "name": "rotation_tool",
@@ -39,7 +41,7 @@
                 }
             },
             "args": [],
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}/core"
         }
     ]
 }
