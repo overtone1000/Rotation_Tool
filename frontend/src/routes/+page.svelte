@@ -1,10 +1,10 @@
 <script>
-	import Staging from '../components/staging/main.svelte';
+	import Staging from './components/main.svelte';
 </script>
 
 <svelte:head>
 	<title>
-		Autoscheda (Svelte)
+		Rotation Tool
 	</title>
 </svelte:head>
 <Staging />
