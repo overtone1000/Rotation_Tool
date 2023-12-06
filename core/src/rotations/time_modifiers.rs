@@ -2,106 +2,104 @@ use std::fmt;
 
 //use chrono::NaiveTime;
 
-use super::{rotation_error::RotationManifestParseError};
+use super::rotation_error::RotationManifestParseError;
 
-const PREVIOUS_BUSINESS_DAY:&str="PBD";
-const DAY_AFTER_PREVIOUS_BUSINESS_DAY:&str="PBD+1";
-const PREVIOUS_DAY:&str="PD";
-const CURRENT_DAY:&str="CD";
-const NEXT_DAY:&str="ND";
+const PREVIOUS_BUSINESS_DAY: &str = "PBD";
+const DAY_AFTER_PREVIOUS_BUSINESS_DAY: &str = "PBD+1";
+const PREVIOUS_DAY: &str = "PD";
+const CURRENT_DAY: &str = "CD";
+const NEXT_DAY: &str = "ND";
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Default, Clone, Copy)]
-pub struct TimeSinceMidnight
-{
-    minutes:u64,
+pub struct TimeSinceMidnight {
+    minutes: u64,
 }
 
-pub const this_midnight:TimeSinceMidnight = TimeSinceMidnight{minutes:0};
-pub const next_midnight:TimeSinceMidnight = TimeSinceMidnight{minutes:24*60};
+pub const this_midnight: TimeSinceMidnight = TimeSinceMidnight { minutes: 0 };
+pub const next_midnight: TimeSinceMidnight = TimeSinceMidnight { minutes: 24 * 60 };
 
-impl TimeSinceMidnight
-{
-    pub fn new(minutes:u64)->TimeSinceMidnight{
+impl TimeSinceMidnight {
+    pub fn new(minutes: u64) -> TimeSinceMidnight {
         TimeSinceMidnight { minutes: minutes }
     }
 
-    pub fn hours(&self)->u64{
-        self.minutes/60
+    pub fn hours(&self) -> u64 {
+        self.minutes / 60
     }
 
-    pub fn minutes(&self)->u64{
-        self.minutes%60
+    pub fn minutes(&self) -> u64 {
+        self.minutes % 60
     }
 
-    pub fn from_minutes(minutes:u64)->TimeSinceMidnight{
+    pub fn from_minutes(minutes: u64) -> TimeSinceMidnight {
         TimeSinceMidnight { minutes: minutes }
     }
 
-    pub fn parse_from_str(str:&str)->Result<TimeSinceMidnight,()>{
-        let split:Vec<&str> = str.split(":").collect();
-        if split.len()!=2 {return Err(());}
-
-        let hrs:u64 = match split.get(0).expect("Checked").parse()
-        {
-            Ok(x) => x,
-            Err(_) => {return Err(());},
-        };
-
-        let min:u64 = match split.get(1).expect("Checked").parse()
-        {
-            Ok(x) => x,
-            Err(_) => {return Err(());},
-        };
-
-        let retval = TimeSinceMidnight { 
-            minutes: hrs*60+min
-        };
-
-        if retval.is_valid()
-        {
-            Ok(retval)
+    pub fn parse_from_str(str: &str) -> Result<TimeSinceMidnight, ()> {
+        let split: Vec<&str> = str.split(":").collect();
+        if split.len() != 2 {
+            return Err(());
         }
-        else {
+
+        let hrs: u64 = match split.get(0).expect("Checked").parse() {
+            Ok(x) => x,
+            Err(_) => {
+                return Err(());
+            }
+        };
+
+        let min: u64 = match split.get(1).expect("Checked").parse() {
+            Ok(x) => x,
+            Err(_) => {
+                return Err(());
+            }
+        };
+
+        let retval = TimeSinceMidnight {
+            minutes: hrs * 60 + min,
+        };
+
+        if retval.is_valid() {
+            Ok(retval)
+        } else {
             Err(())
         }
     }
 
-    pub fn is_valid(&self)->bool{
-        self<=&next_midnight
+    pub fn is_valid(&self) -> bool {
+        self <= &next_midnight
     }
 }
 
-impl fmt::Debug for TimeSinceMidnight
-{
+impl fmt::Debug for TimeSinceMidnight {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let str = self.to_string();
-        f.debug_struct("TimeSinceMidnight").field("time", &str).finish()
+        f.debug_struct("TimeSinceMidnight")
+            .field("time", &str)
+            .finish()
     }
 }
 
-impl fmt::Display for TimeSinceMidnight
-{
+impl fmt::Display for TimeSinceMidnight {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let str=format!("{:02}:{:02}",self.hours(),self.minutes());
-        write!(f,"{}",str)
+        let str = format!("{:02}:{:02}", self.hours(), self.minutes());
+        write!(f, "{}", str)
     }
 }
 
 #[derive(Debug, PartialEq)]
-pub enum RelativeTime
-{
+pub enum RelativeTime {
     PreviousBusinessDay(TimeSinceMidnight),
     DayAfterPreviousBusinessDay(TimeSinceMidnight),
     PreviousDay(TimeSinceMidnight),
     CurrentDay(TimeSinceMidnight),
-    NextDay(TimeSinceMidnight)
+    NextDay(TimeSinceMidnight),
 }
 
-const delimiter:&str=" ";
+const delimiter: &str = " ";
 
-fn get_previous_business_day(day:chrono::Weekday)->chrono::Weekday{
-    match day
-    {
+fn get_previous_business_day(day: chrono::Weekday) -> chrono::Weekday {
+    match day {
         chrono::Weekday::Mon => chrono::Weekday::Fri,
         chrono::Weekday::Tue => chrono::Weekday::Mon,
         chrono::Weekday::Wed => chrono::Weekday::Tue,
@@ -112,23 +110,19 @@ fn get_previous_business_day(day:chrono::Weekday)->chrono::Weekday{
     }
 }
 
-impl RelativeTime
-{
-    pub fn get_modifier(&self)->&str{
-        match self 
-        {
-            Self::PreviousBusinessDay(_)=>PREVIOUS_BUSINESS_DAY,
-            Self::DayAfterPreviousBusinessDay(_)=>DAY_AFTER_PREVIOUS_BUSINESS_DAY,
-            Self::PreviousDay(_)=>PREVIOUS_DAY,
-            Self::CurrentDay(_)=>CURRENT_DAY,
-            Self::NextDay(_)=>NEXT_DAY
+impl RelativeTime {
+    pub fn get_modifier(&self) -> &str {
+        match self {
+            Self::PreviousBusinessDay(_) => PREVIOUS_BUSINESS_DAY,
+            Self::DayAfterPreviousBusinessDay(_) => DAY_AFTER_PREVIOUS_BUSINESS_DAY,
+            Self::PreviousDay(_) => PREVIOUS_DAY,
+            Self::CurrentDay(_) => CURRENT_DAY,
+            Self::NextDay(_) => NEXT_DAY,
         }
     }
 
-    pub fn get_time(&self)->&TimeSinceMidnight
-    {
-        match self
-        {
+    pub fn get_time(&self) -> &TimeSinceMidnight {
+        match self {
             RelativeTime::PreviousBusinessDay(x) => x,
             RelativeTime::DayAfterPreviousBusinessDay(x) => x,
             RelativeTime::PreviousDay(x) => x,
@@ -137,102 +131,74 @@ impl RelativeTime
         }
     }
 
-    fn get_day(&self,day:chrono::Weekday)->chrono::Weekday{
-        match self{
-            RelativeTime::PreviousBusinessDay(x) => {
-                get_previous_business_day(day)
-            },
-            RelativeTime::DayAfterPreviousBusinessDay(_) => {
-                get_previous_business_day(day).succ()
-            },
-            RelativeTime::PreviousDay(x) => {
-                day.pred()
-            },
-            RelativeTime::CurrentDay(x) => {
-                day
-            },
-            RelativeTime::NextDay(x) => {
-                day.succ()
-            },
+    fn get_day(&self, day: chrono::Weekday) -> chrono::Weekday {
+        match self {
+            RelativeTime::PreviousBusinessDay(x) => get_previous_business_day(day),
+            RelativeTime::DayAfterPreviousBusinessDay(_) => get_previous_business_day(day).succ(),
+            RelativeTime::PreviousDay(x) => day.pred(),
+            RelativeTime::CurrentDay(x) => day,
+            RelativeTime::NextDay(x) => day.succ(),
         }
     }
 
-    pub fn get_day_offset(&self,day:chrono::Weekday)->i64{
-        match self{
-            RelativeTime::PreviousBusinessDay(_) => {
-                match day{
-                    chrono::Weekday::Mon => -3,
-                    chrono::Weekday::Sun => -2,
-                    _ => -1
-                }
+    pub fn get_day_offset(&self, day: chrono::Weekday) -> i64 {
+        match self {
+            RelativeTime::PreviousBusinessDay(_) => match day {
+                chrono::Weekday::Mon => -3,
+                chrono::Weekday::Sun => -2,
+                _ => -1,
             },
-            RelativeTime::DayAfterPreviousBusinessDay(_) => {
-                match day{
-                    chrono::Weekday::Mon => -2,
-                    chrono::Weekday::Sun => -1,
-                    _ => 0
-                }
+            RelativeTime::DayAfterPreviousBusinessDay(_) => match day {
+                chrono::Weekday::Mon => -2,
+                chrono::Weekday::Sun => -1,
+                _ => 0,
             },
-            RelativeTime::PreviousDay(_) => {
-                -1
-            },
-            RelativeTime::CurrentDay(_) => {
-                0
-            },
-            RelativeTime::NextDay(_) => {
-                1
-            },
+            RelativeTime::PreviousDay(_) => -1,
+            RelativeTime::CurrentDay(_) => 0,
+            RelativeTime::NextDay(_) => 1,
         }
     }
 }
 
-pub fn parse_relative_time(strval:&str)->Result<RelativeTime,RotationManifestParseError>
-{
-    let err=RotationManifestParseError::generate(0,format!("Malformed relative time {}",strval));
+pub fn parse_relative_time(strval: &str) -> Result<RelativeTime, RotationManifestParseError> {
+    let err =
+        RotationManifestParseError::generate(0, format!("Malformed relative time {}", strval));
 
-    let spl=strval.split(delimiter);
+    let spl = strval.split(delimiter);
     let mut members = Vec::new();
-    for item in spl
-    {
+    for item in spl {
         members.push(item);
     }
 
-    if members.len()!=2 {return err;}
+    if members.len() != 2 {
+        return err;
+    }
 
-    let time = match *members.get(0).expect("Checked")
-    {
-        x=>{
-            match TimeSinceMidnight::parse_from_str(x)
-            {
-                Ok(x)=>x,
-                Err(e)=>{
-                    return err;
-                }
+    let time = match *members.get(0).expect("Checked") {
+        x => match TimeSinceMidnight::parse_from_str(x) {
+            Ok(x) => x,
+            Err(e) => {
+                return err;
             }
-        }
-
+        },
     };
 
-    match *members.get(1).expect("Checked")
-    {
-        PREVIOUS_BUSINESS_DAY=>{Ok(RelativeTime::PreviousBusinessDay(time))},
-        DAY_AFTER_PREVIOUS_BUSINESS_DAY=>{Ok(RelativeTime::DayAfterPreviousBusinessDay(time))},
-        PREVIOUS_DAY=>{Ok(RelativeTime::PreviousDay(time))},
-        CURRENT_DAY=>{Ok(RelativeTime::CurrentDay(time))},
-        NEXT_DAY=>{Ok(RelativeTime::NextDay(time))},
-        _=>{
-            err
-        }
+    match *members.get(1).expect("Checked") {
+        PREVIOUS_BUSINESS_DAY => Ok(RelativeTime::PreviousBusinessDay(time)),
+        DAY_AFTER_PREVIOUS_BUSINESS_DAY => Ok(RelativeTime::DayAfterPreviousBusinessDay(time)),
+        PREVIOUS_DAY => Ok(RelativeTime::PreviousDay(time)),
+        CURRENT_DAY => Ok(RelativeTime::CurrentDay(time)),
+        NEXT_DAY => Ok(RelativeTime::NextDay(time)),
+        _ => err,
     }
 }
 
-impl RelativeTime
-{
-    pub fn to_string(&self)->String{
+impl RelativeTime {
+    pub fn to_string(&self) -> String {
         let time = self.get_time();
 
         let timestr = time.to_string();
-        
+
         timestr + delimiter + self.get_modifier()
     }
 }

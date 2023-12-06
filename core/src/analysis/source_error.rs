@@ -1,8 +1,7 @@
 use std::fmt;
 
-pub struct SourceError
-{
-    message:String
+pub struct SourceError {
+    message: String,
 }
 
 impl fmt::Display for SourceError {
@@ -18,21 +17,14 @@ impl fmt::Debug for SourceError {
     }
 }
 
-impl std::error::Error for SourceError{}
+impl std::error::Error for SourceError {}
 
-impl SourceError
-{
-    pub fn generate<T>(message:String)->Result<T, SourceError>
-    {
-        Err(SourceError{
-            message:message
-        })
+impl SourceError {
+    pub fn generate<T>(message: String) -> Result<T, SourceError> {
+        Err(SourceError { message: message })
     }
 
-    pub fn generate_boxed<T>(message:String)->Result<T, Box<dyn std::error::Error>>
-    {
-        Err(Box::new(SourceError{
-            message: message
-        }))
+    pub fn generate_boxed<T>(message: String) -> Result<T, Box<dyn std::error::Error>> {
+        Err(Box::new(SourceError { message: message }))
     }
 }
