@@ -133,11 +133,11 @@ impl RelativeTime {
 
     fn get_day(&self, day: chrono::Weekday) -> chrono::Weekday {
         match self {
-            RelativeTime::PreviousBusinessDay(x) => get_previous_business_day(day),
+            RelativeTime::PreviousBusinessDay(_x) => get_previous_business_day(day),
             RelativeTime::DayAfterPreviousBusinessDay(_) => get_previous_business_day(day).succ(),
-            RelativeTime::PreviousDay(x) => day.pred(),
-            RelativeTime::CurrentDay(x) => day,
-            RelativeTime::NextDay(x) => day.succ(),
+            RelativeTime::PreviousDay(_x) => day.pred(),
+            RelativeTime::CurrentDay(_x) => day,
+            RelativeTime::NextDay(_x) => day.succ(),
         }
     }
 
@@ -177,7 +177,7 @@ pub fn parse_relative_time(strval: &str) -> Result<RelativeTime, RotationManifes
     let time = match *members.get(0).expect("Checked") {
         x => match TimeSinceMidnight::parse_from_str(x) {
             Ok(x) => x,
-            Err(e) => {
+            Err(_e) => {
                 return err;
             }
         },

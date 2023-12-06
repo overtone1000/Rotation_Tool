@@ -14,7 +14,7 @@ use crate::globals::{self, ALL_DAYS};
 use crate::rotations::manifest::Manifest;
 use crate::rotations::rotation_error::RotationManifestParseError;
 use crate::rotations::time_modifiers::{next_midnight, this_midnight, TimeSinceMidnight};
-use crate::rotations::timespan::{parse_time_span, Timespan};
+use crate::rotations::timespan::parse_time_span;
 use crate::{
     categorization::{buildSalemBVUMap, buildSalemRVUMap},
     constraints::ConstraintSet,
@@ -23,7 +23,7 @@ use crate::{
     processed_source::ProcessedSource,
 };
 
-use super::fractional_coverage::{self, FractionalCoverageUnit};
+use super::fractional_coverage::FractionalCoverageUnit;
 use super::source_error::SourceError;
 use super::temporal_coverage::{weekday_plus, TemporalCoverageUnit};
 
@@ -100,7 +100,7 @@ pub trait WorkCollector {
 
 impl WorkCollector for CoverageUnit {
     fn collect_work(&self, workday: &CoverageAndWorkDay) -> AnalysisDatum {
-        let mut retval: AnalysisDatum = AnalysisDatum {
+        let _retval: AnalysisDatum = AnalysisDatum {
             total_rvu: 0.0,
             total_bvu: 0.0,
         };
@@ -125,14 +125,14 @@ impl Coverage {
                 CoverageUnit::Temporal(new_coverage) => {
                     coverages.push(new_coverage);
                 }
-                CoverageUnit::WeekFraction(new_coverage) => {
+                CoverageUnit::WeekFraction(_new_coverage) => {
                     return SourceError::generate_boxed(
                         "Mixing fractional and temporal coverage types is not allowed.".to_string(),
                     );
                 }
             },
             Coverage::Fractional(coverages) => match coverage {
-                CoverageUnit::Temporal(new_coverage) => {
+                CoverageUnit::Temporal(_new_coverage) => {
                     return SourceError::generate_boxed(
                         "Mixing fractional and temporal coverage types is not allowed.".to_string(),
                     );
@@ -528,7 +528,7 @@ impl CoverageMap {
         source: ProcessedSource,
         date_constraints: &ConstraintSet<'a, NaiveDateTime>,
     ) -> Result<(), Box<dyn std::error::Error>> {
-        let mut retval = CoverageMap::default();
+        let _retval = CoverageMap::default();
 
         let mut modality_map: HashMap<String, String> = HashMap::new();
 
@@ -831,7 +831,7 @@ impl CoverageMap {
         ];
 
         let mut coords: CoverageCoordinates = CoverageCoordinates::default();
-        let testcoords = testcoords();
+        let _testcoords = testcoords();
 
         for rotation_description in &manifest.rotation_manifest {
             match &rotation_description.responsibilities {
@@ -1008,7 +1008,7 @@ impl CoverageMap {
         };
 
         let func =
-            |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| -> () {
+            |_coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| -> () {
                 match &coverage_and_workday.coverages {
                     Some(coverage) => match coverage {
                         Coverage::Temporal(coverages) => {

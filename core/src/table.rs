@@ -1,6 +1,6 @@
 use std::collections::HashMap;
-use std::collections::HashSet;
-use std::fs;
+
+
 use std::io::Error;
 use std::io::ErrorKind;
 use std::ops::Range;
@@ -42,7 +42,7 @@ impl Table {
             for cell in record?.iter() {
                 row.push(cell.to_string());
             }
-            if (row.len() != retval.headers.len()) {
+            if row.len() != retval.headers.len() {
                 let mut message: String = "Malformed data. Header length is ".to_string();
                 message += &(retval.headers.len().to_string());
                 message += " but row ";
@@ -151,7 +151,7 @@ impl Table {
             match key_value {
                 Err(x) => return Err(x),
                 Ok(key_value) => {
-                    if (key_value == "") {
+                    if key_value == "" {
                         eprintln!("Row {} header {} is empty.", row_i, key_header_label);
                     } else {
                         retval.insert(key_value, row_i);

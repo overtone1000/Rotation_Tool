@@ -38,10 +38,10 @@ impl RotationManifestParseError {
 
     pub fn generate_boxed<T>(line: u64, message: String) -> Result<T, Box<dyn std::error::Error>> {
         Err(Box::new(
-            (RotationManifestParseError {
+            RotationManifestParseError {
                 line: line,
                 message: message,
-            }),
+            },
         ))
     }
 }

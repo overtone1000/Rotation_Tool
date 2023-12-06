@@ -2,14 +2,14 @@ use std::{
     collections::HashMap,
     error::Error,
     fs::File,
-    io::{BufReader, BufWriter, Read},
+    io::{BufWriter, Read},
 };
 
 use serde::{Deserialize, Serialize};
 
 use crate::{
     categorization::{
-        backup, exam_categories::exam_category, get_categories_list, get_locations_list,
+        exam_categories::exam_category, get_categories_list, get_locations_list,
     },
     globals::file_names,
     table::{self, Table},
@@ -61,7 +61,7 @@ impl ProcessedSource {
             location_categories_table.pushrow(newrow);
         }
 
-        let dt = chrono::offset::Local::now();
+        let _dt = chrono::offset::Local::now();
 
         //Archive and save new file if changed
         /*

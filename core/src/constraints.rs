@@ -2,7 +2,6 @@ use chrono::{Datelike, NaiveDate, NaiveDateTime, Timelike};
 
 use crate::{
     dates,
-    globals::{Outpatient, MSK, NEURO_BRAIN, NEURO_OTHER, TPC},
     rvu_map::MapCoords,
 };
 

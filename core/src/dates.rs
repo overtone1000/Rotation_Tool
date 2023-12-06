@@ -1,6 +1,6 @@
-use chrono::{Datelike, NaiveDate, NaiveDateTime};
+use chrono::{Datelike, NaiveDate};
 
-use crate::constraints::{is_not_holiday, is_weekday, ConstraintSet};
+
 
 pub fn checkWeekDay(date: NaiveDate) -> bool {
     match date.weekday() {
@@ -23,10 +23,10 @@ fn calcNumberOfDayOfWeekInMonth(date: NaiveDate) -> u32 {
                 return retval;
             }
             Some(d) => {
-                if (d.month() != month) {
+                if d.month() != month {
                     return retval;
                 }
-                if (d.weekday() == day_of_week) {
+                if d.weekday() == day_of_week {
                     retval += 1;
                 }
             }
@@ -67,36 +67,36 @@ pub fn checkHoliday(date: NaiveDate) -> bool {
     //println!("Checking {} ({}) ({})",date.to_string(),calcDayOfWeekOfMonth(date),calcNumberOfDayOfWeekInMonth(date));
 
     //Memorial Day, last Monday of May
-    if (month == chrono::Month::May.number_from_month()
+    if month == chrono::Month::May.number_from_month()
         && day_of_week == chrono::Weekday::Mon
-        && calcDayOfWeekOfMonth(date) == calcNumberOfDayOfWeekInMonth(date))
+        && calcDayOfWeekOfMonth(date) == calcNumberOfDayOfWeekInMonth(date)
     {
         return true;
     }
     //Independence Day, July 4
-    if (month == chrono::Month::July.number_from_month() && day_of_month == 4) {
+    if month == chrono::Month::July.number_from_month() && day_of_month == 4 {
         return true;
     }
     //Labor Day, first Monday of September
-    if (month == chrono::Month::September.number_from_month()
+    if month == chrono::Month::September.number_from_month()
         && day_of_week == chrono::Weekday::Mon
-        && calcDayOfWeekOfMonth(date) == 1)
+        && calcDayOfWeekOfMonth(date) == 1
     {
         return true;
     }
     //Thanksgiving 4th Thursday in November
-    if (month == chrono::Month::November.number_from_month()
+    if month == chrono::Month::November.number_from_month()
         && day_of_week == chrono::Weekday::Thu
-        && calcDayOfWeekOfMonth(date) == 4)
+        && calcDayOfWeekOfMonth(date) == 4
     {
         return true;
     }
     //Christmas December 25
-    if (month == chrono::Month::December.number_from_month() && day_of_month == 25) {
+    if month == chrono::Month::December.number_from_month() && day_of_month == 25 {
         return true;
     }
     //New Years 1/1
-    if (month == chrono::Month::January.number_from_month() && day_of_month == 1) {
+    if month == chrono::Month::January.number_from_month() && day_of_month == 1 {
         return true;
     }
     return false;

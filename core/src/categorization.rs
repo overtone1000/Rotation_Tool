@@ -15,20 +15,20 @@ pub mod exam_categories {
 
     use serde::{Deserialize, Serialize};
 
-    pub(crate) enum pertinent_headers {
+    pub(crate) enum PertinentHeaders {
         procedure_code,
         exam,
         subspecialty,
         comments,
     }
 
-    impl pertinent_headers {
+    impl PertinentHeaders {
         pub(crate) fn getLabel(&self) -> String {
             match self {
-                pertinent_headers::procedure_code => "Exam Code".to_string(),
-                pertinent_headers::exam => "Exam Description".to_string(),
-                pertinent_headers::subspecialty => "Subspecialty".to_string(),
-                pertinent_headers::comments => "Comments".to_string(),
+                PertinentHeaders::procedure_code => "Exam Code".to_string(),
+                PertinentHeaders::exam => "Exam Description".to_string(),
+                PertinentHeaders::subspecialty => "Subspecialty".to_string(),
+                PertinentHeaders::comments => "Comments".to_string(),
             }
         }
     }
@@ -61,7 +61,7 @@ pub mod exam_categories {
         fn cmp(&self, other: &Self) -> std::cmp::Ordering {
             match self.exam.cmp(&other.exam) {
                 std::cmp::Ordering::Equal => self.procedure_code.cmp(&other.procedure_code),
-                (examcmp) => examcmp,
+                examcmp => examcmp,
             }
         }
     }
@@ -123,7 +123,7 @@ pub(crate) fn get_categories_list(
         .getKeyedColumnSampleMap(&(main_headers::pertinent_headers::procedure_code.getLabel()))?;
 
     let existing_exam_categories = exam_categories_table.getKeyedColumnSampleMap(
-        &(exam_categories::pertinent_headers::procedure_code.getLabel()),
+        &(exam_categories::PertinentHeaders::procedure_code.getLabel()),
     )?;
 
     let mut complete_exam_code_list: Vec<exam_categories::exam_category> = Vec::new();
@@ -159,19 +159,19 @@ pub(crate) fn get_categories_list(
             }
             Some(sample_row_index) => {
                 next_member.procedure_code = exam_categories_table.getVal(
-                    &exam_categories::pertinent_headers::procedure_code.getLabel(),
+                    &exam_categories::PertinentHeaders::procedure_code.getLabel(),
                     sample_row_index,
                 )?;
                 next_member.exam = exam_categories_table.getVal(
-                    &exam_categories::pertinent_headers::exam.getLabel(),
+                    &exam_categories::PertinentHeaders::exam.getLabel(),
                     sample_row_index,
                 )?;
                 next_member.subspecialty = exam_categories_table.getVal(
-                    &exam_categories::pertinent_headers::subspecialty.getLabel(),
+                    &exam_categories::PertinentHeaders::subspecialty.getLabel(),
                     sample_row_index,
                 )?;
                 next_member.comments = exam_categories_table.getVal(
-                    &exam_categories::pertinent_headers::comments.getLabel(),
+                    &exam_categories::PertinentHeaders::comments.getLabel(),
                     sample_row_index,
                 )?;
             }
@@ -278,7 +278,7 @@ pub fn buildSalemRVUMap(main_data_table: &table::Table) -> Result<HashMap<String
             Some(&x) => {
                 if x != rvus {
                     rvu_disc += (x - rvus).abs();
-                    if (rvus > x) {
+                    if rvus > x {
                         println!("Replacing RVUs for exam code {} with higher value found {}, previously {}",exam_code,rvus,x);
                         retval.insert(exam_code, rvus);
                     }
@@ -381,7 +381,7 @@ pub fn buildSalemBVUMap(bvu_data_table: &table::Table) -> Result<HashMap<String,
 
         let current = retval.get(&exam_code);
         match current {
-            Some(&x) => {
+            Some(&_x) => {
                 eprintln!("Duplicate BVU table entires for {}", exam_code);
             }
             None => {
@@ -404,7 +404,7 @@ pub fn buildSalemModalityMap(
             &row_i,
         )?;
 
-        if (!retval.contains_key(&exam_code)) {
+        if !retval.contains_key(&exam_code) {
             let listed_modality = main_data_table.getVal(
                 &main_headers::pertinent_headers::modality.getLabel(),
                 &row_i,

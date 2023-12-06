@@ -1,9 +1,7 @@
 use std::{
     collections::{HashMap, HashSet},
-    convert::Infallible,
     error::Error,
     fs::File,
-    hash::Hash,
     io::Write,
 };
 
@@ -49,7 +47,7 @@ pub struct MapCoords {
 impl MapCoords {
     fn validate(s: String, list: &[&str]) -> bool {
         for member in list {
-            if (member.to_string() == s) {
+            if member.to_string() == s {
                 return true;
             }
         }
@@ -57,28 +55,28 @@ impl MapCoords {
     }
     pub fn validateSite(&self) -> bool {
         let retval = MapCoords::validate(self.site.to_owned(), SITES);
-        if (!retval) {
+        if !retval {
             eprintln!("Invalid site {}", self.site);
         }
         return retval;
     }
     pub fn validateSubspecialty(&self) -> bool {
         let retval = MapCoords::validate(self.subspecialty.to_owned(), SUBSPECIALTIES);
-        if (!retval) {
+        if !retval {
             eprintln!("Invalid subspecialty {}", self.subspecialty);
         }
         return retval;
     }
     pub fn validateContext(&self) -> bool {
         let retval = MapCoords::validate(self.context.to_owned(), CONTEXTS);
-        if (!retval) {
+        if !retval {
             eprintln!("Invalid context {}", self.context);
         }
         return retval;
     }
     pub fn validateModality(&self) -> bool {
         let retval = MapCoords::validate(self.modality.to_owned(), MODALITIES);
-        if (!retval) {
+        if !retval {
             eprintln!("Invalid modality {}", self.modality);
         }
         return retval;
@@ -105,7 +103,7 @@ pub struct RVUMap {
 
 impl RVUMap {
     fn new() -> RVUMap {
-        let mut retval = RVUMap {
+        let retval = RVUMap {
             map: HashMap::new(),
         };
 
@@ -113,19 +111,19 @@ impl RVUMap {
     }
 
     fn addRVUs(&mut self, coords: &MapCoords, rvus: f64) -> Result<String, String> {
-        if (!coords.validateSite()) {
+        if !coords.validateSite() {
             return Err("Invalid site.".to_string());
         }
-        if (!self.map.contains_key(&coords.site)) {
+        if !self.map.contains_key(&coords.site) {
             let map = HashMap::new();
             self.map.insert(coords.site.to_owned(), map);
         }
         let sub_map = self.map.get_mut(&coords.site).expect("Immediate get");
 
-        if (!coords.validateSubspecialty()) {
+        if !coords.validateSubspecialty() {
             return Err("Invalid subspecialty.".to_string());
         }
-        if (!sub_map.contains_key(&coords.subspecialty)) {
+        if !sub_map.contains_key(&coords.subspecialty) {
             let map = HashMap::new();
             sub_map.insert(coords.subspecialty.to_owned(), map);
         }
@@ -133,25 +131,25 @@ impl RVUMap {
             .get_mut(&coords.subspecialty)
             .expect("Immediate get");
 
-        if (!coords.validateContext()) {
+        if !coords.validateContext() {
             return Err("Invalid context.".to_string());
         }
-        if (!con_map.contains_key(&coords.context)) {
+        if !con_map.contains_key(&coords.context) {
             let map = HashMap::new();
             con_map.insert(coords.context.to_owned(), map);
         }
         let mod_map = con_map.get_mut(&coords.context).expect("Immediate get");
 
-        if (!coords.validateModality()) {
+        if !coords.validateModality() {
             return Err("Invalid modality.".to_string());
         }
-        if (!mod_map.contains_key(&coords.modality)) {
+        if !mod_map.contains_key(&coords.modality) {
             let map = HashMap::new();
             mod_map.insert(coords.modality.to_owned(), map);
         }
         let time_map = mod_map.get_mut(&coords.modality).expect("Immediate get");
 
-        if (!time_map.contains_key(&coords.time_row)) {
+        if !time_map.contains_key(&coords.time_row) {
             let map_entry: MapEntry = MapEntry { rvus: 0.0 };
             time_map.insert(coords.time_row, map_entry);
         }
@@ -162,22 +160,22 @@ impl RVUMap {
 
     pub fn toJSON(&self, constraints: &Option<ConstraintSet<MapCoords>>) -> Result<String, String> {
         let mut topnode = json::JsonValue::new_object();
-        if (self.map.keys().len() > 0) {
+        if self.map.keys().len() > 0 {
             for site in self.map.keys() {
                 let sub_map = self.map.get(site).expect("No submap");
-                if (sub_map.keys().len() > 0) {
+                if sub_map.keys().len() > 0 {
                     let mut sitenode: json::JsonValue = json::JsonValue::new_object();
                     for subspecialty in sub_map.keys() {
                         let con_map = sub_map.get(subspecialty).expect("No conmap");
-                        if (con_map.keys().len() > 0) {
+                        if con_map.keys().len() > 0 {
                             let mut subspecialtynode = json::JsonValue::new_object();
                             for context in con_map.keys() {
                                 let mod_map = con_map.get(context).expect("No modmap");
-                                if (mod_map.keys().len() > 0) {
+                                if mod_map.keys().len() > 0 {
                                     let mut contextnode = json::JsonValue::new_object();
                                     for modality in mod_map.keys() {
                                         let time_map = mod_map.get(modality).expect("No time map");
-                                        if (time_map.keys().len() > 0) {
+                                        if time_map.keys().len() > 0 {
                                             let mut modalitynode = json::JsonValue::new_object();
                                             for time_row in time_map.keys() {
                                                 let coords = MapCoords {
@@ -263,11 +261,11 @@ impl RVUMap {
                             };
 
                             if include {
-                                if (me.rvus.is_infinite()) {
+                                if me.rvus.is_infinite() {
                                     eprintln!("Infinite RVUs!");
                                 }
                                 retval += me.rvus;
-                                if (retval.is_infinite()) {
+                                if retval.is_infinite() {
                                     eprintln!("Infinite retval!");
                                 }
                             }
@@ -299,7 +297,7 @@ pub fn createMap<'a>(
 
         let datetime = match NaiveDateTime::parse_from_str(&datetimestring, "%m/%d/%y %H:%M") {
             Ok(x) => x,
-            Err(x) => {
+            Err(_x) => {
                 return Err(format!("Couldn't parse date {}", datetimestring));
             }
         };
@@ -401,7 +399,7 @@ pub fn createMap<'a>(
                     return Err(format!("Could not determine modality for row {}", row_i));
                 }
             };
-            if (!modality_map.contains_key(&exam_code)) {
+            if !modality_map.contains_key(&exam_code) {
                 modality_map.insert(exam_code.to_owned(), coords.modality.to_owned());
             }
         }

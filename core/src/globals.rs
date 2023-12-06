@@ -168,7 +168,7 @@ pub fn getLocationSiteMapping(location: &String) -> Option<String> {
     match location.as_str() {
         DXR => Some(SH.to_string()),
         BC => Some(SH.to_string()),
-        (_) => None,
+        _ => None,
     }
 }
 

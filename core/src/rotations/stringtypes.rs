@@ -1,12 +1,12 @@
 use std::{collections::HashSet, fmt};
 
-use chrono::NaiveTime;
+
 use serde::{
     de::{self, Visitor},
     Deserialize, Serialize, Serializer,
 };
 
-use super::timespan::Timespan;
+
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
