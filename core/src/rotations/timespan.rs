@@ -9,7 +9,7 @@ use serde::{
 use super::{
     rotation_error::RotationManifestParseError,
     time_modifiers::{
-        next_midnight, parse_relative_time, this_midnight, RelativeTime, TimeSinceMidnight,
+        NEXT_MIDNIGHT, parse_relative_time, THIS_MIDNIGHT, RelativeTime, TimeSinceMidnight,
     },
 };
 
@@ -73,11 +73,11 @@ impl Timespan {
         if startday == stopday {
             retval.push((startday, start, stop))
         } else {
-            retval.push((startday, start, next_midnight));
+            retval.push((startday, start, NEXT_MIDNIGHT));
             for day in startday + 1..stopday {
-                retval.push((day, this_midnight, next_midnight));
+                retval.push((day, THIS_MIDNIGHT, NEXT_MIDNIGHT));
             }
-            retval.push((stopday, this_midnight, stop));
+            retval.push((stopday, THIS_MIDNIGHT, stop));
         }
 
         retval

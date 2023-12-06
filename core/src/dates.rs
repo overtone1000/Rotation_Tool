@@ -2,7 +2,7 @@ use chrono::{Datelike, NaiveDate};
 
 
 
-pub fn checkWeekDay(date: NaiveDate) -> bool {
+pub fn check_week_day(date: NaiveDate) -> bool {
     match date.weekday() {
         chrono::Weekday::Sun => false,
         chrono::Weekday::Sat => false,
@@ -10,7 +10,7 @@ pub fn checkWeekDay(date: NaiveDate) -> bool {
     }
 }
 
-fn calcNumberOfDayOfWeekInMonth(date: NaiveDate) -> u32 {
+fn calc_number_of_day_of_week_in_month(date: NaiveDate) -> u32 {
     let day_of_week = date.weekday();
     let month = date.month(); //january is 1
     let year = date.year();
@@ -35,31 +35,31 @@ fn calcNumberOfDayOfWeekInMonth(date: NaiveDate) -> u32 {
     retval
 }
 
-pub fn calcDayOfWeekOfMonth(date: NaiveDate) -> u32 {
+pub fn calc_day_of_week_of_month(date: NaiveDate) -> u32 {
     let day_of_month = date.day();
     (day_of_month as f32 / 7.0).ceil() as u32
 }
 
-pub(crate) const business_days_per_year: f64 = 52.0 * 5.0 - 7.0;
+pub(crate) const BUSINESS_DAYS_PER_YEAR: f64 = 52.0 * 5.0 - 7.0;
 
-fn holidayTest() {
+fn holiday_test() {
     println!("Memorial day");
-    checkHoliday(NaiveDate::from_ymd_opt(1999, 5, 31).unwrap_or_default());
+    check_holiday(NaiveDate::from_ymd_opt(1999, 5, 31).unwrap_or_default());
     println!("Independence day");
-    checkHoliday(NaiveDate::from_ymd_opt(1999, 7, 4).unwrap_or_default());
+    check_holiday(NaiveDate::from_ymd_opt(1999, 7, 4).unwrap_or_default());
     println!("Not a holiday");
-    checkHoliday(NaiveDate::from_ymd_opt(1999, 7, 5).unwrap_or_default());
+    check_holiday(NaiveDate::from_ymd_opt(1999, 7, 5).unwrap_or_default());
     println!("Christmas");
-    checkHoliday(NaiveDate::from_ymd_opt(1999, 12, 25).unwrap_or_default());
+    check_holiday(NaiveDate::from_ymd_opt(1999, 12, 25).unwrap_or_default());
     println!("Labor day");
-    checkHoliday(NaiveDate::from_ymd_opt(1999, 9, 6).unwrap_or_default());
+    check_holiday(NaiveDate::from_ymd_opt(1999, 9, 6).unwrap_or_default());
     println!("Thanksgiving");
-    checkHoliday(NaiveDate::from_ymd_opt(1999, 11, 25).unwrap_or_default());
+    check_holiday(NaiveDate::from_ymd_opt(1999, 11, 25).unwrap_or_default());
     println!("New Years");
-    checkHoliday(NaiveDate::from_ymd_opt(1999, 1, 1).unwrap_or_default());
+    check_holiday(NaiveDate::from_ymd_opt(1999, 1, 1).unwrap_or_default());
 }
 
-pub fn checkHoliday(date: NaiveDate) -> bool {
+pub fn check_holiday(date: NaiveDate) -> bool {
     let day_of_week = date.weekday();
     let month = date.month(); //january is 1
     let day_of_month = date.day(); //1st is 1
@@ -69,7 +69,7 @@ pub fn checkHoliday(date: NaiveDate) -> bool {
     //Memorial Day, last Monday of May
     if month == chrono::Month::May.number_from_month()
         && day_of_week == chrono::Weekday::Mon
-        && calcDayOfWeekOfMonth(date) == calcNumberOfDayOfWeekInMonth(date)
+        && calc_day_of_week_of_month(date) == calc_number_of_day_of_week_in_month(date)
     {
         return true;
     }
@@ -80,14 +80,14 @@ pub fn checkHoliday(date: NaiveDate) -> bool {
     //Labor Day, first Monday of September
     if month == chrono::Month::September.number_from_month()
         && day_of_week == chrono::Weekday::Mon
-        && calcDayOfWeekOfMonth(date) == 1
+        && calc_day_of_week_of_month(date) == 1
     {
         return true;
     }
     //Thanksgiving 4th Thursday in November
     if month == chrono::Month::November.number_from_month()
         && day_of_week == chrono::Weekday::Thu
-        && calcDayOfWeekOfMonth(date) == 4
+        && calc_day_of_week_of_month(date) == 4
     {
         return true;
     }

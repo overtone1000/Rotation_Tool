@@ -13,12 +13,12 @@ use chrono::{Datelike, Duration, NaiveDate, NaiveDateTime, Timelike};
 use crate::globals::{self, ALL_DAYS};
 use crate::rotations::manifest::Manifest;
 use crate::rotations::rotation_error::RotationManifestParseError;
-use crate::rotations::time_modifiers::{next_midnight, this_midnight, TimeSinceMidnight};
+use crate::rotations::time_modifiers::{NEXT_MIDNIGHT, THIS_MIDNIGHT, TimeSinceMidnight};
 use crate::rotations::timespan::parse_time_span;
 use crate::{
-    categorization::{buildSalemBVUMap, buildSalemRVUMap},
+    categorization::{build_salem_bvumap, build_salem_rvumap},
     constraints::ConstraintSet,
-    dates::business_days_per_year,
+    dates::BUSINESS_DAYS_PER_YEAR,
     globals::{main_headers, tpc_headers, BUSINESS_DAYS, MODALITIES, SITES},
     processed_source::ProcessedSource,
 };
@@ -234,7 +234,7 @@ impl CoverageAndWorkDay {
         match &self.coverages {
             None => {
                 CoverageError::NoCoverage(
-                    self.get_work_in_timespan(this_midnight, next_midnight)
+                    self.get_work_in_timespan(THIS_MIDNIGHT, NEXT_MIDNIGHT)
                         .total_rvu,
                 )
             }
@@ -247,9 +247,9 @@ impl CoverageAndWorkDay {
                                 //Check from midnight
                                 if farthest_unit.starts_after_this_midnight() {
                                     let rvus = &self
-                                        .get_work_in_timespan(this_midnight, farthest_unit.start);
+                                        .get_work_in_timespan(THIS_MIDNIGHT, farthest_unit.start);
                                     retval.gaps.push((
-                                        this_midnight,
+                                        THIS_MIDNIGHT,
                                         farthest_unit.start,
                                         farthest_unit.to_string() + " starts after midnight",
                                         rvus.total_rvu,
@@ -290,10 +290,10 @@ impl CoverageAndWorkDay {
                                 //Check through midnight
                                 if farthest_unit.ends_before_next_midnight() {
                                     let rvus = &self
-                                        .get_work_in_timespan(farthest_unit.end, next_midnight);
+                                        .get_work_in_timespan(farthest_unit.end, NEXT_MIDNIGHT);
                                     retval.gaps.push((
                                         farthest_unit.end,
-                                        next_midnight,
+                                        NEXT_MIDNIGHT,
                                         farthest_unit.to_string() + " ends before midnight",
                                         rvus.total_rvu,
                                     ));
@@ -526,16 +526,16 @@ impl CoverageMap {
 
         let mut modality_map: HashMap<String, String> = HashMap::new();
 
-        let exam_rvu_map = buildSalemRVUMap(&source.main_data_table)?;
-        let exam_bvu_map: HashMap<String, f64> = buildSalemBVUMap(&source.bvu_data_table)?;
+        let exam_rvu_map = build_salem_rvumap(&source.main_data_table)?;
+        let exam_bvu_map: HashMap<String, f64> = build_salem_bvumap(&source.bvu_data_table)?;
 
         let mut salem_weekday_count: HashMap<chrono::Weekday, u64> = HashMap::new();
         //Determine how many days worth for each weekday
         {
             let mut dateset: HashSet<NaiveDate> = HashSet::new();
-            for row_i in source.main_data_table.rowIndices() {
-                let datetimestring = source.main_data_table.getVal(
-                    &main_headers::pertinent_headers::scheduled_datetime.getLabel(),
+            for row_i in source.main_data_table.row_indices() {
+                let datetimestring = source.main_data_table.get_val(
+                    &main_headers::PertinentHeaders::ScheduledDatetime.get_label(),
                     &row_i,
                 )?;
 
@@ -565,9 +565,9 @@ impl CoverageMap {
             }
         }
         //Process Salem Data
-        for row_i in source.main_data_table.rowIndices() {
-            let datetimestring = source.main_data_table.getVal(
-                &main_headers::pertinent_headers::scheduled_datetime.getLabel(),
+        for row_i in source.main_data_table.row_indices() {
+            let datetimestring = source.main_data_table.get_val(
+                &main_headers::PertinentHeaders::ScheduledDatetime.get_label(),
                 &row_i,
             )?;
 
@@ -584,12 +584,12 @@ impl CoverageMap {
                     .expect("All weekdays should be populated")
                     as f64;
 
-                let location = source.main_data_table.getVal(
-                    &main_headers::pertinent_headers::location.getLabel(),
+                let location = source.main_data_table.get_val(
+                    &main_headers::PertinentHeaders::Location.get_label(),
                     &row_i,
                 )?;
-                let exam_code = source.main_data_table.getVal(
-                    &main_headers::pertinent_headers::procedure_code.getLabel(),
+                let exam_code = source.main_data_table.get_val(
+                    &main_headers::PertinentHeaders::ProcedureCode.get_label(),
                     &row_i,
                 )?;
 
@@ -608,8 +608,8 @@ impl CoverageMap {
 
                     //Try site. If not valid, go by location.
                     let mut selected_site: Option<String> = None;
-                    let listed_site = source.main_data_table.getVal(
-                        &main_headers::pertinent_headers::accession.getLabel(),
+                    let listed_site = source.main_data_table.get_val(
+                        &main_headers::PertinentHeaders::Accession.get_label(),
                         &row_i,
                     )?;
                     for site in SITES {
@@ -621,7 +621,7 @@ impl CoverageMap {
                         }
                     }
                     if selected_site.is_none() {
-                        selected_site = crate::globals::getLocationSiteMapping(&location);
+                        selected_site = crate::globals::get_location_site_mapping(&location);
                     }
                     let site = match selected_site {
                         Some(x) => x,
@@ -636,7 +636,7 @@ impl CoverageMap {
                     //Try context. If not valid, go by site map.
                     let context = match source.location_to_context_map.get(&location) {
                         Some(x) => x.to_string(),
-                        None => match crate::globals::getLocationSiteMapping(&location) {
+                        None => match crate::globals::get_location_site_mapping(&location) {
                             Some(x) => x,
                             None => {
                                 return SourceError::generate_boxed(format!(
@@ -648,8 +648,8 @@ impl CoverageMap {
                     };
 
                     //Get modality, but check for aliases
-                    let listed_modality = source.main_data_table.getVal(
-                        &main_headers::pertinent_headers::modality.getLabel(),
+                    let listed_modality = source.main_data_table.get_val(
+                        &main_headers::PertinentHeaders::Modality.get_label(),
                         &row_i,
                     )?;
                     let mut selected_modality: Option<String> = None;
@@ -661,15 +661,15 @@ impl CoverageMap {
                     }
                     match selected_modality {
                         None => {
-                            selected_modality = crate::globals::getModalityAlias(&listed_modality);
+                            selected_modality = crate::globals::get_modality_alias(&listed_modality);
                         }
                         _ => {}
                     }
                     match selected_modality {
                         None => {
-                            selected_modality = crate::globals::getModalityFromProcedureDesc(
-                                source.main_data_table.getVal(
-                                    &main_headers::pertinent_headers::exam.getLabel(),
+                            selected_modality = crate::globals::get_modality_from_procedure_desc(
+                                source.main_data_table.get_val(
+                                    &main_headers::PertinentHeaders::Exam.get_label(),
                                     &row_i,
                                 )?,
                             )
@@ -730,14 +730,14 @@ impl CoverageMap {
             }
         }
         //Add TPC, which doesn't go by number of dates
-        let weights = crate::time::getNormalDistWeights();
-        for row_i in source.tpc_data_table.rowIndices() {
-            let exam_code = source.tpc_data_table.getVal(
-                &tpc_headers::pertinent_headers::exam_code.getLabel(),
+        let weights = crate::time::get_normal_dist_weights();
+        for row_i in source.tpc_data_table.row_indices() {
+            let exam_code = source.tpc_data_table.get_val(
+                &tpc_headers::PertinentHeaders::ExamCode.get_label(),
                 &row_i,
             )?;
-            let number_str = source.tpc_data_table.getVal(
-                &tpc_headers::pertinent_headers::number_in_2022.getLabel(),
+            let number_str = source.tpc_data_table.get_val(
+                &tpc_headers::PertinentHeaders::NumberIn2022.get_label(),
                 &row_i,
             )?;
 
@@ -748,7 +748,7 @@ impl CoverageMap {
                 }
             };
 
-            let number_per_business_day = number / business_days_per_year;
+            let number_per_business_day = number / BUSINESS_DAYS_PER_YEAR;
 
             let rvus_per_exam = match exam_rvu_map.get(&exam_code) {
                 Some(val) => val.to_owned(),
@@ -783,7 +783,7 @@ impl CoverageMap {
             for weekday in BUSINESS_DAYS {
                 let coords = CoverageCoordinates {
                     site: crate::globals::TPC.to_string(),
-                    context: crate::globals::Outpatient.to_string(),
+                    context: crate::globals::OUTPATIENT.to_string(),
                     modality: modality.to_string(),
                     subspecialty: subspecialty.to_string(),
                     weekday: **weekday,

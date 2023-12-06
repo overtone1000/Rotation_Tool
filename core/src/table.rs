@@ -91,15 +91,15 @@ impl Table {
         true
     }
 
-    fn getHeaderColumnIndex(&self, header_label: &String) -> Result<&usize, String> {
+    fn get_header_column_index(&self, header_label: &String) -> Result<&usize, String> {
         match self.labelmap.get(header_label) {
             None => Err(format!("No header {} found", header_label)),
             Some(x) => Ok(x),
         }
     }
 
-    pub fn getVal(&self, header_label: &String, row: &usize) -> Result<String, String> {
-        let index = self.getHeaderColumnIndex(header_label)?.to_owned();
+    pub fn get_val(&self, header_label: &String, row: &usize) -> Result<String, String> {
+        let index = self.get_header_column_index(header_label)?.to_owned();
 
         let datarow = match self.data.get(row.to_owned()) {
             None => {
@@ -118,13 +118,13 @@ impl Table {
         }
     }
 
-    pub fn setVal(
+    pub fn set_val(
         &mut self,
         header_label: &String,
         row: &usize,
         val: &String,
     ) -> Result<(), String> {
-        let index = self.getHeaderColumnIndex(header_label)?.to_owned();
+        let index = self.get_header_column_index(header_label)?.to_owned();
 
         let datarow = match self.data.get_mut(row.to_owned()) {
             None => {
@@ -137,17 +137,17 @@ impl Table {
         Ok(())
     }
 
-    pub fn rowIndices(&self) -> Range<usize> {
+    pub fn row_indices(&self) -> Range<usize> {
         0..self.data.len()
     }
 
-    pub fn getKeyedColumnSampleMap(
+    pub fn get_keyed_column_sample_map(
         &self,
         key_header_label: &String,
     ) -> Result<HashMap<String, usize>, String> {
         let mut retval: HashMap<String, usize> = HashMap::new();
-        for row_i in self.rowIndices() {
-            let key_value = self.getVal(key_header_label, &row_i);
+        for row_i in self.row_indices() {
+            let key_value = self.get_val(key_header_label, &row_i);
             match key_value {
                 Err(x) => return Err(x),
                 Ok(key_value) => {

@@ -1,6 +1,6 @@
 
 
-use crate::rotations::time_modifiers::{next_midnight, this_midnight, TimeSinceMidnight};
+use crate::rotations::time_modifiers::{NEXT_MIDNIGHT, THIS_MIDNIGHT, TimeSinceMidnight};
 
 use super::coverage_tree::{AnalysisDatum, CoverageAndWorkDay, WorkCollector};
 
@@ -75,7 +75,7 @@ impl TemporalCoverageUnit {
         (self.weekday_offset==0 &&
             self.start>this_midnight)
         */
-        self.start > this_midnight
+        self.start > THIS_MIDNIGHT
     }
 
     pub fn ends_before_next_midnight(&self) -> bool {
@@ -84,7 +84,7 @@ impl TemporalCoverageUnit {
         (self.weekday_offset==0 &&
             self.end<next_midnight)
         */
-        self.end < next_midnight
+        self.end < NEXT_MIDNIGHT
     }
 
     /*

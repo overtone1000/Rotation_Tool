@@ -8,9 +8,9 @@ use std::{
 use chrono::{NaiveDate, NaiveDateTime, Timelike};
 
 use crate::{
-    categorization::{buildSalemBVUMap, buildSalemRVUMap},
+    categorization::{build_salem_bvumap, build_salem_rvumap},
     constraints::ConstraintSet,
-    dates::business_days_per_year,
+    dates::BUSINESS_DAYS_PER_YEAR,
     error::RotationToolError,
     globals::{file_names, main_headers, tpc_headers, CONTEXTS, MODALITIES, SITES, SUBSPECIALTIES},
     processed_source::ProcessedSource,
@@ -22,15 +22,15 @@ struct MapEntry {
 }
 
 impl MapEntry {
-    fn addRVUs(&mut self, rvus: f64) {
+    fn add_rvus(&mut self, rvus: f64) {
         self.rvus += rvus;
     }
 
-    fn getRVUs(&self) -> f64 {
+    fn get_rvus(&self) -> f64 {
         self.rvus.to_owned()
     }
 
-    fn setRVUs(&mut self, rvu: f64) {
+    fn set_rvus(&mut self, rvu: f64) {
         self.rvus = rvu;
     }
 }
@@ -53,28 +53,28 @@ impl MapCoords {
         }
         false
     }
-    pub fn validateSite(&self) -> bool {
+    pub fn validate_site(&self) -> bool {
         let retval = MapCoords::validate(self.site.to_owned(), SITES);
         if !retval {
             eprintln!("Invalid site {}", self.site);
         }
         retval
     }
-    pub fn validateSubspecialty(&self) -> bool {
+    pub fn validate_subspecialty(&self) -> bool {
         let retval = MapCoords::validate(self.subspecialty.to_owned(), SUBSPECIALTIES);
         if !retval {
             eprintln!("Invalid subspecialty {}", self.subspecialty);
         }
         retval
     }
-    pub fn validateContext(&self) -> bool {
+    pub fn validate_context(&self) -> bool {
         let retval = MapCoords::validate(self.context.to_owned(), CONTEXTS);
         if !retval {
             eprintln!("Invalid context {}", self.context);
         }
         retval
     }
-    pub fn validateModality(&self) -> bool {
+    pub fn validate_modality(&self) -> bool {
         let retval = MapCoords::validate(self.modality.to_owned(), MODALITIES);
         if !retval {
             eprintln!("Invalid modality {}", self.modality);
@@ -82,13 +82,13 @@ impl MapCoords {
         retval
     }
 
-    pub fn getSubspecialty(&self) -> &String {
+    pub fn get_subspecialty(&self) -> &String {
         &self.subspecialty
     }
-    pub fn getContext(&self) -> &String {
+    pub fn get_context(&self) -> &String {
         &self.context
     }
-    pub fn getSite(&self) -> &String {
+    pub fn get_site(&self) -> &String {
         &self.site
     }
 }
@@ -110,8 +110,8 @@ impl RVUMap {
         }
     }
 
-    fn addRVUs(&mut self, coords: &MapCoords, rvus: f64) -> Result<String, String> {
-        if !coords.validateSite() {
+    fn add_rvus(&mut self, coords: &MapCoords, rvus: f64) -> Result<String, String> {
+        if !coords.validate_site() {
             return Err("Invalid site.".to_string());
         }
         if !self.map.contains_key(&coords.site) {
@@ -120,7 +120,7 @@ impl RVUMap {
         }
         let sub_map = self.map.get_mut(&coords.site).expect("Immediate get");
 
-        if !coords.validateSubspecialty() {
+        if !coords.validate_subspecialty() {
             return Err("Invalid subspecialty.".to_string());
         }
         if !sub_map.contains_key(&coords.subspecialty) {
@@ -131,7 +131,7 @@ impl RVUMap {
             .get_mut(&coords.subspecialty)
             .expect("Immediate get");
 
-        if !coords.validateContext() {
+        if !coords.validate_context() {
             return Err("Invalid context.".to_string());
         }
         if !con_map.contains_key(&coords.context) {
@@ -140,7 +140,7 @@ impl RVUMap {
         }
         let mod_map = con_map.get_mut(&coords.context).expect("Immediate get");
 
-        if !coords.validateModality() {
+        if !coords.validate_modality() {
             return Err("Invalid modality.".to_string());
         }
         if !mod_map.contains_key(&coords.modality) {
@@ -154,11 +154,11 @@ impl RVUMap {
             map_entry
         });
         let me = time_map.get_mut(&coords.time_row).expect("Immediate get");
-        me.addRVUs(rvus);
+        me.add_rvus(rvus);
         Ok("good".to_string())
     }
 
-    pub fn toJSON(&self, constraints: &Option<ConstraintSet<MapCoords>>) -> Result<String, String> {
+    pub fn to_json(&self, constraints: &Option<ConstraintSet<MapCoords>>) -> Result<String, String> {
         let mut topnode = json::JsonValue::new_object();
         if self.map.keys().len() > 0 {
             for site in self.map.keys() {
@@ -218,28 +218,28 @@ impl RVUMap {
         Ok(topnode.dump())
     }
 
-    pub fn toFile(
+    pub fn to_file(
         &self,
         constraints: &Option<ConstraintSet<MapCoords>>,
         filename: &str,
     ) -> Result<(), Box<dyn Error>> {
         let mut mapoutfile = File::create(filename)?;
-        let mapstr = self.toJSON(constraints)?;
+        let mapstr = self.to_json(constraints)?;
         let bytes = mapstr.as_bytes();
 
         match mapoutfile.write_all(bytes) {
             Ok(_) => Ok(()),
             Err(e) => {
-                Err(Box::new(crate::RotationToolError::new(e.to_string())))
+                Err(Box::new(crate::error::RotationToolError::new(e.to_string())))
             }
         }
     }
 
-    pub fn totalAverageRVUs(&self) -> f64 {
-        self.sliceAverageRVUs(None)
+    pub fn total_average_rvus(&self) -> f64 {
+        self.slice_average_rvus(None)
     }
 
-    pub fn sliceAverageRVUs(&self, constraints: Option<ConstraintSet<MapCoords>>) -> f64 {
+    pub fn slice_average_rvus(&self, constraints: Option<ConstraintSet<MapCoords>>) -> f64 {
         //site, subspecialty, context, modality, time_row
         let mut retval: f64 = 0.0;
         for (site, m1) in &self.map {
@@ -278,7 +278,7 @@ impl RVUMap {
     }
 }
 
-pub fn createMap(
+pub fn create_map(
     source: &ProcessedSource,
     exam_rvu_map: &HashMap<String, f64>,
     date_constraints: &ConstraintSet<'_, NaiveDateTime>,
@@ -289,9 +289,9 @@ pub fn createMap(
 
     let mut included_dates: HashSet<NaiveDate> = HashSet::new();
 
-    for row_i in source.main_data_table.rowIndices() {
-        let datetimestring = source.main_data_table.getVal(
-            &main_headers::pertinent_headers::scheduled_datetime.getLabel(),
+    for row_i in source.main_data_table.row_indices() {
+        let datetimestring = source.main_data_table.get_val(
+            &main_headers::PertinentHeaders::ScheduledDatetime.get_label(),
             &row_i,
         )?;
 
@@ -302,19 +302,19 @@ pub fn createMap(
             }
         };
 
-        let location = source.main_data_table.getVal(
-            &main_headers::pertinent_headers::location.getLabel(),
+        let location = source.main_data_table.get_val(
+            &main_headers::PertinentHeaders::Location.get_label(),
             &row_i,
         )?;
-        let exam_code = source.main_data_table.getVal(
-            &main_headers::pertinent_headers::procedure_code.getLabel(),
+        let exam_code = source.main_data_table.get_val(
+            &main_headers::PertinentHeaders::ProcedureCode.get_label(),
             &row_i,
         )?;
 
         //Build coords and populate maps with this row.
         let mut coords = MapCoords::default();
         {
-            coords.time_row = crate::time::getTimeRowIndex(datetime.hour(), datetime.minute());
+            coords.time_row = crate::time::get_time_row_index(datetime.hour(), datetime.minute());
 
             //Get subspecialty from exam code
             coords.subspecialty = match source.exam_to_subspecialty_map.get(&exam_code) {
@@ -329,8 +329,8 @@ pub fn createMap(
 
             //Try site. If not valid, go by location.
             let mut selected_site: Option<String> = None;
-            let listed_site = source.main_data_table.getVal(
-                &main_headers::pertinent_headers::accession.getLabel(),
+            let listed_site = source.main_data_table.get_val(
+                &main_headers::PertinentHeaders::Accession.get_label(),
                 &row_i,
             )?;
             for site in SITES {
@@ -342,7 +342,7 @@ pub fn createMap(
                 }
             }
             if selected_site.is_none() {
-                selected_site = crate::globals::getLocationSiteMapping(&location);
+                selected_site = crate::globals::get_location_site_mapping(&location);
             }
             coords.site = match selected_site {
                 Some(x) => x,
@@ -354,7 +354,7 @@ pub fn createMap(
             //Try context. If not valid, go by site map.
             coords.context = match source.location_to_context_map.get(&location) {
                 Some(x) => x.to_string(),
-                None => match crate::globals::getLocationSiteMapping(&location) {
+                None => match crate::globals::get_location_site_mapping(&location) {
                     Some(x) => x,
                     None => {
                         return Err(format!(
@@ -366,8 +366,8 @@ pub fn createMap(
             };
 
             //Get modality, but check for aliases
-            let listed_modality = source.main_data_table.getVal(
-                &main_headers::pertinent_headers::modality.getLabel(),
+            let listed_modality = source.main_data_table.get_val(
+                &main_headers::PertinentHeaders::Modality.get_label(),
                 &row_i,
             )?;
             let mut selected_modality: Option<String> = None;
@@ -379,16 +379,16 @@ pub fn createMap(
             }
             match selected_modality {
                 None => {
-                    selected_modality = crate::globals::getModalityAlias(&listed_modality);
+                    selected_modality = crate::globals::get_modality_alias(&listed_modality);
                 }
                 _ => {}
             }
             match selected_modality {
                 None => {
-                    selected_modality = crate::globals::getModalityFromProcedureDesc(
+                    selected_modality = crate::globals::get_modality_from_procedure_desc(
                         source
                             .main_data_table
-                            .getVal(&main_headers::pertinent_headers::exam.getLabel(), &row_i)?,
+                            .get_val(&main_headers::PertinentHeaders::Exam.get_label(), &row_i)?,
                     )
                 }
                 _ => {}
@@ -416,7 +416,7 @@ pub fn createMap(
                 }
             };
 
-            rvumap.addRVUs(&coords, rvus)?;
+            rvumap.add_rvus(&coords, rvus)?;
         }
     }
 
@@ -437,7 +437,7 @@ pub fn createMap(
                     let time_map = modality.1;
                     for time_row in time_map.iter_mut() {
                         let me = time_row.1;
-                        me.setRVUs(me.rvus / days);
+                        me.set_rvus(me.rvus / days);
                     }
                 }
             }
@@ -445,14 +445,14 @@ pub fn createMap(
     }
 
     //Add TPC, which doesn't go by number of dates
-    let weights = crate::time::getTimeRowNormalDistWeights();
-    for row_i in source.tpc_data_table.rowIndices() {
-        let exam_code = source.tpc_data_table.getVal(
-            &tpc_headers::pertinent_headers::exam_code.getLabel(),
+    let weights = crate::time::get_time_row_normal_dist_weights();
+    for row_i in source.tpc_data_table.row_indices() {
+        let exam_code = source.tpc_data_table.get_val(
+            &tpc_headers::PertinentHeaders::ExamCode.get_label(),
             &row_i,
         )?;
-        let number_str = source.tpc_data_table.getVal(
-            &tpc_headers::pertinent_headers::number_in_2022.getLabel(),
+        let number_str = source.tpc_data_table.get_val(
+            &tpc_headers::PertinentHeaders::NumberIn2022.get_label(),
             &row_i,
         )?;
 
@@ -463,7 +463,7 @@ pub fn createMap(
             }
         };
 
-        let number_per_business_day = number / business_days_per_year;
+        let number_per_business_day = number / BUSINESS_DAYS_PER_YEAR;
         let rvus_per_exam = match exam_rvu_map.get(&exam_code) {
             None => {
                 return Err(format!("Bad exam code {}", exam_code));
@@ -481,7 +481,7 @@ pub fn createMap(
             }
             Some(val) => val.to_owned(),
         };
-        coords.context = crate::globals::Outpatient.to_string();
+        coords.context = crate::globals::OUTPATIENT.to_string();
         coords.modality = match modality_map.get(&exam_code) {
             None => {
                 return Err(format!("Bad exam code {}", exam_code));
@@ -492,14 +492,14 @@ pub fn createMap(
         for key in weights.keys() {
             coords.time_row = *key;
             let rvu = rvus_per_business_day * (*weights.get(key).expect("Expected")) as f64;
-            rvumap.addRVUs(&coords, rvu);
+            rvumap.add_rvus(&coords, rvu);
         }
     }
 
     Ok(rvumap)
 }
 
-pub fn buildMaps(
+pub fn build_maps(
     date_constraints: &ConstraintSet<NaiveDateTime>,
     classification_constraints: Option<ConstraintSet<MapCoords>>,
 ) -> Result<(), Box<dyn Error>> {
@@ -507,8 +507,8 @@ pub fn buildMaps(
 
     //Create the conventional RVU map
     {
-        let rvu_map = buildSalemRVUMap(&source.main_data_table)?;
-        let map = match rvu_map::createMap(&source, &rvu_map, date_constraints) {
+        let rvu_map = build_salem_rvumap(&source.main_data_table)?;
+        let map = match rvu_map::create_map(&source, &rvu_map, date_constraints) {
             Ok(x) => x,
             Err(e) => {
                 let err = RotationToolError::new(e);
@@ -516,7 +516,7 @@ pub fn buildMaps(
             }
         };
 
-        match map.toFile(&classification_constraints, file_names::OUT_FILE) {
+        match map.to_file(&classification_constraints, file_names::OUT_FILE) {
             Ok(_) => {}
             Err(e) => {
                 return Err(e);
@@ -526,8 +526,8 @@ pub fn buildMaps(
 
     //Create BVU map
     {
-        let bvu_map: HashMap<String, f64> = buildSalemBVUMap(&source.bvu_data_table)?;
-        let map = match rvu_map::createMap(&source, &bvu_map, date_constraints) {
+        let bvu_map: HashMap<String, f64> = build_salem_bvumap(&source.bvu_data_table)?;
+        let map = match rvu_map::create_map(&source, &bvu_map, date_constraints) {
             Ok(x) => x,
             Err(e) => {
                 let err = RotationToolError::new(e);
@@ -535,7 +535,7 @@ pub fn buildMaps(
             }
         };
 
-        match map.toFile(&classification_constraints, file_names::BVU_OUT_FILE) {
+        match map.to_file(&classification_constraints, file_names::BVU_OUT_FILE) {
             Ok(_) => {}
             Err(e) => {
                 return Err(e);

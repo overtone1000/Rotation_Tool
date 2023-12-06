@@ -3,20 +3,20 @@ use std::{collections::HashMap, error::Error};
 use chrono::NaiveDateTime;
 
 use crate::{
-    categorization::buildSalemRVUMap,
+    categorization::build_salem_rvumap,
     constraints::{
         exclude_site, is_after_this_hour, is_before_this_hour, is_not_holiday, is_this_day,
         only_these_subspecialties, only_this_context, ConstraintSet,
     },
     error::RotationToolError,
-    globals::{Outpatient, MSK, NEURO_BRAIN, NEURO_OTHER, TPC},
+    globals::{OUTPATIENT, MSK, NEURO_BRAIN, NEURO_OTHER, TPC},
     processed_source::ProcessedSource,
     rvu_map::{self, MapCoords, RVUMap},
 };
 
 pub(crate) fn explain_weekend_outpatient_volumes() -> Result<(), Box<dyn Error>> {
     let source = ProcessedSource::build()?;
-    let rvu_map = buildSalemRVUMap(&source.main_data_table)?;
+    let rvu_map = build_salem_rvumap(&source.main_data_table)?;
 
     let is_not_holiday_ref = &is_not_holiday;
 
@@ -28,7 +28,7 @@ pub(crate) fn explain_weekend_outpatient_volumes() -> Result<(), Box<dyn Error>>
         let is_hour_ref = &(is_after_this_hour(17));
         tcs.add(is_hour_ref);
 
-        ExplainTimeRegion("Friday after 5PM", &tcs, &source, &rvu_map)?;
+        explain_time_region("Friday after 5PM", &tcs, &source, &rvu_map)?;
     }
 
     {
@@ -39,7 +39,7 @@ pub(crate) fn explain_weekend_outpatient_volumes() -> Result<(), Box<dyn Error>>
         let is_hour_ref = &(is_before_this_hour(17));
         tcs.add(is_hour_ref);
 
-        ExplainTimeRegion("Saturday before 5PM", &tcs, &source, &rvu_map)?;
+        explain_time_region("Saturday before 5PM", &tcs, &source, &rvu_map)?;
     }
 
     {
@@ -50,7 +50,7 @@ pub(crate) fn explain_weekend_outpatient_volumes() -> Result<(), Box<dyn Error>>
         let is_hour_ref = &(is_before_this_hour(17));
         tcs.add(is_hour_ref);
 
-        ExplainTimeRegion("Sunday before 5PM", &tcs, &source, &rvu_map)?;
+        explain_time_region("Sunday before 5PM", &tcs, &source, &rvu_map)?;
     }
 
     {
@@ -61,7 +61,7 @@ pub(crate) fn explain_weekend_outpatient_volumes() -> Result<(), Box<dyn Error>>
         let is_hour_ref = &(is_after_this_hour(17));
         tcs.add(is_hour_ref);
 
-        ExplainTimeRegion("Sunday after 5PM", &tcs, &source, &rvu_map)?;
+        explain_time_region("Sunday after 5PM", &tcs, &source, &rvu_map)?;
     }
 
     Ok(())
@@ -69,7 +69,7 @@ pub(crate) fn explain_weekend_outpatient_volumes() -> Result<(), Box<dyn Error>>
 
 pub(crate) extern "C" fn explain_weekday_variance() -> Result<(), Box<dyn Error>> {
     let source = ProcessedSource::build()?;
-    let rvu_map = buildSalemRVUMap(&source.main_data_table)?;
+    let rvu_map = build_salem_rvumap(&source.main_data_table)?;
 
     let weekdays = [
         chrono::Weekday::Mon,
@@ -91,7 +91,7 @@ pub(crate) extern "C" fn explain_weekday_variance() -> Result<(), Box<dyn Error>
             let is_hour_ref = &(is_before_this_hour(15));
             tcs.add(is_hour_ref);
 
-            ExplainTimeRegion(&format!("{} before 3PM", weekday), &tcs, &source, &rvu_map)?;
+            explain_time_region(&format!("{} before 3PM", weekday), &tcs, &source, &rvu_map)?;
         }
 
         {
@@ -101,26 +101,26 @@ pub(crate) extern "C" fn explain_weekday_variance() -> Result<(), Box<dyn Error>
             let is_hour_ref = &(is_after_this_hour(15));
             tcs.add(is_hour_ref);
 
-            ExplainTimeRegion(&format!("{} after 3PM", weekday), &tcs, &source, &rvu_map)?;
+            explain_time_region(&format!("{} after 3PM", weekday), &tcs, &source, &rvu_map)?;
         }
     }
 
     Ok(())
 }
 
-fn ExplainSegment(map: RVUMap) -> String {
+fn explain_segment(map: RVUMap) -> String {
     let mut total: f64 = 0.0;
     let mut neuro: f64 = 0.0;
     let mut msk: f64 = 0.0;
 
     let exclude_tpc_ref = &exclude_site(TPC.to_string());
-    let only_outpatient_ref = &only_this_context(Outpatient.to_string());
+    let only_outpatient_ref = &only_this_context(OUTPATIENT.to_string());
 
     {
         let mut ccs: ConstraintSet<MapCoords> = ConstraintSet::new();
         ccs.add(exclude_tpc_ref);
         ccs.add(only_outpatient_ref);
-        total = map.sliceAverageRVUs(Some(ccs));
+        total = map.slice_average_rvus(Some(ccs));
     }
 
     {
@@ -134,7 +134,7 @@ fn ExplainSegment(map: RVUMap) -> String {
         let only_these_subspecialties_ref = &only_these_subspecialties(subspecialties);
         ccs.add(only_these_subspecialties_ref);
 
-        neuro = map.sliceAverageRVUs(Some(ccs));
+        neuro = map.slice_average_rvus(Some(ccs));
     }
 
     {
@@ -147,7 +147,7 @@ fn ExplainSegment(map: RVUMap) -> String {
         let only_these_subspecialties_ref = &only_these_subspecialties(subspecialties);
         ccs.add(only_these_subspecialties_ref);
 
-        msk = map.sliceAverageRVUs(Some(ccs));
+        msk = map.slice_average_rvus(Some(ccs));
     }
 
     format!(
@@ -156,19 +156,19 @@ fn ExplainSegment(map: RVUMap) -> String {
     )
 }
 
-fn ExplainTimeRegion(
+fn explain_time_region(
     desc: &str,
     date_inclusion: &ConstraintSet<NaiveDateTime>,
     source: &ProcessedSource,
     rvu_map: &HashMap<String, f64>,
 ) -> Result<(), Box<dyn Error>> {
-    let map = match rvu_map::createMap(source, rvu_map, date_inclusion) {
+    let map = match rvu_map::create_map(source, rvu_map, date_inclusion) {
         Ok(x) => x,
         Err(e) => {
             let err = RotationToolError::new(e);
             return Err(Box::new(err));
         }
     };
-    println!("{}, {}", desc, ExplainSegment(map));
+    println!("{}, {}", desc, explain_segment(map));
     Ok(())
 }

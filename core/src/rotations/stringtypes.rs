@@ -60,9 +60,9 @@ impl StringTypes {
     }
 }
 
-const delimiter: &str = "/";
+const DELIMITER: &str = "/";
 
-const all: &str = "All";
+const ALL: &str = "All";
 
 #[derive(Debug, PartialEq)]
 pub struct AllType {}
@@ -72,7 +72,7 @@ impl Serialize for AllType {
     where
         S: serde::Serializer,
     {
-        serializer.serialize_str(all)
+        serializer.serialize_str(ALL)
     }
 }
 
@@ -81,7 +81,7 @@ impl<'de> Visitor<'de> for AllTypeVisitor {
     type Value = AllType;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let str = format!("Just the word {}", all);
+        let str = format!("Just the word {}", ALL);
         formatter.write_str(&str)
     }
 
@@ -89,7 +89,7 @@ impl<'de> Visitor<'de> for AllTypeVisitor {
     where
         E: de::Error,
     {
-        if value == all {
+        if value == ALL {
             Ok(AllType {})
         } else {
             Err(E::custom("Not an all"))
@@ -114,7 +114,7 @@ pub struct SlashSeparatedStringSet {
 impl SlashSeparatedStringSet {
     pub fn new(val: &str) -> SlashSeparatedStringSet {
         let mut vec: HashSet<String> = HashSet::new();
-        let values = val.split(&delimiter);
+        let values = val.split(&DELIMITER);
         for value in values {
             vec.insert(value.to_string());
         }
@@ -131,7 +131,7 @@ impl Serialize for SlashSeparatedStringSet {
         for value in &self.values {
             match str {
                 None => str = Some(value.to_string()),
-                Some(x) => str = Some(x + &delimiter + value),
+                Some(x) => str = Some(x + &DELIMITER + value),
             }
         }
         match str {
@@ -146,7 +146,7 @@ impl<'de> Visitor<'de> for SlashSeparateddStringVisitor {
     type Value = SlashSeparatedStringSet;
 
     fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        let str = "A set of strings separated by ".to_string() + &delimiter;
+        let str = "A set of strings separated by ".to_string() + &DELIMITER;
         formatter.write_str(&str)
     }
 

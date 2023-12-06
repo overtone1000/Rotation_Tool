@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     categorization::{
-        exam_categories::exam_category, get_categories_list, get_locations_list,
+        exam_categories::ExamCategory, get_categories_list, get_locations_list,
     },
     globals::file_names,
     table::{self, Table},
@@ -22,7 +22,7 @@ pub struct ProcessedSource {
     pub bvu_data_table: Table,
     pub exam_categories_table: Table,
     pub location_categories_table: Table,
-    pub exam_categories_list: Vec<exam_category>,
+    pub exam_categories_list: Vec<ExamCategory>,
     pub exam_to_subspecialty_map: HashMap<String, String>,
     pub location_to_context_map: HashMap<String, String>,
 }
@@ -135,8 +135,8 @@ impl ProcessedSource {
         Ok(ProcessedSource::deserialize(&mut deserializer)?)
     }
 
-    pub fn checkBVUSource(&mut self) {
+    pub fn check_bvusource(&mut self) {
         //This was only necessary to fix the data.
-        crate::categorization::checkBVUSource(&self.main_data_table, &mut self.bvu_data_table);
+        crate::categorization::check_bvusource(&self.main_data_table, &mut self.bvu_data_table);
     }
 }

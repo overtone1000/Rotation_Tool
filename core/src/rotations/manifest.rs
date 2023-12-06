@@ -1,7 +1,7 @@
 
 
 use serde::{Deserialize, Serialize};
-use std::collections::{HashSet};
+use std::collections::HashSet;
 use std::error::Error;
 use std::fs;
 
@@ -11,9 +11,9 @@ use crate::globals::file_names::EXAMPLE_ROTATION_DESCRIPTIONS;
 
 use super::baseline::RotationBaseline;
 use super::description::RotationDescription;
-use super::responsibility::{RotationResponsibility};
-use super::special::{weekdays};
-use super::stringtypes::{StringTypes};
+use super::responsibility::RotationResponsibility;
+use super::special::weekdays;
+use super::stringtypes::StringTypes;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -129,8 +129,8 @@ impl Manifest {
 
         let baselines = vec![RotationBaseline {
             rotation: "Rotation A".to_string(),
-            RVU: 71.2,
-            BVU: 2100.2,
+            rvu: 71.2,
+            bvu: 2100.2,
         }];
 
         example.baselines = Some(baselines);

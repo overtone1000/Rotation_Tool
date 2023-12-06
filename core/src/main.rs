@@ -1,21 +1,19 @@
 use std::{
     error::Error,
-    fs::{File},
-    io::{BufWriter},
+    fs::File,
+    io::BufWriter,
 };
 
 
-use chrono::{NaiveDateTime};
+use chrono::NaiveDateTime;
 use constraints::{is_business_day, is_not_holiday, ConstraintSet};
 
 
 use processed_source::ProcessedSource;
-use rvu_map::{buildMaps};
 
 
 use crate::{
-    analysis::coverage_tree::{CoverageMap},
-    error::RotationToolError,
+    analysis::coverage_tree::CoverageMap,
     globals::file_names::{COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE},
 };
 
@@ -45,7 +43,7 @@ fn build_maps() -> Result<(), Box<dyn Error>> {
 
     //buildMaps(Some(ccs))
 
-    buildMaps(&date_constraints, None)
+    rvu_map::build_maps(&date_constraints, None)
 }
 
 fn analyze_rotations() -> Result<(), Box<dyn Error>> {
@@ -113,7 +111,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
     println!("Starting.");
 
-    let rebuild_source: bool = false;
+    let rebuild_source: bool = true;
 
     if rebuild_source {
         cache_source()?;

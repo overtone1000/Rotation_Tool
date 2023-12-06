@@ -15,8 +15,8 @@ pub struct TimeSinceMidnight {
     minutes: u64,
 }
 
-pub const this_midnight: TimeSinceMidnight = TimeSinceMidnight { minutes: 0 };
-pub const next_midnight: TimeSinceMidnight = TimeSinceMidnight { minutes: 24 * 60 };
+pub const THIS_MIDNIGHT: TimeSinceMidnight = TimeSinceMidnight { minutes: 0 };
+pub const NEXT_MIDNIGHT: TimeSinceMidnight = TimeSinceMidnight { minutes: 24 * 60 };
 
 impl TimeSinceMidnight {
     pub fn new(minutes: u64) -> TimeSinceMidnight {
@@ -67,7 +67,7 @@ impl TimeSinceMidnight {
     }
 
     pub fn is_valid(&self) -> bool {
-        self <= &next_midnight
+        self <= &NEXT_MIDNIGHT
     }
 }
 
@@ -96,7 +96,7 @@ pub enum RelativeTime {
     NextDay(TimeSinceMidnight),
 }
 
-const delimiter: &str = " ";
+const DELIMITER: &str = " ";
 
 fn get_previous_business_day(day: chrono::Weekday) -> chrono::Weekday {
     match day {
@@ -164,7 +164,7 @@ pub fn parse_relative_time(strval: &str) -> Result<RelativeTime, RotationManifes
     let err =
         RotationManifestParseError::generate(0, format!("Malformed relative time {}", strval));
 
-    let spl = strval.split(delimiter);
+    let spl = strval.split(DELIMITER);
     let mut members = Vec::new();
     for item in spl {
         members.push(item);
@@ -199,6 +199,6 @@ impl RelativeTime {
 
         let timestr = time.to_string();
 
-        timestr + delimiter + self.get_modifier()
+        timestr + DELIMITER + self.get_modifier()
     }
 }

@@ -30,11 +30,11 @@ impl<'a, T> ConstraintSet<'a, T> {
 }
 
 pub(crate) fn is_not_holiday(datetime: &NaiveDateTime) -> bool {
-    !dates::checkHoliday(NaiveDate::from(*datetime))
+    !dates::check_holiday(NaiveDate::from(*datetime))
 }
 
 pub(crate) fn is_weekday(datetime: &NaiveDateTime) -> bool {
-    dates::checkWeekDay(NaiveDate::from(*datetime))
+    dates::check_week_day(NaiveDate::from(*datetime))
 }
 
 pub(crate) fn is_this_day<'a>(day: chrono::Weekday) -> impl Fn(&NaiveDateTime) -> bool {
@@ -42,11 +42,11 @@ pub(crate) fn is_this_day<'a>(day: chrono::Weekday) -> impl Fn(&NaiveDateTime) -
 }
 
 pub(crate) fn exclude_site(site: String) -> impl Fn(&MapCoords) -> bool {
-    move |coords: &MapCoords| coords.getSite() != &site
+    move |coords: &MapCoords| coords.get_site() != &site
 }
 
 pub(crate) fn only_this_context(context: String) -> impl Fn(&MapCoords) -> bool {
-    move |coords: &MapCoords| coords.getContext() == &context
+    move |coords: &MapCoords| coords.get_context() == &context
 }
 
 pub(crate) fn only_these_subspecialties(
@@ -54,7 +54,7 @@ pub(crate) fn only_these_subspecialties(
 ) -> impl Fn(&MapCoords) -> bool {
     move |coords: &MapCoords| {
         for subspecialty in &subspecialties {
-            if coords.getSubspecialty() == subspecialty {
+            if coords.get_subspecialty() == subspecialty {
                 return true;
             }
         }

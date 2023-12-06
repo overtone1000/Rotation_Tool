@@ -14,62 +14,62 @@ pub mod file_names {
 }
 
 pub mod main_headers {
-    pub(crate) enum pertinent_headers {
-        accession,
-        procedure_code,
-        exam,
-        location,
-        scheduled_datetime,
-        rvu,
-        modality,
+    pub(crate) enum PertinentHeaders {
+        Accession,
+        ProcedureCode,
+        Exam,
+        Location,
+        ScheduledDatetime,
+        Rvu,
+        Modality,
     }
 
-    impl pertinent_headers {
-        pub(crate) fn getLabel(&self) -> String {
+    impl PertinentHeaders {
+        pub(crate) fn get_label(&self) -> String {
             match self {
-                pertinent_headers::accession => "Accession".to_string(),
-                pertinent_headers::procedure_code => "ProcedureCodeList".to_string(),
-                pertinent_headers::exam => "ProcedureDescList".to_string(),
-                pertinent_headers::location => "LocationDescription".to_string(),
-                pertinent_headers::scheduled_datetime => "Exam Started".to_string(),
-                pertinent_headers::rvu => "WorkRVU".to_string(),
-                pertinent_headers::modality => "Modality".to_string(),
+                PertinentHeaders::Accession => "Accession".to_string(),
+                PertinentHeaders::ProcedureCode => "ProcedureCodeList".to_string(),
+                PertinentHeaders::Exam => "ProcedureDescList".to_string(),
+                PertinentHeaders::Location => "LocationDescription".to_string(),
+                PertinentHeaders::ScheduledDatetime => "Exam Started".to_string(),
+                PertinentHeaders::Rvu => "WorkRVU".to_string(),
+                PertinentHeaders::Modality => "Modality".to_string(),
             }
         }
     }
 }
 
 pub mod tpc_headers {
-    pub(crate) enum pertinent_headers {
-        number_in_2022,
-        exam_code,
+    pub(crate) enum PertinentHeaders {
+        NumberIn2022,
+        ExamCode,
     }
 
-    impl pertinent_headers {
-        pub(crate) fn getLabel(&self) -> String {
+    impl PertinentHeaders {
+        pub(crate) fn get_label(&self) -> String {
             match self {
-                pertinent_headers::number_in_2022 => "2022 Volume".to_string(),
-                pertinent_headers::exam_code => "Exam Code Translation".to_string(),
+                PertinentHeaders::NumberIn2022 => "2022 Volume".to_string(),
+                PertinentHeaders::ExamCode => "Exam Code Translation".to_string(),
             }
         }
     }
 }
 
 pub mod bvu_headers {
-    pub(crate) enum pertinent_headers {
-        exam_code,
-        target_percentile,
-        exam_description,
-        comments,
+    pub(crate) enum PertinentHeaders {
+        ExamCode,
+        TargetPercentile,
+        ExamDescription,
+        Comments,
     }
 
-    impl pertinent_headers {
-        pub(crate) fn getLabel(&self) -> String {
+    impl PertinentHeaders {
+        pub(crate) fn get_label(&self) -> String {
             match self {
-                pertinent_headers::target_percentile => "50th".to_string(),
-                pertinent_headers::exam_code => "Location group".to_string(),
-                pertinent_headers::exam_description => "Exam Description".to_string(),
-                pertinent_headers::comments => "Comments".to_string(),
+                PertinentHeaders::TargetPercentile => "50th".to_string(),
+                PertinentHeaders::ExamCode => "Location group".to_string(),
+                PertinentHeaders::ExamDescription => "Exam Description".to_string(),
+                PertinentHeaders::Comments => "Comments".to_string(),
             }
         }
     }
@@ -116,11 +116,11 @@ pub const SUBSPECIALTIES: &[&str] = &[
     "Non-Radiology",
 ];
 
-const Inpatient: &str = "Inpatient";
-pub const Outpatient: &str = "Outpatient";
+const INPATIENT: &str = "Inpatient";
+pub const OUTPATIENT: &str = "Outpatient";
 const ED: &str = "ED";
 
-pub const CONTEXTS: &[&str] = &[Inpatient, Outpatient, ED, "Wet Read"];
+pub const CONTEXTS: &[&str] = &[INPATIENT, OUTPATIENT, ED, "Wet Read"];
 
 //modalities
 const XR: &str = "XR";
@@ -133,16 +133,16 @@ pub const MODALITIES: &[&str] = &[
     XR, "CT", US, "MR", "NM", PET, "DEXA", "RF", MG, "XA", "CVUS", ANG, "CLINIC",
 ];
 
-pub fn mapSiteToContext(site: &str) -> Option<String> {
+pub fn map_site_to_context(site: &str) -> Option<String> {
     match site {
-        SH => Some(Outpatient.to_string()),
-        SC => Some(Outpatient.to_string()),
-        WB => Some(Outpatient.to_string()),
+        SH => Some(OUTPATIENT.to_string()),
+        SC => Some(OUTPATIENT.to_string()),
+        WB => Some(OUTPATIENT.to_string()),
         _ => None,
     }
 }
 
-pub fn getModalityAlias(modality: &String) -> Option<String> {
+pub fn get_modality_alias(modality: &String) -> Option<String> {
     let retval = match modality.as_str() {
         "MAM" => Some(MG.to_string()),
         "CR" => Some(XR.to_string()),
@@ -152,7 +152,7 @@ pub fn getModalityAlias(modality: &String) -> Option<String> {
     retval
 }
 
-pub fn getModalityFromProcedureDesc(desc: String) -> Option<String> {
+pub fn get_modality_from_procedure_desc(desc: String) -> Option<String> {
     match desc.as_str() {
         "ANG PA LYSIS" => Some(ANG.to_string()),
         "ANG NEPHROSTOMY REMOVAL" => Some(ANG.to_string()),
@@ -164,7 +164,7 @@ pub fn getModalityFromProcedureDesc(desc: String) -> Option<String> {
     }
 }
 
-pub fn getLocationSiteMapping(location: &String) -> Option<String> {
+pub fn get_location_site_mapping(location: &String) -> Option<String> {
     match location.as_str() {
         DXR => Some(SH.to_string()),
         BC => Some(SH.to_string()),

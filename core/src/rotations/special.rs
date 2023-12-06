@@ -4,4 +4,4 @@ pub mod weekdays {
     }
 }
 
-pub const all: &str = "All";
+pub const ALL: &str = "All";
