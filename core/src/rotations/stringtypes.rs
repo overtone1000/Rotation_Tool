@@ -52,7 +52,7 @@ impl StringTypes {
             }
         }
 
-        if invalids.len() > 0 {
+        if !invalids.is_empty() {
             Err(invalids)
         } else {
             Ok(())
@@ -102,7 +102,7 @@ impl<'de> Deserialize<'de> for AllType {
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(deserializer.deserialize_str(AllTypeVisitor)?)
+        deserializer.deserialize_str(AllTypeVisitor)
     }
 }
 
@@ -163,6 +163,6 @@ impl<'de> Deserialize<'de> for SlashSeparatedStringSet {
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(deserializer.deserialize_str(SlashSeparateddStringVisitor)?)
+        deserializer.deserialize_str(SlashSeparateddStringVisitor)
     }
 }

@@ -20,7 +20,7 @@ pub const next_midnight: TimeSinceMidnight = TimeSinceMidnight { minutes: 24 * 6
 
 impl TimeSinceMidnight {
     pub fn new(minutes: u64) -> TimeSinceMidnight {
-        TimeSinceMidnight { minutes: minutes }
+        TimeSinceMidnight { minutes }
     }
 
     pub fn hours(&self) -> u64 {
@@ -32,16 +32,16 @@ impl TimeSinceMidnight {
     }
 
     pub fn from_minutes(minutes: u64) -> TimeSinceMidnight {
-        TimeSinceMidnight { minutes: minutes }
+        TimeSinceMidnight { minutes }
     }
 
     pub fn parse_from_str(str: &str) -> Result<TimeSinceMidnight, ()> {
-        let split: Vec<&str> = str.split(":").collect();
+        let split: Vec<&str> = str.split(':').collect();
         if split.len() != 2 {
             return Err(());
         }
 
-        let hrs: u64 = match split.get(0).expect("Checked").parse() {
+        let hrs: u64 = match split.first().expect("Checked").parse() {
             Ok(x) => x,
             Err(_) => {
                 return Err(());
@@ -174,7 +174,7 @@ pub fn parse_relative_time(strval: &str) -> Result<RelativeTime, RotationManifes
         return err;
     }
 
-    let time = match *members.get(0).expect("Checked") {
+    let time = match *members.first().expect("Checked") {
         x => match TimeSinceMidnight::parse_from_str(x) {
             Ok(x) => x,
             Err(_e) => {

@@ -147,13 +147,14 @@ impl Coverage {
 }
 
 #[derive(Debug)]
+#[derive(Default)]
 pub struct CoverageAndWorkDay {
     pub coverages: Option<Coverage>,
     pub work: Vec<WorkUnit>,
 }
 
 impl CoverageAndWorkDay {
-    pub fn add_work(&mut self, work: WorkUnit) -> () {
+    pub fn add_work(&mut self, work: WorkUnit) {
         self.work.push(work)
     }
     pub fn add_coverage(
@@ -175,14 +176,7 @@ impl CoverageAndWorkDay {
     }
 }
 
-impl Default for CoverageAndWorkDay {
-    fn default() -> Self {
-        Self {
-            coverages: None,
-            work: Default::default(),
-        }
-    }
-}
+
 
 #[derive(Default, Debug)]
 pub struct MalformedCoverage {
@@ -198,7 +192,7 @@ pub enum CoverageError {
 }
 
 impl CoverageAndWorkDay {
-    fn sort_coverage(&mut self) -> () {
+    fn sort_coverage(&mut self) {
         match &mut self.coverages {
             Some(coverages) => match coverages {
                 Coverage::Temporal(temporal_coverages) => {
@@ -224,7 +218,7 @@ impl CoverageAndWorkDay {
                 (work.datetime.num_seconds_from_midnight() / 60).into(),
             );
             if start <= tsm && tsm < end {
-                retval.add_workunit(&work);
+                retval.add_workunit(work);
             }
         }
         retval
@@ -239,10 +233,10 @@ impl CoverageAndWorkDay {
 
         match &self.coverages {
             None => {
-                return CoverageError::NoCoverage(
+                CoverageError::NoCoverage(
                     self.get_work_in_timespan(this_midnight, next_midnight)
                         .total_rvu,
-                );
+                )
             }
             Some(coverages) => {
                 let mut retval = MalformedCoverage::default();
@@ -269,7 +263,7 @@ impl CoverageAndWorkDay {
                                         retval.overlaps.push(
                                             TemporalCoverageUnit::get_overlap_desc(
                                                 farthest_unit,
-                                                &cu,
+                                                cu,
                                             ),
                                         );
                                     } else if farthest_unit.gap_between_end_and_other(cu)
@@ -282,7 +276,7 @@ impl CoverageAndWorkDay {
                                             cu.start,
                                             TemporalCoverageUnit::get_overlap_desc(
                                                 farthest_unit,
-                                                &cu,
+                                                cu,
                                             ),
                                             rvus.total_rvu,
                                         ));
@@ -319,7 +313,7 @@ impl CoverageAndWorkDay {
                         }
                     }
                 }
-                return CoverageError::MalformedCoverage(retval);
+                CoverageError::MalformedCoverage(retval)
             }
         }
     }
@@ -341,7 +335,7 @@ where
     fn get_map(&mut self) -> &mut HashMap<T, U>;
     fn get_coordinate(coords: &CoverageCoordinates) -> T;
     fn get_branch(&'a mut self, coords: &'a CoverageCoordinates) -> &mut U {
-        let key = Self::get_coordinate(&coords);
+        let key = Self::get_coordinate(coords);
         let retval = match (*self.get_map()).entry(key) {
             Entry::Occupied(o) => o.into_mut(),
             Entry::Vacant(v) => v.insert(U::default()),
@@ -364,7 +358,7 @@ impl WeekdayMap {
         map.insert(chrono::Weekday::Fri, CoverageAndWorkDay::default());
         map.insert(chrono::Weekday::Sat, CoverageAndWorkDay::default());
         map.insert(chrono::Weekday::Sun, CoverageAndWorkDay::default());
-        WeekdayMap { map: map }
+        WeekdayMap { map }
     }
 }
 impl WorkCoverageMap for WeekdayMap {
@@ -402,7 +396,7 @@ impl<'a> CoordinateMap<'a, chrono::Weekday, CoverageAndWorkDay> for WeekdayMap {
         &mut self.map
     }
     fn get_coordinate(coords: &CoverageCoordinates) -> chrono::Weekday {
-        coords.weekday.clone()
+        coords.weekday
     }
 }
 
@@ -523,10 +517,10 @@ pub struct CoverageMap {
     map: HashMap<String, SubspecialtyMap>,
 }
 impl CoverageMap {
-    pub fn add_work_from_source<'a>(
+    pub fn add_work_from_source(
         &mut self,
         source: ProcessedSource,
-        date_constraints: &ConstraintSet<'a, NaiveDateTime>,
+        date_constraints: &ConstraintSet<'_, NaiveDateTime>,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let _retval = CoverageMap::default();
 
@@ -660,7 +654,7 @@ impl CoverageMap {
                     )?;
                     let mut selected_modality: Option<String> = None;
                     for modality in MODALITIES {
-                        if modality.to_string() == listed_modality {
+                        if *modality == listed_modality {
                             selected_modality = Some(modality.to_string());
                             break;
                         }
@@ -696,9 +690,9 @@ impl CoverageMap {
                     }
 
                     CoverageCoordinates {
-                        site: site,
-                        subspecialty: subspecialty,
-                        context: context,
+                        site,
+                        subspecialty,
+                        context,
                         modality: modality.to_string(),
                         weekday: datetime.weekday(),
                     }
@@ -726,7 +720,7 @@ impl CoverageMap {
                     };
 
                     WorkUnit {
-                        datetime: datetime,
+                        datetime,
                         rvu: *rvu / denominator, //divide by denominator to account for aggregation of many days of data
                         bvu: *bvu / denominator, //divide by denominator to account for aggregation of many days of data
                     }
@@ -799,7 +793,7 @@ impl CoverageMap {
                 date = date + Duration::days(**weekday as i64 - date.weekday() as i64);
 
                 if date.weekday() != **weekday {
-                    return SourceError::generate_boxed(format!("Weekday math is wrong."));
+                    return SourceError::generate_boxed("Weekday math is wrong.".to_string());
                 }
 
                 for key in weights.keys() {
@@ -940,7 +934,7 @@ impl CoverageMap {
 
     fn foreach(
         &mut self,
-        mut func: impl FnMut(&CoverageCoordinates, &mut CoverageAndWorkDay) -> (),
+        mut func: impl FnMut(&CoverageCoordinates, &mut CoverageAndWorkDay),
     ) {
         for (site, subspecialtymap) in self.map.iter_mut() {
             for (subspecialty, contextmap) in subspecialtymap.map.iter_mut() {
@@ -969,7 +963,7 @@ impl CoverageMap {
         //let testcoords=testcoords();
 
         let func =
-            |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| -> () {
+            |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| {
                 let errs = coverage_and_workday.audit_coverage();
 
                 retval.insert(coords.to_owned(), errs);
@@ -983,7 +977,7 @@ impl CoverageMap {
     pub fn analyze(&mut self) -> HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>> {
         let mut retval: HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>> = HashMap::new();
 
-        let mut addfunc = |rotation: String, weekday: chrono::Weekday, data: AnalysisDatum| -> () {
+        let mut addfunc = |rotation: String, weekday: chrono::Weekday, data: AnalysisDatum| {
             let daymap: &mut HashMap<chrono::Weekday, AnalysisDatum> = match retval.entry(rotation)
             {
                 Entry::Occupied(entry) => entry.into_mut(),
@@ -1008,18 +1002,18 @@ impl CoverageMap {
         };
 
         let func =
-            |_coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| -> () {
+            |_coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| {
                 match &coverage_and_workday.coverages {
                     Some(coverage) => match coverage {
                         Coverage::Temporal(coverages) => {
                             for coverage in coverages {
-                                let collection = coverage.collect_work(&coverage_and_workday);
+                                let collection = coverage.collect_work(coverage_and_workday);
                                 addfunc(coverage.get_rotation(), coverage.get_day(), collection);
                             }
                         }
                         Coverage::Fractional(coverages) => {
                             for coverage in coverages {
-                                let collection = coverage.collect_work(&coverage_and_workday);
+                                let collection = coverage.collect_work(coverage_and_workday);
                                 addfunc(coverage.get_rotation(), coverage.get_day(), collection);
                             }
                         }
@@ -1118,7 +1112,7 @@ impl CoverageMap {
                     )?;
                 }
                 CoverageError::MalformedCoverage(errs) => {
-                    if errs.gaps.len() > 0 {
+                    if !errs.gaps.is_empty() {
                         for (rotation1, rotation2, desc, rvus) in &errs.gaps {
                             writeln!(
                                 writer,
@@ -1135,7 +1129,7 @@ impl CoverageMap {
                             )?;
                         }
                     }
-                    if errs.overlaps.len() > 0 {
+                    if !errs.overlaps.is_empty() {
                         for overlap in &errs.overlaps {
                             writeln!(
                                 writer,

@@ -14,9 +14,9 @@ impl FractionalCoverageUnit {
         fraction: f64,
     ) -> FractionalCoverageUnit {
         FractionalCoverageUnit {
-            rotation: rotation,
+            rotation,
             rotation_day: weekday,
-            fraction: fraction,
+            fraction,
         }
     }
 

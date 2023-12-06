@@ -31,16 +31,16 @@ impl std::error::Error for RotationManifestParseError {}
 impl RotationManifestParseError {
     pub fn generate<T>(line: u64, message: String) -> Result<T, RotationManifestParseError> {
         Err(RotationManifestParseError {
-            line: line,
-            message: message,
+            line,
+            message,
         })
     }
 
     pub fn generate_boxed<T>(line: u64, message: String) -> Result<T, Box<dyn std::error::Error>> {
         Err(Box::new(
             RotationManifestParseError {
-                line: line,
-                message: message,
+                line,
+                message,
             },
         ))
     }

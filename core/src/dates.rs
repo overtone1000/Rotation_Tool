@@ -32,17 +32,17 @@ fn calcNumberOfDayOfWeekInMonth(date: NaiveDate) -> u32 {
             }
         }
     }
-    return retval;
+    retval
 }
 
 pub fn calcDayOfWeekOfMonth(date: NaiveDate) -> u32 {
     let day_of_month = date.day();
-    return (day_of_month as f32 / 7.0).ceil() as u32;
+    (day_of_month as f32 / 7.0).ceil() as u32
 }
 
 pub(crate) const business_days_per_year: f64 = 52.0 * 5.0 - 7.0;
 
-fn holidayTest() -> () {
+fn holidayTest() {
     println!("Memorial day");
     checkHoliday(NaiveDate::from_ymd_opt(1999, 5, 31).unwrap_or_default());
     println!("Independence day");
@@ -99,5 +99,5 @@ pub fn checkHoliday(date: NaiveDate) -> bool {
     if month == chrono::Month::January.number_from_month() && day_of_month == 1 {
         return true;
     }
-    return false;
+    false
 }

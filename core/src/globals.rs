@@ -149,7 +149,7 @@ pub fn getModalityAlias(modality: &String) -> Option<String> {
         "PT" => Some(PET.to_string()),
         _ => None,
     };
-    return retval;
+    retval
 }
 
 pub fn getModalityFromProcedureDesc(desc: String) -> Option<String> {

@@ -98,7 +98,7 @@ pub fn parse_time_span(strval: &str) -> Result<Timespan, RotationManifestParseEr
         return err;
     }
 
-    let start = match parse_relative_time(members.get(0).expect("Checked")) {
+    let start = match parse_relative_time(members.first().expect("Checked")) {
         Ok(x) => x,
         Err(e) => {
             return Err(e);
@@ -112,7 +112,7 @@ pub fn parse_time_span(strval: &str) -> Result<Timespan, RotationManifestParseEr
     };
 
     let ts = Timespan {
-        start: start,
+        start,
         stop: end,
     };
     Ok(ts)
@@ -142,6 +142,6 @@ impl<'de> Deserialize<'de> for Timespan {
     where
         D: serde::Deserializer<'de>,
     {
-        Ok(deserializer.deserialize_str(TimespanVisitor)?)
+        deserializer.deserialize_str(TimespanVisitor)
     }
 }

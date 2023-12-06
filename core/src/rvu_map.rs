@@ -27,10 +27,10 @@ impl MapEntry {
     }
 
     fn getRVUs(&self) -> f64 {
-        return self.rvus.to_owned();
+        self.rvus.to_owned()
     }
 
-    fn setRVUs(&mut self, rvu: f64) -> () {
+    fn setRVUs(&mut self, rvu: f64) {
         self.rvus = rvu;
     }
 }
@@ -47,49 +47,49 @@ pub struct MapCoords {
 impl MapCoords {
     fn validate(s: String, list: &[&str]) -> bool {
         for member in list {
-            if member.to_string() == s {
+            if *member == s {
                 return true;
             }
         }
-        return false;
+        false
     }
     pub fn validateSite(&self) -> bool {
         let retval = MapCoords::validate(self.site.to_owned(), SITES);
         if !retval {
             eprintln!("Invalid site {}", self.site);
         }
-        return retval;
+        retval
     }
     pub fn validateSubspecialty(&self) -> bool {
         let retval = MapCoords::validate(self.subspecialty.to_owned(), SUBSPECIALTIES);
         if !retval {
             eprintln!("Invalid subspecialty {}", self.subspecialty);
         }
-        return retval;
+        retval
     }
     pub fn validateContext(&self) -> bool {
         let retval = MapCoords::validate(self.context.to_owned(), CONTEXTS);
         if !retval {
             eprintln!("Invalid context {}", self.context);
         }
-        return retval;
+        retval
     }
     pub fn validateModality(&self) -> bool {
         let retval = MapCoords::validate(self.modality.to_owned(), MODALITIES);
         if !retval {
             eprintln!("Invalid modality {}", self.modality);
         }
-        return retval;
+        retval
     }
 
     pub fn getSubspecialty(&self) -> &String {
-        return &self.subspecialty;
+        &self.subspecialty
     }
     pub fn getContext(&self) -> &String {
-        return &self.context;
+        &self.context
     }
     pub fn getSite(&self) -> &String {
-        return &self.site;
+        &self.site
     }
 }
 
@@ -103,11 +103,11 @@ pub struct RVUMap {
 
 impl RVUMap {
     fn new() -> RVUMap {
-        let retval = RVUMap {
-            map: HashMap::new(),
-        };
+        
 
-        return retval;
+        RVUMap {
+            map: HashMap::new(),
+        }
     }
 
     fn addRVUs(&mut self, coords: &MapCoords, rvus: f64) -> Result<String, String> {
@@ -149,13 +149,13 @@ impl RVUMap {
         }
         let time_map = mod_map.get_mut(&coords.modality).expect("Immediate get");
 
-        if !time_map.contains_key(&coords.time_row) {
+        time_map.entry(coords.time_row).or_insert_with(|| {
             let map_entry: MapEntry = MapEntry { rvus: 0.0 };
-            time_map.insert(coords.time_row, map_entry);
-        }
+            map_entry
+        });
         let me = time_map.get_mut(&coords.time_row).expect("Immediate get");
         me.addRVUs(rvus);
-        return Ok("good".to_string());
+        Ok("good".to_string())
     }
 
     pub fn toJSON(&self, constraints: &Option<ConstraintSet<MapCoords>>) -> Result<String, String> {
@@ -227,12 +227,12 @@ impl RVUMap {
         let mapstr = self.toJSON(constraints)?;
         let bytes = mapstr.as_bytes();
 
-        return match mapoutfile.write_all(&bytes) {
+        match mapoutfile.write_all(bytes) {
             Ok(_) => Ok(()),
             Err(e) => {
-                return Err(Box::new(crate::RotationToolError::new(e.to_string())));
+                Err(Box::new(crate::RotationToolError::new(e.to_string())))
             }
-        };
+        }
     }
 
     pub fn totalAverageRVUs(&self) -> f64 {
@@ -278,10 +278,10 @@ impl RVUMap {
     }
 }
 
-pub fn createMap<'a>(
+pub fn createMap(
     source: &ProcessedSource,
     exam_rvu_map: &HashMap<String, f64>,
-    date_constraints: &ConstraintSet<'a, NaiveDateTime>,
+    date_constraints: &ConstraintSet<'_, NaiveDateTime>,
 ) -> Result<RVUMap, String> {
     let mut rvumap = RVUMap::new();
 
@@ -372,7 +372,7 @@ pub fn createMap<'a>(
             )?;
             let mut selected_modality: Option<String> = None;
             for modality in MODALITIES {
-                if modality.to_string() == listed_modality {
+                if *modality == listed_modality {
                     selected_modality = Some(modality.to_string());
                     break;
                 }
@@ -508,7 +508,7 @@ pub fn buildMaps(
     //Create the conventional RVU map
     {
         let rvu_map = buildSalemRVUMap(&source.main_data_table)?;
-        let map = match rvu_map::createMap(&source, &rvu_map, &date_constraints) {
+        let map = match rvu_map::createMap(&source, &rvu_map, date_constraints) {
             Ok(x) => x,
             Err(e) => {
                 let err = RotationToolError::new(e);
@@ -527,7 +527,7 @@ pub fn buildMaps(
     //Create BVU map
     {
         let bvu_map: HashMap<String, f64> = buildSalemBVUMap(&source.bvu_data_table)?;
-        let map = match rvu_map::createMap(&source, &bvu_map, &date_constraints) {
+        let map = match rvu_map::createMap(&source, &bvu_map, date_constraints) {
             Ok(x) => x,
             Err(e) => {
                 let err = RotationToolError::new(e);
@@ -544,5 +544,5 @@ pub fn buildMaps(
     }
 
     println!("Finished.");
-    return Ok(());
+    Ok(())
 }

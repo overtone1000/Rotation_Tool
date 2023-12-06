@@ -162,7 +162,7 @@ fn ExplainTimeRegion(
     source: &ProcessedSource,
     rvu_map: &HashMap<String, f64>,
 ) -> Result<(), Box<dyn Error>> {
-    let map = match rvu_map::createMap(&source, &rvu_map, date_inclusion) {
+    let map = match rvu_map::createMap(source, rvu_map, date_inclusion) {
         Ok(x) => x,
         Err(e) => {
             let err = RotationToolError::new(e);

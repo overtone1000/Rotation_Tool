@@ -40,7 +40,7 @@ impl RotationResponsibility {
 
         let mut errors: Vec<String> = Vec::new();
 
-        let mut check = |t: &StringTypes, poss: &[&str], desc: &str| -> () {
+        let mut check = |t: &StringTypes, poss: &[&str], desc: &str| {
             match t.validate(poss) {
                 Err(e) => {
                     for i in e {
@@ -64,7 +64,7 @@ impl RotationResponsibility {
         check(&self.modalities, globals::MODALITIES, "modality");
         check(&self.days, days, "weekday");
 
-        if errors.len() > 0 {
+        if !errors.is_empty() {
             Err(errors)
         } else {
             Ok(())

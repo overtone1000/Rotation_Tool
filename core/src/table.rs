@@ -112,7 +112,7 @@ impl Table {
 
         match cell {
             None => {
-                return Err(format!("No val for {} in row {} ", header_label, row));
+                Err(format!("No val for {} in row {} ", header_label, row))
             }
             Some(val) => Ok(val.to_owned()),
         }
@@ -151,7 +151,7 @@ impl Table {
             match key_value {
                 Err(x) => return Err(x),
                 Ok(key_value) => {
-                    if key_value == "" {
+                    if key_value.is_empty() {
                         eprintln!("Row {} header {} is empty.", row_i, key_header_label);
                     } else {
                         retval.insert(key_value, row_i);

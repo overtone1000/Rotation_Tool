@@ -10,7 +10,7 @@ pub(crate) const time_start_minute: u32 = 0;
 pub(crate) const time_step_minutes: u32 = 30;
 
 pub(crate) fn time_row_count() -> usize {
-    return ((24.0 * 60.0) / (time_step_minutes as f32)).floor() as usize;
+    ((24.0 * 60.0) / (time_step_minutes as f32)).floor() as usize
 }
 
 pub(crate) fn getTimeRowIndex(hour: u32, minute: u32) -> usize {
@@ -19,8 +19,8 @@ pub(crate) fn getTimeRowIndex(hour: u32, minute: u32) -> usize {
     if minute_of_day < start_minute_of_day {
         minute_of_day += 24 * 60;
     }
-    return (((minute_of_day - start_minute_of_day) as f32) / (time_step_minutes as f32)).floor()
-        as usize;
+    (((minute_of_day - start_minute_of_day) as f32) / (time_step_minutes as f32)).floor()
+        as usize
 }
 
 pub(crate) fn getTimeRowNormalDistWeights() -> HashMap<usize, f64> {
@@ -45,7 +45,7 @@ pub(crate) fn getTimeRowNormalDistWeights() -> HashMap<usize, f64> {
     }
     retval.insert(stop_i, 1.0 - last);
 
-    return retval;
+    retval
 }
 
 pub(crate) fn getNormalDistWeights() -> HashMap<NaiveTime, f64> {
@@ -75,5 +75,5 @@ pub(crate) fn getNormalDistWeights() -> HashMap<NaiveTime, f64> {
     }
     retval.insert(stop_i, 1.0 - last);
 
-    return retval;
+    retval
 }

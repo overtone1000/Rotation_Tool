@@ -21,10 +21,10 @@ impl std::error::Error for SourceError {}
 
 impl SourceError {
     pub fn generate<T>(message: String) -> Result<T, SourceError> {
-        Err(SourceError { message: message })
+        Err(SourceError { message })
     }
 
     pub fn generate_boxed<T>(message: String) -> Result<T, Box<dyn std::error::Error>> {
-        Err(Box::new(SourceError { message: message }))
+        Err(Box::new(SourceError { message }))
     }
 }

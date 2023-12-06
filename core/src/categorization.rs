@@ -140,7 +140,7 @@ pub(crate) fn get_categories_list(
             None => {
                 println!(
                     "Couldn't find procedure code {}",
-                    procedure_code.to_string()
+                    procedure_code
                 );
                 let sample_row_index = match main_exam_categories.get(procedure_code) {
                     Some(x) => x,
@@ -182,7 +182,7 @@ pub(crate) fn get_categories_list(
 
     complete_exam_code_list.sort();
 
-    return Ok(complete_exam_code_list);
+    Ok(complete_exam_code_list)
 }
 
 pub(crate) fn get_locations_list(
@@ -207,7 +207,7 @@ pub(crate) fn get_locations_list(
 
         match existing_exam_locations.get(location) {
             None => {
-                println!("Couldn't find location {}", location.to_string());
+                println!("Couldn't find location {}", location);
                 let sample_row_index = match main_exam_locations.get(location) {
                     Some(x) => x,
                     None => {
@@ -240,14 +240,14 @@ pub(crate) fn get_locations_list(
 
     complete_exam_location_list.sort();
 
-    return Ok(complete_exam_location_list);
+    Ok(complete_exam_location_list)
 }
 
 pub fn backup(dt: DateTime<Local>, p: String, label: String) -> Result<u64, std::io::Error> {
     let backup_path =
         "./categories/archive/".to_string() + &dt.timestamp().to_string() + " backup of " + &label;
     println!("Backup to {}", backup_path);
-    return fs::copy(p.to_owned(), backup_path);
+    fs::copy(p, backup_path)
 }
 
 pub fn buildSalemRVUMap(main_data_table: &table::Table) -> Result<HashMap<String, f64>, String> {
@@ -300,7 +300,7 @@ pub fn buildSalemRVUMap(main_data_table: &table::Table) -> Result<HashMap<String
 }
 
 //Check BVU source for missing exam codes. Also puts all exam descriptions in comments.
-pub fn checkBVUSource(main_data_table: &table::Table, bvu_data_table: &mut table::Table) -> () {
+pub fn checkBVUSource(main_data_table: &table::Table, bvu_data_table: &mut table::Table) {
     let mut found: HashSet<String> = HashSet::new();
     for row_i in main_data_table.rowIndices() {
         let exam_code = main_data_table
@@ -404,12 +404,12 @@ pub fn buildSalemModalityMap(
             &row_i,
         )?;
 
-        if !retval.contains_key(&exam_code) {
+        if let std::collections::hash_map::Entry::Vacant(e) = retval.entry(exam_code) {
             let listed_modality = main_data_table.getVal(
                 &main_headers::pertinent_headers::modality.getLabel(),
                 &row_i,
             )?;
-            retval.insert(exam_code, listed_modality);
+            e.insert(listed_modality);
         }
     }
 

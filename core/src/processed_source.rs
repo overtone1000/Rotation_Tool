@@ -99,14 +99,14 @@ impl ProcessedSource {
         }
 
         Ok(ProcessedSource {
-            main_data_table: main_data_table,
-            tpc_data_table: tpc_data_table,
-            bvu_data_table: bvu_data_table,
-            exam_categories_table: exam_categories_table,
-            location_categories_table: location_categories_table,
-            exam_categories_list: exam_categories_list,
-            exam_to_subspecialty_map: exam_to_subspecialty_map,
-            location_to_context_map: location_to_context_map,
+            main_data_table,
+            tpc_data_table,
+            bvu_data_table,
+            exam_categories_table,
+            location_categories_table,
+            exam_categories_list,
+            exam_to_subspecialty_map,
+            location_to_context_map,
         })
     }
 

@@ -36,9 +36,9 @@ impl TemporalCoverageUnit {
         day: chrono::Weekday,
     ) -> TemporalCoverageUnit {
         TemporalCoverageUnit {
-            start: start,
-            end: end,
-            rotation: rotation,
+            start,
+            end,
+            rotation,
             rotation_day: day, //weekday_offset:offset //This is limited to one 24 hour period inclusive on each end.
         }
     }

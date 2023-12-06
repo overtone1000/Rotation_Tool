@@ -14,13 +14,13 @@ impl Display for RotationToolError {
 
 impl Debug for RotationToolError {
     fn fmt(&self, f: &mut Formatter) -> Result {
-        return <RotationToolError as Display>::fmt(self, f);
+        <RotationToolError as Display>::fmt(self, f)
         //write!(f, "{{ file: {}, line: {} }}", file!(), line!()) // programmer-facing output
     }
 }
 
 impl RotationToolError {
     pub fn new(message: String) -> RotationToolError {
-        RotationToolError { message: message }
+        RotationToolError { message }
     }
 }
