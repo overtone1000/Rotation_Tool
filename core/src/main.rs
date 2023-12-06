@@ -111,7 +111,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
     println!("Starting.");
 
-    let rebuild_source: bool = true;
+    let rebuild_source: bool = false;
 
     if rebuild_source {
         cache_source()?;
