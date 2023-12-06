@@ -23,7 +23,7 @@ pub mod exam_categories {
     }
 
     impl PertinentHeaders {
-        pub(crate) fn getLabel(&self) -> String {
+        pub(crate) fn get_label(&self) -> String {
             match self {
                 PertinentHeaders::procedure_code => "Exam Code".to_string(),
                 PertinentHeaders::exam => "Exam Description".to_string(),
@@ -123,7 +123,7 @@ pub(crate) fn get_categories_list(
         .getKeyedColumnSampleMap(&(main_headers::pertinent_headers::procedure_code.getLabel()))?;
 
     let existing_exam_categories = exam_categories_table.getKeyedColumnSampleMap(
-        &(exam_categories::PertinentHeaders::procedure_code.getLabel()),
+        &(exam_categories::PertinentHeaders::procedure_code.get_label()),
     )?;
 
     let mut complete_exam_code_list: Vec<exam_categories::exam_category> = Vec::new();
@@ -159,19 +159,19 @@ pub(crate) fn get_categories_list(
             }
             Some(sample_row_index) => {
                 next_member.procedure_code = exam_categories_table.getVal(
-                    &exam_categories::PertinentHeaders::procedure_code.getLabel(),
+                    &exam_categories::PertinentHeaders::procedure_code.get_label(),
                     sample_row_index,
                 )?;
                 next_member.exam = exam_categories_table.getVal(
-                    &exam_categories::PertinentHeaders::exam.getLabel(),
+                    &exam_categories::PertinentHeaders::exam.get_label(),
                     sample_row_index,
                 )?;
                 next_member.subspecialty = exam_categories_table.getVal(
-                    &exam_categories::PertinentHeaders::subspecialty.getLabel(),
+                    &exam_categories::PertinentHeaders::subspecialty.get_label(),
                     sample_row_index,
                 )?;
                 next_member.comments = exam_categories_table.getVal(
-                    &exam_categories::PertinentHeaders::comments.getLabel(),
+                    &exam_categories::PertinentHeaders::comments.get_label(),
                     sample_row_index,
                 )?;
             }
