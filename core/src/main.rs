@@ -46,17 +46,16 @@ fn build_maps() -> Result<(), Box<dyn Error>> {
     rvu_map::build_maps(&date_constraints, None)
 }
 
+fn parse_manifest() -> Result<rotations::manifest::Manifest, Box<dyn Error>> {
+    println!("Parsing manifest.");
+    let filename = "./rotations/active.yaml";
+    crate::rotations::manifest::Manifest::parse(filename)
+}
+
 fn analyze_rotations() -> Result<(), Box<dyn Error>> {
     //crate::rotations::manifest:: Manifest::create_example();
 
-    println!("Parsing manifest.");
-    let filename = "./rotations/active.yaml";
-    let manifest = match crate::rotations::manifest::Manifest::parse(filename) {
-        Ok(x) => x,
-        Err(e) => {
-            return Err(e);
-        }
-    };
+    let manifest: rotations::manifest::Manifest = parse_manifest()?;
 
     println!("Building coverage tree.");
     let mut date_constraint_set: ConstraintSet<NaiveDateTime> = ConstraintSet::new();
@@ -117,8 +116,15 @@ fn main() -> Result<(), Box<dyn Error>> {
         cache_source()?;
     }
 
-    let retval = analyze_rotations();
+    let rotation_analysis:bool = false;
+
+    if rotation_analysis{
+        analyze_rotations()?;
+    }
+
+    let manifest = parse_manifest()?;
+    manifest.to_json("../frontend/static/active.json")?;
 
     println!("Finished.");
-    retval
+    Ok(())
 }

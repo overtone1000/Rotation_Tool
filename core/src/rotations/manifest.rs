@@ -3,7 +3,8 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::error::Error;
-use std::fs;
+use std::fs::{self, File};
+use std::io::BufWriter;
 
 
 
@@ -53,6 +54,13 @@ impl Manifest {
         } else {
             Err("Malformed manifest".into())
         }
+    }
+
+    pub fn to_json(&self, filename:&str) -> Result<(), Box<dyn Error>> {
+        let file = File::create(filename)?;
+        let writer = BufWriter::new(file);
+        serde_json::to_writer(writer, self)?;
+        Ok(())
     }
 
     pub fn create_example() -> Result<(), Box<dyn Error>> {

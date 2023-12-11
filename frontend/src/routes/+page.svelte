@@ -1,5 +1,5 @@
 <script>
-	import Staging from '../components/main.svelte';
+	import Main from '../components/main.svelte';
 </script>
 
 <svelte:head>
@@ -7,4 +7,4 @@
 		Rotation Tool
 	</title>
 </svelte:head>
-<Staging />
+<Main />

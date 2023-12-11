@@ -106,7 +106,7 @@ impl<'de> Deserialize<'de> for AllType {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize)]
 pub struct SlashSeparatedStringSet {
     values: HashSet<String>,
 }
@@ -122,6 +122,9 @@ impl SlashSeparatedStringSet {
     }
 }
 
+
+//Serialize to array always for transition to automated approach
+/*
 impl Serialize for SlashSeparatedStringSet {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -140,6 +143,7 @@ impl Serialize for SlashSeparatedStringSet {
         }
     }
 }
+*/
 
 struct SlashSeparateddStringVisitor;
 impl<'de> Visitor<'de> for SlashSeparateddStringVisitor {

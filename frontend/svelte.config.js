@@ -20,9 +20,6 @@ const config = {
 		paths: {
 			base: ''
 		}
-		//alias: {
-		//	"@@migration" : "../../frontend/src/ts/"
-		//}
 	}
 };
 

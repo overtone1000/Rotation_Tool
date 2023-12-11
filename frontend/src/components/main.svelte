@@ -1,14 +1,33 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import ManifestDisplay from './manifest_display.svelte';
+	import type { RotationManifest } from "./RotationManifest";
 
+	let manifest_instance:RotationManifest|undefined=undefined;
+	
 	onMount(() => {
-		console.debug('Mounting.');
+		fetch("active.json").then(
+			(value:Response)=>{
+				if(value.ok)
+				{
+					value.json().then(
+						(manifest:RotationManifest)=>{
+							manifest_instance=manifest;
+						}
+					);
+				}
+			}
+		);
 	});
+
+
 </script>
 
 <div class="vp_fill">
 	<div class="page">
-		Hi!
+		{#if manifest_instance!==undefined}
+			<ManifestDisplay manifest={manifest_instance}/>
+		{/if}
 	</div>
 </div>
 
