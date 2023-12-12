@@ -2,12 +2,13 @@
 	import Drawer, { AppContent, Content } from '@smui/drawer';
 	import Select, { Option } from '@smui/select';
   	import List, { Item, Text } from '@smui/list';
-	import type { RotationManifest } from "./RotationManifest";
+	import type { Rotation, RotationManifest } from "./RotationManifest";
+	import RotationDisplay from './rotation_display.svelte';
 
 	export let manifest:RotationManifest;
 	console.debug("Manifest",manifest);
 
-	let rotation = "";
+	let selected_rotation:Rotation|undefined = undefined;
 	
 	const today=(new Date()).getDay()
 	let dow = today;
@@ -58,7 +59,9 @@
 				<Content>
 					<List>
 						{#each manifest.rotation_manifest as rotation}
-							<Item>
+							<Item
+							on:click={()=>{selected_rotation=rotation}}
+							>
 								<Text>{rotation.rotation}</Text>
 							</Item>
 						{/each}
@@ -67,7 +70,9 @@
 			</Drawer>
 		</div>		
 		<div class="manifest">
-			Manifest
+			{#if selected_rotation!==undefined}
+				<RotationDisplay rotation={selected_rotation}/>
+			{/if}
 		</div>
 	</div>
 </div>
@@ -77,11 +82,15 @@
 		display: flex;
 		flex-direction:column;
 		height: 100%;
+		min-height: 1px;
+		flex-shrink: 1;
 	}
 	.container2{
 		display: flex;
 		flex-direction:row;
+		min-height: 1px;
 		flex-grow: 1;
+		flex-shrink: 1;
 	}
 	.title {
 		display: flex;
@@ -94,7 +103,6 @@
 		
 	}
 	.drawer {
-		height: 100%;
 		flex-shrink: 1;
 	}
 </style>

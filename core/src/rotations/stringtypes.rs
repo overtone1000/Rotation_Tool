@@ -3,7 +3,7 @@ use std::{collections::HashSet, fmt};
 
 use serde::{
     de::{self, Visitor},
-    Deserialize, Serialize, Serializer,
+    Deserialize, Serialize, Serializer, ser::SerializeSeq,
 };
 
 
@@ -106,7 +106,7 @@ impl<'de> Deserialize<'de> for AllType {
     }
 }
 
-#[derive(Debug, PartialEq, Serialize)]
+#[derive(Debug, PartialEq)]
 pub struct SlashSeparatedStringSet {
     values: HashSet<String>,
 }
@@ -122,28 +122,18 @@ impl SlashSeparatedStringSet {
     }
 }
 
-
-//Serialize to array always for transition to automated approach
-/*
 impl Serialize for SlashSeparatedStringSet {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
-        let mut str: Option<String> = None;
+        let mut seq = serializer.serialize_seq(Some(self.values.len()))?;
         for value in &self.values {
-            match str {
-                None => str = Some(value.to_string()),
-                Some(x) => str = Some(x + &DELIMITER + value),
-            }
+            seq.serialize_element(value)?;
         }
-        match str {
-            None => serializer.serialize_none(),
-            Some(x) => serializer.serialize_str(&x),
-        }
+        seq.end()
     }
 }
-*/
 
 struct SlashSeparateddStringVisitor;
 impl<'de> Visitor<'de> for SlashSeparateddStringVisitor {

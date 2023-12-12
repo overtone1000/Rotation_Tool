@@ -10,16 +10,16 @@ export interface Rotation
     rotation:string,
     location:string,
     responsibilities:[Responsibility],
-    comments:[string]
+    comments:string[]
 }
 
 export interface Responsibility
 {
-    sites:string|[string],
-    contexts:string|[string],
-    days:string|[string],
-    modalities:string|[string],
-    subspecialties:string|[string],
+    sites:string|string[],
+    contexts:string|string[],
+    days:string|string[],
+    modalities:string|string[],
+    subspecialties:string|string[],
     time_periods:null|[TimePeriod],
     weekly_fraction:null|number
 }
