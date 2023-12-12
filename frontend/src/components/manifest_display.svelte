@@ -46,13 +46,6 @@
 			</div>
 		</div>
 	</div>
-	{#if dow!==today}
-		<div class="title" style="background:#5e0606; color:white">
-			<Text>
-				Warning: Today is {dowfunc(today)}, but {dowfunc(dow)} is selected.
-			</Text>
-		</div>
-	{/if}
 	<div class="container2">
 		<div class="drawer">
 			<Drawer>
@@ -72,6 +65,13 @@
 		<div class="manifest">
 			{#if selected_rotation!==undefined}
 				<RotationDisplay rotation={selected_rotation}/>
+			{/if}
+			{#if dow!==today}
+				<div class="title" style="background:#5e0606; color:white">
+					<Text>
+						Warning: Today is {dowfunc(today)}, but {dowfunc(dow)} is selected.
+					</Text>
+				</div>
 			{/if}
 		</div>
 	</div>
@@ -100,7 +100,11 @@
 		border-bottom-width: 1px;
 	}
 	.manifest {
-		
+		display: flex;
+		flex-direction:column;
+		flex-grow: 1;
+		flex-shrink: 1;
+		min-height: 1px;
 	}
 	.drawer {
 		flex-shrink: 1;
