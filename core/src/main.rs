@@ -147,20 +147,20 @@ fn main() -> Result<(), Box<dyn Error>> {
         cache_source()?;
     }
 
-    let rotation_analysis:bool = false;
+    let rotation_analysis:bool = true;
 
     if rotation_analysis{
         analyze_rotations()?;
     }
 
-    let manifest_to_json:bool = false;
+    let manifest_to_json:bool = true;
     if manifest_to_json
     {
         let manifest = parse_manifest()?;
         manifest.to_json("../frontend/static/active.json")?;
     }
 
-    let perform_detailed_analysis:bool = true;
+    let perform_detailed_analysis:bool = false;
     if perform_detailed_analysis
     {
         detailed_analysis(chrono::Weekday::Tue, globals::MSK)?;

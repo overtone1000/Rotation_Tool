@@ -1090,11 +1090,13 @@ impl CoverageMap {
         }
     }
 
-    pub fn audit_to_stream<T: Write>(&mut self, writer: &mut T) -> Result<(), std::io::Error> {
+    pub fn audit_to_stream<T: Write>(&mut self, writer: &mut T) -> Result<(), Box<dyn Error>> {
         let audit_result = self.audit();
 
         let mut sorted_keys: Vec<&CoverageCoordinates> = audit_result.keys().collect();
         sorted_keys.sort();
+
+        let mut no_errs=true;
 
         for coords in sorted_keys {
             let errs = audit_result.get(coords).expect("Should be a key");
@@ -1104,6 +1106,7 @@ impl CoverageMap {
                     //retval.push(format!("No work for: {site}, {subspecialty}, {context}, {modality}, {weekday}"));
                 }
                 CoverageError::NoCoverage(rvus) => {
+                    no_errs=false;
                     writeln!(
                         writer,
                         "No coverage for: {}, {}, {}, {}, {} ({} rvus)",
@@ -1118,6 +1121,7 @@ impl CoverageMap {
                 CoverageError::MalformedCoverage(errs) => {
                     if !errs.gaps.is_empty() {
                         for (rotation1, rotation2, desc, rvus) in &errs.gaps {
+                            no_errs=false;
                             writeln!(
                                 writer,
                                 "Coverage gap: {}, {}, {}, {}, {}: {}-{} {} ({} rvus)",
@@ -1135,6 +1139,7 @@ impl CoverageMap {
                     }
                     if !errs.overlaps.is_empty() {
                         for overlap in &errs.overlaps {
+                            no_errs=false;
                             writeln!(
                                 writer,
                                 "Coverage overlap: {}, {}, {}, {}, {}: {}",
@@ -1149,6 +1154,7 @@ impl CoverageMap {
                     }
                     match errs.incorrect_fraction {
                         Some(x) => {
+                            no_errs=false;
                             writeln!(
                                 writer,
                                 "Incorrect fraction: {}, {}, {}, {}, {}: {}",
@@ -1160,13 +1166,22 @@ impl CoverageMap {
                                 x
                             )?;
                         }
-                        None => (),
+                        None => {
+                            ()
+                        },
                     }
                 }
             };
         }
 
-        Ok(())
+        if no_errs
+        {
+            writeln!(writer, "No errors detected.")?;
+            Ok(())
+        }
+        else {
+            RotationManifestParseError::generate_boxed(0, "Audit returned errors.".to_string())
+        }
     }
 }
 impl<'a> CoordinateMap<'a, String, SubspecialtyMap> for CoverageMap {

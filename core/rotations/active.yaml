@@ -769,14 +769,14 @@ rotation_manifest:
     subspecialties: General
     contexts: Outpatient
     modalities: CT/US/XR/MR/RF
-    days: Mon
+    days: Sat
     time_periods:
     - 15:00 PBD-18:00 PBD
   - sites: SC
     subspecialties: General
     contexts: Outpatient
     modalities: CVUS
-    days: Mon
+    days: Sat
     time_periods:
     - 15:00 PBD-18:00 PBD
   comments:
@@ -788,21 +788,28 @@ rotation_manifest:
     subspecialties: General
     contexts: Outpatient
     modalities: CT/US/MR/RF
-    days: Mon
+    days: Sun
+    time_periods:
+    - 18:00 PBD-24:00 PBD+1
+  - sites: SC
+    subspecialties: General
+    contexts: Outpatient
+    modalities: CVUS
+    days: Sun
     time_periods:
     - 18:00 PBD-24:00 PBD+1
   - sites: SH/WB/SC/SRC/TPC
     subspecialties: General
     contexts: Outpatient
     modalities: XR
-    days: Mon
+    days: Sun
     time_periods:
     - 18:00 PBD-24:00 PBD+1
   - sites: WVH
     subspecialties: General
     contexts: Outpatient
     modalities: XR
-    days: Mon
+    days: Sun
     time_periods:
     - 18:00 PBD-07:00 PBD+1
     - 11:00 PBD+1-24:00 PBD+1
