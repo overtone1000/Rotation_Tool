@@ -2,7 +2,7 @@
 
 use crate::rotations::time_modifiers::{NEXT_MIDNIGHT, THIS_MIDNIGHT, TimeSinceMidnight};
 
-use super::coverage_tree::{AnalysisDatum, CoverageAndWorkDay, WorkCollector};
+use super::{coverage_tree::{CoverageAndWorkDay, WorkCollector}, analysis_datum::AnalysisDatum};
 
 pub fn weekday_plus(base_weekday: chrono::Weekday, delta: i64) -> chrono::Weekday {
     let mut retval = base_weekday;

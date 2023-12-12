@@ -1,7 +1,7 @@
 use std::{
     error::Error,
     fs::File,
-    io::BufWriter,
+    io::BufWriter, os::unix::process,
 };
 
 
@@ -52,7 +52,12 @@ fn parse_manifest() -> Result<rotations::manifest::Manifest, Box<dyn Error>> {
     crate::rotations::manifest::Manifest::parse(filename)
 }
 
-fn analyze_rotations() -> Result<(), Box<dyn Error>> {
+struct ProcessedData
+{
+    pub coverage_tree:CoverageMap,
+    pub source:ProcessedSource,
+}
+fn process_data() -> Result<ProcessedData, Box<dyn Error>> {
     //crate::rotations::manifest:: Manifest::create_example();
 
     let manifest: rotations::manifest::Manifest = parse_manifest()?;
@@ -77,14 +82,40 @@ fn analyze_rotations() -> Result<(), Box<dyn Error>> {
     println!("Finished loading source from cache.");
 
     println!("Adding work to tree.");
-    coverage_tree.add_work_from_source(source, &date_constraint_set)?;
+    coverage_tree.add_work_from_source(&source, &date_constraint_set)?;
 
-    let auditfile = File::create(COVERAGE_AUDIT_OUT)?;
+    Ok(
+        ProcessedData{
+            coverage_tree:coverage_tree,
+            source:source
+        }
+    )
+}
+
+fn analyze_rotations() -> Result<(), Box<dyn Error>> {
+    let mut processed_data = process_data()?;
+
+    let auditfile: File = File::create(COVERAGE_AUDIT_OUT)?;
     let mut writer = BufWriter::new(auditfile);
-    coverage_tree.audit_to_stream(&mut writer)?;
 
-    coverage_tree.analysis_to_file(COVERAGE_ANALYSIS_OUT.to_owned() + "_rvu.csv", true);
-    coverage_tree.analysis_to_file(COVERAGE_ANALYSIS_OUT.to_owned() + "_bvu.csv", false);
+    processed_data.coverage_tree.audit_to_stream(&mut writer)?;
+
+    processed_data.coverage_tree.analysis_to_file(COVERAGE_ANALYSIS_OUT.to_owned() + "_rvu.csv", true);
+    processed_data.coverage_tree.analysis_to_file(COVERAGE_ANALYSIS_OUT.to_owned() + "_bvu.csv", false);
+
+    Ok(())
+}
+
+fn detailed_analysis(weekday:chrono::Weekday, rotation:&str) -> Result<(), Box<dyn Error>> {
+    let mut processed_data = process_data()?;
+
+    let details = processed_data.coverage_tree.details(weekday,rotation)?;
+
+    println!("Detailed analysis for {}-{}",rotation,weekday);
+    for (exam,count) in details.get_studies()
+    {
+        println!("{},{}",exam,count);
+    }
 
     Ok(())
 }
@@ -122,8 +153,18 @@ fn main() -> Result<(), Box<dyn Error>> {
         analyze_rotations()?;
     }
 
-    let manifest = parse_manifest()?;
-    manifest.to_json("../frontend/static/active.json")?;
+    let manifest_to_json:bool = false;
+    if manifest_to_json
+    {
+        let manifest = parse_manifest()?;
+        manifest.to_json("../frontend/static/active.json")?;
+    }
+
+    let perform_detailed_analysis:bool = true;
+    if perform_detailed_analysis
+    {
+        detailed_analysis(chrono::Weekday::Tue, globals::MSK)?;
+    }
 
     println!("Finished.");
     Ok(())

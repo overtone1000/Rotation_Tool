@@ -1,4 +1,4 @@
-use super::coverage_tree::{AnalysisDatum, CoverageAndWorkDay, WorkCollector};
+use super::{coverage_tree::{CoverageAndWorkDay, WorkCollector}, analysis_datum::AnalysisDatum};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct FractionalCoverageUnit {
@@ -33,10 +33,7 @@ impl FractionalCoverageUnit {
 
 impl WorkCollector for FractionalCoverageUnit {
     fn collect_work(&self, workday: &CoverageAndWorkDay) -> AnalysisDatum {
-        let mut retval: AnalysisDatum = AnalysisDatum {
-            total_rvu: 0.0,
-            total_bvu: 0.0,
-        };
+        let mut retval: AnalysisDatum = AnalysisDatum::default();
 
         for work in &workday.work {
             retval.add_workunit(work);

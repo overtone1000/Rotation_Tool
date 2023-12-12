@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 use std::collections::{hash_map::Entry, HashMap};
 
+use std::error::Error;
 use std::fmt::Debug;
 
 use std::hash::Hash;
@@ -10,6 +11,7 @@ use std::str::FromStr;
 
 use chrono::{Datelike, Duration, NaiveDate, NaiveDateTime, Timelike};
 
+use crate::categorization::{get_categories_map, exam_categories};
 use crate::globals::{self, ALL_DAYS};
 use crate::rotations::manifest::Manifest;
 use crate::rotations::rotation_error::RotationManifestParseError;
@@ -23,6 +25,7 @@ use crate::{
     processed_source::ProcessedSource,
 };
 
+use super::analysis_datum::{AnalysisDatum, WorkUnit};
 use super::fractional_coverage::FractionalCoverageUnit;
 use super::source_error::SourceError;
 use super::temporal_coverage::{weekday_plus, TemporalCoverageUnit};
@@ -81,13 +84,6 @@ impl Default for CoverageCoordinates {
     }
 }
 
-#[derive(Default, Debug)]
-pub struct WorkUnit {
-    datetime: NaiveDateTime,
-    rvu: f64,
-    bvu: f64,
-}
-
 #[derive(Clone)]
 pub enum CoverageUnit {
     Temporal(TemporalCoverageUnit),
@@ -100,10 +96,7 @@ pub trait WorkCollector {
 
 impl WorkCollector for CoverageUnit {
     fn collect_work(&self, workday: &CoverageAndWorkDay) -> AnalysisDatum {
-        let _retval: AnalysisDatum = AnalysisDatum {
-            total_rvu: 0.0,
-            total_bvu: 0.0,
-        };
+        let _retval: AnalysisDatum = AnalysisDatum::default();
 
         match self {
             CoverageUnit::Temporal(s) => s.collect_work(workday),
@@ -209,13 +202,10 @@ impl CoverageAndWorkDay {
         start: TimeSinceMidnight,
         end: TimeSinceMidnight,
     ) -> AnalysisDatum {
-        let mut retval: AnalysisDatum = AnalysisDatum {
-            total_rvu: 0.0,
-            total_bvu: 0.0,
-        };
+        let mut retval: AnalysisDatum = AnalysisDatum::default();
         for work in &self.work {
             let tsm = TimeSinceMidnight::from_minutes(
-                (work.datetime.num_seconds_from_midnight() / 60).into(),
+                (work.get_datetime().num_seconds_from_midnight() / 60).into(),
             );
             if start <= tsm && tsm < end {
                 retval.add_workunit(work);
@@ -235,7 +225,7 @@ impl CoverageAndWorkDay {
             None => {
                 CoverageError::NoCoverage(
                     self.get_work_in_timespan(THIS_MIDNIGHT, NEXT_MIDNIGHT)
-                        .total_rvu,
+                        .get_rvu(),
                 )
             }
             Some(coverages) => {
@@ -252,7 +242,7 @@ impl CoverageAndWorkDay {
                                         THIS_MIDNIGHT,
                                         farthest_unit.start,
                                         farthest_unit.to_string() + " starts after midnight",
-                                        rvus.total_rvu,
+                                        rvus.get_rvu(),
                                     ))
                                 }
 
@@ -278,7 +268,7 @@ impl CoverageAndWorkDay {
                                                 farthest_unit,
                                                 cu,
                                             ),
-                                            rvus.total_rvu,
+                                            rvus.get_rvu(),
                                         ));
                                     }
 
@@ -295,7 +285,7 @@ impl CoverageAndWorkDay {
                                         farthest_unit.end,
                                         NEXT_MIDNIGHT,
                                         farthest_unit.to_string() + " ends before midnight",
-                                        rvus.total_rvu,
+                                        rvus.get_rvu(),
                                     ));
                                 }
                             }
@@ -488,30 +478,6 @@ fn testcoords() -> CoverageCoordinates {
     }
 }
 
-pub struct AnalysisDatum {
-    pub total_rvu: f64,
-    pub total_bvu: f64,
-}
-
-impl AddAssign for AnalysisDatum {
-    fn add_assign(&mut self, rhs: Self) {
-        self.total_rvu += rhs.total_rvu;
-        self.total_bvu += rhs.total_bvu;
-    }
-}
-
-impl AnalysisDatum {
-    pub fn scale(&mut self, scale: f64) {
-        self.total_rvu *= scale;
-        self.total_bvu *= scale;
-    }
-
-    pub fn add_workunit(&mut self, rhs: &WorkUnit) {
-        self.total_rvu += rhs.rvu;
-        self.total_bvu += rhs.bvu;
-    }
-}
-
 #[derive(Default)]
 pub struct CoverageMap {
     map: HashMap<String, SubspecialtyMap>,
@@ -519,7 +485,7 @@ pub struct CoverageMap {
 impl CoverageMap {
     pub fn add_work_from_source(
         &mut self,
-        source: ProcessedSource,
+        source: &ProcessedSource,
         date_constraints: &ConstraintSet<'_, NaiveDateTime>,
     ) -> Result<(), Box<dyn std::error::Error>> {
         let _retval = CoverageMap::default();
@@ -528,6 +494,8 @@ impl CoverageMap {
 
         let exam_rvu_map = build_salem_rvumap(&source.main_data_table)?;
         let exam_bvu_map: HashMap<String, f64> = build_salem_bvumap(&source.bvu_data_table)?;
+
+        let exam_code_map = get_categories_map(&source)?;
 
         let mut salem_weekday_count: HashMap<chrono::Weekday, u64> = HashMap::new();
         //Determine how many days worth for each weekday
@@ -592,7 +560,7 @@ impl CoverageMap {
                     &main_headers::PertinentHeaders::ProcedureCode.get_label(),
                     &row_i,
                 )?;
-
+                
                 //Build coords and populate maps with this row.
                 let coords: CoverageCoordinates = {
                     //Get subspecialty from exam code
@@ -719,36 +687,37 @@ impl CoverageMap {
                         }
                     };
 
-                    WorkUnit {
+                    WorkUnit::create(
                         datetime,
-                        rvu: *rvu / denominator, //divide by denominator to account for aggregation of many days of data
-                        bvu: *bvu / denominator, //divide by denominator to account for aggregation of many days of data
-                    }
+                        *rvu,
+                        *bvu,
+                        denominator,
+                        exam_code_map.get(&exam_code).expect("Should be there!").exam.to_string()
+                    )
                 };
 
                 self.add_work(&coords, work);
             }
         }
         //Add TPC, which doesn't go by number of dates
-        let weights = crate::time::get_normal_dist_weights();
+        let distribution_weights = crate::time::get_normal_dist_weights();
         for row_i in source.tpc_data_table.row_indices() {
             let exam_code = source.tpc_data_table.get_val(
                 &tpc_headers::PertinentHeaders::ExamCode.get_label(),
                 &row_i,
             )?;
+
             let number_str = source.tpc_data_table.get_val(
                 &tpc_headers::PertinentHeaders::NumberIn2022.get_label(),
                 &row_i,
             )?;
 
-            let number = match number_str.parse::<f64>() {
+            let number_of_exams = match number_str.parse::<f64>() {
                 Ok(val) => val,
                 Err(e) => {
                     return SourceError::generate_boxed(format!("{:?}", e));
                 }
             };
-
-            let number_per_business_day = number / BUSINESS_DAYS_PER_YEAR;
 
             let rvus_per_exam = match exam_rvu_map.get(&exam_code) {
                 Some(val) => val.to_owned(),
@@ -762,9 +731,6 @@ impl CoverageMap {
                     return SourceError::generate_boxed(format!("Bad exam code {}", exam_code));
                 }
             };
-
-            let rvus_per_business_day = number_per_business_day * rvus_per_exam;
-            let bvus_per_business_day = number_per_business_day * bvus_per_exam;
 
             let subspecialty = match source.exam_to_subspecialty_map.get(&exam_code) {
                 None => {
@@ -796,12 +762,14 @@ impl CoverageMap {
                     return SourceError::generate_boxed("Weekday math is wrong.".to_string());
                 }
 
-                for key in weights.keys() {
-                    let work = WorkUnit {
-                        datetime: NaiveDateTime::new(date, *key),
-                        rvu: rvus_per_business_day * (*weights.get(key).expect("Expected")) as f64,
-                        bvu: bvus_per_business_day * (*weights.get(key).expect("Expected")) as f64,
-                    };
+                for key in distribution_weights.keys() {
+                    let work = WorkUnit::create (
+                        NaiveDateTime::new(date, *key),
+                        number_of_exams*rvus_per_exam * (*distribution_weights.get(key).expect("Expected")) as f64,
+                        number_of_exams*bvus_per_exam * (*distribution_weights.get(key).expect("Expected")) as f64,
+                        BUSINESS_DAYS_PER_YEAR as f64,
+                        exam_code_map.get(&exam_code).expect("Should be there!").exam.to_string()
+                    );
                     self.add_work(&coords, work);
                 }
             }
@@ -990,10 +958,7 @@ impl CoverageMap {
             let datum: &mut AnalysisDatum = match daymap.entry(weekday) {
                 Entry::Occupied(entry) => entry.into_mut(),
                 Entry::Vacant(empty) => {
-                    let entry = empty.insert(AnalysisDatum {
-                        total_bvu: 0.0,
-                        total_rvu: 0.0,
-                    });
+                    let entry = empty.insert(AnalysisDatum::default());
                     entry
                 }
             };
@@ -1028,6 +993,45 @@ impl CoverageMap {
         self.foreach(func);
 
         retval
+    }
+
+    pub fn details(&mut self, analyzed_weekday:chrono::Weekday, analyzed_rotation:&str) -> Result<AnalysisDatum, Box<dyn Error>> {
+        let mut aggregate:AnalysisDatum = AnalysisDatum::default();
+
+        let mut addfunc = |rotation: String, weekday: chrono::Weekday, data: AnalysisDatum| {
+            if weekday==analyzed_weekday && rotation==analyzed_rotation
+            {
+                aggregate+=data;
+            }
+        };
+
+        let func =
+            |_coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| {
+                match &coverage_and_workday.coverages {
+                    Some(coverage) => match coverage {
+                        Coverage::Temporal(coverages) => {
+                            for coverage in coverages {
+                                let collection = coverage.collect_work(coverage_and_workday);
+                                addfunc(coverage.get_rotation(), coverage.get_day(), collection);
+                            }
+                        }
+                        Coverage::Fractional(coverages) => {
+                            for coverage in coverages {
+                                let collection = coverage.collect_work(coverage_and_workday);
+                                addfunc(coverage.get_rotation(), coverage.get_day(), collection);
+                            }
+                        }
+                    },
+                    None => {
+                        eprintln!("Uncovered work!");
+                        panic!("Uncovered work!");
+                    }
+                }
+            };
+
+        self.foreach(func);
+
+        Ok(aggregate)
     }
 
     pub fn analysis_to_file(&mut self, path: String, use_rvu: bool) {
@@ -1069,9 +1073,9 @@ impl CoverageMap {
                 let val = match daymap.get(weekday) {
                     Some(x) => {
                         if use_rvu {
-                            x.total_rvu.to_string()
+                            x.get_rvu().to_string()
                         } else {
-                            x.total_bvu.to_string()
+                            x.get_bvu().to_string()
                         }
                     }
                     None => "".to_string(),

@@ -7,7 +7,7 @@ use chrono::{DateTime, Local};
 
 use crate::{
     globals::{bvu_headers, file_names, main_headers},
-    table,
+    table, processed_source::ProcessedSource,
 };
 
 pub mod exam_categories {
@@ -62,6 +62,18 @@ pub mod exam_categories {
             match self.exam.cmp(&other.exam) {
                 std::cmp::Ordering::Equal => self.procedure_code.cmp(&other.procedure_code),
                 examcmp => examcmp,
+            }
+        }
+    }
+
+    impl ExamCategory
+    {
+        pub fn copy(&self) -> ExamCategory {
+            ExamCategory { 
+                procedure_code: self.procedure_code.to_string(),
+                exam: self.exam.to_string(), 
+                subspecialty: self.subspecialty.to_string(), 
+                comments: self.comments.to_string() 
             }
         }
     }
@@ -183,6 +195,27 @@ pub(crate) fn get_categories_list(
     complete_exam_code_list.sort();
 
     Ok(complete_exam_code_list)
+}
+
+
+pub(crate) fn get_categories_map(
+    source:&ProcessedSource
+) -> Result<HashMap<String, exam_categories::ExamCategory>, String> {
+    let list = get_categories_list(&source.main_data_table, &source.exam_categories_table)?;
+    let mut retval:HashMap<String, exam_categories::ExamCategory> = HashMap::new();
+    
+    for member in &list
+    {
+        match retval.entry(member.procedure_code.to_string())
+        {
+            std::collections::hash_map::Entry::Occupied(_) => panic!("Duplicate procedure code!"),
+            std::collections::hash_map::Entry::Vacant(v) => {
+                v.insert(member.copy());
+            },
+        }
+    }
+
+    Ok(retval)
 }
 
 pub(crate) fn get_locations_list(
