@@ -49,7 +49,6 @@
         {subspecialty_string}
         {context_string}
         {modality_string}
-        {responsibility.days.toString()}
         {portion}
 	</div>
 </div>

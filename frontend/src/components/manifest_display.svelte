@@ -4,6 +4,7 @@
   	import List, { Item, Text } from '@smui/list';
 	import type { Rotation, RotationManifest } from "./RotationManifest";
 	import RotationDisplay from './rotation_display.svelte';
+	import { day_indices, dowfunc } from '../commons/time';
 
 	export let manifest:RotationManifest;
 	console.debug("Manifest",manifest);
@@ -12,22 +13,6 @@
 	
 	const today=(new Date()).getDay()
 	let dow = today;
-
-	const day_indices = [0,1,2,3,4,5,6];
-
-	const days_of_the_week = [
-		"Sunday",
-		"Monday",
-		"Tuesday",
-		"Wednesday",
-		"Thursday",
-		"Friday",
-		"Saturday"
-	];
-
-	const dowfunc=(di:number)=>{
-		return days_of_the_week[di];
-	}
 </script>
 
 <div class="container1">
@@ -64,7 +49,7 @@
 		</div>		
 		<div class="manifest">
 			{#if selected_rotation!==undefined}
-				<RotationDisplay rotation={selected_rotation}/>
+				<RotationDisplay rotation={selected_rotation} dow={dow}/>
 			{/if}
 			{#if dow!==today}
 				<div class="title" style="background:#5e0606; color:white">
