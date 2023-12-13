@@ -12,27 +12,46 @@
 	}
 
 	const should_display = (responsibility:Responsibility) => {
+		console.debug("Should display",rotation);		
 		let retval = responsibility.days=="All" || responsibility.days.includes(shortdow);
-		if(retval){
-			console.debug("Showing",responsibility,shortdow);
-		}
-
 		return retval;
 	}
 </script>
 
 <div>
-	{#key shortdow}
-		{#each rotation.responsibilities as responsibility}
-			{#if should_display(responsibility)}
-				<ResponsibilityDisplay
-					responsibility={responsibility}
-				/>
-			{/if}
-		{/each}
-	{/key}
+	<table class="table">
+		<tr>
+			<th>Site</th>
+			<th>Subspecialty</th>
+			<th>Context</th>
+			<th>Modality</th>
+			<th>Portions</th>
+		</tr>
+		{#key dow}
+			{#key rotation.responsibilities}
+				{#each rotation.responsibilities as responsibility}
+					{#if should_display(responsibility)}
+						<ResponsibilityDisplay
+							responsibility={responsibility}
+							dow={dow}
+						/>
+					{/if}
+				{/each}
+			{/key}
+		{/key}
+	</table>
+	{#if rotation.comments !== undefined && rotation.comments !== null}
+		<ul>
+			{#each rotation.comments as comment}
+				<li><div class="mdc-typography--body1">{comment}</div></li>
+			{/each}
+		</ul>
+	{/if}
 </div>
 
 <style>
-
+	table, th {
+		border: 1px solid white;
+		border-collapse: collapse;
+	}
 </style>
