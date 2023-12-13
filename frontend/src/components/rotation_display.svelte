@@ -12,7 +12,6 @@
 	}
 
 	const should_display = (responsibility:Responsibility) => {
-		console.debug("Should display",rotation);		
 		let retval = responsibility.days=="All" || responsibility.days.includes(shortdow);
 		return retval;
 	}
@@ -29,14 +28,16 @@
 		</tr>
 		{#key dow}
 			{#key rotation.responsibilities}
-				{#each rotation.responsibilities as responsibility}
-					{#if should_display(responsibility)}
-						<ResponsibilityDisplay
-							responsibility={responsibility}
-							dow={dow}
-						/>
-					{/if}
-				{/each}
+				{#if rotation.responsibilities!==undefined && rotation.responsibilities!==null}
+					{#each rotation.responsibilities as responsibility}
+						{#if should_display(responsibility)}
+							<ResponsibilityDisplay
+								responsibility={responsibility}
+								dow={dow}
+							/>
+						{/if}
+					{/each}
+				{/if}
 			{/key}
 		{/key}
 	</table>
