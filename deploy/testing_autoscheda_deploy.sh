@@ -12,7 +12,7 @@ if [[ -z "$CONTAINER_NAME" ]]; then
 else
     echo "Copying static site."
     docker exec $CONTAINER_NAME rm -R /var/www/html/static_content/rotations
-    docker cp ../frontend/build/ $CONTAINER_NAME:/var/www/html/static_content/rotations/
+    docker cp ./frontend/build/ $CONTAINER_NAME:/var/www/html/static_content/rotations/
 fi
 
 docker context use default

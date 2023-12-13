@@ -1,4 +1,4 @@
-title: Rotations v.2023-01-01
+title: Rotations v.2023-01-05
 rotation_manifest:
 - rotation: SC-Main
   location: SC-Main
@@ -299,6 +299,19 @@ rotation_manifest:
     days: Mon
     time_periods:
     - 15:00 PBD-09:00 PD
+- rotation: MSK Weekend AH0C
+  location: Remote
+  responsibilities:
+    # Monday
+  - sites: All
+    subspecialties: MSK
+    contexts: Outpatient
+    modalities: All
+    days: Sun
+    time_periods:
+    - 15:00 PBD-15:00 PBD+1
+  comments:
+    - If no MSK radiologist volunteers, this responsibility falls to the Monday MSK radiologist.
 - rotation: MSK
   location: SRC
   responsibilities:
@@ -310,14 +323,13 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 08:00 CD-16:30 CD
-  # Monday
   - sites: All
     subspecialties: MSK
     contexts: Outpatient
     modalities: All
     days: Mon
     time_periods:
-    - 15:00 PBD-15:00 CD
+    - 15:00 PBD+1-15:00 CD
   # Tues-Fri
   - sites: All
     subspecialties: MSK

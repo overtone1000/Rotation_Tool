@@ -106,9 +106,7 @@ fn analyze_rotations() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn detailed_analysis(weekday:chrono::Weekday, rotation:&str) -> Result<(), Box<dyn Error>> {
-    let mut processed_data = process_data()?;
-
+fn detailed_analysis(processed_data:&mut ProcessedData, weekday:chrono::Weekday, rotation:&str) -> Result<(), Box<dyn Error>> {
     let details = processed_data.coverage_tree.details(weekday,rotation)?;
 
     println!("Detailed analysis for {}-{}",rotation,weekday);
@@ -147,7 +145,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         cache_source()?;
     }
 
-    let rotation_analysis:bool = true;
+    let rotation_analysis:bool = false;
 
     if rotation_analysis{
         analyze_rotations()?;
@@ -163,7 +161,9 @@ fn main() -> Result<(), Box<dyn Error>> {
     let perform_detailed_analysis:bool = false;
     if perform_detailed_analysis
     {
-        detailed_analysis(chrono::Weekday::Tue, globals::MSK)?;
+        let mut processed_data = process_data()?;
+        detailed_analysis(&mut processed_data,chrono::Weekday::Mon, globals::MSK)?;
+        detailed_analysis(&mut processed_data,chrono::Weekday::Sun, globals::MSK_WE_AH0C)?;
     }
 
     println!("Finished.");
