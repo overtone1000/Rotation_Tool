@@ -1,10 +1,25 @@
 use std::{ops::AddAssign, collections::{HashMap, hash_map::Entry}};
 
 use chrono::NaiveDateTime;
+use serde::Serialize;
 
 #[derive(Default, Debug)]
+pub struct SerializeableNaiveDateTime
+{
+    pub datetime:NaiveDateTime
+}
+impl Serialize for SerializeableNaiveDateTime
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer {
+        serializer.serialize_i64(self.datetime.timestamp())
+    }
+}
+
+#[derive(Default, Debug, Serialize)]
 pub struct WorkUnit {
-    datetime: NaiveDateTime,
+    datetime: SerializeableNaiveDateTime,
     rvu: f64,
     bvu: f64,
     exam_desc: String,
@@ -12,7 +27,7 @@ pub struct WorkUnit {
 }
 
 impl WorkUnit {
-    pub fn get_datetime(&self)->NaiveDateTime{self.datetime}
+    pub fn get_datetime(&self)->NaiveDateTime{self.datetime.datetime}
     pub fn get_scaled_rvu(&self)->f64{self.rvu/self.denominator}
     pub fn get_scaled_bvu(&self)->f64{self.bvu/self.denominator}
     pub fn get_exam_desc(&self)->&str{self.exam_desc.as_str()}
@@ -25,7 +40,7 @@ impl WorkUnit {
     )->WorkUnit
     {
         WorkUnit { 
-            datetime: datetime, 
+            datetime: SerializeableNaiveDateTime{datetime:datetime}, 
             rvu: rvu, 
             bvu: bvu, 
             exam_desc: exam_desc, 

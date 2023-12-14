@@ -1,8 +1,10 @@
 
 
+use serde::{Serialize, ser::SerializeStruct};
+
 use crate::rotations::time_modifiers::{NEXT_MIDNIGHT, THIS_MIDNIGHT, TimeSinceMidnight};
 
-use super::{coverage_tree::{CoverageAndWorkDay, WorkCollector}, analysis_datum::AnalysisDatum};
+use super::{coverage_tree::{CoverageAndWorkDay, WorkCollector}, analysis_datum::AnalysisDatum, fractional_coverage::SerializeableWeekday};
 
 pub fn weekday_plus(base_weekday: chrono::Weekday, delta: i64) -> chrono::Weekday {
     let mut retval = base_weekday;
@@ -18,15 +20,20 @@ pub fn weekday_plus(base_weekday: chrono::Weekday, delta: i64) -> chrono::Weekda
     retval
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone,Serialize)]
 pub struct TemporalCoverageUnit {
     pub start: TimeSinceMidnight,
     pub end: TimeSinceMidnight,
     rotation: String,
-    rotation_day: chrono::Weekday,
+    rotation_day:SerializeableWeekday
 }
 
 impl Eq for TemporalCoverageUnit {}
+
+pub fn weekday_for_javascript(weekday:&chrono::Weekday)->u32
+{
+    weekday.num_days_from_sunday()//This is how javascript represents weekdays
+}
 
 impl TemporalCoverageUnit {
     pub fn create(
@@ -39,7 +46,7 @@ impl TemporalCoverageUnit {
             start,
             end,
             rotation,
-            rotation_day: day, //weekday_offset:offset //This is limited to one 24 hour period inclusive on each end.
+            rotation_day: SerializeableWeekday{day:day}, //weekday_offset:offset //This is limited to one 24 hour period inclusive on each end.
         }
     }
 
@@ -111,11 +118,11 @@ impl TemporalCoverageUnit {
         self.rotation.to_string()
     }
     pub fn get_day(&self) -> chrono::Weekday {
-        self.rotation_day
+        self.rotation_day.day
     }
 
     pub fn to_string(&self) -> String {
-        format!("{} ({})", self.rotation, self.rotation_day)
+        format!("{} ({})", self.rotation, self.rotation_day.day)
     }
 }
 

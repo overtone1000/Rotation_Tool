@@ -309,7 +309,7 @@ rotation_manifest:
     modalities: All
     days: Sun
     time_periods:
-    - 15:00 PBD-15:00 PBD+1
+    - 15:00 PBD-18:00 PBD+1
   comments:
     - If no MSK radiologist volunteers, this responsibility falls to the Monday MSK radiologist.
 - rotation: MSK
@@ -329,7 +329,7 @@ rotation_manifest:
     modalities: All
     days: Mon
     time_periods:
-    - 15:00 PBD+1-15:00 CD
+    - 18:00 PBD+1-15:00 CD
   # Tues-Fri
   - sites: All
     subspecialties: MSK

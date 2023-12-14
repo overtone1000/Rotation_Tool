@@ -1,32 +1,22 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import ManifestDisplay from './manifest_display.svelte';
-	import type { RotationManifest } from "./RotationManifest";
-
-	let manifest_instance:RotationManifest|undefined=undefined;
+	import CoverageDisplay from './coverage/coverage_display.svelte';
+	import ManifestDisplay from './manifest/manifest_display.svelte';
 	
-	onMount(() => {
-		fetch("active.json").then(
-			(value:Response)=>{
-				if(value.ok)
-				{
-					value.json().then(
-						(manifest:RotationManifest)=>{
-							manifest_instance=manifest;
-						}
-					);
-				}
-			}
-		);
-	});
+	enum Display
+	{
+		Manifest,
+		Coverage
+	}	
 
-
+	let current_display=Display.Coverage;
 </script>
 
 <div class="vp_fill">
 	<div class="page">
-		{#if manifest_instance!==undefined}
-			<ManifestDisplay manifest={manifest_instance}/>
+		{#if current_display==Display.Manifest}
+			<ManifestDisplay/>
+		{:else if current_display==Display.Coverage}
+			<CoverageDisplay/>
 		{/if}
 	</div>
 </div>

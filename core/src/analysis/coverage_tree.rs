@@ -10,10 +10,12 @@ use std::ops::AddAssign;
 use std::str::FromStr;
 
 use chrono::{Datelike, Duration, NaiveDate, NaiveDateTime, Timelike};
+use serde::Serialize;
+use serde::ser::SerializeMap;
 
 use crate::categorization::{get_categories_map, exam_categories};
 use crate::globals::{self, ALL_DAYS};
-use crate::rotations::manifest::Manifest;
+use crate::rotations::manifest::{Manifest, JSONable};
 use crate::rotations::rotation_error::RotationManifestParseError;
 use crate::rotations::time_modifiers::{NEXT_MIDNIGHT, THIS_MIDNIGHT, TimeSinceMidnight};
 use crate::rotations::timespan::parse_time_span;
@@ -26,9 +28,9 @@ use crate::{
 };
 
 use super::analysis_datum::{AnalysisDatum, WorkUnit};
-use super::fractional_coverage::FractionalCoverageUnit;
+use super::fractional_coverage::{FractionalCoverageUnit, SerializeableWeekday};
 use super::source_error::SourceError;
-use super::temporal_coverage::{weekday_plus, TemporalCoverageUnit};
+use super::temporal_coverage::{weekday_plus, TemporalCoverageUnit, weekday_for_javascript};
 
 #[derive(Eq, Hash, PartialEq, Clone)]
 pub struct CoverageCoordinates {
@@ -105,7 +107,7 @@ impl WorkCollector for CoverageUnit {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub enum Coverage {
     Temporal(Vec<TemporalCoverageUnit>),
     Fractional(Vec<FractionalCoverageUnit>),
@@ -139,8 +141,7 @@ impl Coverage {
     }
 }
 
-#[derive(Debug)]
-#[derive(Default)]
+#[derive(Debug, Default, Serialize)]
 pub struct CoverageAndWorkDay {
     pub coverages: Option<Coverage>,
     pub work: Vec<WorkUnit>,
@@ -334,20 +335,21 @@ where
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Serialize)]
 pub struct WeekdayMap {
-    map: HashMap<chrono::Weekday, CoverageAndWorkDay>,
+    map: HashMap<SerializeableWeekday, CoverageAndWorkDay>,
 }
+
 impl WeekdayMap {
     fn default() -> WeekdayMap {
-        let mut map: HashMap<chrono::Weekday, CoverageAndWorkDay> = HashMap::new();
-        map.insert(chrono::Weekday::Mon, CoverageAndWorkDay::default());
-        map.insert(chrono::Weekday::Tue, CoverageAndWorkDay::default());
-        map.insert(chrono::Weekday::Wed, CoverageAndWorkDay::default());
-        map.insert(chrono::Weekday::Thu, CoverageAndWorkDay::default());
-        map.insert(chrono::Weekday::Fri, CoverageAndWorkDay::default());
-        map.insert(chrono::Weekday::Sat, CoverageAndWorkDay::default());
-        map.insert(chrono::Weekday::Sun, CoverageAndWorkDay::default());
+        let mut map: HashMap<SerializeableWeekday, CoverageAndWorkDay> = HashMap::new();
+        map.insert(SerializeableWeekday::new(chrono::Weekday::Mon), CoverageAndWorkDay::default());
+        map.insert(SerializeableWeekday::new(chrono::Weekday::Tue), CoverageAndWorkDay::default());
+        map.insert(SerializeableWeekday::new(chrono::Weekday::Wed), CoverageAndWorkDay::default());
+        map.insert(SerializeableWeekday::new(chrono::Weekday::Thu), CoverageAndWorkDay::default());
+        map.insert(SerializeableWeekday::new(chrono::Weekday::Fri), CoverageAndWorkDay::default());
+        map.insert(SerializeableWeekday::new(chrono::Weekday::Sat), CoverageAndWorkDay::default());
+        map.insert(SerializeableWeekday::new(chrono::Weekday::Sun), CoverageAndWorkDay::default());
         WeekdayMap { map }
     }
 }
@@ -381,16 +383,16 @@ impl WorkCoverageMap for WeekdayMap {
         }
     }
 }
-impl<'a> CoordinateMap<'a, chrono::Weekday, CoverageAndWorkDay> for WeekdayMap {
-    fn get_map(&mut self) -> &mut HashMap<chrono::Weekday, CoverageAndWorkDay> {
+impl<'a> CoordinateMap<'a, SerializeableWeekday, CoverageAndWorkDay> for WeekdayMap {
+    fn get_map(&mut self) -> &mut HashMap<SerializeableWeekday, CoverageAndWorkDay> {
         &mut self.map
     }
-    fn get_coordinate(coords: &CoverageCoordinates) -> chrono::Weekday {
-        coords.weekday
+    fn get_coordinate(coords: &CoverageCoordinates) -> SerializeableWeekday {
+        SerializeableWeekday::new(coords.weekday)
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Serialize)]
 pub struct ModalityMap {
     map: HashMap<String, WeekdayMap>,
 }
@@ -416,7 +418,7 @@ impl WorkCoverageMap for ModalityMap {
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Serialize)]
 pub struct ContextMap {
     map: HashMap<String, ModalityMap>,
 }
@@ -442,7 +444,7 @@ impl WorkCoverageMap for ContextMap {
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Serialize)]
 pub struct SubspecialtyMap {
     map: HashMap<String, ContextMap>,
 }
@@ -478,7 +480,7 @@ fn testcoords() -> CoverageCoordinates {
     }
 }
 
-#[derive(Default)]
+#[derive(Default,Serialize)]
 pub struct CoverageMap {
     map: HashMap<String, SubspecialtyMap>,
 }
@@ -914,7 +916,7 @@ impl CoverageMap {
                                 subspecialty: subspecialty.to_string(),
                                 context: context.to_string(),
                                 modality: modality.to_string(),
-                                weekday: *weekday,
+                                weekday: weekday.day,
                             };
 
                             func(&coords, coverage_and_workday);
@@ -1203,4 +1205,7 @@ impl WorkCoverageMap for CoverageMap {
     ) -> Result<(), Box<dyn std::error::Error>> {
         self.get_branch(coords).add_coverage(coords, coverage)
     }
+}
+
+impl JSONable for CoverageMap {
 }

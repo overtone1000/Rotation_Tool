@@ -2,6 +2,8 @@ use std::fmt;
 
 //use chrono::NaiveTime;
 
+use serde::Serialize;
+
 use super::rotation_error::RotationManifestParseError;
 
 const PREVIOUS_BUSINESS_DAY: &str = "PBD";
@@ -10,7 +12,7 @@ const PREVIOUS_DAY: &str = "PD";
 const CURRENT_DAY: &str = "CD";
 const NEXT_DAY: &str = "ND";
 
-#[derive(PartialEq, Eq, PartialOrd, Ord, Default, Clone, Copy)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Default, Clone, Copy, Serialize)]
 pub struct TimeSinceMidnight {
     minutes: u64,
 }

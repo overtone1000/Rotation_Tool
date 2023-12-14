@@ -1,9 +1,33 @@
-use super::{coverage_tree::{CoverageAndWorkDay, WorkCollector}, analysis_datum::AnalysisDatum};
+use serde::{Serialize, ser::SerializeStruct};
 
-#[derive(Debug, PartialEq, Clone)]
+use super::{coverage_tree::{CoverageAndWorkDay, WorkCollector}, analysis_datum::AnalysisDatum, temporal_coverage::weekday_for_javascript};
+
+#[derive(Debug, PartialEq, Eq, Hash, Clone)]
+pub struct SerializeableWeekday
+{
+    pub day:chrono::Weekday
+}
+
+impl SerializeableWeekday
+{
+    pub fn new(weekday:chrono::Weekday)->SerializeableWeekday{
+        SerializeableWeekday{day:weekday}
+    }
+}
+
+impl Serialize for SerializeableWeekday
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer {
+        serializer.serialize_u32(weekday_for_javascript(&self.day))
+    }
+}
+
+#[derive(Debug, PartialEq, Clone, Serialize)]
 pub struct FractionalCoverageUnit {
     rotation: String,
-    rotation_day: chrono::Weekday,
+    rotation_day: SerializeableWeekday,
     fraction: f64,
 }
 
@@ -15,7 +39,7 @@ impl FractionalCoverageUnit {
     ) -> FractionalCoverageUnit {
         FractionalCoverageUnit {
             rotation,
-            rotation_day: weekday,
+            rotation_day: SerializeableWeekday{day:weekday},
             fraction,
         }
     }
@@ -24,7 +48,7 @@ impl FractionalCoverageUnit {
         self.rotation.to_string()
     }
     pub fn get_day(&self) -> chrono::Weekday {
-        self.rotation_day
+        self.rotation_day.day
     }
     pub fn get_fraction(&self) -> f64 {
         self.fraction

@@ -14,7 +14,7 @@ use processed_source::ProcessedSource;
 
 use crate::{
     analysis::coverage_tree::CoverageMap,
-    globals::file_names::{COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE},
+    globals::file_names::{COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE}, rotations::manifest::JSONable,
 };
 
 mod analysis;
@@ -151,11 +151,16 @@ fn main() -> Result<(), Box<dyn Error>> {
         analyze_rotations()?;
     }
 
-    let manifest_to_json:bool = true;
-    if manifest_to_json
+    let output_to_json:bool = true;
+    if output_to_json
     {
         let manifest = parse_manifest()?;
-        manifest.to_json("../frontend/static/active.json")?;
+        manifest.to_json("../frontend/static/active_rotation_manifest.json")?;
+        
+        let mut coverage_tree = CoverageMap::default();
+        println!("Adding coverage.");
+        coverage_tree.add_coverage_from_manifest(manifest)?;
+        coverage_tree.to_json("../frontend/static/active_coverage_tree.json")?;
     }
 
     let perform_detailed_analysis:bool = false;

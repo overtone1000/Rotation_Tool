@@ -56,13 +56,6 @@ impl Manifest {
         }
     }
 
-    pub fn to_json(&self, filename:&str) -> Result<(), Box<dyn Error>> {
-        let file = File::create(filename)?;
-        let writer = BufWriter::new(file);
-        serde_json::to_writer(writer, self)?;
-        Ok(())
-    }
-
     pub fn create_example() -> Result<(), Box<dyn Error>> {
         let mut example = Manifest {
             title: "Rotation Description Example".to_string(),
@@ -148,4 +141,17 @@ impl Manifest {
         serde_yaml::to_writer(writer, &example)?;
         Ok(())
     }
+}
+
+pub trait JSONable:Serialize
+{
+    fn to_json(&self, filename:&str) -> Result<(), Box<dyn Error>> {
+        let file = File::create(filename)?;
+        let writer = BufWriter::new(file);
+        serde_json::to_writer(writer, self)?;
+        Ok(())
+    }
+}
+
+impl JSONable for Manifest {
 }
