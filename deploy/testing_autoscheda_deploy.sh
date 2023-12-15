@@ -11,7 +11,8 @@ if [[ -z "$CONTAINER_NAME" ]]; then
     echo "Container name not found. Got $CONTAINER_NAME"
 else
     echo "Copying static site."
-    docker exec $CONTAINER_NAME rm -R /var/www/html/static_content/rotations
+    echo "Trying remove."
+    echo $(docker exec $CONTAINER_NAME rm -R /var/www/html/static_content/rotations)
     docker cp ./frontend/build/ $CONTAINER_NAME:/var/www/html/static_content/rotations/
 fi
 
