@@ -53,7 +53,6 @@ export const nd = (di:number)=>{
 export const day_indices = [0,1,2,3,4,5,6];
 
 export const dowfunc=(di:number)=>{
-    console.debug("dowfunc",di);
     return days_of_the_week[di];
 }
 

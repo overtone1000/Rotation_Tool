@@ -139,13 +139,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
     println!("Starting.");
 
-    let rebuild_source: bool = true;
+    let rebuild_source: bool = false;
 
     if rebuild_source {
         cache_source()?;
     }
 
-    let rotation_analysis:bool = true;
+    let rotation_analysis:bool = false;
 
     if rotation_analysis{
         analyze_rotations()?;
@@ -161,6 +161,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         println!("Adding coverage.");
         coverage_tree.add_coverage_from_manifest(manifest)?;
         coverage_tree.to_json("../frontend/static/active_coverage_tree.json")?;
+
+        let source = ProcessedSource::load_from_cache(SOURCE_CACHE)?;
+
+        source.exam_categories_list.to_json("../frontend/static/exam_categories.json")?;
     }
 
     let perform_detailed_analysis:bool = false;

@@ -15,6 +15,8 @@ pub mod exam_categories {
 
     use serde::{Deserialize, Serialize};
 
+    use crate::rotations::manifest::JSONable;
+
     pub(crate) enum PertinentHeaders {
         ProcedureCode,
         Exam,
@@ -39,6 +41,9 @@ pub mod exam_categories {
         pub exam: String,
         pub subspecialty: String,
         pub comments: String,
+    }
+
+    impl JSONable for Vec<ExamCategory> {
     }
 
     impl Eq for ExamCategory {}

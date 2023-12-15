@@ -7,8 +7,13 @@
 	import FractionalCoverageDisplay from "./fractional_coverage_display.svelte";
     import TemporalCoverageDisplay from "./temporal_coverage_display.svelte";
 	import DrawerToggleButton from "../common/drawer_toggle_button.svelte";
+	import type { ExamCategory } from "./ExamCategory";
+	import FormField from "@smui/form-field";
+    import Switch from '@smui/switch';
+    import Autocomplete from '@smui-extra/autocomplete';
 
 	let site_tree:SiteTree|undefined=undefined;
+    let exam_categories:ExamCategory[]|undefined=undefined;
     
     let keys:CoordKeys={
         sites: [],
@@ -44,10 +49,34 @@
 				}
 			}
 		);
+
+        fetch("exam_categories.json").then(
+			(value:Response)=>{
+				if(value.ok)
+				{
+					value.json().then(
+						(res:ExamCategory[])=>{
+							exam_categories=res;                  
+                            console.debug("Exam categories",exam_categories);
+						}
+					);
+				}
+			}
+		);
 	});
 
     let open=true;
+    let search_by_exam_description=false;
 
+    let getExamLabel = (option:ExamCategory) => {
+        if(option===undefined || option===null){return "";}
+        return option.exam;
+    }
+
+    let examSelected = (selection:ExamCategory) =>
+    {
+        active_coords.subspecialty=selection.subspecialty;
+    }
 </script>
 
 {#if site_tree !== undefined}
@@ -55,6 +84,12 @@
         <div class="drawer" hidden={!open}>
             <Drawer>
                 <Content>
+                    <div class="button_container">
+                        <FormField enabled>
+                            <span slot="label">Search by exam description.</span>
+                            <Switch color="primary" disabled={exam_categories===undefined} bind:checked={search_by_exam_description} />
+                        </FormField>
+                    </div>
                     <div class="button_container">
                         <Select
                             label="Site"
@@ -66,14 +101,23 @@
                         </Select>
                     </div>
                     <div class="button_container">
-                        <Select 
-                            label="Subspecialty"
-                            bind:value={active_coords.subspecialty}
-                            >
-                            {#each keys.subspecialties as o}
-                                <Option value={o}>{o}</Option>
-                            {/each}
-                        </Select>
+                        {#if search_by_exam_description && exam_categories!==undefined}
+                            <Autocomplete
+                                options={exam_categories} 
+                                getOptionLabel={getExamLabel}
+                                on:Select={examSelected}
+                                label="Exam Description"
+                            />
+                        {:else}
+                            <Select 
+                                label="Subspecialty"
+                                bind:value={active_coords.subspecialty}
+                                >
+                                {#each keys.subspecialties as o}
+                                    <Option value={o}>{o}</Option>
+                                {/each}
+                            </Select>
+                        {/if}
                     </div>
                     <div class="button_container">
                         <Select
