@@ -8,7 +8,7 @@ use serde::{
 
 
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Deserialize)]
 #[serde(untagged)]
 pub enum StringTypes {
     All(AllType),
@@ -56,6 +56,37 @@ impl StringTypes {
             Err(invalids)
         } else {
             Ok(())
+        }
+    }
+}
+
+fn serialize_hashset_alphabetically<S>(hashset:&HashSet<String>, serializer:S) -> Result<S::Ok, S::Error>
+where S:serde::Serializer
+{
+    let mut asarr:Vec<&str> = Vec::new();
+    for value in hashset {
+        asarr.push(value);
+    }
+    asarr.sort(); //Alphabetize
+
+    let mut seq = serializer.serialize_seq(Some(asarr.len()))?;
+    for value in asarr {
+        seq.serialize_element(value)?;
+    }
+    seq.end()
+}
+
+impl Serialize for StringTypes
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        match self
+        {
+            StringTypes::All(x) => x.serialize(serializer),
+            StringTypes::SlashSeparatedStringHashSet(x) => serialize_hashset_alphabetically(&x.values, serializer),
+            StringTypes::Array(x) => serialize_hashset_alphabetically(x, serializer),
         }
     }
 }
@@ -119,19 +150,6 @@ impl SlashSeparatedStringSet {
             vec.insert(value.to_string());
         }
         SlashSeparatedStringSet { values: vec }
-    }
-}
-
-impl Serialize for SlashSeparatedStringSet {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        let mut seq = serializer.serialize_seq(Some(self.values.len()))?;
-        for value in &self.values {
-            seq.serialize_element(value)?;
-        }
-        seq.end()
     }
 }
 

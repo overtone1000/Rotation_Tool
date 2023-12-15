@@ -139,13 +139,13 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
     println!("Starting.");
 
-    let rebuild_source: bool = false;
+    let rebuild_source: bool = true;
 
     if rebuild_source {
         cache_source()?;
     }
 
-    let rotation_analysis:bool = false;
+    let rotation_analysis:bool = true;
 
     if rotation_analysis{
         analyze_rotations()?;

@@ -4,13 +4,13 @@ rotation_manifest:
   location: SC-Main
   responsibilities:
   - sites: SC
-    subspecialties: Screening Mamm
+    subspecialties: Mamm (Screening)
     contexts: All
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
     weekly_fraction: 0.2
   - sites: SC
-    subspecialties: Diagnostic Mamm/Mamm Procedure
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
     contexts: All
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
@@ -134,13 +134,13 @@ rotation_manifest:
     - 08:00 CD-15:00 CD
   #Mamms
   - sites: WVH
-    subspecialties: Screening Mamm
+    subspecialties: Mamm (Screening)
     contexts: All
     modalities: MG
     days: Mon/Tue/Wed/Thu/Fri
     weekly_fraction: 0.2
   - sites: WVH
-    subspecialties: Diagnostic Mamm/Mamm Procedure
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
     contexts: All
     modalities: MG/US
     days: Mon/Tue/Wed/Thu/Fri
@@ -205,27 +205,27 @@ rotation_manifest:
   location: SH
   responsibilities:
   - sites: SH/WB
-    subspecialties: Screening Mamm
+    subspecialties: Mamm (Screening)
     contexts: All
     modalities: MG
     days: Mon/Tue/Wed/Thu/Fri
     weekly_fraction: 0.2
   - sites: SH
-    subspecialties: Diagnostic Mamm/Mamm Procedure
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
     contexts: Outpatient
     modalities: MG/US
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 07:15 CD-15:30 CD
   - sites: SH
-    subspecialties: Diagnostic Mamm/Mamm Procedure
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
     contexts: Inpatient/ED
     modalities: MG/US
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 07:15 CD-16:00 CD
   - sites: WB
-    subspecialties: Diagnostic Mamm
+    subspecialties: Mamm (Diag)
     contexts: Outpatient
     modalities: US
     days: Mon/Tue/Wed/Thu/Fri
@@ -339,7 +339,7 @@ rotation_manifest:
     time_periods:
     - 15:00 PD-15:00 CD
   - sites: SRC/TPC
-    subspecialties: Screening Mamm
+    subspecialties: Mamm (Screening)
     contexts: All
     modalities: MG
     days: Tue/Wed/Thu/Fri
@@ -367,7 +367,7 @@ rotation_manifest:
     time_periods:
     - 08:00 CD-13:00 CD
   - sites: SRC/TPC
-    subspecialties: Diagnostic Mamm/Mamm Procedure
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
     contexts: All
     modalities: MG/US
     days: Mon/Tue/Wed/Thu/Fri
@@ -387,7 +387,7 @@ rotation_manifest:
   responsibilities:
   # Monday
   - sites: SRC/TPC
-    subspecialties: Screening Mamm
+    subspecialties: Mamm (Screening)
     contexts: All
     modalities: All
     days: Mon
@@ -401,7 +401,7 @@ rotation_manifest:
     - 08:00 CD-17:00 CD
   # Tue-Fri
   - sites: SRC/TPC
-    subspecialties: Screening Mamm
+    subspecialties: Mamm (Screening)
     contexts: All
     modalities: All
     days: Tue/Wed/Thu/Fri
@@ -422,7 +422,7 @@ rotation_manifest:
     - 08:00 CD-12:30 CD
   # Mon-Fri
   - sites: SRC/TPC
-    subspecialties: Diagnostic Mamm/Mamm Procedure
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
     contexts: All
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
@@ -560,14 +560,14 @@ rotation_manifest:
   location: Remote
   responsibilities:
   - sites: SH
-    subspecialties: Diagnostic Mamm
+    subspecialties: Mamm (Diag)
     contexts: ED/Inpatient
     modalities: MG/US
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 06:00 CD-07:15 CD
   - sites: WVH
-    subspecialties: Diagnostic Mamm
+    subspecialties: Mamm (Diag)
     contexts: ED/Inpatient
     modalities: MG/US
     days: Mon/Tue/Wed/Thu/Fri
@@ -745,7 +745,7 @@ rotation_manifest:
   location: Remote
   responsibilities:
   - sites: All
-    subspecialties: General/Complex CTA+MRA/MSK/Neuro (Brain)/Neuro (Other)/Diagnostic Mamm
+    subspecialties: General/Complex CTA+MRA/MSK/Neuro (Brain)/Neuro (Other)/Mamm (Diag)
     contexts: ED/Wet Read/Inpatient
     modalities: CT/US/XR/MR/NM/RF/MG/DEXA
     days: Sun/Mon/Tue/Wed/Thu
@@ -759,7 +759,7 @@ rotation_manifest:
     time_periods:
     - 22:00 CD-06:00 ND
   - sites: All
-    subspecialties: General/Complex CTA+MRA/MSK/Neuro (Brain)/Neuro (Other)/Diagnostic Mamm
+    subspecialties: General/Complex CTA+MRA/MSK/Neuro (Brain)/Neuro (Other)/Mamm (Diag)
     contexts: ED/Wet Read/Inpatient
     modalities: CT/US/XR/MR/NM/RF/MG/DEXA
     days: Fri/Sat
@@ -884,14 +884,14 @@ rotation_manifest:
     time_periods:
     - 11:00 CD-19:00 CD
   - sites: All
-    subspecialties: Diagnostic Mamm/Mamm Procedure
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
     contexts: ED/Inpatient
     modalities: MG/US
     days: Sat/Sun
     time_periods:
     - 11:00 CD-19:00 CD
   - sites: SH
-    subspecialties: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)/Fluoro (General)/Fluoro Procedure (MSK)/Mamm Procedure
+    subspecialties: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)/Fluoro (General)/Fluoro Procedure (MSK)/Mamm (Procedures)
     contexts: ED/Inpatient
     modalities: XR/RF/US/MG
     days: Sat/Sun
@@ -910,7 +910,7 @@ rotation_manifest:
     - 07:00 CD-08:00 CD
   # Diagnostic Work
   - sites: All
-    subspecialties: Diagnostic Mamm
+    subspecialties: Mamm (Diag)
     contexts: ED/Inpatient
     modalities: MG/US
     days: Sat/Sun
@@ -985,28 +985,28 @@ rotation_manifest:
     time_periods:
     - 16:30 CD-20:00 CD
   - sites: SH
-    subspecialties: Diagnostic Mamm/Mamm Procedure
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
     contexts: ED/Inpatient
     modalities: MG/US
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 16:00 CD-22:00 CD
   - sites: SH
-    subspecialties: Diagnostic Mamm/Mamm Procedure
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
     contexts: ED/Inpatient
     modalities: MG/US
     days: Sat/Sun
     time_periods:
     - 19:00 CD-22:00 CD
   - sites: WVH
-    subspecialties: Diagnostic Mamm
+    subspecialties: Mamm (Diag)
     contexts: ED/Inpatient
     modalities: MG/US
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 15:00 CD-22:00 CD
   - sites: WVH
-    subspecialties: Diagnostic Mamm
+    subspecialties: Mamm (Diag)
     contexts: ED/Inpatient
     modalities: MG/US
     days: Sat/Sun
@@ -1050,14 +1050,14 @@ rotation_manifest:
     - 19:00 CD-22:00 CD
     # Overnight procedure call
   - sites: SH
-    subspecialties: Mamm Procedure
+    subspecialties: Mamm (Procedures)
     contexts: ED/Inpatient
     modalities: MG/US
     days: Sun/Mon/Tue/Wed/Thu
     time_periods:
     - 22:00 CD-07:15 ND
   - sites: SH
-    subspecialties: Mamm Procedure
+    subspecialties: Mamm (Procedures)
     contexts: ED/Inpatient
     modalities: MG/US
     days: Fri/Sat
@@ -1233,7 +1233,7 @@ rotation_manifest:
     - 00:00 CD-13:00 CD
     - 16:30 CD-24:00 CD
   - sites: TPC
-    subspecialties: Diagnostic Mamm
+    subspecialties: Mamm (Diag)
     contexts: Outpatient
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
@@ -1242,7 +1242,7 @@ rotation_manifest:
     - 16:30 CD-24:00 CD
     # No procedures or mamms outside normal horus
   - sites: SRC
-    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (MSK)/Diagnostic Mamm/Mamm Procedure
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (MSK)/Mamm (Diag)/Mamm (Procedures)
     contexts: Outpatient
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
@@ -1259,7 +1259,7 @@ rotation_manifest:
     - 00:00 CD-13:00 CD
     - 16:30 CD-24:00 CD
   - sites: SRC
-    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (IR or PA)/US Procedure (IR)/US Procedure (MSK)/Angio/Diagnostic Mamm/Mamm Procedure
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (IR or PA)/US Procedure (IR)/US Procedure (MSK)/Angio/Mamm (Diag)/Mamm (Procedures)
     contexts: Outpatient
     modalities: All
     days: Sat/Sun
@@ -1289,7 +1289,7 @@ rotation_manifest:
     - 00:00 CD-07:30 CD
     - 19:00 CD-24:00 CD
   - sites: WVH
-    subspecialties: Diagnostic Mamm
+    subspecialties: Mamm (Diag)
     contexts: Outpatient
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
@@ -1297,7 +1297,7 @@ rotation_manifest:
     - 00:00 CD-08:00 CD
     - 15:00 CD-24:00 CD
   - sites: WVH
-    subspecialties: Mamm Procedure
+    subspecialties: Mamm (Procedures)
     contexts: All
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
@@ -1313,7 +1313,7 @@ rotation_manifest:
     - 00:00 CD-08:00 CD
     - 17:00 CD-24:00 CD
   - sites: SH/WB
-    subspecialties: Diagnostic Mamm/Mamm Procedure
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
     contexts: Outpatient
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
@@ -1321,7 +1321,7 @@ rotation_manifest:
     - 00:00 CD-07:15 CD
     - 15:30 CD-24:00 CD
   - sites: SH
-    subspecialties: Diagnostic Mamm/Mamm Procedure
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
     contexts: Outpatient
     modalities: All
     days: Sat/Sun
