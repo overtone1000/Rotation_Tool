@@ -99,22 +99,14 @@ export const getCoverages = (coords:Coordinates, site_map:SiteTree|undefined):Co
     const subspecialty_map = site_map.map[coords.site];
     if(subspecialty_map===undefined){return undefined;}
 
-    console.debug("Subspecialty map:",subspecialty_map);
-
     const context_map = subspecialty_map.map[coords.subspecialty];
     if(context_map===undefined){return undefined;}
-
-    console.debug("Context map:",context_map);
 
     const modality_map = context_map.map[coords.context];
     if(modality_map===undefined){return undefined;}
 
-    console.debug("Modality map:",modality_map);
-
     const weekday_map = modality_map.map[coords.modality];
     if(weekday_map===undefined || weekday_map.map===undefined || weekday_map.map[coords.dow]===undefined){return undefined;}
-
-    console.debug("Weekday map:",weekday_map);
 
     return weekday_map.map[coords.dow].coverages;
 }

@@ -119,6 +119,7 @@ impl Coverage {
             Coverage::Temporal(coverages) => match coverage {
                 CoverageUnit::Temporal(new_coverage) => {
                     coverages.push(new_coverage);
+                    coverages.sort();
                 }
                 CoverageUnit::WeekFraction(_new_coverage) => {
                     return SourceError::generate_boxed(
@@ -134,6 +135,7 @@ impl Coverage {
                 }
                 CoverageUnit::WeekFraction(new_coverage) => {
                     coverages.push(new_coverage);
+                    coverages.sort();
                 }
             },
         }

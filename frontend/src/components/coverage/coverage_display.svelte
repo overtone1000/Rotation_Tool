@@ -6,6 +6,7 @@
 	import Drawer, { Content } from "@smui/drawer";
 	import FractionalCoverageDisplay from "./fractional_coverage_display.svelte";
     import TemporalCoverageDisplay from "./temporal_coverage_display.svelte";
+	import DrawerToggleButton from "../common/drawer_toggle_button.svelte";
 
 	let site_tree:SiteTree|undefined=undefined;
     
@@ -27,7 +28,6 @@
     let coverages:Coverages|undefined=undefined;
     $ : {
         coverages=getCoverages(active_coords,site_tree);
-        console.debug("Coverages:",coverages);
     }
 
 	onMount(() => {
@@ -38,9 +38,7 @@
 					value.json().then(
 						(res:SiteTree)=>{
 							site_tree=res;
-                            console.debug(site_tree);
                             keys=getAllCoords(site_tree);                         
-                            console.debug(keys);
 						}
 					);
 				}
@@ -48,77 +46,86 @@
 		);
 	});
 
+    let open=true;
+
 </script>
 
 {#if site_tree !== undefined}
     <div class="container1">
-        <Drawer>
-            <Content>
-                <div class="button_container">
-                    <Select
-                        label="Site"
-                        bind:value={active_coords.site}
-                        >
-                        {#each keys.sites as o}
-                            <Option value={o}>{o}</Option>
-                        {/each}
-                    </Select>
-                </div>
-                <div class="button_container">
-                    <Select 
-                        label="Subspecialty"
-                        bind:value={active_coords.subspecialty}
-                        >
-                        {#each keys.subspecialties as o}
-                            <Option value={o}>{o}</Option>
-                        {/each}
-                    </Select>
-                </div>
-                <div class="button_container">
-                    <Select
-                        label="Context"
-                        bind:value={active_coords.context}
-                        >
-                        {#each keys.contexts as o}
-                            <Option value={o}>{o}</Option>
-                        {/each}
-                    </Select>
-                </div>
-                <div class="button_container">
-                    <Select
-                        label="Modality"
-                        bind:value={active_coords.modality}
-                        >
-                        {#each keys.modalities as o}
-                            <Option value={o}>{o}</Option>
-                        {/each}
-                    </Select>
-                </div>
-                <div class="button_container">
-                    <Select
-                        label="Day of the week"
-                        key={dowfunc}
-                        bind:value={active_coords.dow}
-                        >
-                        {#each day_indices as di}
-                            <Option value={di}>{dowfunc(di)}</Option>
-                        {/each}
-                    </Select>
-                </div>
-            </Content>
-        </Drawer>
+        <div class="drawer" hidden={!open}>
+            <Drawer>
+                <Content>
+                    <div class="button_container">
+                        <Select
+                            label="Site"
+                            bind:value={active_coords.site}
+                            >
+                            {#each keys.sites as o}
+                                <Option value={o}>{o}</Option>
+                            {/each}
+                        </Select>
+                    </div>
+                    <div class="button_container">
+                        <Select 
+                            label="Subspecialty"
+                            bind:value={active_coords.subspecialty}
+                            >
+                            {#each keys.subspecialties as o}
+                                <Option value={o}>{o}</Option>
+                            {/each}
+                        </Select>
+                    </div>
+                    <div class="button_container">
+                        <Select
+                            label="Context"
+                            bind:value={active_coords.context}
+                            >
+                            {#each keys.contexts as o}
+                                <Option value={o}>{o}</Option>
+                            {/each}
+                        </Select>
+                    </div>
+                    <div class="button_container">
+                        <Select
+                            label="Modality"
+                            bind:value={active_coords.modality}
+                            >
+                            {#each keys.modalities as o}
+                                <Option value={o}>{o}</Option>
+                            {/each}
+                        </Select>
+                    </div>
+                    <div class="button_container">
+                        <Select
+                            label="Day of the week"
+                            key={dowfunc}
+                            bind:value={active_coords.dow}
+                            >
+                            {#each day_indices as di}
+                                <Option value={di}>{dowfunc(di)}</Option>
+                            {/each}
+                        </Select>
+                    </div>
+                </Content>
+            </Drawer>
+        </div>
         <div class="container2">
+            <DrawerToggleButton bind:open={open}/>
             {#if coverages !== undefined}
+            <table class="tablecont">
                 {#if coverages.Temporal !== undefined}
+                    <tr><th>Rotation</th><th>Rotation Day</th><th>Start Time</th><th>End Time</th></tr>
                     {#each coverages.Temporal as temporal_coverage}
-                        <TemporalCoverageDisplay coverage={temporal_coverage}/>
+                        <TemporalCoverageDisplay coverage={temporal_coverage} day={active_coords.dow}/>
                     {/each}
                 {/if}
                 {#if coverages.Fractional !== undefined}
+                    <tr><th>Rotation</th><th>Rotation Day</th><th>Week %</th></tr>
                     {#each coverages.Fractional as fractional_coverage}
                         <FractionalCoverageDisplay coverage={fractional_coverage}/>
                     {/each}
                 {/if}
+            </table>
             {/if}
         </div>
     </div>
@@ -138,5 +145,19 @@
     }
     .container2 {
         margin: 5px;
+        display:flex;
+        flex-direction: column;
+        width:100%;
+    }
+    .tablecont
+    {
+        flex-shrink:1;
+        overflow:scroll;
+        border: 1px solid white;
+		border-collapse: collapse
+    }
+    th{
+		border: 1px solid white;
+		border-collapse: collapse;
     }
 </style>

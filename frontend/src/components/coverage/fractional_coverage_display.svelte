@@ -1,13 +1,19 @@
 <script lang="ts">
+	import { dowfunc } from "../../commons/time";
 	import type { FractionalCoverage } from "./CoverageTree";
 
 	export let coverage:FractionalCoverage;
 </script>
 
-<div>
-    {coverage.rotation}{coverage.rotation_day}{coverage.fraction}
-</div>
+<tr>
+	<td>{coverage.rotation}</td>
+	<td>{dowfunc(coverage.rotation_day)}</td>
+	<td>{coverage.fraction*100 + "%"}</td>
+</tr>
 
 <style>
-
+	td{
+		border: 1px solid white;
+		border-collapse: collapse;
+	}
 </style>

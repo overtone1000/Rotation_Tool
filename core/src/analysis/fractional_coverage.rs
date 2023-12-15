@@ -24,12 +24,63 @@ impl Serialize for SerializeableWeekday
     }
 }
 
+impl PartialOrd for SerializeableWeekday
+{
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.day.num_days_from_sunday().partial_cmp(&other.day.num_days_from_sunday())
+    }
+}
+
+impl Ord for SerializeableWeekday
+{
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        match self.partial_cmp(other)
+        {
+            Some(x) => x,
+            None => std::cmp::Ordering::Equal,
+        }
+    }
+}
+
 #[derive(Debug, PartialEq, Clone, Serialize)]
 pub struct FractionalCoverageUnit {
     rotation: String,
     rotation_day: SerializeableWeekday,
     fraction: f64,
 }
+
+impl PartialOrd for FractionalCoverageUnit
+{
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        match self.rotation_day.partial_cmp(&other.rotation_day) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        match self.rotation.partial_cmp(&other.rotation) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        self.fraction.partial_cmp(&other.fraction)
+    }
+}
+
+impl Eq for FractionalCoverageUnit
+{
+
+}
+
+
+impl Ord for FractionalCoverageUnit
+{
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        match self.partial_cmp(other)
+        {
+            Some(x) => x,
+            None => std::cmp::Ordering::Equal,
+        }
+    }
+}
+
 
 impl FractionalCoverageUnit {
     pub fn create(

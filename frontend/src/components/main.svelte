@@ -1,4 +1,6 @@
 <script lang="ts">
+	import Radio from '@smui/radio';
+  	import FormField from '@smui/form-field';
 	import CoverageDisplay from './coverage/coverage_display.svelte';
 	import ManifestDisplay from './manifest/manifest_display.svelte';
 	
@@ -8,10 +10,20 @@
 		Coverage
 	}	
 
-	let current_display=Display.Coverage;
+	let current_display=Display.Manifest;
 </script>
 
 <div class="vp_fill">
+	<div class="top_menu">
+		<FormField>
+			<Radio bind:group={current_display} value={Display.Manifest} touch />
+			<span slot="label">Rotation Manifest</span>
+		</FormField>
+		<FormField>
+			<Radio bind:group={current_display} value={Display.Coverage} touch />
+			<span slot="label">Coverage Query</span>
+		</FormField>
+	</div>
 	<div class="page">
 		{#if current_display==Display.Manifest}
 			<ManifestDisplay/>
@@ -28,11 +40,13 @@
 		max-width: 100vw;
 		max-height: 100vh;
 		overflow: hidden;
+		display:flex;
+		flex-direction:column;
 	}
 	.page {
-		width: 100%;
-		height: 100%;
 		display: flex;
 		flex-direction: column;
+		flex-grow: 1;
+		min-height: 1px;
 	}
 </style>

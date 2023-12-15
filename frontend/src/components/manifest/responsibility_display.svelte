@@ -6,7 +6,6 @@
     export let dow:number;
 
     const array_or_string_to_string = (array_or_string:string|string[]) => {
-        console.debug(array_or_string,typeof array_or_string == "string")
         if(typeof array_or_string == "string")
         {
             return array_or_string;
@@ -17,7 +16,6 @@
             for(let n=0;n<array_or_string.length;n++)
             {
                 retval += array_or_string[n];
-                console.debug(array_or_string[n]);
                 if(n!=array_or_string.length-1)
                 {
                     retval+=", ";
