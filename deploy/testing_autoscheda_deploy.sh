@@ -13,7 +13,7 @@ else
     echo "Copying static site."
     echo "Trying remove."
     echo $(docker exec $CONTAINER_NAME rm -R /var/www/html/static_content/rotations)
-    docker cp ./frontend/build/ $CONTAINER_NAME:/var/www/html/static_content/rotations/
+    docker cp ./build/ $CONTAINER_NAME:/var/www/html/static_content/rotations/
 fi
 
 docker context use default

@@ -8,7 +8,7 @@
 	$secondary: color.scale(#676778, $whiteness: -10%),
 	$surface: color.adjust(color-palette.$grey-900, $blue: +4),
 	$background: #000,
-	$error: color-palette.$red-700
+	$error: color-palette.$red-700,
 );
 
 // Import all the styles for the classes.
@@ -99,4 +99,8 @@ big {
 b,
 strong {
 	font-weight: bold;
+}
+
+.warning {
+	background:#5e0606;
 }

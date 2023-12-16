@@ -197,11 +197,11 @@
     {
         flex-shrink:1;
         overflow:scroll;
-        border: 1px solid white;
+        border: 1px solid;
 		border-collapse: collapse
     }
     th{
-		border: 1px solid white;
+		border: 1px solid;
 		border-collapse: collapse;
     }
 </style>

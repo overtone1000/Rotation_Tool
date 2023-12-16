@@ -32,24 +32,10 @@
 
 	let open=true;
 
-	const warning_background="#320303";
-	const black_background="black";
-	
 	let display_warning:boolean=false;
-	let background=black_background;
 
 	$ : {
 		display_warning=dow!=today;
-
-		console.debug("Display warning now ",display_warning);
-		if(display_warning)
-		{
-			background=warning_background;
-		}
-		else
-		{
-			background=black_background;
-		}
 	}
 </script>
 
@@ -70,7 +56,7 @@
 				</Content>
 			</Drawer>		
 		</div>
-		<div class="manifest" style="background:{background};">
+		<div class="manifest">
 			<div class="title">
 				<DrawerToggleButton bind:open={open}/>
 				<Text class="title" style="align-self:center; margin-right:20px">{manifest.title}</Text>
@@ -112,8 +98,8 @@
 		display: flex;
 		justify-content: space-between;
 		align-content: center;
-		border-top: 1px solid white;
-		border-bottom: 1px solid white;
+		border-top: 1px solid;
+		border-bottom: 1px solid;
 		padding-left: 5px;
 		flex-shrink: 1;
 	}
@@ -121,21 +107,21 @@
 		flex-shrink: 0;
 		text-align: center;
 	}
+
 	.warning {
 		display: flex;
 		justify-content: center;
 		align-content: center;
 		text-align:left;
-		border-top: 1px solid white;
-		border-bottom: 1px solid white;
+		border-top: 1px solid;
+		border-bottom: 1px solid;
 		padding-left: 5px;
-		background:#5e0606;
-		color:white;
 		flex-grow:1;
 		flex-shrink:1;
 		margin: 1px;
 		padding: 1px;
 	}
+	
 	.manifest {
 		display: flex;
 		flex-direction:column;

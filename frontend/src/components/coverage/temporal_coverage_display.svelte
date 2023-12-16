@@ -17,7 +17,7 @@
 
 <style>
 	td{
-		border: 1px solid white;
+		border: 1px solid;
 		border-collapse: collapse;
 	}
 </style>
