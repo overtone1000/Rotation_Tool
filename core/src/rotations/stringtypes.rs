@@ -8,7 +8,7 @@ use serde::{
 
 
 
-#[derive(Debug, PartialEq, Deserialize)]
+#[derive(Debug, PartialEq, Deserialize, Clone)]
 #[serde(untagged)]
 pub enum StringTypes {
     All(AllType),
@@ -107,6 +107,12 @@ impl Serialize for AllType {
     }
 }
 
+impl Clone for AllType {
+    fn clone(&self) -> Self {
+        Self {}
+    }
+}
+
 struct AllTypeVisitor;
 impl<'de> Visitor<'de> for AllTypeVisitor {
     type Value = AllType;
@@ -137,7 +143,7 @@ impl<'de> Deserialize<'de> for AllType {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct SlashSeparatedStringSet {
     values: HashSet<String>,
 }
@@ -153,6 +159,25 @@ impl SlashSeparatedStringSet {
     }
 }
 
+pub fn cmphashsets(sel:&HashSet<String>, other:&HashSet<String>)->Option<std::cmp::Ordering>
+{
+    match sel.len().partial_cmp(&other.len())
+    {
+        Some(core::cmp::Ordering::Equal) => {}
+        ord => return ord,
+    };
+    for selfval in sel
+    {
+        if !other.contains(selfval)
+        { return Some(core::cmp::Ordering::Greater) }
+    }
+    for otherval in other
+    {
+        if !sel.contains(otherval)
+        { return Some(core::cmp::Ordering::Less) }
+    }
+    Some(core::cmp::Ordering::Equal)
+}
 struct SlashSeparateddStringVisitor;
 impl<'de> Visitor<'de> for SlashSeparateddStringVisitor {
     type Value = SlashSeparatedStringSet;

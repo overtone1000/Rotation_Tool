@@ -15,10 +15,10 @@ use serde::ser::SerializeMap;
 
 use crate::categorization::{get_categories_map, exam_categories};
 use crate::globals::{self, ALL_DAYS};
+use crate::rotations::description::WrappedSortable;
 use crate::rotations::manifest::{Manifest, JSONable};
 use crate::rotations::rotation_error::RotationManifestParseError;
 use crate::rotations::time_modifiers::{NEXT_MIDNIGHT, THIS_MIDNIGHT, TimeSinceMidnight};
-use crate::rotations::timespan::parse_time_span;
 use crate::{
     categorization::{build_salem_bvumap, build_salem_rvumap},
     constraints::ConstraintSet,
@@ -800,7 +800,7 @@ impl CoverageMap {
         let _testcoords = testcoords();
 
         for rotation_description in &manifest.rotation_manifest {
-            match &rotation_description.responsibilities {
+            match &rotation_description.responsibilities.get() {
                 Some(responsibilities) => {
                     for responsibility in responsibilities {
                         for site in responsibility.sites.to_vec(globals::SITES) {
@@ -824,27 +824,29 @@ impl CoverageMap {
                                             Err(_) => return RotationManifestParseError::generate_boxed(0,"".to_string()),
                                         };
 
-                                            if responsibility.time_periods.is_some()
+                                            if responsibility.time_periods.get().is_some()
                                                 && responsibility.weekly_fraction.is_some()
                                             {
                                                 return RotationManifestParseError::generate_boxed(0,"'time_periods' and 'fraction' have both been provided. One and only one must be provided.".to_string());
                                             }
-                                            if responsibility.time_periods.is_none()
+                                            if responsibility.time_periods.get().is_none()
                                                 && responsibility.weekly_fraction.is_none()
                                             {
                                                 return RotationManifestParseError::generate_boxed(0,"Neither 'time_periods' nor 'fraction' provided.".to_string());
                                             }
 
-                                            match &responsibility.time_periods {
+                                            match &responsibility.time_periods.get() {
                                                 Some(time_periods) => {
-                                                    for time_period in time_periods.to_vec(&[]) {
+                                                    for time_period in time_periods {
+                                                        /*
                                                         let timespan =
                                                             parse_time_span(time_period.as_str())
                                                                 .expect(
                                                                 "Erroneous timespan in manifest.",
                                                             );
+                                                        */
                                                         let periods =
-                                                            timespan.instantiate_periods(weekday);
+                                                            time_period.instantiate_periods(weekday);
 
                                                         for (day_offset, start, end) in periods {
                                                             coords.weekday =

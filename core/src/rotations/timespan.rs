@@ -13,10 +13,16 @@ use super::{
     },
 };
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub struct Timespan {
     pub start: RelativeTime,
     pub stop: RelativeTime,
+}
+
+impl Timespan {
+    pub fn from_string(stringrep:&str)->Result<Timespan, RotationManifestParseError>{
+        parse_time_span(stringrep)
+    }
 }
 
 impl Display for Timespan {
@@ -84,7 +90,7 @@ impl Timespan {
     }
 }
 
-pub fn parse_time_span(strval: &str) -> Result<Timespan, RotationManifestParseError> {
+fn parse_time_span(strval: &str) -> Result<Timespan, RotationManifestParseError> {
     let err =
         RotationManifestParseError::generate(0, format!("Malformed relative time {}", strval));
 
@@ -145,3 +151,4 @@ impl<'de> Deserialize<'de> for Timespan {
         deserializer.deserialize_str(TimespanVisitor)
     }
 }
+

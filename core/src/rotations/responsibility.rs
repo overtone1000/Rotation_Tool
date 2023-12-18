@@ -4,9 +4,9 @@ use serde::{Deserialize, Serialize};
 
 use crate::globals;
 
-use super::stringtypes::StringTypes;
+use super::{stringtypes::StringTypes, timespan::Timespan, rotation_error::RotationManifestParseError, description::WrappedSortable};
 
-#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 #[serde(deny_unknown_fields)]
 pub struct RotationResponsibility {
     pub sites: StringTypes,
@@ -15,7 +15,7 @@ pub struct RotationResponsibility {
     pub modalities: StringTypes,
     pub days: StringTypes,
     pub weekly_fraction: Option<f64>,
-    pub time_periods: Option<StringTypes>,
+    pub time_periods: TimePeriods,
 }
 
 impl RotationResponsibility {
@@ -68,6 +68,145 @@ impl RotationResponsibility {
             Err(errors)
         } else {
             Ok(())
+        }
+    }
+}
+
+impl PartialOrd for RotationResponsibility
+{
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+
+        if self.weekly_fraction.is_some() && other.weekly_fraction.is_none()
+        {
+            core::cmp::Ordering::Less
+        }
+        else if self.weekly_fraction.is_none() && other.weekly_fraction.is_some()
+        {
+            core::cmp::Ordering::Greater
+        }
+
+        match self.weekly_fraction.partial_cmp(&other.weekly_fraction) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+
+        self.time_periods.partial_cmp(&other.time_periods) 
+        /*
+        match self.days.partial_cmp(&other.days) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        match self.sites.partial_cmp(&other.sites) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        match self.subspecialties.partial_cmp(&other.subspecialties) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        match self.contexts.partial_cmp(&other.contexts) {
+            Some(core::cmp::Ordering::Equal) => {}
+            ord => return ord,
+        }
+        self.modalities.partial_cmp(&other.modalities)
+        */
+    }
+}
+
+impl Ord for RotationResponsibility{
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.partial_cmp(other).expect("Bad ordering")
+    }
+}
+impl Eq for RotationResponsibility{}
+
+#[derive(Debug, PartialEq, Eq, PartialOrd, Clone)]
+pub struct TimePeriods
+{
+    value: Option<Vec<Timespan>>
+}
+
+impl WrappedSortable<Timespan> for TimePeriods
+{
+    fn get(&self)->&Option<Vec<Timespan>>{
+        &self.value
+    }
+    fn fromval(mut val:Option<Vec<Timespan>>)->TimePeriods{
+        match val
+        {
+            Some(mut x)=>{
+                x.sort();
+                val=Some(x);
+            },
+            None => {();},
+        }
+
+        TimePeriods{
+            value:val
+        }
+    }
+}
+
+impl TimePeriods
+{
+    pub fn from_strings(strings:Vec<&str>)->Result<TimePeriods,RotationManifestParseError>
+    {
+        let mut periods:Vec<Timespan>=Vec::new();
+        for str in strings
+        {
+            periods.push(Timespan::from_string(str)?);
+        }
+        Ok(TimePeriods{
+            value: Some(periods)
+        })
+    }
+
+    pub fn get(&self)->&Option<Vec<Timespan>>{
+        &self.value
+    }
+}
+
+impl <'de> Deserialize<'de> for TimePeriods
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de> {
+        let mut val = Option::<Vec::<Timespan>>::deserialize(deserializer)?;
+        match val
+        {
+            Some(mut x)=>{
+                x.sort();
+                val=Some(x);
+            },
+            None => {();},
+        }
+
+        println!("{:?}",val);
+
+        Ok(TimePeriods{
+            value:val
+        })
+    }
+}
+impl Serialize for TimePeriods
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer {
+        match &self.value
+        {
+            Some(x) => {
+                let mut newvec:Vec<Timespan> = x.clone();
+                newvec.sort();
+                if newvec.len()>1
+                {
+                    println!("{:?}",newvec);
+                }
+                newvec.serialize(serializer)
+            },
+            None => {
+                serializer.serialize_none()
+            },
         }
     }
 }

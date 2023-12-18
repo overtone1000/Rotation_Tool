@@ -89,13 +89,75 @@ impl fmt::Display for TimeSinceMidnight {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Eq, Ord, Clone)]
 pub enum RelativeTime {
     PreviousBusinessDay(TimeSinceMidnight),
     DayAfterPreviousBusinessDay(TimeSinceMidnight),
     PreviousDay(TimeSinceMidnight),
     CurrentDay(TimeSinceMidnight),
     NextDay(TimeSinceMidnight),
+}
+
+impl PartialOrd for RelativeTime
+{
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        let retval = match self
+        {
+            RelativeTime::PreviousBusinessDay(s) => 
+            {
+                match other{
+                    RelativeTime::PreviousBusinessDay(o) => {s.partial_cmp(o)},
+                    RelativeTime::DayAfterPreviousBusinessDay(_) => {Some(std::cmp::Ordering::Less)},
+                    RelativeTime::PreviousDay(_) => {Some(std::cmp::Ordering::Less)},
+                    RelativeTime::CurrentDay(_) => {Some(std::cmp::Ordering::Less)},
+                    RelativeTime::NextDay(_) => {Some(std::cmp::Ordering::Less)}
+                }
+            },
+            RelativeTime::DayAfterPreviousBusinessDay(s) => 
+            {
+                match other{
+                    RelativeTime::PreviousBusinessDay(_) => {Some(std::cmp::Ordering::Greater)},
+                    RelativeTime::DayAfterPreviousBusinessDay(o) => {s.partial_cmp(o)},
+                    RelativeTime::PreviousDay(_) => {None},
+                    RelativeTime::CurrentDay(_) => {Some(std::cmp::Ordering::Less)},
+                    RelativeTime::NextDay(_) => {Some(std::cmp::Ordering::Less)}
+                }
+            },
+            RelativeTime::PreviousDay(s) => 
+            {
+                match other{
+                    RelativeTime::PreviousBusinessDay(_) => {Some(std::cmp::Ordering::Greater)},
+                    RelativeTime::DayAfterPreviousBusinessDay(_) => {None},
+                    RelativeTime::PreviousDay(o)  => {s.partial_cmp(o)},
+                    RelativeTime::CurrentDay(_) => {Some(std::cmp::Ordering::Less)},
+                    RelativeTime::NextDay(_) => {Some(std::cmp::Ordering::Less)}
+                }
+            },
+            RelativeTime::CurrentDay(s) => 
+            {
+                match other{
+                    RelativeTime::PreviousBusinessDay(_) => {Some(std::cmp::Ordering::Greater)},
+                    RelativeTime::DayAfterPreviousBusinessDay(_) => {Some(std::cmp::Ordering::Greater)},
+                    RelativeTime::PreviousDay(_) => {Some(std::cmp::Ordering::Greater)},
+                    RelativeTime::CurrentDay(o)  => {s.partial_cmp(o)},
+                    RelativeTime::NextDay(_) => {Some(std::cmp::Ordering::Less)}
+                }
+            },
+            RelativeTime::NextDay(s) => 
+            {
+                match other{
+                    RelativeTime::PreviousBusinessDay(_) => {Some(std::cmp::Ordering::Greater)},
+                    RelativeTime::DayAfterPreviousBusinessDay(_) => {Some(std::cmp::Ordering::Greater)},
+                    RelativeTime::PreviousDay(_) => {Some(std::cmp::Ordering::Greater)},
+                    RelativeTime::CurrentDay(_) => {Some(std::cmp::Ordering::Greater)},
+                    RelativeTime::NextDay(o)  => {s.partial_cmp(o)},
+                }
+            },
+        };
+
+        println!("Comparison result: {:?}-{:?}: {:?}",self,other,retval);
+        retval
+    }
 }
 
 const DELIMITER: &str = " ";

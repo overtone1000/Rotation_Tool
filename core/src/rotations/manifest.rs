@@ -11,8 +11,8 @@ use std::io::BufWriter;
 use crate::globals::file_names::EXAMPLE_ROTATION_DESCRIPTIONS;
 
 use super::baseline::RotationBaseline;
-use super::description::RotationDescription;
-use super::responsibility::RotationResponsibility;
+use super::description::{RotationDescription, WrappedSortable, Responsibilities};
+use super::responsibility::{RotationResponsibility, TimePeriods};
 use super::special::weekdays;
 use super::stringtypes::StringTypes;
 
@@ -31,7 +31,7 @@ impl Manifest {
 
         let mut noerrs = true;
         for desc in &retval.rotation_manifest {
-            match &desc.responsibilities {
+            match &desc.responsibilities.get() {
                 Some(responsibilities) => {
                     for resp in responsibilities {
                         match resp.validate() {
@@ -66,7 +66,7 @@ impl Manifest {
         example.rotation_manifest.push(RotationDescription {
             rotation: "Rotation A".to_string(),
             location: "Rot A Location".to_string(),
-            responsibilities: Some(vec![
+            responsibilities: Responsibilities::from_vec(vec![
                 RotationResponsibility {
                     sites: StringTypes::new_slash_separated_string_vec("Site 1/Site 2"),
                     subspecialties: StringTypes::new_slash_separated_string_vec(
@@ -76,10 +76,10 @@ impl Manifest {
                     modalities: StringTypes::new_slash_separated_string_vec(
                         "Modality 1/Modality 2",
                     ),
-                    time_periods: Some(StringTypes::Array(HashSet::from([
-                        "17:00 PBD-12:00 CD".to_string(),
-                        "13:00 CD-17:00 CD".to_string(),
-                    ]))),
+                    time_periods: TimePeriods::from_strings(Vec::from([
+                        "17:00 PBD-12:00 CD",
+                        "13:00 CD-17:00 CD",
+                    ])).expect("Should be valid."),
                     weekly_fraction: None,
                     days: StringTypes::new_slash_separated_string_vec(
                         &(weekdays::weekday_to_str(chrono::Weekday::Mon)
@@ -110,10 +110,10 @@ impl Manifest {
                         "Modality A".to_string(),
                         "Modality B".to_string(),
                     ])),
-                    time_periods: Some(StringTypes::Array(HashSet::from([
-                        "17:00 PD-12:00 CD".to_string(),
-                        "13:00 CD-17:00 CD".to_string(),
-                    ]))),
+                    time_periods:  TimePeriods::from_strings(Vec::from([
+                        "17:00 PD-12:00 CD",
+                        "13:00 CD-17:00 CD",
+                    ])).expect("Should be valid."),
                     weekly_fraction: None,
                     days: StringTypes::Array(HashSet::from([
                         weekdays::weekday_to_str(chrono::Weekday::Sat),
