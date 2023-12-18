@@ -78,11 +78,11 @@ impl PartialOrd for RotationResponsibility
 
         if self.weekly_fraction.is_some() && other.weekly_fraction.is_none()
         {
-            core::cmp::Ordering::Less
+            return Some(core::cmp::Ordering::Less);
         }
         else if self.weekly_fraction.is_none() && other.weekly_fraction.is_some()
         {
-            core::cmp::Ordering::Greater
+            return Some(core::cmp::Ordering::Greater);
         }
 
         match self.weekly_fraction.partial_cmp(&other.weekly_fraction) {
