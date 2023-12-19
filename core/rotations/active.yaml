@@ -329,7 +329,8 @@ rotation_manifest:
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 08:00 CD-16:30 CD
+    - 08:00 CD-16:00 CD
+  #Mon only
   - sites: All
     subspecialties: MSK
     contexts: Outpatient
@@ -997,7 +998,7 @@ rotation_manifest:
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 16:30 CD-20:00 CD
+    - 16:00 CD-20:00 CD
   - sites: All
     subspecialties: General
     contexts: ED
