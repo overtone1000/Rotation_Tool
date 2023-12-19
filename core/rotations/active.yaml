@@ -306,10 +306,17 @@ rotation_manifest:
   - sites: All
     subspecialties: MSK
     contexts: Outpatient
-    modalities: All
+    modalities: MR/DEXA/CT
     days: Sun
     time_periods:
     - 15:00 PBD-18:00 PBD+1
+  - sites: All
+    subspecialties: MSK
+    contexts: Outpatient
+    modalities: US
+    days: Sun
+    time_periods:
+    - 17:00 PBD-18:00 PBD+1
   comments:
     - If no MSK radiologist volunteers, this responsibility falls to the Monday MSK radiologist.
 - rotation: MSK
@@ -326,18 +333,32 @@ rotation_manifest:
   - sites: All
     subspecialties: MSK
     contexts: Outpatient
-    modalities: All
+    modalities: MR/DEXA/CT
     days: Mon
     time_periods:
     - 18:00 PBD+1-15:00 CD
+  - sites: All
+    subspecialties: MSK
+    contexts: Outpatient
+    modalities: US
+    days: Mon
+    time_periods:
+    - 18:00 PBD+1-17:00 CD
   # Tues-Fri
   - sites: All
     subspecialties: MSK
     contexts: Outpatient
-    modalities: All
+    modalities: MR/DEXA/CT
     days: Tue/Wed/Thu/Fri
     time_periods:
     - 15:00 PD-15:00 CD
+  - sites: All
+    subspecialties: MSK
+    contexts: Outpatient
+    modalities: US
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 17:00 PD-17:00 CD
   - sites: SRC/TPC
     subspecialties: Mamm (Screening)
     contexts: All

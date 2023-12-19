@@ -155,7 +155,7 @@ impl PartialOrd for RelativeTime
             },
         };
 
-        println!("Comparison result: {:?}-{:?}: {:?}",self,other,retval);
+        //println!("Comparison result: {:?}-{:?}: {:?}",self,other,retval);
         retval
     }
 }

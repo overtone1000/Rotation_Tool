@@ -93,10 +93,6 @@ impl Serialize for Responsibilities
         {
             Some(x) => {
                 let mut newvec=x.clone();
-                if newvec.len()>1
-                {
-                    println!("{:?}",newvec);
-                }
                 newvec.serialize(serializer)
             },
             None => {

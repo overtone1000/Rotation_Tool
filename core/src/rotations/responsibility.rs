@@ -181,8 +181,6 @@ impl <'de> Deserialize<'de> for TimePeriods
             None => {();},
         }
 
-        println!("{:?}",val);
-
         Ok(TimePeriods{
             value:val
         })
@@ -198,10 +196,6 @@ impl Serialize for TimePeriods
             Some(x) => {
                 let mut newvec:Vec<Timespan> = x.clone();
                 newvec.sort();
-                if newvec.len()>1
-                {
-                    println!("{:?}",newvec);
-                }
                 newvec.serialize(serializer)
             },
             None => {
