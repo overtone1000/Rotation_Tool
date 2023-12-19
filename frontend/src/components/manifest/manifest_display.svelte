@@ -2,9 +2,10 @@
 	import Drawer, { AppContent, Content } from '@smui/drawer';
 	import Select, { Option } from '@smui/select';
   	import List, { Item, Text } from '@smui/list';
+	import Button, { Group, Label } from '@smui/button';
 	import type { Rotation, RotationManifest } from "./RotationManifest";
 	import RotationDisplay from './rotation_display.svelte';
-	import { day_indices, dowfunc } from '../../commons/time';
+	import { day_indices, dowfunc, shortdowfunc, shortdowfuncinv } from '../../commons/time';
 	import { onMount } from 'svelte';
 	import DrawerToggleButton from '../common/drawer_toggle_button.svelte';
 	
@@ -29,6 +30,10 @@
 	
 	const today=(new Date()).getDay()
 	let dow = today;
+	let shortdow:string;
+	$:{
+		shortdow = shortdowfunc(dow);
+	}
 
 	let open=true;
 
@@ -36,6 +41,35 @@
 
 	$ : {
 		display_warning=dow!=today;
+	}
+
+	let empty_day:boolean=true;
+	let responsible_days_arr:number[]=[];
+	$:{
+		empty_day=true;
+		let responsible_days = new Set<number>();
+		if(selected_rotation!==undefined)
+		{
+			for(const responsibility of selected_rotation.responsibilities)
+			{
+				for(const day of responsibility.days)
+				{
+					const di=shortdowfuncinv(day);
+					if(di===undefined){console.error("Unexpected short day",day);}
+					else
+					{
+						responsible_days.add(di);
+						if(di === dow)
+						{
+							empty_day=false;
+						}
+					}
+				}
+			}	
+		}
+		responsible_days_arr=[];
+		responsible_days.forEach((v)=>{responsible_days_arr.push(v);})
+		responsible_days_arr.sort();
 	}
 </script>
 
@@ -77,11 +111,33 @@
 				{#if selected_rotation!==undefined}
 					<div class="rotation_label">{selected_rotation.rotation} {dowfunc(dow)}</div>
 					<RotationDisplay rotation={selected_rotation} dow={dow}/>
+					{#if empty_day}
+						<div class="warning warning_empty">
+							<div class="warning_empty_desc">
+								Warning: This rotation has no responsibilities on {shortdow}.
+								Try:
+							</div>
+							<div class="warning_empty_buttons">
+								{#each responsible_days_arr as day}
+									<Button color="primary" variant="raised" style="margin-left:15px;" on:click={()=>{dow=day}}>
+										<Label>{shortdowfunc(day)}</Label>
+									</Button>
+								{/each}
+							</div>
+						</div>
+					{/if}
 				{/if}
 				{#if display_warning}
-					<p class="warning">
-						Warning: Today is {dowfunc(today)}, but {dowfunc(dow)} is selected.
-					</p>
+					<div class="warning warning_empty">
+						<div class="warning_empty_desc">
+							Warning: Today is {dowfunc(today)}, but {dowfunc(dow)} is selected.
+						</div>
+						<div class="warning_empty_buttons">
+							<Button color="primary" variant="raised" on:click={()=>{dow=today}}>
+								<Label>Go To Today</Label>
+							</Button>
+						</div>
+					</div>
 				{/if}
 			</div>
 		</div>
@@ -108,7 +164,22 @@
 		text-align: center;
 	}
 
-	.warning {
+	.warning_empty {
+		display:flex;
+		justify-content: center;
+		flex-direction: column;
+	}
+	.warning_empty_desc {
+		flex-shrink:1;
+		text-align: center;
+	}
+	.warning_empty_buttons {
+		display: flex;
+		flex-direction: row;
+		justify-content:center;
+	}
+
+	.warning_not_today {
 		display: flex;
 		justify-content: center;
 		align-content: center;

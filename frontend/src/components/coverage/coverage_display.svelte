@@ -73,9 +73,12 @@
         return option.exam;
     }
 
-    let examSelected = (selection:ExamCategory) =>
-    {
-        active_coords.subspecialty=selection.subspecialty;
+    let exam_selection:ExamCategory|undefined = undefined;
+    $ : {
+        if(exam_selection !== undefined)
+        {
+            active_coords.subspecialty=exam_selection.subspecialty;
+        }
     }
 </script>
 
@@ -85,7 +88,7 @@
             <Drawer>
                 <Content>
                     <div class="button_container">
-                        <FormField enabled>
+                        <FormField>
                             <span slot="label">Search by exam description.</span>
                             <Switch color="primary" disabled={exam_categories===undefined} bind:checked={search_by_exam_description} />
                         </FormField>
@@ -105,7 +108,7 @@
                             <Autocomplete
                                 options={exam_categories} 
                                 getOptionLabel={getExamLabel}
-                                on:Select={examSelected}
+                                bind:value={exam_selection}
                                 label="Exam Description"
                             />
                         {:else}

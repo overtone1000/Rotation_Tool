@@ -60,6 +60,17 @@ export const shortdowfunc=(di:number)=>{
     return short_days_of_the_week[di];
 }
 
+export const shortdowfuncinv=(str:string)=>{
+    for(const n in short_days_of_the_week)
+    {
+        if(str===short_days_of_the_week[n])
+        {
+            return parseInt(n);
+        }
+    }
+    return undefined;
+}
+
 export const minutes_since_midnight_to_time_string=(msm:MinutesSinceMidnight)=>{
     const hrs = msm.minutes/60;
     const minutes = msm.minutes%60;
