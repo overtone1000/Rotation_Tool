@@ -110,13 +110,13 @@ rotation_manifest:
     time_periods:
     - 15:00 PD-15:00 CD
     #Outpatient general work Mon through current day 3 pm
-  #- sites: SRC
-  #  subspecialties: General
-  #  contexts: Outpatient
-  #  modalities: XR/RF
-  #  days: Mon
-  #  time_periods:
-  #  - 00:00 CD-11:30 CD
+  - sites: SRC
+    subspecialties: General
+    contexts: Outpatient
+    modalities: XR/RF
+    days: Mon
+    time_periods:
+    - 00:00 CD-11:30 CD
   - sites: SRC
     subspecialties: General
     contexts: Wet Read
@@ -360,20 +360,20 @@ rotation_manifest:
     days: Tue/Wed/Thu/Fri
     time_periods:
     - 17:00 PD-17:00 CD
-  # All days
   - sites: SRC/TPC
     subspecialties: Mamm (Screening)
     contexts: All
     modalities: MG
-    days: Mon/Tue/Wed/Thu/Fri
+    days: Tue/Wed/Thu/Fri
     weekly_fraction: 0.1
   - sites: SRC
     subspecialties: General
     contexts: Wet Read
     modalities: CT/US/XR/RF
-    days: Mon/Tue/Wed/Thu/Fri
+    days: Tue/Wed/Thu/Fri
     time_periods:
     - 12:00 PBD-24:00 PBD
+  # All days
   - sites: SRC
     subspecialties: CT Procedure
     contexts: All
@@ -408,38 +408,38 @@ rotation_manifest:
   location: SRC
   responsibilities:
   # Monday
-  #- sites: SRC/TPC
-   # subspecialties: Mamm (Screening)
-   # contexts: All
-   # modalities: All
-   # days: Mon
-   # weekly_fraction: 0.2
-  #- sites: SRC
-  #  subspecialties: General
-  #  contexts: Wet Read
-  #  modalities: All
-  #  days: Mon
-  #  time_periods:
-  #  - 08:00 CD-17:00 CD
+  - sites: SRC/TPC
+    subspecialties: Mamm (Screening)
+    contexts: All
+    modalities: All
+    days: Mon
+    weekly_fraction: 0.2
+  - sites: SRC
+    subspecialties: General
+    contexts: Wet Read
+    modalities: All
+    days: Mon
+    time_periods:
+    - 08:00 CD-17:00 CD
   # Tue-Fri
   - sites: SRC/TPC
     subspecialties: Mamm (Screening)
     contexts: All
     modalities: All
-    days: Mon/Tue/Wed/Thu/Fri
+    days: Tue/Wed/Thu/Fri
     weekly_fraction: 0.1
   - sites: SRC
     subspecialties: General
     contexts: All
     modalities: XR/RF
-    days: Mon/Tue/Wed/Thu/Fri
+    days: Tue/Wed/Thu/Fri
     time_periods:
     - 00:00 CD-15:00 CD
   - sites: SRC
     subspecialties: General
     contexts: Wet Read
     modalities: All
-    days: Mon/Tue/Wed/Thu/Fri
+    days: Tue/Wed/Thu/Fri
     time_periods:
     - 08:00 CD-12:30 CD
   # Mon-Fri
@@ -537,13 +537,13 @@ rotation_manifest:
     time_periods:
     - 19:00 PD-24:00 PD
     # Mon SRC XR
-  #- sites: SRC
-  #  subspecialties: General
-  #  contexts: All
-  #  modalities: XR/RF
-  #  days: Mon
-  #  time_periods:
-  #  - 11:30 CD-15:00 CD
+  - sites: SRC
+    subspecialties: General
+    contexts: All
+    modalities: XR/RF
+    days: Mon
+    time_periods:
+    - 11:30 CD-15:00 CD
     # Every day
   - sites: All
     subspecialties: Complex CTA+MRA

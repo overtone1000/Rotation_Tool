@@ -145,7 +145,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         cache_source()?;
     }
 
-    let rotation_analysis:bool = true;
+    let rotation_analysis:bool = false;
 
     if rotation_analysis{
         analyze_rotations()?;
