@@ -3,51 +3,44 @@
   	import FormField from '@smui/form-field';
 	import CoverageDisplay from './coverage/coverage_display.svelte';
 	import ManifestDisplay from './manifest/manifest_display.svelte';
-	import Switch from '@smui/switch';
+	import IconButton, { Icon } from '@smui/icon-button';
 	import { onMount } from 'svelte';
-	import { browser } from '$app/environment';
-
+	
 	enum Display
 	{
 		Manifest,
 		Coverage
-	}	
+	}
+
+	const light_css = "/smui.css";
+	const dark_css = "/smui-dark.css";
 
 	let current_display=Display.Manifest;
 
-	const STORAGE_KEY = 'theme';
-	const THEMES = {
-		DARK: 'dark',
-		LIGHT: 'light',
-	};
-	const DARK_PREFERENCE = '(prefers-color-scheme: dark)';
-	
-	let mounted:boolean=false;
 	let dark_mode:boolean=false;
-
-	onMount(()=>{
-		console.debug(window);
-		mounted=true;
-		dark_mode=window.matchMedia(DARK_PREFERENCE).matches;
-	});
-
-	$ : {
-		console.debug("Reactive element called.",mounted,dark_mode);
-		if(mounted)
-		{
-			if (dark_mode) {
-				document.body.classList.remove(THEMES.LIGHT);
-				document.body.classList.add(THEMES.DARK);
-			} else {
-				document.body.classList.remove(THEMES.DARK);
-      			document.body.classList.add(THEMES.LIGHT);
-			}
-		}
-	}
-
-	//<Switch color="primary" bind:checked={dark_mode} />
-	
+	$:{console.debug("Darkmode is now",dark_mode);}
 </script>
+
+
+<svelte:head>
+  {#if dark_mode === undefined}
+  <link
+    rel="stylesheet"
+    href={light_css}
+    media="(prefers-color-scheme: light)"
+  />
+  <link
+    rel="stylesheet"
+    href={dark_css}
+    media="screen and (prefers-color-scheme: dark)"
+  />
+  {:else if dark_mode}
+	<link rel="stylesheet" href={light_css} media="print" />
+	<link rel="stylesheet" href={dark_css} media="screen" />
+  {:else}
+  	<link rel="stylesheet" href={light_css} />
+  {/if}
+</svelte:head>
 
 <div class="vp_fill">
 	<div class="top_menu">
@@ -60,6 +53,12 @@
 			<span slot="label">Coverage Query</span>
 		</FormField>
 		<div class="spacer"></div>
+		<div style="display: flex; align-items: center;">
+			<IconButton on:click={() => dark_mode=!dark_mode} toggle pressed={dark_mode}>
+				<Icon class="material-icons" on>light_mode</Icon>
+				<Icon class="material-icons">dark_mode</Icon>
+			</IconButton>
+		</div>
 	</div>
 	<div class="page">
 		{#if current_display==Display.Manifest}
