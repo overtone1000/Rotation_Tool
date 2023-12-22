@@ -1,15 +1,23 @@
 <script lang="ts">
-	import Radio from '@smui/radio';
-  	import FormField from '@smui/form-field';
+	import Menu, { SelectionGroup, SelectionGroupIcon } from '@smui/menu';
+  	import List, { Item, Text } from '@smui/list';
 	import CoverageDisplay from './coverage/coverage_display.svelte';
 	import ManifestDisplay from './manifest/manifest_display.svelte';
 	import IconButton, { Icon } from '@smui/icon-button';
-	import { onMount } from 'svelte';
+
 	
 	enum Display
 	{
 		Manifest,
 		Coverage
+	}
+
+	const display_to_string = (display:Display) => {
+		switch(display)
+		{
+			case Display.Manifest:return "Rotation Descriptions";
+			case Display.Coverage:return "Coverage Query";
+		}
 	}
 
 	const light_css = "/smui.css";
@@ -18,6 +26,7 @@
 	let current_display=Display.Manifest;
 
 	let dark_mode:boolean|undefined=undefined;
+	let menu: Menu;
 </script>
 
 
@@ -43,16 +52,33 @@
 
 <div class="vp_fill">
 	<div class="top_menu">
-		<FormField>
-			<Radio bind:group={current_display} value={Display.Manifest} touch />
-			<span slot="label">Rotation Manifest</span>
-		</FormField>
-		<FormField>
-			<Radio bind:group={current_display} value={Display.Coverage} touch />
-			<span slot="label">Coverage Query</span>
-		</FormField>
+		<div class="top_menu_item">
+			<IconButton on:click={() => menu.setOpen(true)}>
+				<Icon class="material-icons">menu</Icon>
+			</IconButton>
+			<Menu bind:this={menu}>
+				<List>
+					<SelectionGroup>
+						{#each [Display.Manifest, Display.Coverage] as display_option}
+						<Item
+							on:SMUI:action={() => {
+								current_display = display_option;
+								menu.setOpen(false);
+							}}
+							selected={current_display === display_option}
+						>
+							<SelectionGroupIcon>
+							<i class="material-icons">check</i>
+							</SelectionGroupIcon>
+							<Text>{display_to_string(display_option)}</Text>
+						</Item>
+						{/each}
+					</SelectionGroup>
+				</List>
+			</Menu>
+		</div>
 		<div class="spacer"></div>
-		<div style="display: flex; align-items: center;">
+		<div class="top_menu_item">
 			<IconButton on:click={() => dark_mode=!dark_mode} toggle pressed={dark_mode}>
 				<Icon class="material-icons" on>light_mode</Icon>
 				<Icon class="material-icons">dark_mode</Icon>
@@ -82,6 +108,11 @@
 	{
 		display: flex;
 		flex-direction: row;
+	}
+	.top_menu_item
+	{
+		display:flex;
+		align-items:center;
 	}
 	.page {
 		display: flex;
