@@ -17,8 +17,7 @@
 
 	let current_display=Display.Manifest;
 
-	let dark_mode:boolean=false;
-	$:{console.debug("Darkmode is now",dark_mode);}
+	let dark_mode:boolean|undefined=undefined;
 </script>
 
 
