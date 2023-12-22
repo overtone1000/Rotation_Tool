@@ -154,6 +154,7 @@
 		display: flex;
 		justify-content: space-between;
 		align-content: center;
+		align-items: center;
 		border-top: 1px solid;
 		border-bottom: 1px solid;
 		padding-left: 5px;
@@ -179,20 +180,6 @@
 		justify-content:center;
 	}
 
-	.warning_not_today {
-		display: flex;
-		justify-content: center;
-		align-content: center;
-		text-align:left;
-		border-top: 1px solid;
-		border-bottom: 1px solid;
-		padding-left: 5px;
-		flex-grow:1;
-		flex-shrink:1;
-		margin: 1px;
-		padding: 1px;
-	}
-	
 	.manifest {
 		display: flex;
 		flex-direction:column;

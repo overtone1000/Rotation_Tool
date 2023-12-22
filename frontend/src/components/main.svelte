@@ -4,19 +4,28 @@
 	import CoverageDisplay from './coverage/coverage_display.svelte';
 	import ManifestDisplay from './manifest/manifest_display.svelte';
 	import IconButton, { Icon } from '@smui/icon-button';
+	import ManifestEdit from './edit/manifest_edit.svelte';
 
 	
 	enum Display
 	{
 		Manifest,
-		Coverage
+		Coverage,
+		Edit
 	}
+
+	const displays = [
+		Display.Manifest,
+		Display.Coverage,
+		Display.Edit
+	];
 
 	const display_to_string = (display:Display) => {
 		switch(display)
 		{
 			case Display.Manifest:return "Rotation Descriptions";
 			case Display.Coverage:return "Coverage Query";
+			case Display.Edit:return "Editor";
 		}
 	}
 
@@ -59,7 +68,7 @@
 			<Menu bind:this={menu}>
 				<List>
 					<SelectionGroup>
-						{#each [Display.Manifest, Display.Coverage] as display_option}
+						{#each displays as display_option}
 						<Item
 							on:SMUI:action={() => {
 								current_display = display_option;
@@ -90,6 +99,8 @@
 			<ManifestDisplay/>
 		{:else if current_display==Display.Coverage}
 			<CoverageDisplay/>
+		{:else if current_display=Display.Edit}
+			<ManifestEdit/>
 		{/if}
 	</div>
 </div>
