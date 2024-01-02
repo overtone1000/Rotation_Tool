@@ -11,6 +11,7 @@
 	import FormField from "@smui/form-field";
     import Switch from '@smui/switch';
     import Autocomplete from '@smui-extra/autocomplete';
+    import { key } from '../../commons/key';
 
 	let site_tree:SiteTree|undefined=undefined;
     let exam_categories:ExamCategory[]|undefined=undefined;
@@ -36,7 +37,7 @@
     }
 
 	onMount(() => {
-		fetch("active_coverage_tree.json").then(
+		fetch("data/active_coverage_tree"+key+".json").then(
 			(value:Response)=>{
 				if(value.ok)
 				{
@@ -50,7 +51,7 @@
 			}
 		);
 
-        fetch("exam_categories.json").then(
+        fetch("data/exam_categories"+key+".json").then(
 			(value:Response)=>{
 				if(value.ok)
 				{

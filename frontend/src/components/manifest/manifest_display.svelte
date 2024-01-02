@@ -8,11 +8,12 @@
 	import { day_indices, dowfunc, shortdowfunc, shortdowfuncinv } from '../../commons/time';
 	import { onMount } from 'svelte';
 	import DrawerToggleButton from '../common/drawer_toggle_button.svelte';
+	import { key } from '../../commons/key';
 	
 	let manifest:RotationManifest|undefined=undefined;
 	
 	onMount(() => {
-		fetch("active_rotation_manifest.json").then(
+		fetch("data/active_rotation_manifest"+key+".json").then(
 			(value:Response)=>{
 				if(value.ok)
 				{

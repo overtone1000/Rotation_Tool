@@ -4,6 +4,7 @@
 	import type { RotationManifest } from "../manifest/RotationManifest";
 	import Dialog, { Title, Content, Actions } from '@smui/dialog';
   	import Button, { Label } from '@smui/button';
+	  import { key } from '../../commons/key';
 
 	let manifest:RotationManifest|undefined=undefined;
 	
@@ -31,7 +32,7 @@
 	const get_current=()=>{
 		discard_check(()=>{
 				console.debug("Fetching active rotation manifest.");
-				fetch("active_rotation_manifest.json").then(
+				fetch("data/active_rotation_manifest"+key+".json").then(
 					(value:Response)=>{
 						if(value.ok)
 						{

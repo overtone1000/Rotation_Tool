@@ -72,7 +72,7 @@ export const shortdowfuncinv=(str:string)=>{
 }
 
 export const minutes_since_midnight_to_time_string=(msm:MinutesSinceMidnight)=>{
-    const hrs = msm.minutes/60;
+    const hrs = Math.floor(msm.minutes/60);
     const minutes = msm.minutes%60;
     return hrs.toString().padStart(2,"0") + ":" + minutes.toString().padStart(2,"0");
 }
