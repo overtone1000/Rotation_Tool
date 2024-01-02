@@ -69,28 +69,28 @@ rotation_manifest:
     - 00:00 PD-15:00 CD
   - sites: All
     subspecialties: General
-    contexts: Inpatient
+    contexts: ED/Inpatient
     modalities: NM
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 07:30 CD-16:30 CD
+    - 07:30 CD-15:00 CD
   - sites: All
     subspecialties: General
     contexts: ED/Inpatient
     modalities: MR
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 07:30 CD-16:30 CD
+    - 07:30 CD-15:00 CD
   - sites: All
     subspecialties: General
     contexts: ED/Wet Read
-    modalities: CT/US/XR/NM/RF
+    modalities: CT/US/XR/RF
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 11:30 CD-12:00 CD
   comments:
-  - Read up to 8 PETs per day
-  - Read at least 7 body MR per day, but do not leave more than 5 for the next day
+  - Read at least 10 PETs per day. Leave no more than 10 for the next day.
+  - Read at least 7 body MR per day. Leave no more than 5 for the next day.
 - rotation: WVH
   location: WVH
   responsibilities:
@@ -618,7 +618,7 @@ rotation_manifest:
     - 06:00 CD-07:30 CD
   - sites: All
     subspecialties: General
-    contexts: Inpatient
+    contexts: ED/Inpatient
     modalities: NM
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
@@ -655,7 +655,7 @@ rotation_manifest:
   - sites: All
     subspecialties: General
     contexts: ED/Wet Read
-    modalities: CT/US/XR/NM/RF
+    modalities: CT/US/XR/RF
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 06:00 CD-11:30 CD
@@ -680,7 +680,7 @@ rotation_manifest:
   - sites: All
     subspecialties: General
     contexts: ED/Wet Read
-    modalities: CT/US/XR/RF/NM
+    modalities: CT/US/XR/RF
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 14:00 CD-16:00 CD
@@ -756,11 +756,18 @@ rotation_manifest:
     - 16:00 CD-20:00 CD
   - sites: All
     subspecialties: General
+    contexts: ED
+    modalities: MR/NM
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 CD-16:00 CD
+  - sites: All
+    subspecialties: General
     contexts: Inpatient
     modalities: MR/NM
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 16:30 CD-20:00 CD
+    - 15:00 CD-20:00 CD
   comments:
   - If caught up, help EVE
 - rotation: OVN
@@ -1005,7 +1012,7 @@ rotation_manifest:
     modalities: MR
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 16:30 CD-20:00 CD
+    - 16:00 CD-20:00 CD
   - sites: SH
     subspecialties: Mamm (Diag)/Mamm (Procedures)
     contexts: ED/Inpatient
