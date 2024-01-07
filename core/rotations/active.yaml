@@ -361,7 +361,7 @@ rotation_manifest:
     time_periods:
     - 17:00 PD-17:00 CD
   # All days
-  - sites: SRC/TPC
+  - sites: SRC
     subspecialties: Mamm (Screening)
     contexts: All
     modalities: MG
@@ -422,12 +422,18 @@ rotation_manifest:
   #  time_periods:
   #  - 08:00 CD-17:00 CD
   # Tue-Fri
-  - sites: SRC/TPC
+  - sites: SRC
     subspecialties: Mamm (Screening)
     contexts: All
     modalities: All
     days: Mon/Tue/Wed/Thu/Fri
     weekly_fraction: 0.1
+  - sites: TPC
+    subspecialties: Mamm (Screening)
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    weekly_fraction: 0.2
   - sites: SRC
     subspecialties: General
     contexts: All
@@ -598,7 +604,7 @@ rotation_manifest:
   - sites: WVH
     subspecialties: General
     contexts: Inpatient
-    modalities: CT
+    modalities: XR/RF/US/CT
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 06:00 CD-08:00 CD
@@ -619,7 +625,7 @@ rotation_manifest:
   - sites: All
     subspecialties: General
     contexts: ED/Inpatient
-    modalities: NM
+    modalities: NM/MR
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 06:00 CD-07:30 CD
@@ -630,13 +636,6 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 06:00 CD-09:00 CD
-  - sites: WVH
-    subspecialties: General
-    contexts: Inpatient
-    modalities: XR/RF/US
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 06:00 CD-08:00 CD
   - sites: All
     subspecialties: Intraop Fluoro
     contexts: All
@@ -647,12 +646,12 @@ rotation_manifest:
   - sites: SC
     subspecialties: General
     contexts: Wet Read
-    modalities: CT/US/MR
+    modalities: All
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 06:00 CD-09:30 CD
     - 12:00 CD-13:00 CD
-  - sites: All
+  - sites: SH/WVH/WB
     subspecialties: General
     contexts: ED/Wet Read
     modalities: CT/US/XR/RF
@@ -667,13 +666,6 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 06:00 CD-14:00 CD
-  - sites: All
-    subspecialties: General
-    contexts: ED/Inpatient
-    modalities: MR
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 06:00 CD-7:30 CD
 - rotation: Swing
   location: Remote
   responsibilities:
@@ -690,7 +682,14 @@ rotation_manifest:
     modalities: CT
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 14:00 CD-20:00 CD
+    - 14:00 CD-16:00 CD
+  - sites: SH
+    subspecialties: General
+    contexts: Inpatient
+    modalities: NM/MR
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 CD-16:00 CD
   - sites: All
     subspecialties: Intraop Fluoro
     contexts: All
@@ -701,14 +700,21 @@ rotation_manifest:
   - sites: WVH
     subspecialties: General
     contexts: Inpatient
-    modalities: XR/US/CT
+    modalities: XR/US/CT/MR
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 15:00 CD-20:00 CD
+    - 15:00 CD-16:00 CD
+  - sites: All
+    subspecialties: General/Neuro (Brain)/Neuro (Other)/Complex CTA+MRA/MSK
+    contexts: Inpatient
+    modalities: MR/NM/XR/US/CT/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 16:00 CD-20:00 CD
   - sites: SRC
     subspecialties: General
     contexts: Wet Read
-    modalities: CT/US/US
+    modalities: All
     days: Mon
     time_periods:
     - 15:00 CD-20:00 CD
@@ -722,7 +728,7 @@ rotation_manifest:
   - sites: SC
     subspecialties: General
     contexts: Wet Read
-    modalities: CT/US/US
+    modalities: All
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 16:00 CD-20:00 CD
@@ -733,27 +739,6 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 16:00 CD-20:00 CD
-  - sites: SH
-    subspecialties: General
-    contexts: Inpatient
-    modalities: US/XR/RF
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 16:00 CD-20:00 CD
-  - sites: All
-    subspecialties: Neuro (Brain)/Neuro (Other)
-    contexts: Inpatient
-    modalities: CT/MR
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 16:00 CD-20:00 CD
-  - sites: SH/WVH
-    subspecialties: Complex CTA+MRA
-    contexts: Inpatient
-    modalities: CT/MR
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 16:00 CD-20:00 CD
   - sites: All
     subspecialties: General
     contexts: ED
@@ -761,13 +746,6 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 15:00 CD-16:00 CD
-  - sites: All
-    subspecialties: General
-    contexts: Inpatient
-    modalities: MR/NM
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 15:00 CD-20:00 CD
   comments:
   - If caught up, help EVE
 - rotation: OVN
@@ -986,30 +964,9 @@ rotation_manifest:
   responsibilities:
     # Weekdays
   - sites: All
-    subspecialties: General
-    contexts: ED
-    modalities: CT/NM
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 16:00 CD-20:00 CD
-  - sites: All
-    subspecialties: Neuro (Brain)/Neuro (Other)/Complex CTA+MRA
+    subspecialties: General/Neuro (Brain)/Neuro (Other)/Complex CTA+MRA/MSK
     contexts: ED
     modalities: CT/NM/MR/DEXA
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 16:00 CD-20:00 CD
-  - sites: All
-    subspecialties: MSK
-    contexts: ED/Inpatient
-    modalities: All
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 16:00 CD-20:00 CD
-  - sites: All
-    subspecialties: General
-    contexts: ED
-    modalities: MR
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 16:00 CD-20:00 CD
