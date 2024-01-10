@@ -5,10 +5,15 @@ export interface RotationManifest
     baslines:[Baseline]
 }
 
+export interface WorkHoursPeriod
+{hours:TimePeriod,days:[]}
+
 export interface Rotation
 {
     rotation:string,
     location:string,
+    hours?:[WorkHoursPeriod],
+    breaktime?:[TimePeriod,string]
     responsibilities:[Responsibility],
     comments:string[]
 }

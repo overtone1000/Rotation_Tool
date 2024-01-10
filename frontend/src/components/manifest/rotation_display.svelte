@@ -16,29 +16,38 @@
 	}
 </script>
 
-<table class="table">
-	<tr>
-		<th>Site</th>
-		<th>Subspecialty</th>
-		<th>Context</th>
-		<th>Modality</th>
-		<th>Portions</th>
-	</tr>
-	{#key dow}
-		{#key rotation.responsibilities}
-			{#if rotation.responsibilities!==undefined && rotation.responsibilities!==null}
-				{#each rotation.responsibilities as responsibility}
-					{#if should_display(responsibility)}
-						<ResponsibilityDisplay
-							responsibility={responsibility}
-							dow={dow}
-						/>
-					{/if}
-				{/each}
-			{/if}
+<div class="container">
+	{#if rotation.hours}
+
+	{/if}
+	{#if rotation.breaktime}
+
+	{/if}
+	<table class="table">
+		<tr>
+			<th>Site</th>
+			<th>Subspecialty</th>
+			<th>Context</th>
+			<th>Modality</th>
+			<th>Portions</th>
+		</tr>
+		{#key dow}
+			{#key rotation.responsibilities}
+				{#if rotation.responsibilities!==undefined && rotation.responsibilities!==null}
+					{#each rotation.responsibilities as responsibility}
+						{#if should_display(responsibility)}
+							<ResponsibilityDisplay
+								responsibility={responsibility}
+								dow={dow}
+							/>
+						{/if}
+					{/each}
+				{/if}
+			{/key}
 		{/key}
-	{/key}
-</table>
+	</table>
+</div>
+
 {#if rotation.comments !== undefined && rotation.comments !== null}
 	<ul>
 		{#each rotation.comments as comment}
@@ -48,6 +57,15 @@
 {/if}
 
 <style>
+	.container {
+		display: flex;
+		flex-direction:column;
+		height:100%;
+		width:100%;
+		flex-grow:1;
+		flex-shrink:1;
+		overflow:auto;
+	}
 	table, th {
 		border: 1px solid;
 		border-collapse: collapse;

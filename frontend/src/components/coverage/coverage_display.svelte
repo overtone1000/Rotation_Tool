@@ -200,7 +200,7 @@
     .tablecont
     {
         flex-shrink:1;
-        overflow:scroll;
+        overflow:auto;
         border: 1px solid;
 		border-collapse: collapse
     }
