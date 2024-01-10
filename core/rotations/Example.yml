@@ -1,12 +1,39 @@
 title: Rotation Description Example
 rotation_manifest:
 - rotation: Rotation A
+  location: Rot A Location
+  hours:
+  - hours: 08:00 CD-17:00 CD
+    days:
+    - Fri
+    - Mon
+    - Sun
+    - Thu
+    - Tue
+    - Wed
+  breaktime:
+  - 12:00 CD-13:00 CD
+  - Covered by Rotation C
   responsibilities:
-  - sites: Site 1/Site 2
-    subspecialties: Subspecialty 1/Subspecialty 2
-    contexts: Context 1/Context 2
-    modalities: Modality 1/Modality 2
-    days: Mon/Tue/Wed/Thu/Fri
+  - sites:
+    - Site 1
+    - Site 2
+    subspecialties:
+    - Subspecialty 1
+    - Subspecialty 2
+    contexts:
+    - Context 1
+    - Context 2
+    modalities:
+    - Modality 1
+    - Modality 2
+    days:
+    - Fri
+    - Mon
+    - Thu
+    - Tue
+    - Wed
+    weekly_fraction: null
     time_periods:
     - 17:00 PBD-12:00 CD
     - 13:00 CD-17:00 CD
@@ -25,10 +52,15 @@ rotation_manifest:
     days:
     - Sat
     - Sun
+    weekly_fraction: null
     time_periods:
     - 17:00 PD-12:00 CD
     - 13:00 CD-17:00 CD
+  comments:
+  - Comments can go here.
+  - Comments are an array.
+  - But this section can be omitted entirely.
 baselines:
 - rotation: Rotation A
-  RVU: 71.2
-  BVU: 2100.2
+  rvu: 71.2
+  bvu: 2100.2

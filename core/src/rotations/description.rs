@@ -2,13 +2,30 @@ use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
 
-use super::{responsibility::RotationResponsibility, rotation_error::RotationManifestParseError};
+use super::{responsibility::{RotationResponsibility}, rotation_error::RotationManifestParseError, timespan::Timespan, stringtypes::StringTypes, time_modifiers::RelativeTime};
+
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+pub struct RotationHours {
+    hours:Timespan,
+    days:StringTypes
+}
+
+impl RotationHours {
+    pub fn new(start:RelativeTime,stop:RelativeTime,days:StringTypes)->RotationHours{
+        RotationHours{
+            hours:Timespan { start: start, stop: stop },
+            days:days
+        }
+    }
+}
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct RotationDescription {
     pub(crate) rotation: String,
     pub(crate) location: String,
+    pub(crate) hours: Option<Vec<RotationHours>>,
+    pub(crate) breaktime: Option<(Timespan,Option<String>)>,
     pub(crate) responsibilities: Responsibilities,
     pub(crate) comments: Option<HashSet<String>>,
 }

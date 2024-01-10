@@ -11,10 +11,12 @@ use std::io::BufWriter;
 use crate::globals::file_names::EXAMPLE_ROTATION_DESCRIPTIONS;
 
 use super::baseline::RotationBaseline;
-use super::description::{RotationDescription, WrappedSortable, Responsibilities};
+use super::description::{RotationDescription, WrappedSortable, Responsibilities, RotationHours};
 use super::responsibility::{RotationResponsibility, TimePeriods};
 use super::special::weekdays;
 use super::stringtypes::StringTypes;
+use super::time_modifiers::{RelativeTime, TimeSinceMidnight};
+use super::timespan::Timespan;
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -126,6 +128,19 @@ impl Manifest {
                 "Comments are an array.".to_string(),
                 "But this section can be omitted entirely.".to_string(),
             ])),
+            hours: Some(Vec::from([RotationHours::new(
+                RelativeTime::CurrentDay(TimeSinceMidnight::new(8*60)),
+                RelativeTime::CurrentDay(TimeSinceMidnight::new(17*60)),
+                StringTypes::new_slash_separated_string_vec("Sun/Mon/Tue/Wed/Thu/Fri")
+            )])),
+            breaktime: Some((
+                Timespan{
+                    start:RelativeTime::CurrentDay(TimeSinceMidnight::new(12*60)),
+                    stop:RelativeTime::CurrentDay(TimeSinceMidnight::new(13*60))
+                }
+                ,
+                Some("Covered by Rotation C".to_string())
+            )),
         });
 
         let baselines = vec![RotationBaseline {

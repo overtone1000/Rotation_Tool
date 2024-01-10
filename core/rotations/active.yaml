@@ -2,6 +2,12 @@ title: Rotations v.2023-01-05
 rotation_manifest:
 - rotation: SC-Main
   location: SC-Main
+  hours: 
+  - hours: 07:30 CD-16:30 CD
+    days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
+  breaktime:
+    - 12:00 CD-13:00 CD
+    - "Urgent reads covered by MED"
   responsibilities:
   - sites: SC
     subspecialties: Mamm (Screening)
@@ -32,6 +38,12 @@ rotation_manifest:
     - 07:30 CD-16:30 CD
 - rotation: NM
   location: SH
+  hours:
+  - hours: 07:30 CD-16:30 CD
+    days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
+  breaktime:
+    - 12:00 CD-12:30 CD
+    - "Urgent reads covered by MED"
   responsibilities:
   - sites: All
     subspecialties: General
@@ -86,6 +98,12 @@ rotation_manifest:
   - Read at least 7 body MR per day. Leave no more than 5 for the next day.
 - rotation: WVH
   location: WVH
+  hours:
+  - hours: 08:00 CD-15:30 CD
+    days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
+  breaktime:
+    - 12:00 CD-12:30 CD
+    - "Urgent reads covered by MED"
   responsibilities:
     #Outpatient general work Tue-Fri from previous day 3 pm through current day 3 pm
   - sites: WVH
@@ -195,6 +213,12 @@ rotation_manifest:
     - 12:30 CD-15:00 CD
 - rotation: BR/US
   location: SH
+  hours: 
+  - hours: 07:15 CD-16:00 CD
+    days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
+  breaktime:
+    - 12:00 CD-12:30 CD
+    -
   responsibilities:
   - sites: SH/WB
     subspecialties: Mamm (Screening)
@@ -248,6 +272,12 @@ rotation_manifest:
     - First rad called in case of IV contrast reaction at SH
 - rotation: Neuro 1
   location: SC
+  hours: 
+  - hours: 07:30 CD-16:30 CD
+    days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
+  breaktime:
+    - 12:00 CD-13:00 CD
+    - "Urgent reads covered by MED"
   #Monday
   responsibilities:
   - sites: All
@@ -291,6 +321,8 @@ rotation_manifest:
     days: Mon
     time_periods:
     - 15:00 PBD-09:00 PD
+  comments:
+    - Work to be completed by 17:00
 - rotation: MSK Weekend AH0C
   location: Remote
   responsibilities:
@@ -311,8 +343,15 @@ rotation_manifest:
     - 17:00 PBD-18:00 PBD+1
   comments:
     - If no MSK radiologist volunteers, this responsibility falls to the Monday MSK radiologist.
+    - Work to be completed by 17:00.
 - rotation: MSK
   location: SRC
+  hours: 
+  - hours: 08:00 CD-17:00 CD
+    days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
+  breaktime:
+    - 11:30 CD-12:30 CD
+    - "Urgent reads covered by SRC"
   responsibilities:
   # Every day
   - sites: All
@@ -398,6 +437,12 @@ rotation_manifest:
     - Cover wet reads for SRC when in procedures
 - rotation: SRC
   location: SRC
+  hours: 
+  - hours: 08:00 CD-17:00 CD
+    days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
+  breaktime:
+    - 12:30 CD-13:30 CD
+    - "Urgent reads and diagnostic mamms covered by MSK"
   responsibilities:
   # Monday
   #- sites: SRC/TPC
@@ -465,6 +510,9 @@ rotation_manifest:
     - 08:00 CD-12:30 CD
 - rotation: IR1
   location: SH
+  hours: 
+  - hours: 07:30 CD-16:30 CD
+    days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
   responsibilities:
   - sites: SH
     subspecialties: Angio
@@ -503,6 +551,12 @@ rotation_manifest:
     - 15:00 PBD-15:00 CD
 - rotation: IR2
   location: SH and SRC
+  hours:
+  - hours: 07:30 CD-16:30 CD
+    days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
+  breaktime:
+    - 12:00 CD-13:00 CD
+    -
   responsibilities:
   # Mon prior day work
   - sites: All
@@ -578,6 +632,12 @@ rotation_manifest:
     - IR Clinic
 - rotation: MED
   location: Remote
+  hours: 
+  - hours: 06:00 CD-14:00 CD
+    days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
+  breaktime:
+    - 11:30 CD-12:00 CD
+    - "Responsibilities covered by NM"
   responsibilities:
   - sites: SH
     subspecialties: Mamm (Diag)
@@ -660,6 +720,9 @@ rotation_manifest:
     - 06:00 CD-14:00 CD
 - rotation: Swing
   location: Remote
+  hours: 
+  - hours: 14:00 CD-20:00 CD
+    days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
   responsibilities:
   - sites: All
     subspecialties: General
@@ -724,10 +787,22 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 16:00 CD-20:00 CD
+  - sites: WVH
+    subspecialties: Mamm (Diag)
+    contexts: ED/Inpatient
+    modalities: MG/US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 CD-16:00 CD
   comments:
   - If caught up, help EVE
 - rotation: OVN
   location: Remote
+  hours:
+  - hours: 22:00 CD-06:00 ND
+    days: Sun/Mon/Tue/Wed/Thu
+  - hours: 22:00 CD-07:00 ND
+    days: Fri/Sat
   responsibilities:
   - sites: All
     subspecialties: General/Complex CTA+MRA/MSK/Neuro (Brain)/Neuro (Other)/Mamm (Diag)
@@ -777,7 +852,8 @@ rotation_manifest:
     time_periods:
     - 15:00 PBD-18:00 PBD
   comments:
-  - Contrast coverage 
+  - Contrast coverage at SRC on Saturday
+  - Finish by 17:00 on Monday
 - rotation: OP2
   location: Remote
   responsibilities:
@@ -795,8 +871,16 @@ rotation_manifest:
     days: Sun
     time_periods:
     - 18:00 PBD-24:00 PBD+1
+  comments:
+    - Finish by 17:00 on Monday
 - rotation: TPC
   location: Remote
+  hours: 
+    - hours: 07:30 CD-15:00 CD
+      days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
+  breaktime:
+    - 12:00 CD-13:00 CD
+    - "Urgent reads covered by MED"
   responsibilities:
   - sites: TPC
     subspecialties: General
@@ -827,10 +911,12 @@ rotation_manifest:
     time_periods:
     - 11:00 CD-15:00 CD
   comments:
-  - Complete work by 17:00
   - Turnaround times must be <24 hrs
 - rotation: Call 1
   location: SH
+  hours: 
+  - hours: 11:00 CD-19:00 CD
+    days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
   responsibilities:
   - sites: All
     subspecialties: General/MSK/Neuro (Brain)/Neuro (Other)/Complex CTA+MRA
@@ -869,6 +955,9 @@ rotation_manifest:
     - 18:00 CD-19:00 CD
 - rotation: Call 2
   location: SH
+  hours: 
+    - hours: 07:00 CD-11:00 CD
+      days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
   responsibilities:
   # Cover PA before they arrive
   - sites: All
@@ -917,6 +1006,11 @@ rotation_manifest:
     - 07:00 CD-07:30 ND
 - rotation: EVE
   location: SH
+  hours:
+  - hours: 16:00 CD-22:00 CD
+    days: Mon/Tue/Wed/Thu/Fri
+  - hours: 15:30 CD-22:00 CD
+    days: Sat/Sun
   responsibilities:
     # Weekdays
   - sites: All
@@ -946,7 +1040,7 @@ rotation_manifest:
     modalities: MG/US
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 15:00 CD-22:00 CD
+    - 16:00 CD-22:00 CD
   - sites: WVH
     subspecialties: Mamm (Diag)
     contexts: ED/Inpatient
@@ -1035,6 +1129,9 @@ rotation_manifest:
     - 19:00 CD-07:30 ND
 - rotation: PA-US
   location: SH
+  hours:
+  - hours: 09:00 CD-19:00 CD
+    days: Mon/Tue/Wed/Thu/Fri/Sat/Sun
   responsibilities:
   - sites: SH
     subspecialties: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)
@@ -1056,6 +1153,9 @@ rotation_manifest:
   - Enter preprocedural orders for next day CT and US patients
 - rotation: PA-GI
   location: SH
+  hours:
+  - hours: 07:30 CD-17:30 CD
+    days: Mon/Tue/Wed/Thu/Fri/Sat/Sun
   responsibilities:
   - sites: SH
     subspecialties: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)
@@ -1077,6 +1177,9 @@ rotation_manifest:
   - Review GI imaging with IR2
 - rotation: PA-IR
   location: SH
+  hours:
+  - hours: 07:00 CD-17:00 CD
+    days: Mon/Tue/Wed/Thu/Fri/Sat/Sun
   comments:
   - Supervised by IR1
   - Carry IR phone and take consults
@@ -1086,6 +1189,9 @@ rotation_manifest:
   - Assist PA-GI and PA-US if available
 - rotation: PA Clinic
   location: SC Union SH SRC
+  hours:
+  - hours: 08:00 CD-16:30 CD
+    days: Mon/Tue/Wed/Thu/Fri/Sat/Sun
   responsibilities:
   - sites: SC
     subspecialties: Fluoro (General)/Fluoro Procedure (MSK)
@@ -1111,6 +1217,9 @@ rotation_manifest:
   - Staff clinic and contrast administration until 6 PM
 - rotation: PA-Weekend
   location: SH
+  hours:
+  - hours: 08:00 CD-18:00 CD
+    days: Mon/Tue/Wed/Thu/Fri/Sat/Sun
   responsibilities:
   - sites: SH
     subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)

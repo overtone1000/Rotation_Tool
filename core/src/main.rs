@@ -14,7 +14,7 @@ use processed_source::ProcessedSource;
 
 use crate::{
     analysis::coverage_tree::CoverageMap,
-    globals::file_names::{COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE}, rotations::manifest::JSONable,
+    globals::file_names::{COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE}, rotations::manifest::{JSONable, self, Manifest},
 };
 
 mod analysis;
@@ -138,6 +138,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         println!();
     }
     println!("Starting.");
+
+    Manifest::create_example()?;
 
     let rebuild_source: bool = false;
 

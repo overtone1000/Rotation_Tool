@@ -6,6 +6,42 @@ use crate::globals;
 
 use super::{stringtypes::StringTypes, timespan::Timespan, rotation_error::RotationManifestParseError, description::WrappedSortable};
 
+pub fn check(t: &StringTypes, poss: &[&str], desc: &str, errors:&mut Vec<String>){
+    match t.validate(poss) {
+        Err(e) => {
+            for i in e {
+                errors.push(format!(
+                    "Invalid {} {}. Valid values are {:?}",
+                    desc, i, poss
+                ));
+            }
+        }
+        _ => (),
+    };
+}
+
+pub fn validate_days(days_to_check:&StringTypes, errors:&mut Vec<String>) -> () {
+    let mon = chrono::Weekday::Mon.to_string();
+    let tue = chrono::Weekday::Tue.to_string();
+    let wed = chrono::Weekday::Wed.to_string();
+    let thu = chrono::Weekday::Thu.to_string();
+    let fri = chrono::Weekday::Fri.to_string();
+    let sat = chrono::Weekday::Sat.to_string();
+    let sun = chrono::Weekday::Sun.to_string();
+
+    let days = &[
+        mon.as_str(),
+        tue.as_str(),
+        wed.as_str(),
+        thu.as_str(),
+        fri.as_str(),
+        sat.as_str(),
+        sun.as_str(),
+    ];
+
+    check(days_to_check, days, "weekday", errors);
+}
+
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 #[serde(deny_unknown_fields)]
 pub struct RotationResponsibility {
@@ -20,49 +56,18 @@ pub struct RotationResponsibility {
 
 impl RotationResponsibility {
     pub fn validate(&self) -> Result<(), Vec<String>> {
-        let mon = chrono::Weekday::Mon.to_string();
-        let tue = chrono::Weekday::Tue.to_string();
-        let wed = chrono::Weekday::Wed.to_string();
-        let thu = chrono::Weekday::Thu.to_string();
-        let fri = chrono::Weekday::Fri.to_string();
-        let sat = chrono::Weekday::Sat.to_string();
-        let sun = chrono::Weekday::Sun.to_string();
-
-        let days = &[
-            mon.as_str(),
-            tue.as_str(),
-            wed.as_str(),
-            thu.as_str(),
-            fri.as_str(),
-            sat.as_str(),
-            sun.as_str(),
-        ];
-
         let mut errors: Vec<String> = Vec::new();
 
-        let mut check = |t: &StringTypes, poss: &[&str], desc: &str| {
-            match t.validate(poss) {
-                Err(e) => {
-                    for i in e {
-                        errors.push(format!(
-                            "Invalid {} {}. Valid values are {:?}",
-                            desc, i, poss
-                        ));
-                    }
-                }
-                _ => (),
-            };
-        };
-
-        check(&self.sites, globals::SITES, "site");
+        check(&self.sites, globals::SITES, "site", &mut errors);
         check(
             &self.subspecialties,
             globals::SUBSPECIALTIES,
             "subspecialty",
+            &mut errors
         );
-        check(&self.contexts, globals::CONTEXTS, "context");
-        check(&self.modalities, globals::MODALITIES, "modality");
-        check(&self.days, days, "weekday");
+        check(&self.contexts, globals::CONTEXTS, "context", &mut errors);
+        check(&self.modalities, globals::MODALITIES, "modality", &mut errors);
+        validate_days(&self.days, &mut errors);
 
         if !errors.is_empty() {
             Err(errors)
