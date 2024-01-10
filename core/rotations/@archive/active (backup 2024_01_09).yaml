@@ -1,0 +1,1304 @@
+title: Rotations v.2023-01-05
+rotation_manifest:
+- rotation: SC-Main
+  location: SC-Main
+  responsibilities:
+  - sites: SC
+    subspecialties: Mamm (Screening)
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    weekly_fraction: 0.2
+  - sites: SC
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PBD-15:00 CD
+  - sites: SC
+    subspecialties: General
+    contexts: All
+    modalities: CT/US/XR/CVUS/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-15:00 CD
+  - sites: SC
+    subspecialties: US Procedure (General)
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 07:30 CD-16:30 CD
+- rotation: NM
+  location: SH
+  responsibilities:
+  - sites: All
+    subspecialties: General
+    contexts: Outpatient/Inpatient
+    modalities: PET
+    days: Mon/Tue/Wed/Thu/Fri
+    weekly_fraction: 0.2
+  - sites: All
+    subspecialties: General
+    contexts: Outpatient
+    modalities: NM
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PBD-15:00 CD
+  - sites: SH
+    subspecialties: General
+    contexts: Outpatient
+    modalities: CT
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-11:00 CD
+  - sites: All
+    subspecialties: General
+    contexts: Outpatient
+    modalities: MR
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-15:00 CD
+  - sites: All
+    subspecialties: General
+    contexts: Outpatient
+    modalities: MR
+    days: Mon
+    time_periods:
+    - 00:00 PD-15:00 CD
+  - sites: All
+    subspecialties: General
+    contexts: ED/Inpatient
+    modalities: NM/MR
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 07:30 CD-16:00 CD
+  - sites: All
+    subspecialties: General
+    contexts: ED/Wet Read
+    modalities: CT/US/XR/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 11:30 CD-12:00 CD
+  comments:
+  - Read at least 10 PETs per day. Leave no more than 10 for the next day.
+  - Read at least 7 body MR per day. Leave no more than 5 for the next day.
+- rotation: WVH
+  location: WVH
+  responsibilities:
+    #Outpatient general work Tue-Fri from previous day 3 pm through current day 3 pm
+  - sites: WVH
+    subspecialties: General
+    contexts: Outpatient
+    modalities: XR/CT/US/RF
+    days: Mon
+    time_periods:
+    - 00:00 CD-15:00 CD
+  - sites: WVH
+    subspecialties: General
+    contexts: Outpatient
+    modalities: XR/CT/US/RF
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-15:00 CD
+    #Outpatient general work Mon through current day 3 pm
+  #- sites: SRC
+  #  subspecialties: General
+  #  contexts: Outpatient
+  #  modalities: XR/RF
+  #  days: Mon
+  #  time_periods:
+  #  - 00:00 CD-11:30 CD
+  - sites: SRC
+    subspecialties: General
+    contexts: Wet Read
+    modalities: CT/US/XR/RF
+    days: Mon
+    time_periods:
+    - 12:30 CD-15:00 CD
+    #Inpatient work
+  - sites: WVH
+    subspecialties: General
+    contexts: Inpatient
+    modalities: XR/CT/US/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 08:00 CD-15:00 CD
+  #Mamms
+  - sites: WVH
+    subspecialties: Mamm (Screening)
+    contexts: All
+    modalities: MG
+    days: Mon/Tue/Wed/Thu/Fri
+    weekly_fraction: 0.2
+  - sites: WVH
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
+    contexts: All
+    modalities: MG/US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 08:00 CD-15:00 CD
+    #US Procedures and Fluoro
+  - sites: WVH
+    subspecialties: US Procedure (General)/Fluoro (General)
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 08:00 CD-17:00 CD
+    #SRC CT from prior day Tues-Fri
+  - sites: SRC
+    subspecialties: General
+    contexts: Outpatient
+    modalities: CT
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PBD-00:00 CD
+    #Prior day SH/WB outpatient
+  - sites: SH/WB
+    subspecialties: General
+    contexts: Outpatient
+    modalities: XR/RF/US/CT
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-19:00 PD
+    #Monday only CT/XR/US from all sites on Sunday until 1pm
+  - sites: All
+    subspecialties: General
+    contexts: Outpatient
+    modalities: CT/US/RF
+    days: Mon
+    time_periods:
+    - 00:00 PD-13:00 PD
+  - sites: SH/WB/SC/SRC/TPC
+    subspecialties: General
+    contexts: Outpatient
+    modalities: XR
+    days: Mon
+    time_periods:
+    - 00:00 PD-13:00 PD
+  - sites: WVH
+    subspecialties: General
+    contexts: Outpatient
+    modalities: XR
+    days: Mon
+    time_periods:
+    - 00:00 PD-07:00 PD
+    - 11:00 PD-13:00 PD
+    #Monday only SRC work
+  - sites: SRC
+    subspecialties: General
+    contexts: Wet Read
+    modalities: XR/CT/US/RF
+    days: Mon
+    time_periods:
+    - 12:30 CD-15:00 CD
+- rotation: BR/US
+  location: SH
+  responsibilities:
+  - sites: SH/WB
+    subspecialties: Mamm (Screening)
+    contexts: All
+    modalities: MG
+    days: Mon/Tue/Wed/Thu/Fri
+    weekly_fraction: 0.2
+  - sites: SH
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
+    contexts: Outpatient
+    modalities: MG/US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 07:15 CD-15:30 CD
+  - sites: SH
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
+    contexts: Inpatient/ED
+    modalities: MG/US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 07:15 CD-16:00 CD
+  - sites: WB
+    subspecialties: Mamm (Diag)
+    contexts: Outpatient
+    modalities: US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 07:15 CD-15:30 CD
+  - sites: SH/WB
+    subspecialties: General
+    contexts: Outpatient
+    modalities: XR/RF/US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-15:00 CD
+  - sites: SH
+    subspecialties: General
+    contexts: Inpatient
+    modalities: XR/RF/US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 09:00 CD-16:00 CD
+  - sites: All
+    subspecialties: Intraop Fluoro
+    contexts: All
+    modalities: XR/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 09:00 CD-16:00 CD
+  comments:
+    - First rad called in case of IV contrast reaction at SH
+- rotation: Neuro 1
+  location: SC
+  #Monday
+  responsibilities:
+  - sites: All
+    subspecialties: Neuro (Other)/Neuro (Brain)
+    contexts: Outpatient
+    modalities: CT/MR
+    days: Mon
+    time_periods:
+    - 09:00 PD-15:00 CD
+  #Tue-Fri
+  - sites: All
+    subspecialties: Neuro (Other)/Neuro (Brain)
+    contexts: Outpatient
+    modalities: CT/MR
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-15:00 CD
+  #Every day
+  - sites: All
+    subspecialties: Neuro (Other)/Neuro (Brain)
+    contexts: Inpatient/ED
+    modalities: CT/MR
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 07:30 CD-16:00 CD
+  - sites: SC
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)
+    contexts: All
+    modalities: XR/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 07:30 CD-08:00 CD
+    - 12:30 CD-16:30 CD
+- rotation: Neuro 2
+  location: Remote
+  responsibilities:
+  - sites: All
+    subspecialties: Neuro (Other)/Neuro (Brain)
+    contexts: Outpatient
+    modalities: CT/MR
+    days: Mon
+    time_periods:
+    - 15:00 PBD-09:00 PD
+- rotation: MSK Weekend AH0C
+  location: Remote
+  responsibilities:
+    # Monday
+  - sites: All
+    subspecialties: MSK
+    contexts: Outpatient
+    modalities: MR/DEXA/CT
+    days: Sun
+    time_periods:
+    - 15:00 PBD-18:00 PBD+1
+  - sites: All
+    subspecialties: MSK
+    contexts: Outpatient
+    modalities: US
+    days: Sun
+    time_periods:
+    - 17:00 PBD-18:00 PBD+1
+  comments:
+    - If no MSK radiologist volunteers, this responsibility falls to the Monday MSK radiologist.
+- rotation: MSK
+  location: SRC
+  responsibilities:
+  # Every day
+  - sites: All
+    subspecialties: MSK
+    contexts: ED/Inpatient
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 08:00 CD-16:00 CD
+  #Mon only
+  - sites: All
+    subspecialties: MSK
+    contexts: Outpatient
+    modalities: MR/DEXA/CT
+    days: Mon
+    time_periods:
+    - 18:00 PBD+1-15:00 CD
+  - sites: All
+    subspecialties: MSK
+    contexts: Outpatient
+    modalities: US
+    days: Mon
+    time_periods:
+    - 18:00 PBD+1-17:00 CD
+  # Tues-Fri
+  - sites: All
+    subspecialties: MSK
+    contexts: Outpatient
+    modalities: MR/DEXA/CT
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-15:00 CD
+  - sites: All
+    subspecialties: MSK
+    contexts: Outpatient
+    modalities: US
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 17:00 PD-17:00 CD
+  # All days
+  - sites: SRC
+    subspecialties: Mamm (Screening)
+    contexts: All
+    modalities: MG
+    days: Mon/Tue/Wed/Thu/Fri
+    weekly_fraction: 0.1
+  - sites: SRC
+    subspecialties: General
+    contexts: Wet Read
+    modalities: CT/US/XR/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 12:00 PBD-24:00 PBD
+  - sites: SRC
+    subspecialties: CT Procedure
+    contexts: All
+    modalities: CT
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 08:00 CD-17:00 CD
+  - sites: SRC
+    subspecialties: US Procedure (MSK)
+    contexts: All
+    modalities: US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 08:00 CD-13:00 CD
+  - sites: SRC/TPC
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
+    contexts: All
+    modalities: MG/US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 12:30 CD-13:30 CD
+  - sites: SRC
+    subspecialties: US Procedure (General)
+    contexts: All
+    modalities: US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 12:30 CD-13:00 CD
+  comments:
+    - Cover wet reads for SRC when in procedures
+- rotation: SRC
+  location: SRC
+  responsibilities:
+  # Monday
+  #- sites: SRC/TPC
+   # subspecialties: Mamm (Screening)
+   # contexts: All
+   # modalities: All
+   # days: Mon
+   # weekly_fraction: 0.2
+  #- sites: SRC
+  #  subspecialties: General
+  #  contexts: Wet Read
+  #  modalities: All
+  #  days: Mon
+  #  time_periods:
+  #  - 08:00 CD-17:00 CD
+  # Tue-Fri
+  - sites: SRC
+    subspecialties: Mamm (Screening)
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    weekly_fraction: 0.1
+  - sites: TPC
+    subspecialties: Mamm (Screening)
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    weekly_fraction: 0.2
+  - sites: SRC
+    subspecialties: General
+    contexts: All
+    modalities: XR/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-15:00 CD
+  - sites: SRC
+    subspecialties: General
+    contexts: Wet Read
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 08:00 CD-12:30 CD
+  # Mon-Fri
+  - sites: SRC/TPC
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 08:00 CD-12:30 CD
+    - 13:30 CD-16:30 CD
+  - sites: SRC
+    subspecialties: General
+    contexts: All
+    modalities: US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-15:00 CD
+  - sites: SRC
+    subspecialties: US Procedure (General)
+    contexts: All
+    modalities: US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 08:00 CD-12:30 CD
+- rotation: IR1
+  location: SH
+  responsibilities:
+  - sites: SH
+    subspecialties: Angio
+    contexts: All
+    modalities: ANG/XA/NM
+    days: Mon/Tue/Wed/Thu
+    time_periods:
+    - 07:30 CD-07:30 ND
+  - sites: SH
+    subspecialties: Angio
+    contexts: All
+    modalities: ANG/XA/NM
+    days: Fri
+    time_periods:
+    - 07:30 CD-07:00 ND
+  - sites: SH
+    subspecialties: CT Procedure/US Procedure (IR)
+    contexts: ED/Inpatient
+    modalities: CT/US
+    days: Mon/Tue/Wed/Thu
+    time_periods:
+    - 16:30 CD-07:30 ND
+  - sites: SH
+    subspecialties: CT Procedure/US Procedure (IR)
+    contexts: ED/Inpatient
+    modalities: CT/US
+    days: Fri
+    time_periods:
+    - 16:30 CD-07:00 ND
+  - sites: All
+    subspecialties: Vascular US
+    contexts: All
+    modalities: US/CVUS/CLINIC
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PBD-15:00 CD
+- rotation: IR2
+  location: SH and SRC
+  responsibilities:
+  # Mon prior day work
+  - sites: All
+    subspecialties: General
+    contexts: Outpatient
+    modalities: CT/US/XR/CVUS/RF
+    days: Mon
+    time_periods:
+    - 13:00 PD-24:00 PD
+  # Tue-Thu prior day work
+  - sites: SC
+    subspecialties: General
+    contexts: Outpatient
+    modalities: CT/US/XR/CVUS/RF
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-24:00 PD
+  - sites: SRC
+    subspecialties: General
+    contexts: All
+    modalities: XR/RF
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-24:00 PD
+  - sites: SH/WB
+    subspecialties: General
+    contexts: Outpatient
+    modalities: CT/US/XR/RF
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 19:00 PD-24:00 PD
+    # Mon SRC XR
+  #- sites: SRC
+  #  subspecialties: General
+  #  contexts: All
+  #  modalities: XR/RF
+  #  days: Mon
+  #  time_periods:
+  #  - 11:30 CD-15:00 CD
+    # Every day
+  - sites: All
+    subspecialties: Complex CTA+MRA
+    contexts: Outpatient
+    modalities: CT/MR
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PBD-15:00 CD
+  - sites: All
+    subspecialties: Complex CTA+MRA
+    contexts: Inpatient/ED
+    modalities: CT/MR
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 07:30 CD-16:00 CD
+  - sites: SH
+    subspecialties: US Procedure (IR)/CT Procedure
+    contexts: All
+    modalities: CT/US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 07:30 CD-16:30 CD
+  # SRC Clinic IR only procedures
+  - sites: SRC
+    subspecialties: US Procedure (IR)
+    contexts: All
+    modalities: CT/US/CLINIC
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 13:00 CD-16:30 CD
+  comments:
+    - Supervise and interpret SH fluoro
+    - Supervise PA US Procedures
+    - IR Clinic
+- rotation: MED
+  location: Remote
+  responsibilities:
+  - sites: SH
+    subspecialties: Mamm (Diag)
+    contexts: ED/Inpatient
+    modalities: MG/US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 06:00 CD-07:15 CD
+  - sites: WVH
+    subspecialties: Mamm (Diag)
+    contexts: ED/Inpatient
+    modalities: MG/US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 06:00 CD-08:00 CD
+  - sites: WVH
+    subspecialties: General
+    contexts: Inpatient
+    modalities: XR/RF/US/CT
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 06:00 CD-08:00 CD
+  - sites: All
+    subspecialties: MSK
+    contexts: ED/Inpatient
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 06:00 CD-08:00 CD
+  - sites: All
+    subspecialties: Neuro (Brain)/Neuro (Other)/Complex CTA+MRA
+    contexts: ED/Inpatient
+    modalities: CT/MR
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 06:00 CD-07:30 CD
+  - sites: All
+    subspecialties: General
+    contexts: ED/Inpatient
+    modalities: NM/MR
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 06:00 CD-07:30 CD
+  - sites: SH
+    subspecialties: General
+    contexts: Inpatient
+    modalities: XR/RF/US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 06:00 CD-09:00 CD
+  - sites: All
+    subspecialties: Intraop Fluoro
+    contexts: All
+    modalities: XR/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 06:00 CD-09:00 CD
+  - sites: SC
+    subspecialties: General
+    contexts: Wet Read
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 06:00 CD-09:30 CD
+    - 12:00 CD-13:00 CD
+  - sites: SH/WVH/WB
+    subspecialties: General
+    contexts: ED/Wet Read
+    modalities: CT/US/XR/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 06:00 CD-11:30 CD
+    - 12:00 CD-14:00 CD
+  - sites: SH
+    subspecialties: General
+    contexts: Inpatient
+    modalities: CT
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 06:00 CD-14:00 CD
+- rotation: Swing
+  location: Remote
+  responsibilities:
+  - sites: All
+    subspecialties: General
+    contexts: ED/Wet Read
+    modalities: CT/US/XR/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 14:00 CD-16:00 CD
+  - sites: SH
+    subspecialties: General
+    contexts: Inpatient
+    modalities: CT
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 14:00 CD-16:00 CD
+  - sites: All
+    subspecialties: Intraop Fluoro
+    contexts: All
+    modalities: XR/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 16:00 CD-20:00 CD
+  - sites: WVH
+    subspecialties: General
+    contexts: Inpatient
+    modalities: XR/US/CT/MR
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 CD-16:00 CD
+  - sites: All
+    subspecialties: General/Neuro (Brain)/Neuro (Other)/Complex CTA+MRA/MSK
+    contexts: Inpatient
+    modalities: MR/NM/XR/US/CT/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 16:00 CD-20:00 CD
+  - sites: SRC
+    subspecialties: General
+    contexts: Wet Read
+    modalities: All
+    days: Mon
+    time_periods:
+    - 15:00 CD-20:00 CD
+  - sites: SRC
+    subspecialties: General
+    contexts: Wet Read
+    modalities: CT/US/US
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 17:00 CD-20:00 CD
+  - sites: SC
+    subspecialties: General
+    contexts: Wet Read
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 16:00 CD-20:00 CD
+  - sites: All
+    subspecialties: General
+    contexts: ED
+    modalities: XR/US/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 16:00 CD-20:00 CD
+  comments:
+  - If caught up, help EVE
+- rotation: OVN
+  location: Remote
+  responsibilities:
+  - sites: All
+    subspecialties: General/Complex CTA+MRA/MSK/Neuro (Brain)/Neuro (Other)/Mamm (Diag)
+    contexts: ED/Wet Read/Inpatient
+    modalities: CT/US/XR/MR/NM/RF/MG/DEXA
+    days: Sun/Mon/Tue/Wed/Thu
+    time_periods:
+    - 22:00 CD-06:00 ND
+  - sites: All
+    subspecialties: Intraop Fluoro
+    contexts: All
+    modalities: XR/RF
+    days: Sun/Mon/Tue/Wed/Thu
+    time_periods:
+    - 22:00 CD-06:00 ND
+  - sites: All
+    subspecialties: General/Complex CTA+MRA/MSK/Neuro (Brain)/Neuro (Other)/Mamm (Diag)
+    contexts: ED/Wet Read/Inpatient
+    modalities: CT/US/XR/MR/NM/RF/MG/DEXA
+    days: Fri/Sat
+    time_periods:
+    - 22:00 CD-07:00 ND
+  - sites: All
+    subspecialties: Intraop Fluoro
+    contexts: All
+    modalities: XR/RF
+    days: Fri/Sat
+    time_periods:
+    - 22:00 CD-07:00 ND
+  comments:
+  - Leave complex, non-urgent subspecialty exams for daytime interpretation
+- rotation: OP1
+  location: SRC
+  responsibilities:
+  - sites: All
+    subspecialties: General
+    contexts: Outpatient
+    modalities: CT/US/XR/MR/RF
+    days: Sat
+    time_periods:
+    - 15:00 PBD-18:00 PBD
+  - sites: SC
+    subspecialties: General
+    contexts: Outpatient
+    modalities: CVUS
+    days: Sat
+    time_periods:
+    - 15:00 PBD-18:00 PBD
+  comments:
+  - Contrast coverage 
+- rotation: OP2
+  location: Remote
+  responsibilities:
+  - sites: All
+    subspecialties: General
+    contexts: Outpatient
+    modalities: CT/US/MR/RF
+    days: Sun
+    time_periods:
+    - 18:00 PBD-24:00 PBD+1
+  - sites: SC
+    subspecialties: General
+    contexts: Outpatient
+    modalities: CVUS
+    days: Sun
+    time_periods:
+    - 18:00 PBD-24:00 PBD+1
+  - sites: SH/WB/SC/SRC/TPC
+    subspecialties: General
+    contexts: Outpatient
+    modalities: XR
+    days: Sun
+    time_periods:
+    - 18:00 PBD-24:00 PBD+1
+  - sites: WVH
+    subspecialties: General
+    contexts: Outpatient
+    modalities: XR
+    days: Sun
+    time_periods:
+    - 18:00 PBD-07:00 PBD+1
+    - 11:00 PBD+1-24:00 PBD+1
+- rotation: TPC
+  location: Remote
+  responsibilities:
+  - sites: TPC
+    subspecialties: General
+    contexts: All
+    modalities: CT/US/XR
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-15:00 CD
+  - sites: SRC
+    subspecialties: General
+    contexts: All
+    modalities: US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-00:00 CD
+  - sites: SRC
+    subspecialties: General
+    contexts: All
+    modalities: CT
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-15:00 CD
+  - sites: SH
+    subspecialties: General
+    contexts: Outpatient
+    modalities: CT
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 11:00 CD-15:00 CD
+  comments:
+  - Complete work by 17:00
+  - Turnaround times must be <24 hrs
+- rotation: Call 1
+  location: SH
+  responsibilities:
+  - sites: All
+    subspecialties: General/MSK/Neuro (Brain)/Neuro (Other)/Complex CTA+MRA
+    contexts: ED/Wet Read
+    modalities: CT/US/XR/NM/MR/RF
+    days: Sat/Sun
+    time_periods:
+    - 11:00 CD-15:30 CD
+  - sites: All
+    subspecialties: General/MSK/Neuro (Brain)/Neuro (Other)/Complex CTA+MRA
+    contexts: Inpatient
+    modalities: CT/US/XR/NM/MR/RF
+    days: Sat/Sun
+    time_periods:
+    - 11:00 CD-19:00 CD
+  - sites: All
+    subspecialties: Intraop Fluoro
+    contexts: All
+    modalities: XR/RF
+    days: Sat/Sun
+    time_periods:
+    - 11:00 CD-19:00 CD
+  - sites: All
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
+    contexts: ED/Inpatient
+    modalities: MG/US
+    days: Sat/Sun
+    time_periods:
+    - 11:00 CD-19:00 CD
+  - sites: SH
+    subspecialties: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)/Fluoro (General)/Fluoro Procedure (MSK)/Mamm (Procedures)
+    contexts: ED/Inpatient
+    modalities: XR/RF/US/MG
+    days: Sat/Sun
+    time_periods:
+    - 18:00 CD-19:00 CD
+- rotation: Call 2
+  location: SH
+  responsibilities:
+  # Cover PA before they arrive
+  - sites: All
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)
+    contexts: ED/Inpatient
+    modalities: XR/RF/US
+    days: Sat/Sun
+    time_periods:
+    - 07:00 CD-08:00 CD
+  # Diagnostic Work
+  - sites: All
+    subspecialties: Mamm (Diag)
+    contexts: ED/Inpatient
+    modalities: MG/US
+    days: Sat/Sun
+    time_periods:
+    - 07:00 CD-11:00 CD
+  - sites: All
+    subspecialties: General/MSK/Neuro (Brain)/Neuro (Other)/Intraop Fluoro/Complex CTA+MRA
+    contexts: ED/Wet Read
+    modalities: CT/US/XR/NM/MR/RF
+    days: Sat/Sun
+    time_periods:
+    - 07:00 CD-11:00 CD
+  - sites: All
+    subspecialties: General/MSK/Neuro (Brain)/Neuro (Other)/Intraop Fluoro/Complex CTA+MRA
+    contexts: Inpatient
+    modalities: CT/US/XR/NM/MR/RF
+    days: Sat/Sun
+    time_periods:
+    - 07:00 CD-11:00 CD
+  - sites: WVH
+    subspecialties: General
+    contexts: Outpatient
+    modalities: XR
+    days: Sat/Sun
+    time_periods:
+    - 07:00 CD-11:00 CD
+  # Angio
+  - sites: SH
+    subspecialties: Angio/US Procedure (IR)/CT Procedure
+    contexts: All
+    modalities: ANG/XA/RF/US/NM/CT
+    days: Sat
+    time_periods:
+    - 07:00 CD-07:00 ND
+  - sites: SH
+    subspecialties: Angio/US Procedure (IR)/CT Procedure
+    contexts: All
+    modalities: ANG/XA/RF/US/NM/CT
+    days: Sun
+    time_periods:
+    - 07:00 CD-07:30 ND
+- rotation: EVE
+  location: SH
+  responsibilities:
+    # Weekdays
+  - sites: All
+    subspecialties: General/Neuro (Brain)/Neuro (Other)/Complex CTA+MRA/MSK
+    contexts: ED
+    modalities: CT/NM/MR/DEXA
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 16:00 CD-20:00 CD
+  - sites: SH
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
+    contexts: ED/Inpatient
+    modalities: MG/US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 16:00 CD-22:00 CD
+  - sites: SH
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
+    contexts: ED/Inpatient
+    modalities: MG/US
+    days: Sat/Sun
+    time_periods:
+    - 19:00 CD-22:00 CD
+  - sites: WVH
+    subspecialties: Mamm (Diag)
+    contexts: ED/Inpatient
+    modalities: MG/US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 CD-22:00 CD
+  - sites: WVH
+    subspecialties: Mamm (Diag)
+    contexts: ED/Inpatient
+    modalities: MG/US
+    days: Sat/Sun
+    time_periods:
+    - 19:00 CD-22:00 CD
+  - sites: All
+    subspecialties: General/Neuro (Brain)/Neuro (Other)/MSK/Complex CTA+MRA
+    contexts: ED/Inpatient/Wet Read
+    modalities: CT/US/XR/MR/NM/RF/MG/DEXA
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 20:00 CD-22:00 CD
+  - sites: All
+    subspecialties: Intraop Fluoro
+    contexts: All
+    modalities: XR/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 20:00 CD-22:00 CD
+    # Weekends
+  - sites: All
+    subspecialties: General/Neuro (Brain)/Neuro (Other)/MSK/Complex CTA+MRA
+    contexts: ED/Wet Read
+    modalities: CT/US/XR/MR/NM/RF
+    days: Sat/Sun
+    time_periods:
+    - 15:30 CD-22:00 CD
+  - sites: All
+    subspecialties: General/Neuro (Brain)/Neuro (Other)/MSK/Complex CTA+MRA
+    contexts: Inpatient
+    modalities: CT/US/XR/MR/NM/RF/MG
+    days: Sat/Sun
+    time_periods:
+    - 19:00 CD-22:00 CD
+  - sites: All
+    subspecialties: Intraop Fluoro
+    contexts: All
+    modalities: XR/RF
+    days: Sat/Sun
+    time_periods:
+    - 19:00 CD-22:00 CD
+    # Overnight procedure call
+  - sites: SH
+    subspecialties: Mamm (Procedures)
+    contexts: ED/Inpatient
+    modalities: MG/US
+    days: Sun/Mon/Tue/Wed/Thu
+    time_periods:
+    - 22:00 CD-07:15 ND
+  - sites: SH
+    subspecialties: Mamm (Procedures)
+    contexts: ED/Inpatient
+    modalities: MG/US
+    days: Fri/Sat
+    time_periods:
+    - 22:00 CD-07:00 ND
+  - sites: SH
+    subspecialties: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)/Fluoro (General)/Fluoro Procedure (MSK)
+    contexts: ED/Inpatient
+    modalities: XR/RF/US/MG
+    days: Mon/Tue/Wed/Thu
+    time_periods:
+    - 19:00 CD-07:30 ND
+  - sites: SH
+    subspecialties: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)/Fluoro (General)/Fluoro Procedure (MSK)
+    contexts: ED/Inpatient
+    modalities: XR/RF/US/MG
+    days: Fri
+    time_periods:
+    - 19:00 CD-07:00 ND
+  - sites: SH
+    subspecialties: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)/Fluoro (General)/Fluoro Procedure (MSK)
+    contexts: ED/Inpatient
+    modalities: XR/RF/US/MG
+    days: Sat
+    time_periods:
+    - 19:00 CD-07:00 ND
+  - sites: SH
+    subspecialties: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)/Fluoro (General)/Fluoro Procedure (MSK)
+    contexts: ED/Inpatient
+    modalities: XR/RF/US/MG
+    days: Sun
+    time_periods:
+    - 19:00 CD-07:30 ND
+- rotation: PA-US
+  location: SH
+  responsibilities:
+  - sites: SH
+    subspecialties: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)
+    contexts: All
+    modalities: US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 09:00 CD-19:00 CD
+  - sites: SH
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)
+    contexts: All
+    modalities: XR/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 17:30 CD-19:00 CD
+  comments:
+  - Preprocedural and postprocedural care of all US procedure patients
+  - Bone marrow biopsies
+  - Enter preprocedural orders for next day CT and US patients
+- rotation: PA-GI
+  location: SH
+  responsibilities:
+  - sites: SH
+    subspecialties: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)
+    contexts: All
+    modalities: US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 07:30 CD-09:00 CD
+  - sites: SH
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)
+    contexts: All
+    modalities: XR/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 07:30 CD-17:30 CD
+  comments:
+  - Preprocedural and postprocedural care of all fluoro procedure patients
+  - Dictate needle procedures
+  - Review GI imaging with IR2
+- rotation: PA-IR
+  location: SH
+  comments:
+  - Supervised by IR1
+  - Carry IR phone and take consults
+  - Round on IR patients and write progress notes
+  - TDC and port removals
+  - H&Ps and preprocedural and postprocedural care of all IR procedure patients
+  - Assist PA-GI and PA-US if available
+- rotation: PA Clinic
+  location: SC Union SH SRC
+  responsibilities:
+  - sites: SC
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)
+    contexts: All
+    modalities: XR/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 08:00 CD-12:30 CD
+  - sites: SRC
+    subspecialties: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)/Angio
+    contexts: All
+    modalities: US/XA/CLINIC
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 13:00 CD-16:30 CD
+  comments:
+  - If finished with SC-Union fluoro early, go to SH and assist other PAs
+  - Afternoon clinic
+  - Take patient phone calls
+  - Administer IV metoprolol for coronary CTAs
+  - Write orders for the next day's IR procedures
+  - Call patients with results
+  - Staff clinic and contrast administration until 6 PM
+- rotation: PA-Weekend
+  location: SH
+  responsibilities:
+  - sites: SH
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)
+    contexts: All
+    modalities: XR/RF/US
+    days: Sat/Sun
+    time_periods:
+    - 08:00 CD-18:00 CD
+  comments:
+  - Carry IR phone and take consults
+  - Round on IR patients and write progress notes
+  - Okay to leave the hospital but must be no more than 20 minutes away and available by page for procedures through 6 PM
+- rotation: Subspecialty Work
+  location: Remote
+  responsibilities:
+  - sites: All
+    subspecialties: Breast MR/Cardiac/CT Colonography
+    contexts: All
+    modalities: All
+    days: All
+    time_periods:
+    - 00:00 CD-24:00 CD
+  comments:
+  - These subspecialty exams are read through AH0C.
+  - This list is not complete as many subspecialty exam types cannot be differentiated based on the available fields.
+- rotation: Non-Radiologist Interpreted
+  location: n/a
+  responsibilities:
+  - sites: All
+    subspecialties: Non-Radiology
+    contexts: All
+    modalities: All
+    days: All
+    time_periods:
+    - 00:00 CD-24:00 CD
+  comments:
+  - These are studies that are not interpreted by a radiologist.
+- rotation: Schedule Blocks
+  location: n/a
+  responsibilities:
+  - sites: SC
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (MSK)/Angio
+    contexts: Outpatient
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-07:30 CD
+    - 16:30 CD-24:00 CD
+  - sites: SC
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (MSK)/Angio
+    contexts: Outpatient
+    modalities: All
+    days: Sat/Sun
+    time_periods:
+    - 00:00 CD-24:00 CD
+  - sites: SRC
+    subspecialties: Angio
+    contexts: Outpatient
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-13:00 CD
+    - 16:30 CD-24:00 CD
+  - sites: TPC
+    subspecialties: Mamm (Diag)
+    contexts: Outpatient
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-08:00 CD
+    - 16:30 CD-24:00 CD
+    # No procedures or mamms outside normal horus
+  - sites: SRC
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (MSK)/Mamm (Diag)/Mamm (Procedures)
+    contexts: Outpatient
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-08:00 CD
+    - 16:30 CD-24:00 CD
+    # No IR or PA procedures outside clinic hours
+  - sites: SRC
+    subspecialties: US Procedure (IR or PA)/US Procedure (IR)
+    contexts: Outpatient
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-13:00 CD
+    - 16:30 CD-24:00 CD
+  - sites: SRC
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)/US Procedure (General)/US Procedure (IR or PA)/US Procedure (IR)/US Procedure (MSK)/Angio/Mamm (Diag)/Mamm (Procedures)
+    contexts: Outpatient
+    modalities: All
+    days: Sat/Sun
+    time_periods:
+    - 00:00 CD-24:00 CD
+  - sites: SH
+    subspecialties: CT Procedure
+    contexts: Outpatient
+    modalities: All
+    days: Sat/Sun
+    time_periods:
+    - 00:00 CD-24:00 CD
+  - sites: SH
+    subspecialties: CT Procedure
+    contexts: Outpatient
+    modalities: CT
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-07:30 CD
+    - 16:30 CD-24:00 CD
+  - sites: SH
+    subspecialties: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)
+    contexts: Outpatient
+    modalities: US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-07:30 CD
+    - 19:00 CD-24:00 CD
+  - sites: WVH
+    subspecialties: Mamm (Diag)
+    contexts: Outpatient
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-08:00 CD
+    - 15:00 CD-24:00 CD
+  - sites: WVH
+    subspecialties: Mamm (Procedures)
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-08:00 CD
+    - 15:00 CD-24:00 CD
+  - sites: WVH
+    subspecialties: Fluoro (General)/US Procedure (General)
+    contexts: All
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-08:00 CD
+    - 17:00 CD-24:00 CD
+  - sites: SH/WB
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
+    contexts: Outpatient
+    modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-07:15 CD
+    - 15:30 CD-24:00 CD
+  - sites: SH
+    subspecialties: Mamm (Diag)/Mamm (Procedures)
+    contexts: Outpatient
+    modalities: All
+    days: Sat/Sun
+    time_periods:
+    - 00:00 CD-24:00 CD
+  - sites: SH
+    subspecialties: Fluoro (General)/Fluoro Procedure (MSK)
+    contexts: Outpatient
+    modalities: XR/RF
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-07:30 CD
+    - 19:00 CD-24:00 CD
+  comments:
+  - Responsibilities listed here represent schedule blocks. Such studies should not be scheduled and so are not accounted for in these rotations.

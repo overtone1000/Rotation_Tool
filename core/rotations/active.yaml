@@ -184,8 +184,7 @@ rotation_manifest:
     modalities: XR
     days: Mon
     time_periods:
-    - 00:00 PD-07:00 PD
-    - 11:00 PD-13:00 PD
+    - 00:00 PD-13:00 PD
     #Monday only SRC work
   - sites: SRC
     subspecialties: General
@@ -785,7 +784,7 @@ rotation_manifest:
   - sites: All
     subspecialties: General
     contexts: Outpatient
-    modalities: CT/US/MR/RF
+    modalities: CT/US/MR/RF/XR
     days: Sun
     time_periods:
     - 18:00 PBD-24:00 PBD+1
@@ -796,21 +795,6 @@ rotation_manifest:
     days: Sun
     time_periods:
     - 18:00 PBD-24:00 PBD+1
-  - sites: SH/WB/SC/SRC/TPC
-    subspecialties: General
-    contexts: Outpatient
-    modalities: XR
-    days: Sun
-    time_periods:
-    - 18:00 PBD-24:00 PBD+1
-  - sites: WVH
-    subspecialties: General
-    contexts: Outpatient
-    modalities: XR
-    days: Sun
-    time_periods:
-    - 18:00 PBD-07:00 PBD+1
-    - 11:00 PBD+1-24:00 PBD+1
 - rotation: TPC
   location: Remote
   responsibilities:
@@ -913,13 +897,6 @@ rotation_manifest:
     subspecialties: General/MSK/Neuro (Brain)/Neuro (Other)/Intraop Fluoro/Complex CTA+MRA
     contexts: Inpatient
     modalities: CT/US/XR/NM/MR/RF
-    days: Sat/Sun
-    time_periods:
-    - 07:00 CD-11:00 CD
-  - sites: WVH
-    subspecialties: General
-    contexts: Outpatient
-    modalities: XR
     days: Sat/Sun
     time_periods:
     - 07:00 CD-11:00 CD
