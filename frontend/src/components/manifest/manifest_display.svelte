@@ -153,6 +153,7 @@
 	}
 	.title {
 		display: flex;
+		font-size: larger;
 		justify-content: space-between;
 		align-content: center;
 		align-items: center;
@@ -163,7 +164,9 @@
 	}
 	.rotation_label{
 		flex-shrink: 0;
-		text-align: center;
+		text-align: left;
+		font-size: larger;
+		font-weight: bold;
 	}
 
 	.warning_empty {

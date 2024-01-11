@@ -76,3 +76,32 @@ export const minutes_since_midnight_to_time_string=(msm:MinutesSinceMidnight)=>{
     const minutes = msm.minutes%60;
     return hrs.toString().padStart(2,"0") + ":" + minutes.toString().padStart(2,"0");
 }
+
+export const relative_time_to_string = (relative_time:string, dow:number) => {
+    const split = relative_time.split(" ");
+
+    let new_dow:number;
+    switch(split[1])
+    {
+        case "ND":new_dow=nd(dow);
+            break;
+        case "CD":new_dow=dow;
+            break;
+        case "PD":new_dow=pd(dow);
+            break;
+        case "PBD":new_dow=pbd(dow);
+            break;
+        case "PBD+1":new_dow=pbdp1(dow);
+            break;
+        default:new_dow=dow;
+    }
+    let daystring:string=shortdowfunc(new_dow);
+
+    return split[0] + " " + daystring;
+}
+
+export const time_range_to_string = (time_range:string, dow:number) => {
+    const split = time_range.split("-");
+
+    return relative_time_to_string(split[0],dow)+" - "+relative_time_to_string(split[1],dow);
+}

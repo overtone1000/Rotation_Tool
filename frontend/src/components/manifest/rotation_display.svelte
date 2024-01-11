@@ -1,6 +1,6 @@
 <script lang="ts">
-	import { shortdowfunc } from "../../commons/time";
-	import type { Responsibility, Rotation } from "./RotationManifest";
+	import { shortdowfunc, time_range_to_string } from "../../commons/time";
+	import type { Responsibility, Rotation, WorkHoursPeriod } from "./RotationManifest";
 	import ResponsibilityDisplay from './responsibility_display.svelte';
 
 	export let rotation:Rotation;
@@ -14,15 +14,29 @@
 		let retval = responsibility.days=="All" || responsibility.days.includes(shortdow);
 		return retval;
 	}
+
+	let pertinent_rotation_hours:WorkHoursPeriod|undefined=undefined;
+	$:{
+		pertinent_rotation_hours=undefined;
+		if(rotation.hours)
+		{
+			for(const entry of rotation.hours)
+			{
+				for(const day of entry.days)
+				{
+					if(shortdow==day)
+					{
+						if(pertinent_rotation_hours!=undefined)
+						{console.error("Duplicate rotation hour days.",rotation.hours)}
+						pertinent_rotation_hours=entry;
+					}
+				}
+			}
+		}
+	}
 </script>
 
 <div class="container">
-	{#if rotation.hours}
-
-	{/if}
-	{#if rotation.breaktime}
-
-	{/if}
 	<table class="table">
 		<tr>
 			<th>Site</th>
@@ -46,16 +60,36 @@
 			{/key}
 		{/key}
 	</table>
+	<div>
+		{#if rotation.location}
+			<div>
+				Location: {rotation.location}
+			</div>
+		{/if}
+		{#if pertinent_rotation_hours}
+		<div>
+			Hours: {time_range_to_string(pertinent_rotation_hours.hours,dow)}
+		</div>
+		{/if}
+		{#if rotation.breaktime}
+			<div>
+				Break: {time_range_to_string(rotation.breaktime[0],dow)}
+			</div>
+			{#if rotation.breaktime[1]}
+				<div style="padding-left: 20px">
+					{rotation.breaktime[1]}
+				</div>
+			{/if}
+		{/if}
+		{#if rotation.comments !== undefined && rotation.comments !== null}
+		<ul>
+			{#each rotation.comments as comment}
+				<li><div class="mdc-typography--body1">{comment}</div></li>
+			{/each}
+		</ul>
+	{/if}
+	</div>
 </div>
-
-{#if rotation.comments !== undefined && rotation.comments !== null}
-	<ul>
-		{#each rotation.comments as comment}
-			<li><div class="mdc-typography--body1">{comment}</div></li>
-		{/each}
-	</ul>
-{/if}
-
 <style>
 	.container {
 		display: flex;

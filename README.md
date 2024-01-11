@@ -20,8 +20,9 @@ Board meeting 1/9/24
 - [x] Move WVH XR on weekends to OP2 instead of Call 2
 - [ ] Add butt-in-chair hours and lunchtimes for each rotation
     - [x] add to rust structs
-    - [ ] show in frontend
-- [ ] Show location in frontend
+    - [x] show in frontend
+    - [ ] should validate days for hours in backend (that they are valid days with the existing function and that there are no duplicates)
+- [x] Show location in frontend
 - [ ] Policy section
     - [ ] Butt in chair rule (when someone else is covering, log in to second workstation or at least broadcast a primordial message)
     - [ ] Copy existing policy stuff
