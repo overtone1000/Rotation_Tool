@@ -21,7 +21,7 @@ pub mod main_headers {
         Location,
         ScheduledDatetime,
         Rvu,
-        Modality,
+        //Modality, //Not using this anymore
     }
 
     impl PertinentHeaders {
@@ -33,7 +33,7 @@ pub mod main_headers {
                 PertinentHeaders::Location => "LocationDescription".to_string(),
                 PertinentHeaders::ScheduledDatetime => "Exam Started".to_string(),
                 PertinentHeaders::Rvu => "WorkRVU".to_string(),
-                PertinentHeaders::Modality => "Modality".to_string(),
+                //PertinentHeaders::Modality => "Modality".to_string(),
             }
         }
     }
@@ -93,7 +93,12 @@ pub(crate) const NEURO_BRAIN: &str = "Neuro (Brain)";
 pub(crate) const NEURO_OTHER: &str = "Neuro (Other)";
 
 pub const SUBSPECIALTIES: &[&str] = &[
-    "General",
+    "General XR",
+    "General US",
+    "General CT",
+    "NM",
+    "PET",
+    "Body MR",
     "US Procedure (General)",
     "US Procedure (MSK)",
     "US Procedure (IR)",

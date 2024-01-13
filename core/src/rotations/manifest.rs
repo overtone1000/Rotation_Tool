@@ -71,13 +71,15 @@ impl Manifest {
             responsibilities: Responsibilities::from_vec(vec![
                 RotationResponsibility {
                     sites: StringTypes::new_slash_separated_string_vec("Site 1/Site 2"),
-                    subspecialties: StringTypes::new_slash_separated_string_vec(
+                    exams: StringTypes::new_slash_separated_string_vec(
                         "Subspecialty 1/Subspecialty 2",
                     ),
                     contexts: StringTypes::new_slash_separated_string_vec("Context 1/Context 2"),
+                    /*
                     modalities: StringTypes::new_slash_separated_string_vec(
                         "Modality 1/Modality 2",
                     ),
+                    */
                     time_periods: TimePeriods::from_strings(Vec::from([
                         "17:00 PBD-12:00 CD",
                         "13:00 CD-17:00 CD",
@@ -100,7 +102,7 @@ impl Manifest {
                         "Site A".to_string(),
                         "Site B".to_string(),
                     ])),
-                    subspecialties: StringTypes::Array(HashSet::from([
+                    exams: StringTypes::Array(HashSet::from([
                         "Specialty A".to_string(),
                         "Specialty B".to_string(),
                     ])),
@@ -108,10 +110,12 @@ impl Manifest {
                         "Context A".to_string(),
                         "Context B".to_string(),
                     ])),
+                    /*
                     modalities: StringTypes::Array(HashSet::from([
                         "Modality A".to_string(),
                         "Modality B".to_string(),
                     ])),
+                    */
                     time_periods:  TimePeriods::from_strings(Vec::from([
                         "17:00 PD-12:00 CD",
                         "13:00 CD-17:00 CD",

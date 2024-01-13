@@ -18,15 +18,12 @@ rotation_manifest:
   - sites:
     - Site 1
     - Site 2
-    subspecialties:
+    exams:
     - Subspecialty 1
     - Subspecialty 2
     contexts:
     - Context 1
     - Context 2
-    modalities:
-    - Modality 1
-    - Modality 2
     days:
     - Fri
     - Mon
@@ -40,15 +37,12 @@ rotation_manifest:
   - sites:
     - Site A
     - Site B
-    subspecialties:
+    exams:
     - Specialty A
     - Specialty B
     contexts:
     - Context A
     - Context B
-    modalities:
-    - Modality A
-    - Modality B
     days:
     - Sat
     - Sun

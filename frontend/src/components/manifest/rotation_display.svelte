@@ -40,9 +40,8 @@
 	<table class="table">
 		<tr>
 			<th>Site</th>
-			<th>Subspecialty</th>
 			<th>Context</th>
-			<th>Modality</th>
+			<th>Exams</th>
 			<th>Portions</th>
 		</tr>
 		{#key dow}

@@ -46,9 +46,9 @@ pub fn validate_days(days_to_check:&StringTypes, errors:&mut Vec<String>) -> () 
 #[serde(deny_unknown_fields)]
 pub struct RotationResponsibility {
     pub sites: StringTypes,
-    pub subspecialties: StringTypes,
+    pub exams: StringTypes,
     pub contexts: StringTypes,
-    pub modalities: StringTypes,
+    //pub modalities: StringTypes,
     pub days: StringTypes,
     pub weekly_fraction: Option<f64>,
     pub time_periods: TimePeriods,
@@ -60,13 +60,13 @@ impl RotationResponsibility {
 
         check(&self.sites, globals::SITES, "site", &mut errors);
         check(
-            &self.subspecialties,
+            &self.exams,
             globals::SUBSPECIALTIES,
             "subspecialty",
             &mut errors
         );
         check(&self.contexts, globals::CONTEXTS, "context", &mut errors);
-        check(&self.modalities, globals::MODALITIES, "modality", &mut errors);
+        //check(&self.modalities, globals::MODALITIES, "modality", &mut errors);
         validate_days(&self.days, &mut errors);
 
         if !errors.is_empty() {

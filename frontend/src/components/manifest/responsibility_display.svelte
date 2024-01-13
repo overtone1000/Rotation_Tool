@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { nd, pbd, pbdp1, pd, shortdowfunc, time_range_to_string } from "../../commons/time";
+	import { time_range_to_string } from "../../commons/time";
 	import type { Responsibility } from "./RotationManifest";
+    import MemberOrList from "./member_or_list.svelte";
 
 	export let responsibility:Responsibility;
     export let dow:number;
 
-    const array_or_string_to_string = (array_or_string:string|string[]) => {
+    /*const array_or_string_to_string = (array_or_string:string|string[]) => {
         if(typeof array_or_string == "string")
         {
             return array_or_string;
@@ -23,19 +24,14 @@
             }
             return retval;
         }
-    }
-
-    let site_string = array_or_string_to_string(responsibility.sites);
-    let context_string = array_or_string_to_string(responsibility.contexts);
-    let modality_string = array_or_string_to_string(responsibility.modalities);
-    let subspecialty_string = array_or_string_to_string(responsibility.subspecialties);
+    }*/
 </script>
 
 <tr>
-	<td><div class="mdc-typography--body1">{site_string}</div></td>
-    <td><div class="mdc-typography--body1">{subspecialty_string}</div></td>
-    <td><div class="mdc-typography--body1">{context_string}</div></td>
-    <td><div class="mdc-typography--body1">{modality_string}</div></td>
+	<td><MemberOrList members={responsibility.sites}/></td>
+    <td><MemberOrList members={responsibility.contexts}/></td>
+    <td><MemberOrList members={responsibility.exams}/></td>
+    <!-- <td><div class="mdc-typography--body1">{modality_string}</div></td> -->
     {#if responsibility.time_periods!==undefined && responsibility.time_periods!==null}
         <td>
             <ul>

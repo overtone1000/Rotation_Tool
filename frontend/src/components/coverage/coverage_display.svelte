@@ -18,16 +18,16 @@
     
     let keys:CoordKeys={
         sites: [],
-        subspecialties: [],
-        contexts: [],
-        modalities: []
+        exams: [],
+        contexts: []
+        //modalities: []
     }
 
     let active_coords:Coordinates={
         site: "",
-        subspecialty: "General",
+        exam: "",
         context: "",
-        modality: "",
+        //modality: "",
         dow: (new Date()).getDay()
     }
 
@@ -78,7 +78,7 @@
     $ : {
         if(exam_selection !== undefined)
         {
-            active_coords.subspecialty=exam_selection.subspecialty;
+            active_coords.exam=exam_selection.subspecialty;
         }
     }
 </script>
@@ -105,25 +105,6 @@
                         </Select>
                     </div>
                     <div class="button_container">
-                        {#if search_by_exam_description && exam_categories!==undefined}
-                            <Autocomplete
-                                options={exam_categories} 
-                                getOptionLabel={getExamLabel}
-                                bind:value={exam_selection}
-                                label="Exam Description"
-                            />
-                        {:else}
-                            <Select 
-                                label="Subspecialty"
-                                bind:value={active_coords.subspecialty}
-                                >
-                                {#each keys.subspecialties as o}
-                                    <Option value={o}>{o}</Option>
-                                {/each}
-                            </Select>
-                        {/if}
-                    </div>
-                    <div class="button_container">
                         <Select
                             label="Context"
                             bind:value={active_coords.context}
@@ -134,6 +115,26 @@
                         </Select>
                     </div>
                     <div class="button_container">
+                        {#if search_by_exam_description && exam_categories!==undefined}
+                            <Autocomplete
+                                options={exam_categories} 
+                                getOptionLabel={getExamLabel}
+                                bind:value={exam_selection}
+                                label="Exam Description"
+                            />
+                        {:else}
+                            <Select 
+                                label="Exam"
+                                bind:value={active_coords.exam}
+                                >
+                                {#each keys.exams as o}
+                                    <Option value={o}>{o}</Option>
+                                {/each}
+                            </Select>
+                        {/if}
+                    </div>
+                    <!--
+                    <div class="button_container">
                         <Select
                             label="Modality"
                             bind:value={active_coords.modality}
@@ -143,6 +144,7 @@
                             {/each}
                         </Select>
                     </div>
+                    -->
                     <div class="button_container">
                         <Select
                             label="Day of the week"
@@ -160,20 +162,28 @@
         <div class="container2">
             <DrawerToggleButton bind:open={open}/>
             {#if coverages !== undefined}
-            <table class="tablecont">
-                {#if coverages.Temporal !== undefined}
-                    <tr><th>Rotation</th><th>Rotation Day</th><th>Start Time</th><th>End Time</th></tr>
-                    {#each coverages.Temporal as temporal_coverage}
-                        <TemporalCoverageDisplay coverage={temporal_coverage} day={active_coords.dow}/>
-                    {/each}
+                <table class="tablecont">
+                    {#if coverages.Temporal !== undefined}
+                        <tr><th>Rotation</th><th>Rotation Day</th><th>Start Time</th><th>End Time</th></tr>
+                        {#each coverages.Temporal as temporal_coverage}
+                            <TemporalCoverageDisplay coverage={temporal_coverage} day={active_coords.dow}/>
+                        {/each}
+                    {/if}
+                    {#if coverages.Fractional !== undefined}
+                        <tr><th>Rotation</th><th>Rotation Day</th><th>Week %</th></tr>
+                        {#each coverages.Fractional as fractional_coverage}
+                            <FractionalCoverageDisplay coverage={fractional_coverage}/>
+                        {/each}
+                    {/if}
+                </table>
+            {:else}
+                {#if !active_coords.site}
+                <p>Select a site.</p>
+                {:else if !active_coords.context}
+                <p>Select a context.</p>
+                {:else if !active_coords.exam}
+                <p>Select an exam.</p>
                 {/if}
-                {#if coverages.Fractional !== undefined}
-                    <tr><th>Rotation</th><th>Rotation Day</th><th>Week %</th></tr>
-                    {#each coverages.Fractional as fractional_coverage}
-                        <FractionalCoverageDisplay coverage={fractional_coverage}/>
-                    {/each}
-                {/if}
-            </table>
             {/if}
         </div>
     </div>

@@ -431,6 +431,7 @@ pub fn build_salem_bvumap(bvu_data_table: &table::Table) -> Result<HashMap<Strin
     Ok(retval)
 }
 
+/*
 pub fn build_salem_modality_map(
     main_data_table: &table::Table,
 ) -> Result<HashMap<String, String>, String> {
@@ -453,3 +454,4 @@ pub fn build_salem_modality_map(
 
     Ok(retval)
 }
+*/

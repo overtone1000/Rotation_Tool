@@ -37,7 +37,7 @@ pub struct CoverageCoordinates {
     site: String,
     subspecialty: String,
     context: String,
-    modality: String,
+    //modality: String,
     weekday: chrono::Weekday,
 }
 
@@ -55,10 +55,12 @@ impl PartialOrd for CoverageCoordinates {
             Some(core::cmp::Ordering::Equal) => {}
             ord => return ord,
         }
+        /*
         match self.modality.partial_cmp(&other.modality) {
             Some(core::cmp::Ordering::Equal) => {}
             ord => return ord,
         }
+        */
         self.weekday
             .num_days_from_monday()
             .partial_cmp(&other.weekday.num_days_from_monday())
@@ -80,13 +82,13 @@ impl Default for CoverageCoordinates {
             site: Default::default(),
             subspecialty: Default::default(),
             context: Default::default(),
-            modality: Default::default(),
+            //modality: Default::default(),
             weekday: chrono::Weekday::Sun,
         }
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone,Debug)]
 pub enum CoverageUnit {
     Temporal(TemporalCoverageUnit),
     WeekFraction(FractionalCoverageUnit),
@@ -114,6 +116,10 @@ pub enum Coverage {
 }
 
 impl Coverage {
+    fn coverage_error(coverage:&CoverageUnit,coverages:&Coverage)->String{
+        let message = format!("Mixing fractional and temporal coverage types is not allowed. This was attempted for {:?} with the following coverages already listed {:?}",coverage,coverages);
+        message
+    }
     pub fn add(&mut self, coverage: CoverageUnit) -> Result<(), Box<dyn std::error::Error>> {
         match self {
             Coverage::Temporal(coverages) => match coverage {
@@ -121,16 +127,16 @@ impl Coverage {
                     coverages.push(new_coverage);
                     coverages.sort();
                 }
-                CoverageUnit::WeekFraction(_new_coverage) => {
+                CoverageUnit::WeekFraction(new_coverage) => {
                     return SourceError::generate_boxed(
-                        "Mixing fractional and temporal coverage types is not allowed.".to_string(),
+                        Self::coverage_error(&(CoverageUnit::WeekFraction(new_coverage)),self)
                     );
                 }
             },
             Coverage::Fractional(coverages) => match coverage {
-                CoverageUnit::Temporal(_new_coverage) => {
+                CoverageUnit::Temporal(new_coverage) => {
                     return SourceError::generate_boxed(
-                        "Mixing fractional and temporal coverage types is not allowed.".to_string(),
+                        Self::coverage_error(&(CoverageUnit::Temporal(new_coverage)),self)
                     );
                 }
                 CoverageUnit::WeekFraction(new_coverage) => {
@@ -394,6 +400,7 @@ impl<'a> CoordinateMap<'a, SerializeableWeekday, CoverageAndWorkDay> for Weekday
     }
 }
 
+/*
 #[derive(Default, Debug, Serialize)]
 pub struct ModalityMap {
     map: HashMap<String, WeekdayMap>,
@@ -419,13 +426,14 @@ impl WorkCoverageMap for ModalityMap {
         self.get_branch(coords).add_coverage(coords, coverage)
     }
 }
+*/
 
 #[derive(Default, Debug, Serialize)]
 pub struct ContextMap {
-    map: HashMap<String, ModalityMap>,
+    map: HashMap<String, WeekdayMap>,
 }
-impl<'a> CoordinateMap<'a, String, ModalityMap> for ContextMap {
-    fn get_map(&mut self) -> &mut HashMap<String, ModalityMap> {
+impl<'a> CoordinateMap<'a, String, WeekdayMap> for ContextMap {
+    fn get_map(&mut self) -> &mut HashMap<String, WeekdayMap> {
         &mut self.map
     }
     fn get_coordinate(coords: &CoverageCoordinates) -> String {
@@ -477,7 +485,7 @@ fn testcoords() -> CoverageCoordinates {
         site: "SH".to_string(),
         subspecialty: "Diagnostic Mamm".to_string(),
         context: "ED".to_string(),
-        modality: "US".to_string(),
+        //modality: "US".to_string(),
         weekday: chrono::Weekday::Mon,
     }
 }
@@ -494,7 +502,7 @@ impl CoverageMap {
     ) -> Result<(), Box<dyn std::error::Error>> {
         let _retval = CoverageMap::default();
 
-        let mut modality_map: HashMap<String, String> = HashMap::new();
+        //let mut modality_map: HashMap<String, String> = HashMap::new();
 
         let exam_rvu_map = build_salem_rvumap(&source.main_data_table)?;
         let exam_bvu_map: HashMap<String, f64> = build_salem_bvumap(&source.bvu_data_table)?;
@@ -620,6 +628,7 @@ impl CoverageMap {
                     };
 
                     //Get modality, but check for aliases
+                    /*
                     let listed_modality = source.main_data_table.get_val(
                         &main_headers::PertinentHeaders::Modality.get_label(),
                         &row_i,
@@ -660,12 +669,13 @@ impl CoverageMap {
                     if !modality_map.contains_key(&exam_code) {
                         modality_map.insert(exam_code.to_owned(), modality.to_string());
                     }
+                    */
 
                     CoverageCoordinates {
                         site,
                         subspecialty,
                         context,
-                        modality: modality.to_string(),
+                        //modality: modality.to_string(),
                         weekday: datetime.weekday(),
                     }
                 };
@@ -743,18 +753,20 @@ impl CoverageMap {
                 Some(val) => val.to_owned(),
             };
 
+            /*
             let modality = match modality_map.get(&exam_code) {
                 None => {
                     return SourceError::generate_boxed(format!("Bad exam code {}", exam_code));
                 }
                 Some(val) => val.to_owned(),
             };
+            */
 
             for weekday in BUSINESS_DAYS {
                 let coords = CoverageCoordinates {
                     site: crate::globals::TPC.to_string(),
                     context: crate::globals::OUTPATIENT.to_string(),
-                    modality: modality.to_string(),
+                    //modality: modality.to_string(),
                     subspecialty: subspecialty.to_string(),
                     weekday: **weekday,
                 };
@@ -806,16 +818,16 @@ impl CoverageMap {
                         for site in responsibility.sites.to_vec(globals::SITES) {
                             coords.site = site.to_string();
                             for subspecialty in responsibility
-                                .subspecialties
+                                .exams
                                 .to_vec(globals::SUBSPECIALTIES)
                             {
                                 coords.subspecialty = subspecialty.to_string();
                                 for context in responsibility.contexts.to_vec(globals::CONTEXTS) {
                                     coords.context = context.to_string();
-                                    for modality in
-                                        responsibility.modalities.to_vec(globals::MODALITIES)
-                                    {
-                                        coords.modality = modality.to_string();
+                                    //for modality in
+                                    //    responsibility.modalities.to_vec(globals::MODALITIES)
+                                    //{
+                                        //coords.modality = modality.to_string();
                                         for weekday_string in
                                             responsibility.days.to_vec(all_weekdays_strings)
                                         {
@@ -893,7 +905,7 @@ impl CoverageMap {
                                                 None => (),
                                             }
                                         }
-                                    }
+                                    //}
                                 }
                             }
                         }
@@ -912,20 +924,20 @@ impl CoverageMap {
     ) {
         for (site, subspecialtymap) in self.map.iter_mut() {
             for (subspecialty, contextmap) in subspecialtymap.map.iter_mut() {
-                for (context, modalitymap) in contextmap.map.iter_mut() {
-                    for (modality, weekdaymap) in modalitymap.map.iter_mut() {
+                for (context, weekdaymap) in contextmap.map.iter_mut() {
+                    //for (modality, weekdaymap) in modalitymap.map.iter_mut() {
                         for (weekday, coverage_and_workday) in weekdaymap.map.iter_mut() {
                             let coords = CoverageCoordinates {
                                 site: site.to_string(),
                                 subspecialty: subspecialty.to_string(),
                                 context: context.to_string(),
-                                modality: modality.to_string(),
+                                //modality: modality.to_string(),
                                 weekday: weekday.day,
                             };
 
                             func(&coords, coverage_and_workday);
                         }
-                    }
+                    //}
                 }
             }
         }
@@ -1115,11 +1127,11 @@ impl CoverageMap {
                     no_errs=false;
                     writeln!(
                         writer,
-                        "No coverage for: {}, {}, {}, {}, {} ({} rvus)",
+                        "No coverage for: {}, {}, {}, {} ({} rvus)",
                         coords.site,
                         coords.subspecialty,
                         coords.context,
-                        coords.modality,
+                        //coords.modality,
                         coords.weekday,
                         rvus
                     )?;
@@ -1130,11 +1142,11 @@ impl CoverageMap {
                             no_errs=false;
                             writeln!(
                                 writer,
-                                "Coverage gap: {}, {}, {}, {}, {}: {}-{} {} ({} rvus)",
+                                "Coverage gap: {}, {}, {}, {}: {}-{} {} ({} rvus)",
                                 coords.site,
                                 coords.subspecialty,
                                 coords.context,
-                                coords.modality,
+                                //coords.modality,
                                 coords.weekday,
                                 rotation1,
                                 rotation2,
@@ -1148,11 +1160,11 @@ impl CoverageMap {
                             no_errs=false;
                             writeln!(
                                 writer,
-                                "Coverage overlap: {}, {}, {}, {}, {}: {}",
+                                "Coverage overlap: {}, {}, {}, {}: {}",
                                 coords.site,
                                 coords.subspecialty,
                                 coords.context,
-                                coords.modality,
+                                //coords.modality,
                                 coords.weekday,
                                 overlap
                             )?;
@@ -1163,11 +1175,11 @@ impl CoverageMap {
                             no_errs=false;
                             writeln!(
                                 writer,
-                                "Incorrect fraction: {}, {}, {}, {}, {}: {}",
+                                "Incorrect fraction: {}, {}, {}, {}: {}",
                                 coords.site,
                                 coords.subspecialty,
                                 coords.context,
-                                coords.modality,
+                                //coords.modality,
                                 coords.weekday,
                                 x
                             )?;

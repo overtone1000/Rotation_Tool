@@ -23,8 +23,8 @@ export interface Responsibility
     sites:string|string[],
     contexts:string|string[],
     days:string|string[],
-    modalities:string|string[],
-    subspecialties:string|string[],
+    //modalities:string|string[],
+    exams:string|string[],
     time_periods:null|[TimePeriod],
     weekly_fraction:null|number
 }

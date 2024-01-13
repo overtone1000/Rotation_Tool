@@ -40,7 +40,7 @@ pub struct MapCoords {
     site: String,
     subspecialty: String,
     context: String,
-    modality: String,
+    //modality: String,
     time_row: usize,
 }
 
@@ -74,6 +74,7 @@ impl MapCoords {
         }
         retval
     }
+    /*
     pub fn validate_modality(&self) -> bool {
         let retval = MapCoords::validate(self.modality.to_owned(), MODALITIES);
         if !retval {
@@ -81,7 +82,7 @@ impl MapCoords {
         }
         retval
     }
-
+    */
     pub fn get_subspecialty(&self) -> &String {
         &self.subspecialty
     }
@@ -97,7 +98,7 @@ pub struct RVUMap {
     //site, subspecialty, context, modality, time_row
     map: HashMap<
         String,
-        HashMap<String, HashMap<String, HashMap<String, HashMap<usize, MapEntry>>>>,
+        HashMap<String, HashMap<String, HashMap<usize, MapEntry>>>,
     >,
 }
 
@@ -138,8 +139,8 @@ impl RVUMap {
             let map = HashMap::new();
             con_map.insert(coords.context.to_owned(), map);
         }
+        /*
         let mod_map = con_map.get_mut(&coords.context).expect("Immediate get");
-
         if !coords.validate_modality() {
             return Err("Invalid modality.".to_string());
         }
@@ -147,7 +148,8 @@ impl RVUMap {
             let map = HashMap::new();
             mod_map.insert(coords.modality.to_owned(), map);
         }
-        let time_map = mod_map.get_mut(&coords.modality).expect("Immediate get");
+        */
+        let time_map = con_map.get_mut(&coords.context).expect("Immediate get");
 
         time_map.entry(coords.time_row).or_insert_with(|| {
             let map_entry: MapEntry = MapEntry { rvus: 0.0 };
@@ -170,19 +172,19 @@ impl RVUMap {
                         if con_map.keys().len() > 0 {
                             let mut subspecialtynode = json::JsonValue::new_object();
                             for context in con_map.keys() {
-                                let mod_map = con_map.get(context).expect("No modmap");
-                                if mod_map.keys().len() > 0 {
+                                let time_map = con_map.get(context).expect("No timemap");
+                                if time_map.keys().len() > 0 {
                                     let mut contextnode = json::JsonValue::new_object();
-                                    for modality in mod_map.keys() {
-                                        let time_map = mod_map.get(modality).expect("No time map");
+                                    //for modality in mod_map.keys() {
+                                        //let time_map = mod_map.get(context).expect("No time map");
                                         if time_map.keys().len() > 0 {
-                                            let mut modalitynode = json::JsonValue::new_object();
+                                            //let mut modalitynode = json::JsonValue::new_object();
                                             for time_row in time_map.keys() {
                                                 let coords = MapCoords {
                                                     site: site.to_owned(),
                                                     subspecialty: subspecialty.to_owned(),
                                                     context: context.to_owned(),
-                                                    modality: modality.to_owned(),
+                                                    //modality: modality.to_owned(),
                                                     time_row: time_row.to_owned(),
                                                 };
 
@@ -197,13 +199,13 @@ impl RVUMap {
                                                     let me = time_map
                                                         .get(time_row)
                                                         .expect("No map entry");
-                                                    modalitynode[time_row.to_string()] =
+                                                    contextnode[time_row.to_string()] =
                                                         me.rvus.into();
                                                 }
                                             }
-                                            contextnode[modality] = modalitynode;
+                                            //contextnode[modality] = modalitynode;
                                         }
-                                    }
+                                   // }
                                     subspecialtynode[context] = contextnode;
                                 }
                             }
@@ -245,13 +247,13 @@ impl RVUMap {
         for (site, m1) in &self.map {
             for (subspecialty, m2) in m1 {
                 for (context, m3) in m2 {
-                    for (modality, m4) in m3 {
-                        for (time_row, me) in m4 {
+                    //for (modality, m4) in m3 {
+                        for (time_row, me) in m3 {
                             let coords = MapCoords {
                                 site: site.to_owned(),
                                 subspecialty: subspecialty.to_owned(),
                                 context: context.to_owned(),
-                                modality: modality.to_owned(),
+                                //modality: modality.to_owned(),
                                 time_row: time_row.to_owned(),
                             };
 
@@ -270,7 +272,7 @@ impl RVUMap {
                                 }
                             }
                         }
-                    }
+                    //}
                 }
             }
         }
@@ -365,6 +367,7 @@ pub fn create_map(
                 },
             };
 
+            /*
             //Get modality, but check for aliases
             let listed_modality = source.main_data_table.get_val(
                 &main_headers::PertinentHeaders::Modality.get_label(),
@@ -402,6 +405,7 @@ pub fn create_map(
             if !modality_map.contains_key(&exam_code) {
                 modality_map.insert(exam_code.to_owned(), coords.modality.to_owned());
             }
+            */
         }
 
         //Check if this date should be included in RVU totals. If so, add rvus.
@@ -432,14 +436,14 @@ pub fn create_map(
         for subspecialty in sub_map.iter_mut() {
             let con_map = subspecialty.1;
             for context in con_map.iter_mut() {
-                let mod_map = context.1;
-                for modality in mod_map.iter_mut() {
-                    let time_map = modality.1;
+                //let mod_map = context.1;
+                //for modality in mod_map.iter_mut() {
+                    let time_map = context.1;
                     for time_row in time_map.iter_mut() {
                         let me = time_row.1;
                         me.set_rvus(me.rvus / days);
                     }
-                }
+                //}
             }
         }
     }
@@ -482,12 +486,14 @@ pub fn create_map(
             Some(val) => val.to_owned(),
         };
         coords.context = crate::globals::OUTPATIENT.to_string();
+        /*
         coords.modality = match modality_map.get(&exam_code) {
             None => {
                 return Err(format!("Bad exam code {}", exam_code));
             }
             Some(val) => val.to_owned(),
         };
+        */
 
         for key in weights.keys() {
             coords.time_row = *key;
