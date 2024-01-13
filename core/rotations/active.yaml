@@ -401,10 +401,10 @@ rotation_manifest:
   - sites: SRC
     subspecialties: General
     contexts: Wet Read
-    modalities: CT/US/XR/RF
+    modalities: All
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 12:00 PBD-24:00 PBD
+    - 12:30 CD-17:00 CD
   - sites: SRC
     subspecialties: CT Procedure
     contexts: All
