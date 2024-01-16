@@ -1045,14 +1045,14 @@ rotation_manifest:
     #modalities: XR/RF/US/MG
     days: Mon/Tue/Wed/Thu
     time_periods:
-    - 19:00 CD-07:30 ND
+    - 18:00 CD-07:30 ND
   - sites: SH
     exams: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)/Fluoro (General)/Fluoro Procedure (MSK)
     contexts: ED/Inpatient
     #modalities: XR/RF/US/MG
     days: Fri
     time_periods:
-    - 19:00 CD-07:00 ND
+    - 18:00 CD-07:00 ND
   - sites: SH
     exams: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)/Fluoro (General)/Fluoro Procedure (MSK)
     contexts: ED/Inpatient
@@ -1070,7 +1070,7 @@ rotation_manifest:
 - rotation: PA-US
   location: SH
   hours:
-  - hours: 09:00 CD-19:00 CD
+  - hours: 09:00 CD-18:00 CD
     days: Mon/Tue/Wed/Thu/Fri/Sat/Sun
   responsibilities:
   - sites: SH
@@ -1079,14 +1079,14 @@ rotation_manifest:
     #modalities: US
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 09:00 CD-19:00 CD
+    - 09:00 CD-18:00 CD
   - sites: SH
     exams: Fluoro (General)/Fluoro Procedure (MSK)
     contexts: All
     #modalities: XR/RF
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 17:30 CD-19:00 CD
+    - 17:30 CD-18:00 CD
   comments:
   - Preprocedural and postprocedural care of all US procedure patients
   - Bone marrow biopsies
@@ -1272,13 +1272,13 @@ rotation_manifest:
     - 00:00 CD-07:30 CD
     - 16:30 CD-24:00 CD
   - sites: SH
-    exams: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)
+    exams: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)/Fluoro (General)/Fluoro Procedure (MSK)
     contexts: Outpatient
     #modalities: US
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 00:00 CD-07:30 CD
-    - 19:00 CD-24:00 CD
+    - 18:00 CD-24:00 CD
   - sites: WVH
     exams: Mamm (Diag)
     contexts: Outpatient
@@ -1318,13 +1318,5 @@ rotation_manifest:
     days: Sat/Sun
     time_periods:
     - 00:00 CD-24:00 CD
-  - sites: SH
-    exams: Fluoro (General)/Fluoro Procedure (MSK)
-    contexts: Outpatient
-    #modalities: XR/RF
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 00:00 CD-07:30 CD
-    - 19:00 CD-24:00 CD
   comments:
   - Responsibilities listed here represent schedule blocks. Such studies should not be scheduled and so are not accounted for in these rotations.
