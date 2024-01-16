@@ -2,7 +2,9 @@
 data
 cache
 err
-categories/archive
+
+# Output
+output
 
 # Rust
 target

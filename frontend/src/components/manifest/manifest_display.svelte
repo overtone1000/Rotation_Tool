@@ -49,7 +49,7 @@
 	$:{
 		empty_day=true;
 		let responsible_days = new Set<number>();
-		if(selected_rotation!==undefined)
+		if(selected_rotation && selected_rotation.responsibilities)
 		{
 			for(const responsibility of selected_rotation.responsibilities)
 			{

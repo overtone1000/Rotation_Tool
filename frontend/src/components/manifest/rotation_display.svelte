@@ -37,28 +37,30 @@
 </script>
 
 <div class="container">
-	<table class="table">
-		<tr>
-			<th>Site</th>
-			<th>Context</th>
-			<th>Exams</th>
-			<th>Portions</th>
-		</tr>
-		{#key dow}
-			{#key rotation.responsibilities}
-				{#if rotation.responsibilities!==undefined && rotation.responsibilities!==null}
-					{#each rotation.responsibilities as responsibility}
-						{#if should_display(responsibility)}
-							<ResponsibilityDisplay
-								responsibility={responsibility}
-								dow={dow}
-							/>
-						{/if}
-					{/each}
-				{/if}
+	{#if rotation.responsibilities}
+		<table class="table">
+			<tr>
+				<th>Site</th>
+				<th>Context</th>
+				<th>Exams</th>
+				<th>Portions</th>
+			</tr>
+			{#key dow}
+				{#key rotation.responsibilities}
+					{#if rotation.responsibilities!==undefined && rotation.responsibilities!==null}
+						{#each rotation.responsibilities as responsibility}
+							{#if should_display(responsibility)}
+								<ResponsibilityDisplay
+									responsibility={responsibility}
+									dow={dow}
+								/>
+							{/if}
+						{/each}
+					{/if}
+				{/key}
 			{/key}
-		{/key}
-	</table>
+		</table>
+	{/if}
 	<div>
 		{#if rotation.location}
 			<div>
