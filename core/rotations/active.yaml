@@ -320,7 +320,7 @@ rotation_manifest:
     days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
   breaktime:
     - 11:30 CD-12:30 CD
-    - "Urgent reads covered by SRC"
+    - ""
   responsibilities:
   # Every day
   - sites: All
@@ -352,13 +352,6 @@ rotation_manifest:
     #modalities: MG
     days: Mon/Tue/Wed/Thu/Fri
     weekly_fraction: 0.1
-  - sites: SRC
-    exams: General XR/General CT/General US
-    contexts: Wet Read
-    #modalities: All
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 12:30 CD-17:00 CD
   - sites: SRC
     exams: CT Procedure
     contexts: All
@@ -426,7 +419,7 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     weekly_fraction: 0.2
   - sites: SRC
-    exams: General XR
+    exams: General XR/General US
     contexts: All
     #modalities: XR/RF
     days: Mon/Tue/Wed/Thu/Fri
@@ -439,6 +432,7 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 08:00 CD-12:30 CD
+    - 13:30 CD-17:00 CD
   # Mon-Fri
   - sites: SRC/TPC
     exams: Mamm (Diag)/Mamm (Procedures)
@@ -448,13 +442,6 @@ rotation_manifest:
     time_periods:
     - 08:00 CD-12:30 CD
     - 13:30 CD-16:30 CD
-  - sites: SRC
-    exams: General US
-    contexts: All
-    #modalities: US
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 00:00 CD-15:00 CD
   - sites: SRC
     exams: US Procedure (General)
     contexts: All
