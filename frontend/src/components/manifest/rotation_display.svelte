@@ -5,6 +5,8 @@
 
 	export let rotation:Rotation;
 	export let dow:number;
+	export let hide_wetreads:boolean;
+
 	let shortdow:string;
 	$:{
 		shortdow = shortdowfunc(dow);
@@ -53,6 +55,7 @@
 								<ResponsibilityDisplay
 									responsibility={responsibility}
 									dow={dow}
+									hide_wetreads={hide_wetreads}
 								/>
 							{/if}
 						{/each}

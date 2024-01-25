@@ -20,6 +20,8 @@ export const short_days_of_the_week = [
     "Sat"
 ];
 
+export const wet_read_string = "Wet Read";
+
 export const pd = (di:number)=>{
     switch(di)
     {

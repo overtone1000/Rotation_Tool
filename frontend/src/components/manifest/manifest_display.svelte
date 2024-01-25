@@ -9,7 +9,9 @@
 	import { onMount } from 'svelte';
 	import DrawerToggleButton from '../common/drawer_toggle_button.svelte';
 	import { key } from '../../commons/key';
-	
+	import Switch from '@smui/switch';
+  	import FormField from '@smui/form-field';
+
 	let manifest:RotationManifest|undefined=undefined;
 	
 	onMount(() => {
@@ -72,6 +74,8 @@
 		responsible_days.forEach((v)=>{responsible_days_arr.push(v);})
 		responsible_days_arr.sort();
 	}
+
+	let show_wetreads:boolean=false;
 </script>
 
 {#if manifest !== undefined}
@@ -110,8 +114,14 @@
 			</div>
 			<div class="manifest">
 				{#if selected_rotation!==undefined}
-					<div class="rotation_label">{selected_rotation.rotation} {dowfunc(dow)}</div>
-					<RotationDisplay rotation={selected_rotation} dow={dow}/>
+					<div class="rotation_header">
+							<div class="rotation_label">{selected_rotation.rotation} {dowfunc(dow)}</div>
+							<FormField>
+								<Switch bind:checked={show_wetreads} />
+								<span slot="label">Show Wet Reads</span>
+							</FormField>
+					</div>
+					<RotationDisplay rotation={selected_rotation} dow={dow} hide_wetreads={!show_wetreads}/>
 					{#if empty_day}
 						<div class="warning warning_empty">
 							<div class="warning_empty_desc">
@@ -162,11 +172,20 @@
 		padding-left: 5px;
 		flex-shrink: 1;
 	}
+
 	.rotation_label{
 		flex-shrink: 0;
 		text-align: left;
+		text-justify: center;
 		font-size: larger;
 		font-weight: bold;
+		height: 100%;
+	}
+
+	.rotation_header{
+		display:flex;
+		justify-content:space-between;
+		flex-direction: row;
 	}
 
 	.warning_empty {
