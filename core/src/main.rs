@@ -9,6 +9,7 @@ use chrono::{NaiveDateTime, Date, DateTime};
 use constraints::{is_business_day, is_not_holiday, ConstraintSet};
 
 
+use globals::file_names::COVERAGE_AUDIT_NOWORK_OUT;
 use processed_source::ProcessedSource;
 
 
@@ -98,7 +99,10 @@ fn analyze_rotations() -> Result<(), Box<dyn Error>> {
     let auditfile: File = File::create(COVERAGE_AUDIT_OUT)?;
     let mut writer = BufWriter::new(auditfile);
 
-    processed_data.coverage_tree.audit_to_stream(&mut writer)?;
+    let auditfile_nowork: File = File::create(COVERAGE_AUDIT_NOWORK_OUT)?;
+    let mut writer_nowork = BufWriter::new(auditfile_nowork);
+
+    processed_data.coverage_tree.audit_to_stream(&mut writer,&mut writer_nowork)?;
 
     processed_data.coverage_tree.analysis_to_file(COVERAGE_ANALYSIS_OUT.to_owned() + "_rvu.csv", true);
     processed_data.coverage_tree.analysis_to_file(COVERAGE_ANALYSIS_OUT.to_owned() + "_bvu.csv", false);

@@ -185,10 +185,10 @@ pub struct MalformedCoverage {
     gaps: Vec<(TimeSinceMidnight, TimeSinceMidnight, String, f64)>,
     overlaps: Vec<String>,
     incorrect_fraction: Option<f64>,
+    no_work: bool
 }
 
 pub enum CoverageError {
-    NoWork,
     NoCoverage(f64),
     MalformedCoverage(MalformedCoverage),
 }
@@ -224,10 +224,7 @@ impl CoverageAndWorkDay {
     }
 
     fn audit_coverage(&mut self) -> CoverageError {
-        if self.work.is_empty() {
-            return CoverageError::NoWork;
-        }
-
+        
         self.sort_coverage();
 
         match &self.coverages {
@@ -239,6 +236,9 @@ impl CoverageAndWorkDay {
             }
             Some(coverages) => {
                 let mut retval = MalformedCoverage::default();
+
+                retval.no_work=self.work.is_empty();
+                
                 match coverages {
                     Coverage::Temporal(temporal_coverages) => {
                         match temporal_coverages.split_first() {
@@ -312,6 +312,7 @@ impl CoverageAndWorkDay {
                         }
                     }
                 }
+
                 CoverageError::MalformedCoverage(retval)
             }
         }
@@ -1108,7 +1109,7 @@ impl CoverageMap {
         }
     }
 
-    pub fn audit_to_stream<T: Write>(&mut self, writer: &mut T) -> Result<(), Box<dyn Error>> {
+    pub fn audit_to_stream<T: Write>(&mut self, primary_error_writer: &mut T, work_gap_writer: &mut T) -> Result<(), Box<dyn Error>> {
         let audit_result = self.audit();
 
         let mut sorted_keys: Vec<&CoverageCoordinates> = audit_result.keys().collect();
@@ -1116,23 +1117,27 @@ impl CoverageMap {
 
         let mut no_errs=true;
 
+        let header = "Site \u{0009} Exam \u{0009} Context \u{0009} Day of Week \n";
+        
+        primary_error_writer.write(header.as_bytes())?;
+        work_gap_writer.write(header.as_bytes())?;
+
         for coords in sorted_keys {
+            let coordstr = format!("{} \u{0009} {} \u{0009} {} \u{0009} {} \u{0009}",
+                coords.site,
+                coords.subspecialty,
+                coords.context,
+                //coords.modality,
+                coords.weekday
+            );
             let errs = audit_result.get(coords).expect("Should be a key");
             match errs {
-                CoverageError::NoWork => {
-                    //Too verbose, skip these for now
-                    //retval.push(format!("No work for: {site}, {subspecialty}, {context}, {modality}, {weekday}"));
-                }
                 CoverageError::NoCoverage(rvus) => {
                     no_errs=false;
                     writeln!(
-                        writer,
-                        "No coverage for: {}, {}, {}, {} ({} rvus)",
-                        coords.site,
-                        coords.subspecialty,
-                        coords.context,
-                        //coords.modality,
-                        coords.weekday,
+                        primary_error_writer,
+                        "{} No coverage ({} rvus)",
+                        coordstr,
                         rvus
                     )?;
                 }
@@ -1141,13 +1146,9 @@ impl CoverageMap {
                         for (rotation1, rotation2, desc, rvus) in &errs.gaps {
                             no_errs=false;
                             writeln!(
-                                writer,
-                                "Coverage gap: {}, {}, {}, {}: {}-{} {} ({} rvus)",
-                                coords.site,
-                                coords.subspecialty,
-                                coords.context,
-                                //coords.modality,
-                                coords.weekday,
+                                primary_error_writer,
+                                "{} Coverage gap: {}-{} {} ({} rvus)",
+                                coordstr,
                                 rotation1,
                                 rotation2,
                                 desc,
@@ -1159,13 +1160,9 @@ impl CoverageMap {
                         for overlap in &errs.overlaps {
                             no_errs=false;
                             writeln!(
-                                writer,
-                                "Coverage overlap: {}, {}, {}, {}: {}",
-                                coords.site,
-                                coords.subspecialty,
-                                coords.context,
-                                //coords.modality,
-                                coords.weekday,
+                                primary_error_writer,
+                                "{} Coverage overlap: {}",
+                                coordstr,
                                 overlap
                             )?;
                         }
@@ -1174,13 +1171,9 @@ impl CoverageMap {
                         Some(x) => {
                             no_errs=false;
                             writeln!(
-                                writer,
-                                "Incorrect fraction: {}, {}, {}, {}: {}",
-                                coords.site,
-                                coords.subspecialty,
-                                coords.context,
-                                //coords.modality,
-                                coords.weekday,
+                                primary_error_writer,
+                                "{} Incorrect fraction: {}",
+                                coordstr,
                                 x
                             )?;
                         }
@@ -1188,13 +1181,20 @@ impl CoverageMap {
                             ()
                         },
                     }
+                    if errs.no_work {
+                        writeln!(
+                            work_gap_writer,
+                            "{} No work",
+                            coordstr
+                        )?;
+                    }
                 }
             };
         }
 
         if no_errs
         {
-            writeln!(writer, "No errors detected.")?;
+            writeln!(primary_error_writer, "No errors detected.")?;
             Ok(())
         }
         else {
