@@ -901,7 +901,8 @@ rotation_manifest:
     time_periods:
     - 11:00 CD-15:00 CD
   comments:
-  - Turnaround times must be <24 hrs
+  - Turnaround time for routine exams must be < 24 hrs
+  - Turnaround time for stat exams (stat icon in PACS) must be< 1 hr
 - rotation: Call 1
   location: SH
   hours: 
