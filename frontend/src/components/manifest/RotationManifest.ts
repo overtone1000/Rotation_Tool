@@ -2,7 +2,7 @@ export interface RotationManifest
 {
     title:string,
     rotation_manifest:[Rotation],
-    baslines:[Baseline]
+    baselines:[Baseline]
 }
 
 export interface WorkHoursPeriod

@@ -4,7 +4,8 @@
 	import type { RotationManifest } from "../manifest/RotationManifest";
 	import Dialog, { Title, Content, Actions } from '@smui/dialog';
   	import Button, { Label } from '@smui/button';
-	  import { key } from '../../commons/key';
+	import { key } from '../../commons/key';
+	import ManifestEditComponent from "./manifest_edit_component.svelte";
 
 	let manifest:RotationManifest|undefined=undefined;
 	
@@ -39,9 +40,16 @@
 							value.json().then(
 								(res:RotationManifest)=>{
 									manifest=res;
+									console.debug("Manifest is now ",manifest);
+								},
+								(err)=>{
+									console.error("Rejected promise.",err);
 								}
 							);
 						}
+					},
+					(err)=>{
+						console.error("Rejected fetch",err);
 					}
 				);
 			}
@@ -50,6 +58,7 @@
 
 	let uploaded_json:FileList|undefined=undefined;
 	$ : {
+		console.debug("Updated uploaded JSON");
 		if(uploaded_json!==undefined)
 		{
 			const file = uploaded_json.item(0);
@@ -92,7 +101,6 @@
             window.URL.revokeObjectURL(url);  
         }, 0); 
 	}
-		
 </script>
 
 <Dialog
@@ -129,21 +137,20 @@
 						<div class="upload_button_label">Upload</div>
 						<input class="upload_button" accept="application/json" bind:files={uploaded_json} type="file"/>
                     </Item>
-					<Item
-						nonInteractive={manifest===undefined}
-						on:click={download}
-					>
-						Download
-					</Item>
+					{#if manifest !== undefined}
+						<Item
+							on:click={download}
+						>
+							Download
+						</Item>
+					{/if}
                 </List>
             </DrawerContent>
         </Drawer>		
     </div>
-    <div>
-        {#if manifest !== undefined}
-            {JSON.stringify(manifest)}
-        {/if}
-    </div>
+    {#if manifest !== undefined}
+		<ManifestEditComponent manifest={manifest}/>
+	{/if}
 </div>
 
 <style>
