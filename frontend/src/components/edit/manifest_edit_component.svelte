@@ -11,8 +11,8 @@
         <Textfield bind:value={manifest.title} on:change={()=>console.debug(manifest)} label="Manifest Title" />
     </div>
     <div class="container middle">
-        <CollapsibleMember name="Rotations">
-            <div slot="contents" class="container inner">
+        <CollapsibleMember name="Rotations" show_children={true}>
+            <div slot="contents" class="inner">
                 {#each manifest.rotation_manifest as rotation}
                     <div class="container">
                         <RotationEditComponent bind:rotation={rotation}/>
@@ -54,7 +54,7 @@
         display: flex;
         flex-grow: 1;
         flex-direction: column;
-        height: 100%;
+        min-height: 0px;
         overflow:auto;
     }
 </style>

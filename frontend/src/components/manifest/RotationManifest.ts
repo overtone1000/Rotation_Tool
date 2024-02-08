@@ -6,13 +6,13 @@ export interface RotationManifest
 }
 
 export interface WorkHoursPeriod
-{hours:TimePeriod,days:[]}
+{hours:TimePeriod,days:Weekday[]}
 
 export interface Rotation
 {
     rotation:string,
     location:string,
-    hours?:[WorkHoursPeriod],
+    hours?:WorkHoursPeriod[],
     breaktime?:[TimePeriod,string]
     responsibilities:[Responsibility],
     comments:string[]
@@ -22,7 +22,7 @@ export interface Responsibility
 {
     sites:string|string[],
     contexts:string|string[],
-    days:string|string[],
+    days:Weekday|Weekday[],
     //modalities:string|string[],
     exams:string|string[],
     time_periods:null|[TimePeriod],
@@ -37,3 +37,14 @@ export interface Baseline
     rvu:number,
     bvu:number
 }
+
+export type Weekday = "Mon" | "Tue" | "Wed" | "Thu" | "Fri" | "Sat" | "Sun";
+export const all_weekdays:Weekday[]=[
+    "Mon",
+    "Tue",
+    "Wed",
+    "Thu",
+    "Fri",
+    "Sat",
+    "Sun"
+];
