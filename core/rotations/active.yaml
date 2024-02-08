@@ -573,6 +573,14 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 13:00 CD-16:30 CD
+  # Covering before PA arrives
+  - sites: SH
+    exams: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)
+    contexts: ED/Inpatient/Outpatient
+    #modalities: US
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 07:30 CD-08:00 CD
   comments:
     - Supervise and interpret SH fluoro
     - Supervise PA US Procedures
@@ -1155,7 +1163,7 @@ rotation_manifest:
 - rotation: PA-US
   location: SH
   hours:
-  - hours: 09:00 CD-18:00 CD
+  - hours: 08:00 CD-18:00 CD
     days: Mon/Tue/Wed/Thu/Fri/Sat/Sun
   responsibilities:
   - sites: SH
@@ -1164,7 +1172,7 @@ rotation_manifest:
     #modalities: US
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 09:00 CD-18:00 CD
+    - 08:00 CD-18:00 CD
   - sites: SH
     exams: Fluoro (General)/Fluoro Procedure (MSK)
     contexts: ED/Inpatient/Outpatient
@@ -1174,21 +1182,13 @@ rotation_manifest:
     - 17:30 CD-18:00 CD
   comments:
   - Preprocedural and postprocedural care of all US procedure patients
-  - Bone marrow biopsies
-  - Enter preprocedural orders for next day CT and US patients
+  - Enter preprocedural orders for next day US
 - rotation: PA-GI
   location: SH
   hours:
   - hours: 07:30 CD-17:30 CD
     days: Mon/Tue/Wed/Thu/Fri/Sat/Sun
   responsibilities:
-  - sites: SH
-    exams: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)
-    contexts: ED/Inpatient/Outpatient
-    #modalities: US
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 07:30 CD-09:00 CD
   - sites: SH
     exams: Fluoro (General)/Fluoro Procedure (MSK)
     contexts: ED/Inpatient/Outpatient
@@ -1198,7 +1198,7 @@ rotation_manifest:
     - 07:30 CD-17:30 CD
   comments:
   - Preprocedural and postprocedural care of all fluoro procedure patients
-  - Dictate needle procedures
+  - Dictate fluoro procedures
   - Review GI imaging with IR2
 - rotation: PA-IR
   location: SH
@@ -1209,9 +1209,12 @@ rotation_manifest:
   - Supervised by IR1
   - Carry IR phone and take consults
   - Round on IR patients and write progress notes
+  - Assist with post-procedure management of IR patients
   - TDC and port removals
-  - H&Ps and preprocedural and postprocedural care of all IR procedure patients
-  - Assist PA-GI and PA-US if available
+  - Assist PA-GI and PA-US as time allows
+  - Bone marrow bopsies
+  - Manage MR moderate sedation
+  - Enter pre-procedure orders for next day CT
 - rotation: PA Clinic
   location: SRC/SH
   hours:
@@ -1223,15 +1226,14 @@ rotation_manifest:
     contexts: Outpatient
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 08:00 CD-16:30 CD
+    - 08:00 CD-18:00 CD
   comments:
   - If no SRC procedures, travel to SH and assist other PAs
-  - Afternoon clinic
-  - Take patient phone calls
+  - Afternoon clinic including H&Ps and progress notes
+  - Take patient phone calls and call patients with results
   - Administer IV metoprolol for coronary CTAs
-  - Write orders for the next day's IR procedures
-  - Call patients with results
   - Staff clinic and contrast administration until 6 PM
+  - TDC removal
 - rotation: PA-Weekend
   location: SH
   hours:
@@ -1248,6 +1250,7 @@ rotation_manifest:
   comments:
   - Carry IR phone and take consults
   - Round on IR patients and write progress notes
+  - Orders for Monday CT and US procedures
   - Okay to leave the hospital but must be no more than 20 minutes away and available by page for procedures through 6 PM
 - rotation: Subspecialty Work
   location: Remote
@@ -1315,7 +1318,15 @@ rotation_manifest:
     - 00:00 CD-24:00 CD
   # No procedures or mamms outside normal horus
   - sites: SRC
-    exams: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)/Angio/Fluoro (General)/Fluoro Procedure (MSK)/Mamm (Diag)/Mamm (Procedures)/CT Procedure
+    exams: US Procedure (General)/US Procedure (IR or PA)/US Procedure (MSK)/Angio/Fluoro (General)/Fluoro Procedure (MSK)
+    contexts: Outpatient
+    #modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-08:00 CD
+    - 18:00 CD-24:00 CD
+  - sites: SRC
+    exams: Mamm (Diag)/Mamm (Procedures)/CT Procedure
     contexts: Outpatient
     #modalities: All
     days: Mon/Tue/Wed/Thu/Fri
