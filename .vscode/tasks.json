@@ -1,0 +1,25 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "npm",
+            "script": "build_and_deploy",
+            "path": "frontend",
+            "group": "build",
+            "problemMatcher": [],
+            "label": "npm: build_and_deploy - frontend",
+            "detail": "vite build && bash ../deploy/testing_autoscheda_deploy.sh"
+        },
+        {
+            "type": "npm",
+            "script": "dev",
+            "path": "frontend",
+            "group": "build",
+            "problemMatcher": [],
+            "label": "npm: dev frontend",
+            "detail": "vite dev"
+        }
+    ]
+  }
