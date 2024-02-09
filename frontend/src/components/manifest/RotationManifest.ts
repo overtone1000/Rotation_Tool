@@ -43,9 +43,9 @@ export function dayoffsetToDisplayString(dayoffset:DayOffset)
     switch(dayoffset)
     {
         case "CD":return "Current Day";
-        case "PD":return "Previous Day";
-        case "PBD":return "Previous Business Day";
-        case "PBD+1":return "Day After Previous Business Day";
+        case "PD":return "Prior Day";
+        case "PBD":return "Prior Business Day";
+        case "PBD+1":return "Day After Prior Business Day";
         case "ND":return "Next Day";
     }
 }
