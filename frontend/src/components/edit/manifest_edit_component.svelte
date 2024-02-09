@@ -10,11 +10,11 @@
     <div>
         <Textfield bind:value={manifest.title} on:change={()=>console.debug(manifest)} label="Manifest Title" />
     </div>
-    <div class="container middle">
+    <div class="rounded_borders middle">
         <CollapsibleMember name="Rotations" show_children={true}>
             <div slot="contents" class="inner">
                 {#each manifest.rotation_manifest as rotation}
-                    <div class="container">
+                    <div class="rounded_borders">
                         <RotationEditComponent bind:rotation={rotation}/>
                     </div>
                 {/each}
@@ -24,15 +24,7 @@
 </div>
 
 <style>    
-    .container {
-        border-width: 1px;
-        border-style: solid;
-        border-radius: 10px;
-        margin: 3px;
-        padding: 10px;
-        flex-shrink: 1;
-    }
-
+    
     .outer {
         display: flex;
         flex-grow: 1;

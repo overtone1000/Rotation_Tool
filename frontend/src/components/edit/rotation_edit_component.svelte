@@ -10,7 +10,7 @@
     <Textfield bind:value={rotation.rotation} label="Name"/>
     <Textfield bind:value={rotation.location} label="Location"/>
     {#if rotation.hours}
-        <div>
+        <div class="rounded_borders">
             Hours
             {#each rotation.hours as period}
                 <EditTimePeriod bind:period={period.hours}/>
@@ -19,7 +19,7 @@
         </div>
     {/if}
     {#if rotation.breaktime}
-        <div>
+        <div class="rounded_borders">
             Break
             <EditTimePeriod bind:period={rotation.breaktime[0]}/>
             <Textfield style="width: 100%;" bind:value={rotation.breaktime[1]} label="Coverage"/>

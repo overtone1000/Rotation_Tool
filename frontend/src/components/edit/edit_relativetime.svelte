@@ -1,30 +1,21 @@
 <script lang="ts">
-	import { parseTimePeriodString, timePeriodToString, type TimePeriodString, all_dayoffsets, dayoffsetToDisplayString } from "../manifest/RotationManifest";
+	import { parseTimePeriodString, timePeriodToString, type TimePeriodString, all_dayoffsets, dayoffsetToDisplayString, parseRelativeTimeString, type RelativeTime } from "../manifest/RotationManifest";
     import SveltyPicker, { config } from 'svelty-picker';
     import Select, { Option } from '@smui/select';
-    import EditRelativeTime from "./edit_relativetime.svelte"
 
-    export let period:TimePeriodString;
-    let parsed_period=parseTimePeriodString(period);
-
-    //Change period when parsed_period is adjusted.
-    $:{
-        period=timePeriodToString(parsed_period);
-    }
+    export let relative_time:RelativeTime;
 </script>
 
-<div class="container">
-    <slot name="label"/>
-    <EditRelativeTime bind:relative_time={parsed_period.start}/>
-    <EditRelativeTime bind:relative_time={parsed_period.end}/>
+<div>
+    <SveltyPicker mode=time bind:value={relative_time.time} format="hh:ii"/>
+    <Select bind:value={relative_time.day} label="Day Offset">
+        {#each all_dayoffsets as dayoffset}
+            <Option value={dayoffset}>{dayoffsetToDisplayString(dayoffset)}</Option>
+        {/each}
+    </Select>
 </div>
 
 <style>
-    .container {
-        display:flex;
-        flex-direction: row;
-        align-items: center;
-    }
     :root {
         --sdt-bg-main: #585858;
         --sdt-shadow-color: #777;

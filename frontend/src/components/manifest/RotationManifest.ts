@@ -6,14 +6,14 @@ export interface RotationManifest
 }
 
 export interface WorkHoursPeriod
-{hours:TimePeriod,days:Weekday[]}
+{hours:TimePeriodString,days:Weekday[]}
 
 export interface Rotation
 {
     rotation:string,
     location:string,
     hours?:WorkHoursPeriod[],
-    breaktime?:[TimePeriod,string]
+    breaktime?:[TimePeriodString,string]
     responsibilities:[Responsibility],
     comments:string[]
 }
@@ -25,11 +25,65 @@ export interface Responsibility
     days:Weekday|Weekday[],
     //modalities:string|string[],
     exams:string|string[],
-    time_periods:null|[TimePeriod],
+    time_periods:null|[TimePeriodString],
     weekly_fraction:null|number
 }
 
-export type TimePeriod = string;
+export type TimePeriodString = string;
+export type DayOffset = "CD" | "PD" | "PBD" | "PBD+1" | "ND";
+export const all_dayoffsets:DayOffset[] = [
+    "CD",
+    "PD",
+    "PBD",
+    "PBD+1",
+    "ND"
+]
+export function dayoffsetToDisplayString(dayoffset:DayOffset)
+{
+    switch(dayoffset)
+    {
+        case "CD":return "Current Day";
+        case "PD":return "Previous Day";
+        case "PBD":return "Previous Business Day";
+        case "PBD+1":return "Day After Previous Business Day";
+        case "ND":return "Next Day";
+    }
+}
+export interface RelativeTime {
+    time:string, //format hh:mm
+    day:DayOffset,
+}
+export interface TimePeriod {
+    start:RelativeTime,
+    end:RelativeTime
+}
+export function parseRelativeTimeString(str:string)
+{
+    let contents=str.split(" ");
+    let hourminute=contents[0].split(":");
+    let retval:RelativeTime={
+        time: hourminute[0].padStart(2,"0")+":"+hourminute[1].padStart(2,"0"),
+        day: contents[1] as DayOffset
+    }
+    return retval;
+}
+export function relativeTimeToString(rt:RelativeTime)
+{
+    return rt.time + " " + rt.day;
+}
+export function parseTimePeriodString(str:TimePeriodString)
+{
+    let relative_times=str.split("-");
+    let retval:TimePeriod={
+        start:parseRelativeTimeString(relative_times[0]),
+        end:parseRelativeTimeString(relative_times[1])
+    };
+    return retval;
+}
+export function timePeriodToString(period:TimePeriod)
+{
+    return relativeTimeToString(period.start) + "-" + relativeTimeToString(period.end);
+}
 
 export interface Baseline
 {

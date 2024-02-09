@@ -38,6 +38,11 @@ body {
 	color: theme.$on-surface;
 }
 
+input {
+	background-color: theme.$surface;
+	color: theme.$on-surface;
+}
+
 a {
 	color: #40b3ff;
 }
@@ -100,6 +105,8 @@ b,
 strong {
 	font-weight: bold;
 }
+
+@import '../common';
 
 .warning {
 	background:#5e0606;
