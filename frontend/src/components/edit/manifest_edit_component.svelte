@@ -3,7 +3,22 @@
 	import Textfield from '@smui/textfield';
 	import RotationEditComponent from "./rotation_edit_component.svelte";
     import CollapsibleMember from "./collapsible_member.svelte";
-	export let manifest:RotationManifest;
+	import EditArray from "./edit_array.svelte";
+	
+    export let manifest:RotationManifest;
+
+    const newRotation = () => {
+        manifest.rotation_manifest.push(
+            {
+                rotation:"New Rotation",
+                location:"",
+                responsibilities:[],
+                comments:[]
+            }
+        );
+
+        manifest.rotation_manifest=manifest.rotation_manifest; //Force component update with assignment
+    }
 </script>
 
 <div class="outer">
@@ -13,11 +28,13 @@
     <div class="rounded_borders middle">
         <CollapsibleMember name="Rotations" show_children={true}>
             <div slot="contents" class="inner">
-                {#each manifest.rotation_manifest as rotation}
-                    <div class="rounded_borders">
-                        <RotationEditComponent bind:rotation={rotation}/>
-                    </div>
-                {/each}
+                <EditArray label="Rotation" newMember={newRotation}>
+                    {#each manifest.rotation_manifest as rotation}
+                        <div class="rounded_borders">
+                            <RotationEditComponent bind:rotation={rotation}/>
+                        </div>
+                    {/each}
+                </EditArray>
             </div>
         </CollapsibleMember>
     </div>

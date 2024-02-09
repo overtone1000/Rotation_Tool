@@ -14,7 +14,7 @@ export interface Rotation
     location:string,
     hours?:WorkHoursPeriod[],
     breaktime?:[TimePeriodString,string]
-    responsibilities:[Responsibility],
+    responsibilities:Responsibility[],
     comments:string[]
 }
 
