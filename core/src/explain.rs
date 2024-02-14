@@ -9,7 +9,7 @@ use crate::{
         only_these_subspecialties, only_this_context, ConstraintSet,
     },
     error::RotationToolError,
-    globals::{OUTPATIENT, MSK, NEURO_BRAIN, NEURO_OTHER, TPC},
+    globals::{OUTPATIENT, MSK, NEURO, TPC},
     processed_source::ProcessedSource,
     rvu_map::{self, MapCoords, RVUMap},
 };
@@ -125,8 +125,7 @@ fn explain_segment(map: RVUMap) -> String {
 
     {
         let mut subspecialties: Vec<String> = Vec::new();
-        subspecialties.push(NEURO_BRAIN.to_string());
-        subspecialties.push(NEURO_OTHER.to_string());
+        subspecialties.push(NEURO.to_string());
 
         let mut ccs: ConstraintSet<MapCoords> = ConstraintSet::new();
         ccs.add(exclude_tpc_ref);

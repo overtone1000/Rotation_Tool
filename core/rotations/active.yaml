@@ -253,7 +253,7 @@ rotation_manifest:
   #Monday
   responsibilities:
   - sites: All
-    exams: Neuro (Other)/Neuro (Brain)
+    exams: Neuro
     contexts: Outpatient
     #modalities: CT/MR
     days: Mon
@@ -261,7 +261,7 @@ rotation_manifest:
     - 09:00 PD-15:00 CD
   #Tue-Fri
   - sites: All
-    exams: Neuro (Other)/Neuro (Brain)
+    exams: Neuro
     contexts: Outpatient
     #modalities: CT/MR
     days: Tue/Wed/Thu/Fri
@@ -269,12 +269,13 @@ rotation_manifest:
     - 15:00 PD-15:00 CD
   #Every day
   - sites: SH/WVH/WB
-    exams: Neuro (Other)/Neuro (Brain)
+    exams: Neuro
     contexts: Inpatient/ED
     #modalities: CT/MR
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 07:30 CD-16:00 CD
+    - 07:30 CD-12:00 CD
+    - 13:00 CD-16:00 CD
   - sites: SC
     exams: Fluoro (General)/Fluoro Procedure (MSK)
     contexts: Outpatient
@@ -288,7 +289,7 @@ rotation_manifest:
   location: Remote
   responsibilities:
   - sites: All
-    exams: Neuro (Other)/Neuro (Brain)
+    exams: Neuro
     contexts: Outpatient
     #modalities: CT/MR
     days: Mon
@@ -623,12 +624,19 @@ rotation_manifest:
     time_periods:
     - 06:00 CD-08:00 CD
   - sites: SH/WVH/WB
-    exams: Neuro (Brain)/Neuro (Other)/Complex CTA+MRA/NM/Body MR
+    exams: Neuro/Complex CTA+MRA/NM/Body MR
     contexts: ED/Inpatient
     #modalities: CT/MR
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 06:00 CD-07:30 CD
+  - sites: SH/WVH/WB
+    exams: Neuro
+    contexts: ED/Inpatient
+    #modalities: CT/MR
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 12:00 CD-13:00 CD
   - sites: SH/WB
     exams: General XR/General US
     contexts: Inpatient
@@ -716,7 +724,7 @@ rotation_manifest:
     time_periods:
     - 15:00 CD-16:00 CD
   - sites: SH/WVH/WB
-    exams: General XR/General CT/General US/NM/Neuro (Brain)/Neuro (Other)/Complex CTA+MRA/MSK/Body MR
+    exams: General XR/General CT/General US/NM/Neuro/Complex CTA+MRA/MSK/Body MR
     contexts: Inpatient
     #modalities: MR/NM/XR/US/CT/RF
     days: Mon/Tue/Wed/Thu/Fri
@@ -782,7 +790,7 @@ rotation_manifest:
     time_periods:
     - 22:00 CD-06:00 ND
   - sites: SH/WVH/WB
-    exams: General XR/General CT/General US/NM/Complex CTA+MRA/MSK/Neuro (Brain)/Neuro (Other)/Mamm (Diag)/Body MR
+    exams: General XR/General CT/General US/NM/Complex CTA+MRA/MSK/Neuro/Mamm (Diag)/Body MR
     contexts: ED/Inpatient
     #modalities: CT/US/XR/MR/NM/RF/MG/DEXA
     days: Sun/Mon/Tue/Wed/Thu
@@ -803,7 +811,7 @@ rotation_manifest:
     time_periods:
     - 22:00 CD-07:00 ND
   - sites: SH/WVH/WB
-    exams: General XR/General CT/General US/NM/Complex CTA+MRA/MSK/Neuro (Brain)/Neuro (Other)/Mamm (Diag)/Body MR
+    exams: General XR/General CT/General US/NM/Complex CTA+MRA/MSK/Neuro/Mamm (Diag)/Body MR
     contexts: ED/Inpatient
     #modalities: CT/US/XR/MR/NM/RF/MG/DEXA
     days: Fri/Sat
@@ -925,14 +933,14 @@ rotation_manifest:
     time_periods:
     - 11:00 CD-15:30 CD
   - sites: SH/WVH/WB
-    exams: General XR/General CT/General US/NM/MSK/Neuro (Brain)/Neuro (Other)/Complex CTA+MRA/Body MR
+    exams: General XR/General CT/General US/NM/MSK/Neuro/Complex CTA+MRA/Body MR
     contexts: ED
     #modalities: CT/US/XR/NM/MR/RF
     days: Sat/Sun
     time_periods:
     - 11:00 CD-15:30 CD
   - sites: SH/WVH/WB
-    exams: General XR/General CT/General US/NM/MSK/Neuro (Brain)/Neuro (Other)/Complex CTA+MRA/Body MR
+    exams: General XR/General CT/General US/NM/MSK/Neuro/Complex CTA+MRA/Body MR
     contexts: Inpatient
     #modalities: CT/US/XR/NM/MR/RF
     days: Sat/Sun
@@ -1003,7 +1011,7 @@ rotation_manifest:
     time_periods:
     - 07:00 CD-11:00 CD
   - sites: SH/WVH/WB
-    exams: General XR/General CT/General US/NM/MSK/Neuro (Brain)/Neuro (Other)/Complex CTA+MRA/Body MR/Mamm (Diag)
+    exams: General XR/General CT/General US/NM/MSK/Neuro/Complex CTA+MRA/Body MR/Mamm (Diag)
     contexts: ED/Inpatient
     #modalities: CT/US/XR/NM/MR/RF
     days: Sat/Sun
@@ -1041,7 +1049,7 @@ rotation_manifest:
     time_periods:
     - 20:00 CD-22:00 CD
   - sites: SH/WVH/WB
-    exams: General CT/NM/Neuro (Brain)/Neuro (Other)/Complex CTA+MRA/MSK/Body MR
+    exams: General CT/NM/Neuro/Complex CTA+MRA/MSK/Body MR
     contexts: ED
     #modalities: CT/NM/MR/DEXA
     days: Mon/Tue/Wed/Thu/Fri
@@ -1062,7 +1070,7 @@ rotation_manifest:
     time_periods:
     - 19:00 CD-22:00 CD
   - sites: SH/WVH/WB
-    exams: General XR/General CT/General US/NM/Neuro (Brain)/Neuro (Other)/MSK/Complex CTA+MRA/Body MR
+    exams: General XR/General CT/General US/NM/Neuro/MSK/Complex CTA+MRA/Body MR
     contexts: ED/Inpatient
     #modalities: CT/US/XR/MR/NM/RF/MG/DEXA
     days: Mon/Tue/Wed/Thu/Fri
@@ -1084,14 +1092,14 @@ rotation_manifest:
     time_periods:
     - 15:30 CD-22:00 CD
   - sites: SH/WVH/WB
-    exams: General XR/General CT/General US/NM/Neuro (Brain)/Neuro (Other)/Complex CTA+MRA/MSK/Body MR
+    exams: General XR/General CT/General US/NM/Neuro/Complex CTA+MRA/MSK/Body MR
     contexts: ED
     #modalities: CT/US/XR/MR/NM/RF
     days: Sat/Sun
     time_periods:
     - 15:30 CD-22:00 CD
   - sites: SH/WVH/WB
-    exams: General XR/General CT/General US/NM/Neuro (Brain)/Neuro (Other)/Complex CTA+MRA/MSK/Body MR
+    exams: General XR/General CT/General US/NM/Neuro/Complex CTA+MRA/MSK/Body MR
     contexts: Inpatient
     #modalities: CT/US/XR/MR/NM/RF/MG
     days: Sat/Sun

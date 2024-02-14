@@ -90,8 +90,7 @@ pub const SITES: &[&str] = &[SH, SC, "SRC", "WVH", WB, TPC];
 
 pub(crate) const MSK: &str = "MSK";
 pub(crate) const MSK_WE_AH0C:&str = "MSK Weekend AH0C";
-pub(crate) const NEURO_BRAIN: &str = "Neuro (Brain)";
-pub(crate) const NEURO_OTHER: &str = "Neuro (Other)";
+pub(crate) const NEURO: &str = "Neuro";
 
 pub const SUBSPECIALTIES: &[&str] = &[
     "General XR",
@@ -115,8 +114,7 @@ pub const SUBSPECIALTIES: &[&str] = &[
     "CT Procedure",
     MSK,
     MSK_WE_AH0C,
-    NEURO_BRAIN,
-    NEURO_OTHER,
+    NEURO,
     "Intraop Fluoro",
     "Cardiac",
     "CT Colonography",
