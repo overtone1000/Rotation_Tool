@@ -90,12 +90,6 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 11:30 CD-12:00 CD
-  - sites: TPC
-    exams: General CT/General US/General XR
-    contexts: Wet Read
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 11:30 CD-12:00 CD
   comments:
   - Read at least 10 PETs per day. Leave no more than 10 for the next day.
   - Read at least 7 body MR per day. Leave no more than 5 for the next day.
@@ -680,8 +674,7 @@ rotation_manifest:
     #modalities: CT/US/XR/RF
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 06:00 CD-11:30 CD
-    - 12:00 CD-14:00 CD
+    - 06:00 CD-07:30 CD
   - sites: SH/WB
     exams: General CT
     contexts: Inpatient
@@ -744,7 +737,7 @@ rotation_manifest:
     days: Tue/Wed/Thu/Fri
     time_periods:
     - 17:00 CD-20:00 CD
-  - sites: SH/WVH/WB/TPC
+  - sites: SH/WVH/WB
     exams: General XR/General US/General CT
     contexts: Wet Read
     #modalities: All
@@ -758,6 +751,13 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 16:00 CD-20:00 CD
+  - sites: TPC
+    exams: General XR/General CT/General US
+    contexts: Wet Read
+    #modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 CD-20:00 CD
   - sites: SH/WVH/WB
     exams: General XR/General US
     contexts: ED
@@ -888,6 +888,13 @@ rotation_manifest:
     days: Tue/Wed/Thu/Fri
     time_periods:
     - 15:00 PD-15:00 CD
+  - sites: TPC
+    exams: General XR/General CT/General US
+    contexts: Wet Read
+    #modalities: All
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 07:30 CD-15:00 CD
   - sites: SRC
     exams: General US
     contexts: Outpatient

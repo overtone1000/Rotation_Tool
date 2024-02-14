@@ -51,9 +51,9 @@ rotation_manifest:
     - 17:00 PD-12:00 CD
     - 13:00 CD-17:00 CD
   comments:
+  - But this section can be omitted entirely.
   - Comments can go here.
   - Comments are an array.
-  - But this section can be omitted entirely.
 baselines:
 - rotation: Rotation A
   rvu: 71.2
