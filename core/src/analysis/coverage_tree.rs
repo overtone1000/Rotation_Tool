@@ -4,13 +4,14 @@ use std::collections::{hash_map::Entry, HashMap};
 use std::error::Error;
 use std::fmt::Debug;
 
+use std::fs::File;
 use std::hash::Hash;
-use std::io::Write;
+use std::io::{BufWriter, Write};
 use std::ops::AddAssign;
 use std::str::FromStr;
 
 use chrono::{Datelike, Duration, NaiveDate, NaiveDateTime, Timelike};
-use serde::Serialize;
+use serde::{Serialize, Serializer};
 use serde::ser::SerializeMap;
 
 use crate::categorization::{get_categories_map, exam_categories};
@@ -1053,8 +1054,8 @@ impl CoverageMap {
         Ok(aggregate)
     }
 
-    pub fn analysis_to_file(&mut self, path: String, use_rvu: bool) {
-        let analysis = self.analyze();
+    pub fn analysis_to_csv(analysis:&HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>>, path: String, use_rvu: bool) {
+        
         let mut writer = match csv::WriterBuilder::new()
             .delimiter(b',')
             .quote(b'"')
@@ -1107,6 +1108,17 @@ impl CoverageMap {
                 Err(_) => panic!(),
             }
         }
+    }
+
+    
+
+    pub fn analysis_to_json(analysis:&HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>>, filename: String, use_rvu: bool) -> Result<(), Box<dyn Error>>  {
+        let cachefile = File::create(filename)?;
+        let writer = BufWriter::new(&cachefile);
+        let mut serializer = serde_json::Serializer::new(writer);
+        let json = serde_json::ser::to_string(analysis)?;
+        serializer.serialize_str(json.as_str());
+        Ok(())
     }
 
     pub fn audit_to_stream<T: Write>(&mut self, primary_error_writer: &mut T, work_gap_writer: &mut T) -> Result<(), Box<dyn Error>> {

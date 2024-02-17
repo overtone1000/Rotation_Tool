@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 csv = "*"
-chrono = "*"
+chrono = { version = "*", features = ["serde"] }
 json = "*"
 statrs = "*"
 serde = { version = "*", features = ["derive"] }

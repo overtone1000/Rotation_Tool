@@ -1,11 +1,10 @@
 use std::{
-    error::Error,
-    fs::File,
-    io::{BufWriter, Write}, os::unix::process,
+    collections::HashMap, error::Error, fs::File, io::{BufWriter, Write}, os::unix::process
 };
 
 
-use chrono::{NaiveDateTime, Date, DateTime};
+use analysis::analysis_datum::AnalysisDatum;
+use chrono::{Date, DateTime, NaiveDateTime, Weekday};
 use constraints::{is_business_day, is_not_holiday, ConstraintSet};
 
 
@@ -93,7 +92,7 @@ fn process_data() -> Result<ProcessedData, Box<dyn Error>> {
     )
 }
 
-fn analyze_rotations() -> Result<(), Box<dyn Error>> {
+fn analyze_rotations() -> Result<HashMap<String, HashMap<Weekday, AnalysisDatum>>, Box<dyn Error>> {
     let mut processed_data = process_data()?;
 
     let auditfile: File = File::create(COVERAGE_AUDIT_OUT)?;
@@ -104,10 +103,11 @@ fn analyze_rotations() -> Result<(), Box<dyn Error>> {
 
     processed_data.coverage_tree.audit_to_stream(&mut writer,&mut writer_nowork)?;
 
-    processed_data.coverage_tree.analysis_to_file(COVERAGE_ANALYSIS_OUT.to_owned() + "_rvu.csv", true);
-    processed_data.coverage_tree.analysis_to_file(COVERAGE_ANALYSIS_OUT.to_owned() + "_bvu.csv", false);
+    let analysis = processed_data.coverage_tree.analyze();
+    analysis::coverage_tree::CoverageMap::analysis_to_csv(&analysis, COVERAGE_ANALYSIS_OUT.to_owned() + "_rvu.csv", true);
+    analysis::coverage_tree::CoverageMap::analysis_to_csv(&analysis, COVERAGE_ANALYSIS_OUT.to_owned() + "_bvu.csv", false);
 
-    Ok(())
+    Ok(analysis)
 }
 
 fn detailed_analysis(processed_data:&mut ProcessedData, weekday:chrono::Weekday, rotation:&str) -> Result<(), Box<dyn Error>> {
@@ -145,7 +145,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     Manifest::create_example()?;
 
-    let rebuild_source: bool = false;
+    let rebuild_source: bool = true;
 
     if rebuild_source {
         cache_source()?;
@@ -153,8 +153,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let rotation_analysis:bool = true;
 
+    let mut analysis:Option<HashMap<String, HashMap<Weekday, AnalysisDatum>>>=None;
     if rotation_analysis{
-        analyze_rotations()?;
+        analysis=Some(analyze_rotations()?);
     }
 
     let output_to_json:bool = true;
@@ -181,6 +182,15 @@ fn main() -> Result<(), Box<dyn Error>> {
         let source = ProcessedSource::load_from_cache(SOURCE_CACHE)?;
 
         source.exam_categories_list.to_json(&(base.to_string() + "/exam_categories"+&millis+".json"))?;
+
+        match analysis
+        {
+            Some(analysis) => {
+                analysis::coverage_tree::CoverageMap::analysis_to_json(&analysis, base.to_string() + "/" + COVERAGE_ANALYSIS_OUT + "_rvu.json", true)?;
+                analysis::coverage_tree::CoverageMap::analysis_to_json(&analysis, base.to_string() + "/" + COVERAGE_ANALYSIS_OUT + "_bvu.json", false)?;
+            },
+            None => (),
+        }
     }
 
     let perform_detailed_analysis:bool = false;

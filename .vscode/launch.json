@@ -5,20 +5,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug frontend",
-            "request": "launch",
-            "runtimeArgs": [
-                "run-script",
-                "dev"
-            ],
-            "runtimeExecutable": "npm",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "type": "node",
-            "cwd": "${workspaceFolder}/frontend"
-        },
-        {
             "type": "lldb",
             "request": "launch",
             "name": "Debug executable 'rotation_tool'",

@@ -48,7 +48,7 @@ impl WorkUnit {
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Serialize)]
 pub struct AnalysisDatum {
     total_rvu: f64,
     total_bvu: f64,

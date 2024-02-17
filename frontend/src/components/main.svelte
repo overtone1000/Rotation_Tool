@@ -5,19 +5,22 @@
 	import ManifestDisplay from './manifest/manifest_display.svelte';
 	import IconButton, { Icon } from '@smui/icon-button';
 	import ManifestEdit from './edit/manifest_edit.svelte';
+	import Analysis from './analysis/analysis.svelte';
 
 	
 	enum Display
 	{
 		Manifest,
 		Coverage,
-		Edit
+		Edit,
+		Analysis
 	}
 
 	const displays = [
 		Display.Manifest,
 		Display.Coverage,
-		Display.Edit
+		Display.Edit,
+		Display.Analysis
 	];
 
 	const display_to_string = (display:Display) => {
@@ -26,6 +29,7 @@
 			case Display.Manifest:return "Rotation Descriptions";
 			case Display.Coverage:return "Coverage Query";
 			case Display.Edit:return "Editor";
+			case Display.Analysis:return "Volume Analysis";
 		}
 	}
 
@@ -95,12 +99,14 @@
 		</div>
 	</div>
 	<div class="page">
-		{#if current_display==Display.Manifest}
+		{#if current_display===Display.Manifest}
 			<ManifestDisplay/>
-		{:else if current_display==Display.Coverage}
+		{:else if current_display===Display.Coverage}
 			<CoverageDisplay/>
-		{:else if current_display=Display.Edit}
+		{:else if current_display===Display.Edit}
 			<ManifestEdit/>
+		{:else if current_display===Display.Analysis}
+			<Analysis/>
 		{/if}
 	</div>
 </div>
