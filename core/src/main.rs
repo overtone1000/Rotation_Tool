@@ -14,7 +14,7 @@ use processed_source::ProcessedSource;
 
 use crate::{
     analysis::coverage_tree::CoverageMap,
-    globals::file_names::{COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE}, rotations::manifest::{JSONable, self, Manifest},
+    globals::file_names::{COVERAGE_ANALYSIS_JSON_OUT, COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE}, rotations::manifest::{self, JSONable, Manifest},
 };
 
 mod analysis;
@@ -145,7 +145,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     Manifest::create_example()?;
 
-    let rebuild_source: bool = true;
+    let rebuild_source: bool = false;
 
     if rebuild_source {
         cache_source()?;
@@ -186,8 +186,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         match analysis
         {
             Some(analysis) => {
-                analysis::coverage_tree::CoverageMap::analysis_to_json(&analysis, base.to_string() + "/" + COVERAGE_ANALYSIS_OUT + "_rvu.json", true)?;
-                analysis::coverage_tree::CoverageMap::analysis_to_json(&analysis, base.to_string() + "/" + COVERAGE_ANALYSIS_OUT + "_bvu.json", false)?;
+                analysis::coverage_tree::CoverageMap::analysis_to_json(&analysis, base.to_string() + "/" + COVERAGE_ANALYSIS_JSON_OUT+&millis+".json")?;
             },
             None => (),
         }

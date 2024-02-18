@@ -1112,12 +1112,12 @@ impl CoverageMap {
 
     
 
-    pub fn analysis_to_json(analysis:&HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>>, filename: String, use_rvu: bool) -> Result<(), Box<dyn Error>>  {
-        let cachefile = File::create(filename)?;
+    pub fn analysis_to_json(analysis:&HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>>, filename: String) -> Result<(), Box<dyn Error>>  {
+        let cachefile = File::create(&filename).expect(format!("Couldn't create file {}",&filename).as_str());
         let writer = BufWriter::new(&cachefile);
         let mut serializer = serde_json::Serializer::new(writer);
         let json = serde_json::ser::to_string(analysis)?;
-        serializer.serialize_str(json.as_str());
+        serializer.serialize_str(json.as_str())?;
         Ok(())
     }
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { key } from "../../commons/key";
 	import ObservablePlot from "./observable_plot.svelte";
 	import * as Plot from "@observablehq/plot";
 
@@ -15,6 +16,31 @@
 			Plot.lineY(test_data, {x:"Date",y:"Close"}),
 		]
 	})
+
+	let data:any;
+	const get_data=()=>{
+		fetch("data/week_analysis"+key+".json").then(
+			(value:Response)=>{
+				if(value.ok)
+				{
+					value.json().then(
+						(res:any)=>{
+							data=res;
+							console.debug("data is now ",data);
+						},
+						(err)=>{
+							console.error("Rejected promise.",err);
+						}
+					);
+				}
+			},
+			(err)=>{
+				console.error("Rejected fetch",err);
+			}
+		);
+	};
+
+	get_data();
 </script>
 
 <div class="container1">
