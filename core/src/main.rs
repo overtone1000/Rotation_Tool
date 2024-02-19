@@ -14,7 +14,7 @@ use processed_source::ProcessedSource;
 
 use crate::{
     analysis::coverage_tree::CoverageMap,
-    globals::file_names::{COVERAGE_ANALYSIS_JSON_OUT, COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE}, rotations::manifest::{self, JSONable, Manifest},
+    globals::file_names::{ROTATION_VOL_BY_WEEKDAY_JSON, COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE}, rotations::manifest::{self, JSONable, Manifest},
 };
 
 mod analysis;
@@ -186,7 +186,8 @@ fn main() -> Result<(), Box<dyn Error>> {
         match analysis
         {
             Some(analysis) => {
-                analysis::coverage_tree::CoverageMap::analysis_to_json(&analysis, base.to_string() + "/" + COVERAGE_ANALYSIS_JSON_OUT+&millis+".json")?;
+                
+                analysis::coverage_tree::CoverageMap::analysis_to_plot(&analysis, base.to_string() + "/" + ROTATION_VOL_BY_WEEKDAY_JSON+&millis+".json")?;
             },
             None => (),
         }

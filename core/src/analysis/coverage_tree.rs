@@ -30,6 +30,7 @@ use crate::{
 
 use super::analysis_datum::{AnalysisDatum, WorkUnit};
 use super::fractional_coverage::{FractionalCoverageUnit, SerializeableWeekday};
+use super::plots::{AnalysisMark, Plot};
 use super::source_error::SourceError;
 use super::temporal_coverage::{weekday_plus, TemporalCoverageUnit, weekday_for_javascript};
 
@@ -1111,12 +1112,30 @@ impl CoverageMap {
     }
 
     
+    
+    pub fn analysis_to_plot(analysis:&HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>>, filename: String) -> Result<(), Box<dyn Error>>  {
+        let mut plot=Plot::<AnalysisMark>::new();
 
-    pub fn analysis_to_json(analysis:&HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>>, filename: String) -> Result<(), Box<dyn Error>>  {
+        for (rotation, rotation_data) in analysis
+        {
+            
+            for (dow, dow_data) in rotation_data
+            {
+                plot.push(
+                    AnalysisMark{
+                        rvu: dow_data.get_rvu(),
+                        bvu: dow_data.get_bvu(),
+                        weekday: dow.to_owned(),
+                        rotation: rotation
+                    }
+                );
+            }
+        }
+
         let cachefile = File::create(&filename).expect(format!("Couldn't create file {}",&filename).as_str());
         let writer = BufWriter::new(&cachefile);
         let mut serializer = serde_json::Serializer::new(writer);
-        let json = serde_json::ser::to_string(analysis)?;
+        let json = serde_json::ser::to_string(&plot)?;
         serializer.serialize_str(json.as_str())?;
         Ok(())
     }
