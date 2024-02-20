@@ -822,6 +822,8 @@ impl CoverageMap {
                 let mut date = NaiveDate::default();
                 date = date + Duration::days(**weekday as i64 - date.weekday() as i64);
 
+                println!("THIS INTRODUCES BAD DATES!");
+                
                 if date.weekday() != **weekday {
                     return SourceError::generate_boxed("Weekday math is wrong.".to_string());
                 }
