@@ -13,6 +13,7 @@ pub mod file_names {
     pub(crate) const COVERAGE_AUDIT_NOWORK_OUT: &str = "./err/Coverage_Audit (no work).tsv";
     pub(crate) const COVERAGE_ANALYSIS_OUT: &str = "./output/WeekAnalysis";
     pub(crate) const ROTATION_VOL_BY_WEEKDAY_JSON: &str = "rotation_by_weekday";
+    pub(crate) const VOLUME_BY_DATE_ROTATION: &str = "volume_by_date_and_rotation";
 }
 
 pub mod main_headers {

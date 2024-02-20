@@ -3,4 +3,4 @@ pub mod fractional_coverage;
 pub mod source_error;
 pub mod temporal_coverage;
 pub mod analysis_datum;
-pub mod plots;
+pub mod volumes;

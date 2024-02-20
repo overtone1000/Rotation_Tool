@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use serde::{Serialize, ser::SerializeStruct};
 
 use super::{coverage_tree::{CoverageAndWorkDay, WorkCollector}, analysis_datum::AnalysisDatum, temporal_coverage::weekday_for_javascript};
@@ -114,6 +116,32 @@ impl WorkCollector for FractionalCoverageUnit {
             retval.add_workunit(work);
         }
         retval.scale(self.get_fraction());
+
+        retval
+    }
+
+    fn collect_work_bydate(&self, workday: &CoverageAndWorkDay) -> HashMap<chrono::prelude::NaiveDate,AnalysisDatum> {
+        let mut retval: HashMap<chrono::prelude::NaiveDate,AnalysisDatum> = HashMap::new();
+
+        for work_unit in &workday.work {
+            match retval.entry(work_unit.get_datetime().date())
+            {
+                std::collections::hash_map::Entry::Occupied(mut entry) => {
+                    entry.get_mut().add_workunit(work_unit);
+                }
+                ,
+                std::collections::hash_map::Entry::Vacant(mut empty) => {
+                    let mut newdat=AnalysisDatum::default();
+                    newdat.add_workunit(work_unit);
+                    empty.insert(newdat);
+                },
+            };
+        }
+
+        for ad in retval.values_mut()
+        {
+            ad.scale(self.get_fraction());
+        }
 
         retval
     }

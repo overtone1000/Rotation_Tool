@@ -1,5 +1,8 @@
 
 
+use std::collections::HashMap;
+
+use chrono::Datelike;
 use serde::{Serialize, ser::SerializeStruct};
 
 use crate::rotations::time_modifiers::{NEXT_MIDNIGHT, THIS_MIDNIGHT, TimeSinceMidnight};
@@ -151,6 +154,37 @@ impl Ord for TemporalCoverageUnit {
 
 impl WorkCollector for TemporalCoverageUnit {
     fn collect_work(&self, workday: &CoverageAndWorkDay) -> AnalysisDatum {
-        workday.get_work_in_timespan(self.start, self.end)
+        let mut retval:AnalysisDatum=AnalysisDatum::default();
+        for work_unit in workday.get_work_in_timespan(self.start, self.end)
+        {
+            retval.add_workunit(work_unit);
+        }
+        retval
+    }
+
+    fn collect_work_bydate(&self, workday: &CoverageAndWorkDay) -> HashMap<chrono::prelude::NaiveDate,AnalysisDatum> {
+        let mut retval: HashMap<chrono::prelude::NaiveDate,AnalysisDatum> = HashMap::new();
+
+        for work_unit in workday.get_work_in_timespan(self.start, self.end) {
+
+            if work_unit.get_datetime().year()<2000
+            {
+                println!("Date is {}",work_unit.get_datetime().date());
+            }
+            
+            match retval.entry(work_unit.get_datetime().date())
+            {
+                std::collections::hash_map::Entry::Occupied(mut entry) => {
+                    entry.get_mut().add_workunit(work_unit);
+                },
+                std::collections::hash_map::Entry::Vacant(mut empty) => {
+                    let mut newdat=AnalysisDatum::default();
+                    newdat.add_workunit(work_unit);
+                    empty.insert(newdat);
+                },
+            };
+        }
+
+        retval
     }
 }

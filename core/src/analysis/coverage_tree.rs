@@ -30,7 +30,7 @@ use crate::{
 
 use super::analysis_datum::{AnalysisDatum, WorkUnit};
 use super::fractional_coverage::{FractionalCoverageUnit, SerializeableWeekday};
-use super::plots::{AnalysisMark, Plot};
+use super::volumes::{VolumesMark, CategorizedVolumes};
 use super::source_error::SourceError;
 use super::temporal_coverage::{weekday_plus, TemporalCoverageUnit, weekday_for_javascript};
 
@@ -98,8 +98,10 @@ pub enum CoverageUnit {
 
 pub trait WorkCollector {
     fn collect_work(&self, workday: &CoverageAndWorkDay) -> AnalysisDatum;
+    fn collect_work_bydate(&self, workday: &CoverageAndWorkDay) -> HashMap<NaiveDate,AnalysisDatum>;
 }
 
+/*
 impl WorkCollector for CoverageUnit {
     fn collect_work(&self, workday: &CoverageAndWorkDay) -> AnalysisDatum {
         let _retval: AnalysisDatum = AnalysisDatum::default();
@@ -109,12 +111,78 @@ impl WorkCollector for CoverageUnit {
             CoverageUnit::WeekFraction(s) => s.collect_work(workday),
         }
     }
+    fn collect_work_bydate(&self, workday: &CoverageAndWorkDay) -> HashMap<NaiveDate,AnalysisDatum> {
+        let _retval: HashMap<NaiveDate,AnalysisDatum> = HashMap::new();
+
+        match self {
+            CoverageUnit::Temporal(s) => s.collect_work_bydate(workday),
+            CoverageUnit::WeekFraction(s) => s.collect_work_bydate(workday),
+        }
+    }
 }
+*/
 
 #[derive(Debug, Serialize)]
 pub enum Coverage {
     Temporal(Vec<TemporalCoverageUnit>),
     Fractional(Vec<FractionalCoverageUnit>),
+}
+
+impl WorkCollector for Coverage{
+    fn collect_work(&self, workday: &CoverageAndWorkDay) -> AnalysisDatum {
+        let mut retval:AnalysisDatum = AnalysisDatum::default();
+        match self
+        {
+            Coverage::Temporal(x) => {
+                for cu in x
+                {
+                    retval.add_assign(cu.collect_work(workday));
+                }
+            },
+            Coverage::Fractional(x) => {
+                for cu in x
+                {
+                    retval.add_assign(cu.collect_work(workday));
+                }
+            },
+        };
+        retval
+    }
+
+    fn collect_work_bydate(&self, workday: &CoverageAndWorkDay) -> HashMap<NaiveDate,AnalysisDatum> {
+        let mut retval:HashMap<NaiveDate,AnalysisDatum> = HashMap::new();
+
+        let mut addsub = |sub:HashMap<NaiveDate,AnalysisDatum>| {
+            for (key,val) in sub
+            {
+                match retval.entry(key){
+                    Entry::Occupied(mut entry) =>{
+                        entry.get_mut().add_assign(val);
+                    },
+                    Entry::Vacant(empty) => {
+                        empty.insert(val);
+                    },
+                }
+            }
+        };
+
+        match self
+        {
+            Coverage::Temporal(x) => {
+                for cu in x
+                {
+                    addsub(cu.collect_work_bydate(workday));
+                }
+            },
+            Coverage::Fractional(x) => {
+                for cu in x
+                {
+                    addsub(cu.collect_work_bydate(workday));
+                }
+            },
+        };
+        retval
+    }
 }
 
 impl Coverage {
@@ -212,15 +280,28 @@ impl CoverageAndWorkDay {
         &self,
         start: TimeSinceMidnight,
         end: TimeSinceMidnight,
-    ) -> AnalysisDatum {
-        let mut retval: AnalysisDatum = AnalysisDatum::default();
+    ) -> Vec<&WorkUnit> {
+        let mut retval: Vec<&WorkUnit> = Vec::new();
         for work in &self.work {
             let tsm = TimeSinceMidnight::from_minutes(
                 (work.get_datetime().num_seconds_from_midnight() / 60).into(),
             );
             if start <= tsm && tsm < end {
-                retval.add_workunit(work);
+                retval.push(work);
             }
+        }
+        retval
+    }
+
+    pub fn aggregate_work_in_timespan(
+        &self,
+        start: TimeSinceMidnight,
+        end: TimeSinceMidnight,
+    ) -> AnalysisDatum {
+        let mut retval: AnalysisDatum = AnalysisDatum::default();
+        for work_unit in self.get_work_in_timespan(start, end)
+        {
+            retval.add_workunit(work_unit);
         }
         retval
     }
@@ -232,7 +313,7 @@ impl CoverageAndWorkDay {
         match &self.coverages {
             None => {
                 CoverageError::NoCoverage(
-                    self.get_work_in_timespan(THIS_MIDNIGHT, NEXT_MIDNIGHT)
+                    self.aggregate_work_in_timespan(THIS_MIDNIGHT, NEXT_MIDNIGHT)
                         .get_rvu(),
                 )
             }
@@ -248,7 +329,7 @@ impl CoverageAndWorkDay {
                                 //Check from midnight
                                 if farthest_unit.starts_after_this_midnight() {
                                     let rvus = &self
-                                        .get_work_in_timespan(THIS_MIDNIGHT, farthest_unit.start);
+                                        .aggregate_work_in_timespan(THIS_MIDNIGHT, farthest_unit.start);
                                     retval.gaps.push((
                                         THIS_MIDNIGHT,
                                         farthest_unit.start,
@@ -271,7 +352,7 @@ impl CoverageAndWorkDay {
                                     //Check gap
                                     {
                                         let rvus =
-                                            &self.get_work_in_timespan(farthest_unit.end, cu.start);
+                                            &self.aggregate_work_in_timespan(farthest_unit.end, cu.start);
                                         retval.gaps.push((
                                             farthest_unit.end,
                                             cu.start,
@@ -291,7 +372,7 @@ impl CoverageAndWorkDay {
                                 //Check through midnight
                                 if farthest_unit.ends_before_next_midnight() {
                                     let rvus = &self
-                                        .get_work_in_timespan(farthest_unit.end, NEXT_MIDNIGHT);
+                                        .aggregate_work_in_timespan(farthest_unit.end, NEXT_MIDNIGHT);
                                     retval.gaps.push((
                                         farthest_unit.end,
                                         NEXT_MIDNIGHT,
@@ -403,33 +484,6 @@ impl<'a> CoordinateMap<'a, SerializeableWeekday, CoverageAndWorkDay> for Weekday
     }
 }
 
-/*
-#[derive(Default, Debug, Serialize)]
-pub struct ModalityMap {
-    map: HashMap<String, WeekdayMap>,
-}
-impl<'a> CoordinateMap<'a, String, WeekdayMap> for ModalityMap {
-    fn get_map(&mut self) -> &mut HashMap<String, WeekdayMap> {
-        &mut self.map
-    }
-    fn get_coordinate(coords: &CoverageCoordinates) -> String {
-        coords.modality.clone()
-    }
-}
-impl WorkCoverageMap for ModalityMap {
-    fn add_work(&mut self, coords: &CoverageCoordinates, work: WorkUnit) {
-        self.get_branch(coords).add_work(coords, work)
-    }
-
-    fn add_coverage(
-        &mut self,
-        coords: &CoverageCoordinates,
-        coverage: CoverageUnit,
-    ) -> Result<(), Box<dyn std::error::Error>> {
-        self.get_branch(coords).add_coverage(coords, coverage)
-    }
-}
-*/
 
 #[derive(Default, Debug, Serialize)]
 pub struct ContextMap {
@@ -483,15 +537,6 @@ impl WorkCoverageMap for SubspecialtyMap {
     }
 }
 
-fn testcoords() -> CoverageCoordinates {
-    CoverageCoordinates {
-        site: "SH".to_string(),
-        subspecialty: "Diagnostic Mamm".to_string(),
-        context: "ED".to_string(),
-        //modality: "US".to_string(),
-        weekday: chrono::Weekday::Mon,
-    }
-}
 
 #[derive(Default,Serialize)]
 pub struct CoverageMap {
@@ -812,7 +857,6 @@ impl CoverageMap {
         ];
 
         let mut coords: CoverageCoordinates = CoverageCoordinates::default();
-        let _testcoords = testcoords();
 
         for rotation_description in &manifest.rotation_manifest {
             match &rotation_description.responsibilities.get() {
@@ -963,7 +1007,7 @@ impl CoverageMap {
         retval
     }
 
-    pub fn analyze(&mut self) -> HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>> {
+    pub fn analyze_by_day_of_week(&mut self) -> HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>> {
         let mut retval: HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>> = HashMap::new();
 
         let mut addfunc = |rotation: String, weekday: chrono::Weekday, data: AnalysisDatum| {
@@ -990,19 +1034,67 @@ impl CoverageMap {
         let func =
             |_coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| {
                 match &coverage_and_workday.coverages {
-                    Some(coverage) => match coverage {
-                        Coverage::Temporal(coverages) => {
-                            for coverage in coverages {
-                                let collection = coverage.collect_work(coverage_and_workday);
-                                addfunc(coverage.get_rotation(), coverage.get_day(), collection);
+                    Some(coverage) => {
+                        match coverage {
+                            Coverage::Temporal(coverages) => {
+                                for coverage in coverages {
+                                    let collection = coverage.collect_work(coverage_and_workday);
+                                    addfunc(coverage.get_rotation(), coverage.get_day(), collection);
+                                }
+                            }
+                            Coverage::Fractional(coverages) => {
+                                for coverage in coverages {
+                                    let collection = coverage.collect_work(coverage_and_workday);
+                                    addfunc(coverage.get_rotation(), coverage.get_day(), collection);
+                                }
                             }
                         }
-                        Coverage::Fractional(coverages) => {
-                            for coverage in coverages {
-                                let collection = coverage.collect_work(coverage_and_workday);
-                                addfunc(coverage.get_rotation(), coverage.get_day(), collection);
-                            }
-                        }
+                    },
+                    None => {
+                        eprintln!("Uncovered work!");
+                        panic!("Uncovered work!");
+                    }
+                }
+            };
+
+        self.foreach(func);
+
+        retval
+    }
+
+    pub fn sort_volumes_by_date(&mut self) -> CategorizedVolumes {
+        let mut retval: CategorizedVolumes = CategorizedVolumes::new();
+
+        let mut process_collection =
+            |rotation:String, collected_by_date:HashMap<NaiveDate,AnalysisDatum>| {
+                for (date, datum) in collected_by_date
+                {
+                    let new_mark=VolumesMark{
+                        rvu:datum.get_rvu(),
+                        bvu:datum.get_bvu()
+                    };
+                    retval.add(date, &rotation, new_mark);
+                }
+            };
+
+        let func =
+            |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| {
+                match &coverage_and_workday.coverages {
+                    Some(coverage) => {
+                        match coverage {
+                            Coverage::Temporal(coverage) => {
+                                for coverage_unit in coverage
+                                {
+                                    process_collection(coverage_unit.get_rotation(), coverage_unit.collect_work_bydate(coverage_and_workday));
+                                }
+                            },
+                            Coverage::Fractional(coverage) => {
+                                for coverage_unit in coverage
+                                {
+                                    process_collection(coverage_unit.get_rotation(), coverage_unit.collect_work_bydate(coverage_and_workday));
+                                }
+                            },
+                        };
                     },
                     None => {
                         eprintln!("Uncovered work!");
@@ -1111,32 +1203,12 @@ impl CoverageMap {
         }
     }
 
-    
-    
-    pub fn analysis_to_plot(analysis:&HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>>, filename: String) -> Result<(), Box<dyn Error>>  {
-        let mut plot=Plot::<AnalysisMark>::new();
-
-        for (rotation, rotation_data) in analysis
-        {
-            
-            for (dow, dow_data) in rotation_data
-            {
-                plot.push(
-                    AnalysisMark{
-                        rvu: dow_data.get_rvu(),
-                        bvu: dow_data.get_bvu(),
-                        weekday: dow.to_owned(),
-                        rotation: rotation
-                    }
-                );
-            }
-        }
-
+    pub fn analysis_to_plot(&mut self, filename: String) -> Result<(), Box<dyn Error>>  {
+        let plot=self.sort_volumes_by_date();
+        //let plot = self.analyze_by_day_of_week();
         let cachefile = File::create(&filename).expect(format!("Couldn't create file {}",&filename).as_str());
         let writer = BufWriter::new(&cachefile);
-        let mut serializer = serde_json::Serializer::new(writer);
-        let json = serde_json::ser::to_string(&plot)?;
-        serializer.serialize_str(json.as_str())?;
+        serde_json::to_writer(writer,&plot)?;
         Ok(())
     }
 
