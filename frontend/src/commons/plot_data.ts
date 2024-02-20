@@ -1,5 +1,5 @@
 export interface AnalysisData {
-    marks:any[]
+    marks:AnalysisMark[]
 };
 
 export interface AnalysisMark {

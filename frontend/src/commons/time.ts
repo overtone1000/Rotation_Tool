@@ -10,7 +10,7 @@ export const days_of_the_week = [
     "Saturday"
 ];
 
-export const short_days_of_the_week = [
+export const short_days_of_the_week_Sun_first = [
     "Sun",
     "Mon",
     "Tue",
@@ -19,6 +19,8 @@ export const short_days_of_the_week = [
     "Fri",
     "Sat"
 ];
+
+export const short_days_of_the_week_Mon_first = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
 
 export const wet_read_string = "Wet Read";
 
@@ -59,13 +61,13 @@ export const dowfunc=(di:number)=>{
 }
 
 export const shortdowfunc=(di:number)=>{
-    return short_days_of_the_week[di];
+    return short_days_of_the_week_Sun_first[di];
 }
 
 export const shortdowfuncinv=(str:string)=>{
-    for(const n in short_days_of_the_week)
+    for(const n in short_days_of_the_week_Sun_first)
     {
-        if(str===short_days_of_the_week[n])
+        if(str===short_days_of_the_week_Sun_first[n])
         {
             return parseInt(n);
         }
