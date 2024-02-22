@@ -24,14 +24,14 @@
         {
             "label": "cargo fix",
             "type": "shell",
-            "command": "cargo fix --all-features --all-targets --workspace ",
+            "command": "cargo fix --all-features --all-targets --workspace --manifest-path ./core/Cargo.toml",
             "group": "none",
             "presentation": {
               "reveal": "always",
               "panel": "new"
             },
             "options": {
-                "cwd": "${workspaceFolder}/core"
+                "cwd": "${workspaceFolder}"
             },
         }
     ]
