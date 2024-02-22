@@ -3,7 +3,7 @@ use std::{collections::HashSet, fmt};
 
 use serde::{
     de::{self, Visitor},
-    Deserialize, Serialize, Serializer, ser::SerializeSeq,
+    Deserialize, Serialize, ser::SerializeSeq,
 };
 
 
