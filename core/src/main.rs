@@ -1,5 +1,5 @@
-use std::{error::Error, fs::File};
-use std::io::Write;
+use std::{error::Error};
+
 
 fn main() -> Result<(), Box<dyn Error>> {
     print!("{}[2J", 27 as char);

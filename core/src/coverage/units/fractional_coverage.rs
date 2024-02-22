@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use serde::{Serialize, ser::SerializeStruct};
+use serde::{Serialize};
 
 use crate::{analysis::analysis_datum::AnalysisDatum, coverage::{coverage_and_work_day::CoverageAndWorkDay, work_collector::WorkCollector}};
 

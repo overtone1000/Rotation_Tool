@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use serde::{Deserialize, Serialize};
 
-use super::{responsibility::{RotationResponsibility}, rotation_error::RotationManifestParseError, timespan::Timespan, stringtypes::StringTypes, time_modifiers::RelativeTime};
+use super::{responsibility::{RotationResponsibility}, timespan::Timespan, stringtypes::StringTypes, time_modifiers::RelativeTime};
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct RotationHours {
@@ -109,7 +109,7 @@ impl Serialize for Responsibilities
         match &self.value
         {
             Some(x) => {
-                let mut newvec=x.clone();
+                let newvec=x.clone();
                 newvec.serialize(serializer)
             },
             None => {

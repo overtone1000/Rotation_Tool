@@ -5,12 +5,12 @@ use std::error::Error;
 use std::fmt::Debug;
 
 use std::fs::File;
-use std::hash::Hash;
+
 use std::io::{BufWriter, Write};
-use std::ops::AddAssign;
+
 use std::str::FromStr;
 
-use chrono::{Datelike, Duration, NaiveDate, NaiveDateTime, Timelike};
+use chrono::{Datelike, Duration, NaiveDate, NaiveDateTime};
 use serde::Serialize;
 
 use crate::analysis::analysis_datum::{AnalysisDatum, WorkUnit};
@@ -28,7 +28,7 @@ use crate::output::JSONable;
 use crate::rotations::description::WrappedSortable;
 use crate::rotations::manifest::{Manifest};
 use crate::rotations::rotation_error::RotationManifestParseError;
-use crate::rotations::time_modifiers::{NEXT_MIDNIGHT, THIS_MIDNIGHT, TimeSinceMidnight};
+
 use crate::source_data::processing::categorization::{build_salem_bvumap, build_salem_rvumap, get_categories_map};
 use crate::source_data::processing::processed_source::ProcessedSource;
 use crate::error::source_error::SourceError;
