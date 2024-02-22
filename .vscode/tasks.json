@@ -20,6 +20,22 @@
             "problemMatcher": [],
             "label": "npm: dev frontend",
             "detail": "vite dev"
+        },
+        {
+            "label": "cargo fix",
+            "type": "shell",
+            "command": "cargo fix --all-features --all-targets --workspace ",
+            "group": "none",
+            "presentation": {
+              "reveal": "always",
+              "panel": "new"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/core"
+            },
+            "runOptions": {
+
+            }
         }
     ]
   }
