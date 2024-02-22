@@ -4,7 +4,7 @@ use serde::{Serialize};
 
 use crate::{analysis::analysis_datum::AnalysisDatum, coverage::{coverage_and_work_day::CoverageAndWorkDay, work_collector::WorkCollector}, serialization::weekday::SerializeableWeekday};
 
-use super::{temporal_coverage::weekday_for_javascript};
+
 
 #[derive(Debug, PartialEq, Clone, Serialize)]
 pub struct FractionalCoverageUnit {
