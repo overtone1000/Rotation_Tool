@@ -1,9 +1,6 @@
 use chrono::{Datelike, NaiveDate, NaiveDateTime, Timelike};
 
-use crate::{
-    dates,
-    rvu_map::MapCoords,
-};
+use crate::dates;
 
 pub struct ConstraintSet<'a, T> {
     constraints: Vec<&'a dyn Fn(&T) -> bool>,
@@ -39,27 +36,6 @@ pub(crate) fn is_weekday(datetime: &NaiveDateTime) -> bool {
 
 pub(crate) fn is_this_day<'a>(day: chrono::Weekday) -> impl Fn(&NaiveDateTime) -> bool {
     move |datetime: &NaiveDateTime| datetime.weekday() == day
-}
-
-pub(crate) fn exclude_site(site: String) -> impl Fn(&MapCoords) -> bool {
-    move |coords: &MapCoords| coords.get_site() != &site
-}
-
-pub(crate) fn only_this_context(context: String) -> impl Fn(&MapCoords) -> bool {
-    move |coords: &MapCoords| coords.get_context() == &context
-}
-
-pub(crate) fn only_these_subspecialties(
-    subspecialties: Vec<String>,
-) -> impl Fn(&MapCoords) -> bool {
-    move |coords: &MapCoords| {
-        for subspecialty in &subspecialties {
-            if coords.get_subspecialty() == subspecialty {
-                return true;
-            }
-        }
-        false
-    }
 }
 
 pub(crate) fn is_before_this_hour(hour: u32) -> impl Fn(&NaiveDateTime) -> bool {

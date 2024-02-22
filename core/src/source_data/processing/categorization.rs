@@ -1,14 +1,13 @@
-use std::{
-    collections::{HashMap, HashSet},
-    fs,
-};
+use std::
+    collections::{HashMap, HashSet}
+;
 
-use chrono::{DateTime, Local};
 
 use crate::{
-    globals::{bvu_headers, file_names, main_headers},
-    table, processed_source::ProcessedSource,
+    globals::{bvu_headers, file_names, main_headers}
 };
+
+use super::{processed_source::ProcessedSource, table::Table};
 
 pub mod exam_categories {
     use std::cmp::Ordering;
@@ -133,8 +132,8 @@ pub(crate) mod location_categories {
 }
 
 pub(crate) fn get_categories_list(
-    main_data_table: &table::Table,
-    exam_categories_table: &table::Table,
+    main_data_table: &Table,
+    exam_categories_table: &Table,
 ) -> Result<Vec<exam_categories::ExamCategory>, String> {
     let main_exam_categories = main_data_table
         .get_keyed_column_sample_map(&(main_headers::PertinentHeaders::ProcedureCode.get_label()))?;
@@ -224,8 +223,8 @@ pub(crate) fn get_categories_map(
 }
 
 pub(crate) fn get_locations_list(
-    main_data_table: &table::Table,
-    exam_locations_table: &table::Table,
+    main_data_table: &Table,
+    exam_locations_table: &Table,
 ) -> Result<Vec<location_categories::LocationCategory>, String> {
     let main_exam_locations = main_data_table
         .get_keyed_column_sample_map(&(main_headers::PertinentHeaders::Location.get_label()))?;
@@ -281,14 +280,7 @@ pub(crate) fn get_locations_list(
     Ok(complete_exam_location_list)
 }
 
-pub fn backup(dt: DateTime<Local>, p: String, label: String) -> Result<u64, std::io::Error> {
-    let backup_path =
-        "./categories/archive/".to_string() + &dt.timestamp().to_string() + " backup of " + &label;
-    println!("Backup to {}", backup_path);
-    fs::copy(p, backup_path)
-}
-
-pub fn build_salem_rvumap(main_data_table: &table::Table) -> Result<HashMap<String, f64>, String> {
+pub fn build_salem_rvumap(main_data_table: &Table) -> Result<HashMap<String, f64>, String> {
     let mut retval: HashMap<String, f64> = HashMap::new();
 
     let mut rvu_sum: f64 = 0.0;
@@ -338,7 +330,7 @@ pub fn build_salem_rvumap(main_data_table: &table::Table) -> Result<HashMap<Stri
 }
 
 //Check BVU source for missing exam codes. Also puts all exam descriptions in comments.
-pub fn check_bvusource(main_data_table: &table::Table, bvu_data_table: &mut table::Table) {
+pub fn check_bvusource(main_data_table: &Table, bvu_data_table: &mut Table) {
     let mut found: HashSet<String> = HashSet::new();
     for row_i in main_data_table.row_indices() {
         let exam_code = main_data_table
@@ -395,7 +387,7 @@ pub fn check_bvusource(main_data_table: &table::Table, bvu_data_table: &mut tabl
     bvu_data_table.write_to_file(file_names::BVU_UPDATE_FILE.to_string());
 }
 
-pub fn build_salem_bvumap(bvu_data_table: &table::Table) -> Result<HashMap<String, f64>, String> {
+pub fn build_salem_bvumap(bvu_data_table: &Table) -> Result<HashMap<String, f64>, String> {
     let mut retval: HashMap<String, f64> = HashMap::new();
 
     for row_i in bvu_data_table.row_indices() {
@@ -433,7 +425,7 @@ pub fn build_salem_bvumap(bvu_data_table: &table::Table) -> Result<HashMap<Strin
 
 /*
 pub fn build_salem_modality_map(
-    main_data_table: &table::Table,
+    main_data_table: &Table,
 ) -> Result<HashMap<String, String>, String> {
     let mut retval: HashMap<String, String> = HashMap::new();
 

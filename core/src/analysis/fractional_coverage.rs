@@ -130,7 +130,7 @@ impl WorkCollector for FractionalCoverageUnit {
                     entry.get_mut().add_workunit(work_unit);
                 }
                 ,
-                std::collections::hash_map::Entry::Vacant(mut empty) => {
+                std::collections::hash_map::Entry::Vacant(empty) => {
                     let mut newdat=AnalysisDatum::default();
                     newdat.add_workunit(work_unit);
                     empty.insert(newdat);

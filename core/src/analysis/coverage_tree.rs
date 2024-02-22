@@ -11,28 +11,26 @@ use std::ops::AddAssign;
 use std::str::FromStr;
 
 use chrono::{Datelike, Duration, NaiveDate, NaiveDateTime, Timelike};
-use serde::{Serialize, Serializer};
-use serde::ser::SerializeMap;
+use serde::Serialize;
 
-use crate::categorization::{get_categories_map, exam_categories};
 use crate::globals::{self, ALL_DAYS};
 use crate::rotations::description::WrappedSortable;
 use crate::rotations::manifest::{Manifest, JSONable};
 use crate::rotations::rotation_error::RotationManifestParseError;
 use crate::rotations::time_modifiers::{NEXT_MIDNIGHT, THIS_MIDNIGHT, TimeSinceMidnight};
+use crate::source_data::processing::categorization::{build_salem_bvumap, build_salem_rvumap, get_categories_map};
+use crate::source_data::processing::processed_source::ProcessedSource;
+use crate::error::source_error::SourceError;
 use crate::{
-    categorization::{build_salem_bvumap, build_salem_rvumap},
     constraints::ConstraintSet,
     dates::BUSINESS_DAYS_PER_YEAR,
-    globals::{main_headers, tpc_headers, BUSINESS_DAYS, MODALITIES, SITES},
-    processed_source::ProcessedSource,
+    globals::{main_headers, tpc_headers, BUSINESS_DAYS, SITES},
 };
 
 use super::analysis_datum::{AnalysisDatum, WorkUnit};
 use super::fractional_coverage::{FractionalCoverageUnit, SerializeableWeekday};
 use super::volumes::{VolumesMark, CategorizedVolumes};
-use super::source_error::SourceError;
-use super::temporal_coverage::{weekday_plus, TemporalCoverageUnit, weekday_for_javascript};
+use super::temporal_coverage::{weekday_plus, TemporalCoverageUnit};
 
 #[derive(Eq, Hash, PartialEq, Clone)]
 pub struct CoverageCoordinates {
@@ -432,19 +430,6 @@ pub struct WeekdayMap {
     map: HashMap<SerializeableWeekday, CoverageAndWorkDay>,
 }
 
-impl WeekdayMap {
-    fn default() -> WeekdayMap {
-        let mut map: HashMap<SerializeableWeekday, CoverageAndWorkDay> = HashMap::new();
-        map.insert(SerializeableWeekday::new(chrono::Weekday::Mon), CoverageAndWorkDay::default());
-        map.insert(SerializeableWeekday::new(chrono::Weekday::Tue), CoverageAndWorkDay::default());
-        map.insert(SerializeableWeekday::new(chrono::Weekday::Wed), CoverageAndWorkDay::default());
-        map.insert(SerializeableWeekday::new(chrono::Weekday::Thu), CoverageAndWorkDay::default());
-        map.insert(SerializeableWeekday::new(chrono::Weekday::Fri), CoverageAndWorkDay::default());
-        map.insert(SerializeableWeekday::new(chrono::Weekday::Sat), CoverageAndWorkDay::default());
-        map.insert(SerializeableWeekday::new(chrono::Weekday::Sun), CoverageAndWorkDay::default());
-        WeekdayMap { map }
-    }
-}
 impl WorkCoverageMap for WeekdayMap {
     fn add_work(&mut self, coords: &CoverageCoordinates, work: WorkUnit) {
         self.get_branch(coords).add_work(work);
@@ -762,7 +747,7 @@ impl CoverageMap {
             }
         }
         //Add TPC, which doesn't go by number of dates
-        let distribution_weights = crate::time::get_normal_dist_weights();
+        let distribution_weights = super::distribution::get_normal_dist_weights();
         for row_i in source.tpc_data_table.row_indices() {
             let exam_code = source.tpc_data_table.get_val(
                 &tpc_headers::PertinentHeaders::ExamCode.get_label(),
@@ -1080,7 +1065,7 @@ impl CoverageMap {
             };
 
         let func =
-            |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| {
+            |_coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| {
                 match &coverage_and_workday.coverages {
                     Some(coverage) => {
                         match coverage {

@@ -8,12 +8,13 @@ use std::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    categorization::{
+    source_data::processing::categorization::{
         exam_categories::ExamCategory, get_categories_list, get_locations_list,
     },
-    globals::file_names,
-    table::{self, Table},
+    globals::file_names
 };
+
+use super::table::Table;
 
 #[derive(Serialize, Deserialize)]
 pub struct ProcessedSource {
@@ -29,12 +30,12 @@ pub struct ProcessedSource {
 
 impl ProcessedSource {
     pub fn build() -> Result<ProcessedSource, Box<dyn Error>> {
-        let main_data_table = table::Table::create(file_names::MAIN_DATA_FILE)?;
-        let tpc_data_table = table::Table::create(file_names::TPC_DATA_FILE)?;
-        let bvu_data_table = table::Table::create(file_names::BVU_DATA_FILE)?;
-        let mut exam_categories_table = table::Table::create(file_names::CATEGORIES_EXAM_FILE)?;
+        let main_data_table = Table::create(file_names::MAIN_DATA_FILE)?;
+        let tpc_data_table = Table::create(file_names::TPC_DATA_FILE)?;
+        let bvu_data_table = Table::create(file_names::BVU_DATA_FILE)?;
+        let mut exam_categories_table = Table::create(file_names::CATEGORIES_EXAM_FILE)?;
         let mut location_categories_table =
-            table::Table::create(file_names::CATEGORIES_LOCATION_FILE)?;
+            Table::create(file_names::CATEGORIES_LOCATION_FILE)?;
         let exam_categories_list = get_categories_list(&main_data_table, &exam_categories_table)?;
         let mut exam_to_subspecialty_map: HashMap<String, String> = HashMap::new();
         let mut location_to_context_map: HashMap<String, String> = HashMap::new();
@@ -137,6 +138,6 @@ impl ProcessedSource {
 
     pub fn check_bvusource(&mut self) {
         //This was only necessary to fix the data.
-        crate::categorization::check_bvusource(&self.main_data_table, &mut self.bvu_data_table);
+        crate::source_data::processing::categorization::check_bvusource(&self.main_data_table, &mut self.bvu_data_table);
     }
 }

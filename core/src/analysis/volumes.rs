@@ -17,7 +17,7 @@ impl CategorizedVolumes
         }
     }
     pub fn add(&mut self, date:NaiveDate, category:&str, new_mark:VolumesMark)->(){
-        let child_map = match self.date_map.entry(date)
+        match self.date_map.entry(date)
         {
             std::collections::hash_map::Entry::Occupied(mut entry) => {
                 match entry.get_mut().entry(category.to_owned())
@@ -25,19 +25,17 @@ impl CategorizedVolumes
                     std::collections::hash_map::Entry::Occupied(mut entry) => {
                         entry.insert(new_mark+*entry.get());
                     },
-                    std::collections::hash_map::Entry::Vacant(mut empty) => {
+                    std::collections::hash_map::Entry::Vacant(empty) => {
                         empty.insert(new_mark);
                     },
                 }
             },
-            std::collections::hash_map::Entry::Vacant(mut empty) => {
+            std::collections::hash_map::Entry::Vacant(empty) => {
                 let mut new_member:HashMap<String,VolumesMark>=HashMap::new();
                 new_member.insert(category.to_owned(),new_mark);
-                let entry=empty.insert(new_member);
+                let _entry=empty.insert(new_member);
             },
-        };
-
-        
+        };        
     }
 }
 

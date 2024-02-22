@@ -9,42 +9,21 @@ use constraints::{is_business_day, is_not_holiday, ConstraintSet};
 
 
 use globals::file_names::COVERAGE_AUDIT_NOWORK_OUT;
-use processed_source::ProcessedSource;
 
 
 use crate::{
     analysis::coverage_tree::CoverageMap,
     globals::file_names::{VOLUME_BY_DATE_ROTATION, COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE}, rotations::manifest::{self, JSONable, Manifest},
+    source_data::processing::processed_source::ProcessedSource
 };
 
 mod analysis;
-mod categorization;
 mod constraints;
 mod dates;
 mod error;
-mod explain;
 mod globals;
-mod processed_source;
 mod rotations;
-mod rvu_map;
-mod table;
-mod time;
-mod tpc;
-
-fn build_maps() -> Result<(), Box<dyn Error>> {
-    let date_constraints = is_business_day();
-
-    //explain_weekday_variance()
-
-    //let exclude_tpc_ref = &exclude_site(TPC.to_string());
-
-    //let mut ccs:ConstraintSet<MapCoords>=ConstraintSet::new();
-    //ccs.add(exclude_tpc_ref);
-
-    //buildMaps(Some(ccs))
-
-    rvu_map::build_maps(&date_constraints, None)
-}
+mod source_data;
 
 fn parse_manifest() -> Result<rotations::manifest::Manifest, Box<dyn Error>> {
     println!("Parsing manifest.");

@@ -5,14 +5,11 @@ pub mod file_names {
     pub(crate) const BVU_UPDATE_FILE: &str = "./data/BVU_modified.csv";
     pub(crate) const CATEGORIES_LOCATION_FILE: &str = "./categories/Categories_Location.csv";
     pub(crate) const CATEGORIES_EXAM_FILE: &str = "./categories/Categories_Exam.csv";
-    pub(crate) const OUT_FILE: &str = "./output/Categorized Weekday RVU Map";
-    pub(crate) const BVU_OUT_FILE: &str = "./output/Categorized Weekday BVU Map";
     pub(crate) const EXAMPLE_ROTATION_DESCRIPTIONS: &str = "./rotations/Example.yml";
     pub(crate) const SOURCE_CACHE: &str = "./cache/ProcessedSource.yml";
     pub(crate) const COVERAGE_AUDIT_OUT: &str = "./err/Coverage_Audit.tsv";
     pub(crate) const COVERAGE_AUDIT_NOWORK_OUT: &str = "./err/Coverage_Audit (no work).tsv";
     pub(crate) const COVERAGE_ANALYSIS_OUT: &str = "./output/WeekAnalysis";
-    pub(crate) const ROTATION_VOL_BY_WEEKDAY_JSON: &str = "rotation_by_weekday";
     pub(crate) const VOLUME_BY_DATE_ROTATION: &str = "volume_by_date_and_rotation";
 }
 
