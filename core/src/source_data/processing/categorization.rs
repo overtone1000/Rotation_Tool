@@ -14,7 +14,7 @@ pub mod exam_categories {
 
     use serde::{Deserialize, Serialize};
 
-    use crate::output::JSONable;
+    use crate::serialization::output::JSONFileOut;
 
     pub(crate) enum PertinentHeaders {
         ProcedureCode,
@@ -42,7 +42,7 @@ pub mod exam_categories {
         pub comments: String,
     }
 
-    impl JSONable for Vec<ExamCategory> {
+    impl JSONFileOut for Vec<ExamCategory> {
     }
 
     impl Eq for ExamCategory {}

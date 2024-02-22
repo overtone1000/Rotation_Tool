@@ -2,7 +2,7 @@ use std::{error::Error, fs::File, io::BufWriter};
 
 use serde::Serialize;
 
-pub trait JSONable:Serialize
+pub trait JSONFileOut:Serialize
 {
     fn to_json(&self, filename:&str) -> Result<(), Box<dyn Error>> {
         let file = File::create(filename)?;

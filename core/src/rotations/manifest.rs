@@ -9,7 +9,7 @@ use std::fs::{self};
 
 
 use crate::globals::file_names::EXAMPLE_ROTATION_DESCRIPTIONS;
-use crate::output::JSONable;
+use crate::serialization::output::JSONFileOut;
 
 use super::baseline::RotationBaseline;
 use super::description::{RotationDescription, WrappedSortable, Responsibilities, RotationHours};
@@ -164,5 +164,5 @@ impl Manifest {
 }
 
 
-impl JSONable for Manifest {
+impl JSONFileOut for Manifest {
 }

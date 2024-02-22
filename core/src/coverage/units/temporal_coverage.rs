@@ -7,7 +7,7 @@ use serde::{Serialize, ser::SerializeStruct};
 
 use crate::{analysis::analysis_datum::AnalysisDatum, coverage::{coverage_and_work_day::CoverageAndWorkDay, work_collector::WorkCollector}, rotations::time_modifiers::{TimeSinceMidnight, NEXT_MIDNIGHT, THIS_MIDNIGHT}};
 
-use super::fractional_coverage::SerializeableWeekday;
+use crate::serialization::weekday::SerializeableWeekday;
 
 
 pub fn weekday_plus(base_weekday: chrono::Weekday, delta: i64) -> chrono::Weekday {

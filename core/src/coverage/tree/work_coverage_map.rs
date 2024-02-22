@@ -19,16 +19,17 @@ use crate::coverage::coordinate::CoverageCoordinates;
 use crate::coverage::coverage_and_work_day::CoverageAndWorkDay;
 use crate::coverage::distribution::get_normal_dist_weights;
 use crate::coverage::malformed_coverage::CoverageError;
-use crate::coverage::units::fractional_coverage::{FractionalCoverageUnit, SerializeableWeekday};
+use crate::coverage::units::fractional_coverage::{FractionalCoverageUnit};
 use crate::coverage::units::temporal_coverage::{weekday_plus, TemporalCoverageUnit};
 use crate::coverage::units::{Coverage, CoverageUnit};
 use crate::coverage::work_collector::WorkCollector;
 use crate::globals::{self, ALL_DAYS};
-use crate::output::JSONable;
 use crate::rotations::description::WrappedSortable;
 use crate::rotations::manifest::{Manifest};
 use crate::rotations::rotation_error::RotationManifestParseError;
 
+use crate::serialization::output::JSONFileOut;
+use crate::serialization::weekday::SerializeableWeekday;
 use crate::source_data::processing::categorization::{build_salem_bvumap, build_salem_rvumap, get_categories_map};
 use crate::source_data::processing::processed_source::ProcessedSource;
 use crate::error::source_error::SourceError;
@@ -929,5 +930,5 @@ impl WorkCoverageMap for CoverageMap {
     }
 }
 
-impl JSONable for CoverageMap {
+impl JSONFileOut for CoverageMap {
 }

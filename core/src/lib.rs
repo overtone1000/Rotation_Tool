@@ -12,7 +12,7 @@ use globals::file_names::COVERAGE_AUDIT_NOWORK_OUT;
 
 
 use crate::{
-    globals::file_names::{COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE, VOLUME_BY_DATE_ROTATION}, output::JSONable, source_data::processing::processed_source::ProcessedSource
+    globals::file_names::{COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE, VOLUME_BY_DATE_ROTATION}, serialization::output::JSONFileOut, source_data::processing::processed_source::ProcessedSource
 };
 
 mod analysis;
@@ -23,7 +23,7 @@ mod globals;
 mod coverage;
 mod source_data;
 mod rotations;
-mod output;
+mod serialization;
 
 pub struct MainCommon
 {
