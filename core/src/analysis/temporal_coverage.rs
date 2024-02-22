@@ -165,13 +165,7 @@ impl WorkCollector for TemporalCoverageUnit {
     fn collect_work_bydate(&self, workday: &CoverageAndWorkDay) -> HashMap<chrono::prelude::NaiveDate,AnalysisDatum> {
         let mut retval: HashMap<chrono::prelude::NaiveDate,AnalysisDatum> = HashMap::new();
 
-        for work_unit in workday.get_work_in_timespan(self.start, self.end) {
-
-            if work_unit.get_datetime().year()<2000
-            {
-                println!("Date is {}",work_unit.get_datetime().date());
-            }
-            
+        for work_unit in workday.get_work_in_timespan(self.start, self.end) {            
             match retval.entry(work_unit.get_datetime().date())
             {
                 std::collections::hash_map::Entry::Occupied(mut entry) => {
