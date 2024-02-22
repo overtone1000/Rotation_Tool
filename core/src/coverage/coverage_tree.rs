@@ -13,9 +13,12 @@ use std::str::FromStr;
 use chrono::{Datelike, Duration, NaiveDate, NaiveDateTime, Timelike};
 use serde::Serialize;
 
+use crate::analysis::analysis_datum::{AnalysisDatum, WorkUnit};
+use crate::analysis::volumes::{CategorizedVolumes, VolumesMark};
 use crate::globals::{self, ALL_DAYS};
+use crate::output::JSONable;
 use crate::rotations::description::WrappedSortable;
-use crate::rotations::manifest::{Manifest, JSONable};
+use crate::rotations::manifest::{Manifest};
 use crate::rotations::rotation_error::RotationManifestParseError;
 use crate::rotations::time_modifiers::{NEXT_MIDNIGHT, THIS_MIDNIGHT, TimeSinceMidnight};
 use crate::source_data::processing::categorization::{build_salem_bvumap, build_salem_rvumap, get_categories_map};
@@ -27,9 +30,7 @@ use crate::{
     globals::{main_headers, tpc_headers, BUSINESS_DAYS, SITES},
 };
 
-use super::analysis_datum::{AnalysisDatum, WorkUnit};
 use super::fractional_coverage::{FractionalCoverageUnit, SerializeableWeekday};
-use super::volumes::{VolumesMark, CategorizedVolumes};
 use super::temporal_coverage::{weekday_plus, TemporalCoverageUnit};
 
 #[derive(Eq, Hash, PartialEq, Clone)]

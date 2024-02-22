@@ -14,7 +14,7 @@ pub mod exam_categories {
 
     use serde::{Deserialize, Serialize};
 
-    use crate::rotations::manifest::JSONable;
+    use crate::output::JSONable;
 
     pub(crate) enum PertinentHeaders {
         ProcedureCode,

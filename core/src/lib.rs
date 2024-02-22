@@ -8,13 +8,12 @@ use chrono::{Date, DateTime, NaiveDateTime, Weekday};
 use constraints::{is_business_day, is_not_holiday, ConstraintSet};
 
 
+use coverage::coverage_tree::CoverageMap;
 use globals::file_names::COVERAGE_AUDIT_NOWORK_OUT;
 
 
 use crate::{
-    analysis::coverage_tree::CoverageMap,
-    globals::file_names::{VOLUME_BY_DATE_ROTATION, COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE}, rotations::manifest::{self, JSONable, Manifest},
-    source_data::processing::processed_source::ProcessedSource
+    globals::file_names::{COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE, VOLUME_BY_DATE_ROTATION}, output::JSONable, source_data::processing::processed_source::ProcessedSource
 };
 
 mod analysis;
@@ -22,8 +21,10 @@ mod constraints;
 mod dates;
 mod error;
 mod globals;
-mod rotations;
+mod coverage;
 mod source_data;
+mod rotations;
+mod output;
 
 pub struct MainCommon
 {
@@ -82,8 +83,8 @@ pub fn analyze_rotations(common:&mut MainCommon) -> Result<HashMap<String, HashM
     common.coverage_tree.audit_to_stream(&mut writer,&mut writer_nowork)?;
 
     let analysis = common.coverage_tree.analyze_by_day_of_week();
-    analysis::coverage_tree::CoverageMap::analysis_to_csv(&analysis, COVERAGE_ANALYSIS_OUT.to_owned() + "_rvu.csv", true);
-    analysis::coverage_tree::CoverageMap::analysis_to_csv(&analysis, COVERAGE_ANALYSIS_OUT.to_owned() + "_bvu.csv", false);
+    coverage::coverage_tree::CoverageMap::analysis_to_csv(&analysis, COVERAGE_ANALYSIS_OUT.to_owned() + "_rvu.csv", true);
+    coverage::coverage_tree::CoverageMap::analysis_to_csv(&analysis, COVERAGE_ANALYSIS_OUT.to_owned() + "_bvu.csv", false);
 
     Ok(analysis)
 }

@@ -9,6 +9,7 @@ use std::io::BufWriter;
 
 
 use crate::globals::file_names::EXAMPLE_ROTATION_DESCRIPTIONS;
+use crate::output::JSONable;
 
 use super::baseline::RotationBaseline;
 use super::description::{RotationDescription, WrappedSortable, Responsibilities, RotationHours};
@@ -162,15 +163,6 @@ impl Manifest {
     }
 }
 
-pub trait JSONable:Serialize
-{
-    fn to_json(&self, filename:&str) -> Result<(), Box<dyn Error>> {
-        let file = File::create(filename)?;
-        let writer = BufWriter::new(file);
-        serde_json::to_writer(writer, self)?;
-        Ok(())
-    }
-}
 
 impl JSONable for Manifest {
 }

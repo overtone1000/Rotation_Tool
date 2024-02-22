@@ -5,9 +5,9 @@ use std::collections::HashMap;
 use chrono::Datelike;
 use serde::{Serialize, ser::SerializeStruct};
 
-use crate::rotations::time_modifiers::{NEXT_MIDNIGHT, THIS_MIDNIGHT, TimeSinceMidnight};
+use crate::{analysis::analysis_datum::AnalysisDatum, rotations::time_modifiers::{TimeSinceMidnight, NEXT_MIDNIGHT, THIS_MIDNIGHT}};
 
-use super::{coverage_tree::{CoverageAndWorkDay, WorkCollector}, analysis_datum::AnalysisDatum, fractional_coverage::SerializeableWeekday};
+use super::{coverage_tree::{CoverageAndWorkDay, WorkCollector}, fractional_coverage::SerializeableWeekday};
 
 pub fn weekday_plus(base_weekday: chrono::Weekday, delta: i64) -> chrono::Weekday {
     let mut retval = base_weekday;

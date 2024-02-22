@@ -2,7 +2,9 @@ use std::collections::HashMap;
 
 use serde::{Serialize, ser::SerializeStruct};
 
-use super::{coverage_tree::{CoverageAndWorkDay, WorkCollector}, analysis_datum::AnalysisDatum, temporal_coverage::weekday_for_javascript};
+use crate::analysis::analysis_datum::AnalysisDatum;
+
+use super::{coverage_tree::{CoverageAndWorkDay, WorkCollector}, temporal_coverage::weekday_for_javascript};
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct SerializeableWeekday
