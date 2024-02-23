@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use chrono::NaiveDate;
 
-use crate::analysis::analysis_datum::AnalysisDatum;
+use crate::analysis::analysis_datum::{AnalysisDatum, SerializeableNaiveDateTime};
 
 use super::coverage_and_work_day::CoverageAndWorkDay;
 
