@@ -1,6 +1,5 @@
 use std::fmt::{self, Display};
 
-
 use serde::{
     de::{self, Visitor},
     Deserialize, Serialize,
@@ -9,7 +8,7 @@ use serde::{
 use super::{
     rotation_error::RotationManifestParseError,
     time_modifiers::{
-        NEXT_MIDNIGHT, parse_relative_time, THIS_MIDNIGHT, RelativeTime, TimeSinceMidnight,
+        parse_relative_time, RelativeTime, TimeSinceMidnight, NEXT_MIDNIGHT, THIS_MIDNIGHT,
     },
 };
 
@@ -20,7 +19,7 @@ pub struct Timespan {
 }
 
 impl Timespan {
-    pub fn from_string(stringrep:&str)->Result<Timespan, RotationManifestParseError>{
+    pub fn from_string(stringrep: &str) -> Result<Timespan, RotationManifestParseError> {
         parse_time_span(stringrep)
     }
 }
@@ -117,10 +116,7 @@ fn parse_time_span(strval: &str) -> Result<Timespan, RotationManifestParseError>
         }
     };
 
-    let ts = Timespan {
-        start,
-        stop: end,
-    };
+    let ts = Timespan { start, stop: end };
     Ok(ts)
 }
 
@@ -151,4 +147,3 @@ impl<'de> Deserialize<'de> for Timespan {
         deserializer.deserialize_str(TimespanVisitor)
     }
 }
-

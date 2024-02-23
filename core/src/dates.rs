@@ -1,7 +1,5 @@
 use chrono::{Datelike, NaiveDate};
 
-
-
 pub fn check_week_day(date: NaiveDate) -> bool {
     match date.weekday() {
         chrono::Weekday::Sun => false,

@@ -1,11 +1,6 @@
-use std::
-    collections::{HashMap, HashSet}
-;
+use std::collections::{HashMap, HashSet};
 
-
-use crate::{
-    globals::{bvu_headers, file_names, main_headers}
-};
+use crate::globals::{bvu_headers, file_names, main_headers};
 
 use super::{processed_source::ProcessedSource, table::Table};
 
@@ -42,8 +37,7 @@ pub mod exam_categories {
         pub comments: String,
     }
 
-    impl JSONFileOut for Vec<ExamCategory> {
-    }
+    impl JSONFileOut for Vec<ExamCategory> {}
 
     impl Eq for ExamCategory {}
 
@@ -70,14 +64,13 @@ pub mod exam_categories {
         }
     }
 
-    impl ExamCategory
-    {
+    impl ExamCategory {
         pub fn copy(&self) -> ExamCategory {
-            ExamCategory { 
+            ExamCategory {
                 procedure_code: self.procedure_code.to_string(),
-                exam: self.exam.to_string(), 
-                subspecialty: self.subspecialty.to_string(), 
-                comments: self.comments.to_string() 
+                exam: self.exam.to_string(),
+                subspecialty: self.subspecialty.to_string(),
+                comments: self.comments.to_string(),
             }
         }
     }
@@ -135,8 +128,9 @@ pub(crate) fn get_categories_list(
     main_data_table: &Table,
     exam_categories_table: &Table,
 ) -> Result<Vec<exam_categories::ExamCategory>, String> {
-    let main_exam_categories = main_data_table
-        .get_keyed_column_sample_map(&(main_headers::PertinentHeaders::ProcedureCode.get_label()))?;
+    let main_exam_categories = main_data_table.get_keyed_column_sample_map(
+        &(main_headers::PertinentHeaders::ProcedureCode.get_label()),
+    )?;
 
     let existing_exam_categories = exam_categories_table.get_keyed_column_sample_map(
         &(exam_categories::PertinentHeaders::ProcedureCode.get_label()),
@@ -154,10 +148,7 @@ pub(crate) fn get_categories_list(
 
         match existing_exam_categories.get(procedure_code) {
             None => {
-                println!(
-                    "Couldn't find procedure code {}",
-                    procedure_code
-                );
+                println!("Couldn't find procedure code {}", procedure_code);
                 let sample_row_index = match main_exam_categories.get(procedure_code) {
                     Some(x) => x,
                     None => {
@@ -201,21 +192,18 @@ pub(crate) fn get_categories_list(
     Ok(complete_exam_code_list)
 }
 
-
 pub(crate) fn get_categories_map(
-    source:&ProcessedSource
+    source: &ProcessedSource,
 ) -> Result<HashMap<String, exam_categories::ExamCategory>, String> {
     let list = get_categories_list(&source.main_data_table, &source.exam_categories_table)?;
-    let mut retval:HashMap<String, exam_categories::ExamCategory> = HashMap::new();
-    
-    for member in &list
-    {
-        match retval.entry(member.procedure_code.to_string())
-        {
+    let mut retval: HashMap<String, exam_categories::ExamCategory> = HashMap::new();
+
+    for member in &list {
+        match retval.entry(member.procedure_code.to_string()) {
             std::collections::hash_map::Entry::Occupied(_) => panic!("Duplicate procedure code!"),
             std::collections::hash_map::Entry::Vacant(v) => {
                 v.insert(member.copy());
-            },
+            }
         }
     }
 
@@ -229,8 +217,9 @@ pub(crate) fn get_locations_list(
     let main_exam_locations = main_data_table
         .get_keyed_column_sample_map(&(main_headers::PertinentHeaders::Location.get_label()))?;
 
-    let existing_exam_locations = exam_locations_table
-        .get_keyed_column_sample_map(&(location_categories::PertinentHeaders::Location.get_label()))?;
+    let existing_exam_locations = exam_locations_table.get_keyed_column_sample_map(
+        &(location_categories::PertinentHeaders::Location.get_label()),
+    )?;
 
     let mut complete_exam_location_list: Vec<location_categories::LocationCategory> = Vec::new();
 
@@ -346,10 +335,7 @@ pub fn check_bvusource(main_data_table: &Table, bvu_data_table: &mut Table) {
             let mut bvu_table_row: Option<usize> = None;
             for row_b in bvu_data_table.row_indices() {
                 let this_code = bvu_data_table
-                    .get_val(
-                        &bvu_headers::PertinentHeaders::ExamCode.get_label(),
-                        &row_b,
-                    )
+                    .get_val(&bvu_headers::PertinentHeaders::ExamCode.get_label(), &row_b)
                     .expect("Couldn't get bvu row");
                 if this_code == exam_code {
                     bvu_table_row = Some(row_b);
@@ -404,10 +390,8 @@ pub fn build_salem_bvumap(bvu_data_table: &Table) -> Result<HashMap<String, f64>
             }
         };
 
-        let exam_code = bvu_data_table.get_val(
-            &bvu_headers::PertinentHeaders::ExamCode.get_label(),
-            &row_i,
-        )?;
+        let exam_code =
+            bvu_data_table.get_val(&bvu_headers::PertinentHeaders::ExamCode.get_label(), &row_i)?;
 
         let current = retval.get(&exam_code);
         match current {

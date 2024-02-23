@@ -1,10 +1,12 @@
 use std::collections::HashMap;
 
-use serde::{Serialize};
+use serde::Serialize;
 
-use crate::{analysis::analysis_datum::AnalysisDatum, coverage::{coverage_and_work_day::CoverageAndWorkDay, work_collector::WorkCollector}, serialization::weekday::SerializeableWeekday};
-
-
+use crate::{
+    analysis::analysis_datum::AnalysisDatum,
+    coverage::{coverage_and_work_day::CoverageAndWorkDay, work_collector::WorkCollector},
+    serialization::weekday::SerializeableWeekday,
+};
 
 #[derive(Debug, PartialEq, Clone, Serialize)]
 pub struct FractionalCoverageUnit {
@@ -13,8 +15,7 @@ pub struct FractionalCoverageUnit {
     fraction: f64,
 }
 
-impl PartialOrd for FractionalCoverageUnit
-{
+impl PartialOrd for FractionalCoverageUnit {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
         match self.rotation_day.partial_cmp(&other.rotation_day) {
             Some(core::cmp::Ordering::Equal) => {}
@@ -28,23 +29,16 @@ impl PartialOrd for FractionalCoverageUnit
     }
 }
 
-impl Eq for FractionalCoverageUnit
-{
+impl Eq for FractionalCoverageUnit {}
 
-}
-
-
-impl Ord for FractionalCoverageUnit
-{
+impl Ord for FractionalCoverageUnit {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        match self.partial_cmp(other)
-        {
+        match self.partial_cmp(other) {
             Some(x) => x,
             None => std::cmp::Ordering::Equal,
         }
     }
 }
-
 
 impl FractionalCoverageUnit {
     pub fn create(
@@ -54,7 +48,7 @@ impl FractionalCoverageUnit {
     ) -> FractionalCoverageUnit {
         FractionalCoverageUnit {
             rotation,
-            rotation_day: SerializeableWeekday{day:weekday},
+            rotation_day: SerializeableWeekday { day: weekday },
             fraction,
         }
     }
@@ -82,26 +76,26 @@ impl WorkCollector for FractionalCoverageUnit {
         retval
     }
 
-    fn collect_work_bydate(&self, workday: &CoverageAndWorkDay) -> HashMap<chrono::prelude::NaiveDate,AnalysisDatum> {
-        let mut retval: HashMap<chrono::prelude::NaiveDate,AnalysisDatum> = HashMap::new();
+    fn collect_work_bydate(
+        &self,
+        workday: &CoverageAndWorkDay,
+    ) -> HashMap<chrono::prelude::NaiveDate, AnalysisDatum> {
+        let mut retval: HashMap<chrono::prelude::NaiveDate, AnalysisDatum> = HashMap::new();
 
         for work_unit in &workday.work {
-            match retval.entry(work_unit.get_datetime().date())
-            {
+            match retval.entry(work_unit.get_datetime().date()) {
                 std::collections::hash_map::Entry::Occupied(mut entry) => {
                     entry.get_mut().add_workunit(work_unit);
                 }
-                ,
                 std::collections::hash_map::Entry::Vacant(empty) => {
-                    let mut newdat=AnalysisDatum::default();
+                    let mut newdat = AnalysisDatum::default();
                     newdat.add_workunit(work_unit);
                     empty.insert(newdat);
-                },
+                }
             };
         }
 
-        for ad in retval.values_mut()
-        {
+        for ad in retval.values_mut() {
             ad.scale(self.get_fraction());
         }
 

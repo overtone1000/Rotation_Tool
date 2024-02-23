@@ -21,20 +21,22 @@ use crate::coverage::coordinate::CoverageCoordinates;
 use crate::coverage::coverage_and_work_day::CoverageAndWorkDay;
 use crate::coverage::distribution::get_normal_dist_weights;
 use crate::coverage::malformed_coverage::CoverageError;
-use crate::coverage::units::fractional_coverage::{FractionalCoverageUnit};
+use crate::coverage::units::fractional_coverage::FractionalCoverageUnit;
 use crate::coverage::units::temporal_coverage::{weekday_plus, TemporalCoverageUnit};
 use crate::coverage::units::{Coverage, CoverageUnit};
 use crate::coverage::work_collector::WorkCollector;
 use crate::globals::{self, ALL_DAYS};
 use crate::rotations::description::WrappedSortable;
-use crate::rotations::manifest::{Manifest};
+use crate::rotations::manifest::Manifest;
 use crate::rotations::rotation_error::RotationManifestParseError;
 
+use crate::error::source_error::SourceError;
 use crate::serialization::output::JSONFileOut;
 use crate::serialization::weekday::SerializeableWeekday;
-use crate::source_data::processing::categorization::{build_salem_bvumap, build_salem_rvumap, get_categories_map};
+use crate::source_data::processing::categorization::{
+    build_salem_bvumap, build_salem_rvumap, get_categories_map,
+};
 use crate::source_data::processing::processed_source::ProcessedSource;
-use crate::error::source_error::SourceError;
 use crate::{
     constraints::ConstraintSet,
     dates::BUSINESS_DAYS_PER_YEAR,
@@ -42,7 +44,6 @@ use crate::{
 };
 
 use traits::{CoordinateMap, WorkCoverageMap};
-
 
 #[derive(Default, Debug, Serialize)]
 pub struct WeekdayMap {
@@ -87,7 +88,6 @@ impl<'a> CoordinateMap<'a, SerializeableWeekday, CoverageAndWorkDay> for Weekday
         SerializeableWeekday::new(coords.weekday)
     }
 }
-
 
 #[derive(Default, Debug, Serialize)]
 pub struct ContextMap {
@@ -141,8 +141,7 @@ impl WorkCoverageMap for SubspecialtyMap {
     }
 }
 
-
-#[derive(Default,Serialize)]
+#[derive(Default, Serialize)]
 pub struct CoverageMap {
     map: HashMap<String, SubspecialtyMap>,
 }
@@ -224,7 +223,7 @@ impl CoverageMap {
                     &main_headers::PertinentHeaders::ProcedureCode.get_label(),
                     &row_i,
                 )?;
-                
+
                 //Build coords and populate maps with this row.
                 let coords: CoverageCoordinates = {
                     //Get subspecialty from exam code
@@ -358,7 +357,11 @@ impl CoverageMap {
                         *rvu,
                         *bvu,
                         denominator,
-                        exam_code_map.get(&exam_code).expect("Should be there!").exam.to_string()
+                        exam_code_map
+                            .get(&exam_code)
+                            .expect("Should be there!")
+                            .exam
+                            .to_string(),
                     )
                 };
 
@@ -368,10 +371,9 @@ impl CoverageMap {
         //Add TPC, which doesn't go by number of dates
         let distribution_weights = get_normal_dist_weights();
         for row_i in source.tpc_data_table.row_indices() {
-            let exam_code = source.tpc_data_table.get_val(
-                &tpc_headers::PertinentHeaders::ExamCode.get_label(),
-                &row_i,
-            )?;
+            let exam_code = source
+                .tpc_data_table
+                .get_val(&tpc_headers::PertinentHeaders::ExamCode.get_label(), &row_i)?;
 
             let number_str = source.tpc_data_table.get_val(
                 &tpc_headers::PertinentHeaders::NumberIn2022.get_label(),
@@ -427,18 +429,26 @@ impl CoverageMap {
                 date = date + Duration::days(**weekday as i64 - date.weekday() as i64);
 
                 println!("THIS INTRODUCES BAD DATES!");
-                
+
                 if date.weekday() != **weekday {
                     return SourceError::generate_boxed("Weekday math is wrong.".to_string());
                 }
 
                 for key in distribution_weights.keys() {
-                    let work = WorkUnit::create (
+                    let work = WorkUnit::create(
                         NaiveDateTime::new(date, *key),
-                        number_of_exams*rvus_per_exam * (*distribution_weights.get(key).expect("Expected")) as f64,
-                        number_of_exams*bvus_per_exam * (*distribution_weights.get(key).expect("Expected")) as f64,
+                        number_of_exams
+                            * rvus_per_exam
+                            * (*distribution_weights.get(key).expect("Expected")) as f64,
+                        number_of_exams
+                            * bvus_per_exam
+                            * (*distribution_weights.get(key).expect("Expected")) as f64,
                         BUSINESS_DAYS_PER_YEAR as f64,
-                        exam_code_map.get(&exam_code).expect("Should be there!").exam.to_string()
+                        exam_code_map
+                            .get(&exam_code)
+                            .expect("Should be there!")
+                            .exam
+                            .to_string(),
                     );
                     self.add_work(&coords, work);
                 }
@@ -470,9 +480,7 @@ impl CoverageMap {
                     for responsibility in responsibilities {
                         for site in responsibility.sites.to_vec(globals::SITES) {
                             coords.site = site.to_string();
-                            for subspecialty in responsibility
-                                .exams
-                                .to_vec(globals::SUBSPECIALTIES)
+                            for subspecialty in responsibility.exams.to_vec(globals::SUBSPECIALTIES)
                             {
                                 coords.subspecialty = subspecialty.to_string();
                                 for context in responsibility.contexts.to_vec(globals::CONTEXTS) {
@@ -480,84 +488,94 @@ impl CoverageMap {
                                     //for modality in
                                     //    responsibility.modalities.to_vec(globals::MODALITIES)
                                     //{
-                                        //coords.modality = modality.to_string();
-                                        for weekday_string in
-                                            responsibility.days.to_vec(all_weekdays_strings)
-                                        {
-                                            let weekday = match chrono::Weekday::from_str(&weekday_string){
+                                    //coords.modality = modality.to_string();
+                                    for weekday_string in
+                                        responsibility.days.to_vec(all_weekdays_strings)
+                                    {
+                                        let weekday = match chrono::Weekday::from_str(
+                                            &weekday_string,
+                                        ) {
                                             Ok(x) => x,
-                                            Err(_) => return RotationManifestParseError::generate_boxed(0,"".to_string()),
+                                            Err(_) => {
+                                                return RotationManifestParseError::generate_boxed(
+                                                    0,
+                                                    "".to_string(),
+                                                )
+                                            }
                                         };
 
-                                            if responsibility.time_periods.get().is_some()
-                                                && responsibility.weekly_fraction.is_some()
-                                            {
-                                                return RotationManifestParseError::generate_boxed(0,"'time_periods' and 'fraction' have both been provided. One and only one must be provided.".to_string());
-                                            }
-                                            if responsibility.time_periods.get().is_none()
-                                                && responsibility.weekly_fraction.is_none()
-                                            {
-                                                return RotationManifestParseError::generate_boxed(0,"Neither 'time_periods' nor 'fraction' provided.".to_string());
-                                            }
+                                        if responsibility.time_periods.get().is_some()
+                                            && responsibility.weekly_fraction.is_some()
+                                        {
+                                            return RotationManifestParseError::generate_boxed(0,"'time_periods' and 'fraction' have both been provided. One and only one must be provided.".to_string());
+                                        }
+                                        if responsibility.time_periods.get().is_none()
+                                            && responsibility.weekly_fraction.is_none()
+                                        {
+                                            return RotationManifestParseError::generate_boxed(
+                                                0,
+                                                "Neither 'time_periods' nor 'fraction' provided."
+                                                    .to_string(),
+                                            );
+                                        }
 
-                                            match &responsibility.time_periods.get() {
-                                                Some(time_periods) => {
-                                                    for time_period in time_periods {
-                                                        /*
-                                                        let timespan =
-                                                            parse_time_span(time_period.as_str())
-                                                                .expect(
-                                                                "Erroneous timespan in manifest.",
-                                                            );
-                                                        */
-                                                        let periods =
-                                                            time_period.instantiate_periods(weekday);
+                                        match &responsibility.time_periods.get() {
+                                            Some(time_periods) => {
+                                                for time_period in time_periods {
+                                                    /*
+                                                    let timespan =
+                                                        parse_time_span(time_period.as_str())
+                                                            .expect(
+                                                            "Erroneous timespan in manifest.",
+                                                        );
+                                                    */
+                                                    let periods =
+                                                        time_period.instantiate_periods(weekday);
 
-                                                        for (day_offset, start, end) in periods {
-                                                            coords.weekday =
-                                                                weekday_plus(weekday, day_offset);
+                                                    for (day_offset, start, end) in periods {
+                                                        coords.weekday =
+                                                            weekday_plus(weekday, day_offset);
 
-                                                            let coverage =
-                                                                TemporalCoverageUnit::create(
-                                                                    start,
-                                                                    end,
-                                                                    rotation_description
-                                                                        .rotation
-                                                                        .to_string(),
-                                                                    weekday, //the NOMINAL weekday
-                                                                );
+                                                        let coverage = TemporalCoverageUnit::create(
+                                                            start,
+                                                            end,
+                                                            rotation_description
+                                                                .rotation
+                                                                .to_string(),
+                                                            weekday, //the NOMINAL weekday
+                                                        );
 
-                                                            match self.add_coverage(
-                                                                &coords,
-                                                                CoverageUnit::Temporal(coverage),
-                                                            ) {
-                                                                Ok(_) => (),
-                                                                Err(e) => {
-                                                                    return Err(e);
-                                                                }
+                                                        match self.add_coverage(
+                                                            &coords,
+                                                            CoverageUnit::Temporal(coverage),
+                                                        ) {
+                                                            Ok(_) => (),
+                                                            Err(e) => {
+                                                                return Err(e);
                                                             }
                                                         }
                                                     }
                                                 }
-                                                None => (),
                                             }
-
-                                            match &responsibility.weekly_fraction {
-                                                Some(fraction) => {
-                                                    coords.weekday = weekday;
-                                                    let coverage = FractionalCoverageUnit::create(
-                                                        rotation_description.rotation.to_string(),
-                                                        weekday,
-                                                        fraction.to_owned(),
-                                                    );
-                                                    self.add_coverage(
-                                                        &coords,
-                                                        CoverageUnit::WeekFraction(coverage),
-                                                    )?;
-                                                }
-                                                None => (),
-                                            }
+                                            None => (),
                                         }
+
+                                        match &responsibility.weekly_fraction {
+                                            Some(fraction) => {
+                                                coords.weekday = weekday;
+                                                let coverage = FractionalCoverageUnit::create(
+                                                    rotation_description.rotation.to_string(),
+                                                    weekday,
+                                                    fraction.to_owned(),
+                                                );
+                                                self.add_coverage(
+                                                    &coords,
+                                                    CoverageUnit::WeekFraction(coverage),
+                                                )?;
+                                            }
+                                            None => (),
+                                        }
+                                    }
                                     //}
                                 }
                             }
@@ -571,25 +589,22 @@ impl CoverageMap {
         Ok(())
     }
 
-    pub fn foreach(
-        &mut self,
-        mut func: impl FnMut(&CoverageCoordinates, &mut CoverageAndWorkDay),
-    ) {
+    pub fn foreach(&mut self, mut func: impl FnMut(&CoverageCoordinates, &mut CoverageAndWorkDay)) {
         for (site, subspecialtymap) in self.map.iter_mut() {
             for (subspecialty, contextmap) in subspecialtymap.map.iter_mut() {
                 for (context, weekdaymap) in contextmap.map.iter_mut() {
                     //for (modality, weekdaymap) in modalitymap.map.iter_mut() {
-                        for (weekday, coverage_and_workday) in weekdaymap.map.iter_mut() {
-                            let coords = CoverageCoordinates {
-                                site: site.to_string(),
-                                subspecialty: subspecialty.to_string(),
-                                context: context.to_string(),
-                                //modality: modality.to_string(),
-                                weekday: weekday.day,
-                            };
+                    for (weekday, coverage_and_workday) in weekdaymap.map.iter_mut() {
+                        let coords = CoverageCoordinates {
+                            site: site.to_string(),
+                            subspecialty: subspecialty.to_string(),
+                            context: context.to_string(),
+                            //modality: modality.to_string(),
+                            weekday: weekday.day,
+                        };
 
-                            func(&coords, coverage_and_workday);
-                        }
+                        func(&coords, coverage_and_workday);
+                    }
                     //}
                 }
             }
@@ -605,6 +620,7 @@ impl<'a> CoordinateMap<'a, String, SubspecialtyMap> for CoverageMap {
         coords.site.clone()
     }
 }
+
 impl WorkCoverageMap for CoverageMap {
     fn add_work(&mut self, coords: &CoverageCoordinates, work: WorkUnit) {
         self.get_branch(coords).add_work(coords, work);
@@ -618,5 +634,4 @@ impl WorkCoverageMap for CoverageMap {
     }
 }
 
-impl JSONFileOut for CoverageMap {
-}
+impl JSONFileOut for CoverageMap {}

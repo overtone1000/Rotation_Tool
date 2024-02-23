@@ -1,14 +1,15 @@
-
-
 use std::collections::HashMap;
 
 use chrono::Datelike;
-use serde::{Serialize, ser::SerializeStruct};
+use serde::{ser::SerializeStruct, Serialize};
 
-use crate::{analysis::analysis_datum::AnalysisDatum, coverage::{coverage_and_work_day::CoverageAndWorkDay, work_collector::WorkCollector}, rotations::time_modifiers::{TimeSinceMidnight, NEXT_MIDNIGHT, THIS_MIDNIGHT}};
+use crate::{
+    analysis::analysis_datum::AnalysisDatum,
+    coverage::{coverage_and_work_day::CoverageAndWorkDay, work_collector::WorkCollector},
+    rotations::time_modifiers::{TimeSinceMidnight, NEXT_MIDNIGHT, THIS_MIDNIGHT},
+};
 
 use crate::serialization::weekday::SerializeableWeekday;
-
 
 pub fn weekday_plus(base_weekday: chrono::Weekday, delta: i64) -> chrono::Weekday {
     let mut retval = base_weekday;
@@ -24,19 +25,18 @@ pub fn weekday_plus(base_weekday: chrono::Weekday, delta: i64) -> chrono::Weekda
     retval
 }
 
-#[derive(Debug, PartialEq, Clone,Serialize)]
+#[derive(Debug, PartialEq, Clone, Serialize)]
 pub struct TemporalCoverageUnit {
     pub start: TimeSinceMidnight,
     pub end: TimeSinceMidnight,
     rotation: String,
-    rotation_day:SerializeableWeekday
+    rotation_day: SerializeableWeekday,
 }
 
 impl Eq for TemporalCoverageUnit {}
 
-pub fn weekday_for_javascript(weekday:&chrono::Weekday)->u32
-{
-    weekday.num_days_from_sunday()//This is how javascript represents weekdays
+pub fn weekday_for_javascript(weekday: &chrono::Weekday) -> u32 {
+    weekday.num_days_from_sunday() //This is how javascript represents weekdays
 }
 
 impl TemporalCoverageUnit {
@@ -50,7 +50,7 @@ impl TemporalCoverageUnit {
             start,
             end,
             rotation,
-            rotation_day: SerializeableWeekday{day:day}, //weekday_offset:offset //This is limited to one 24 hour period inclusive on each end.
+            rotation_day: SerializeableWeekday { day: day }, //weekday_offset:offset //This is limited to one 24 hour period inclusive on each end.
         }
     }
 
@@ -155,28 +155,29 @@ impl Ord for TemporalCoverageUnit {
 
 impl WorkCollector for TemporalCoverageUnit {
     fn collect_work(&self, workday: &CoverageAndWorkDay) -> AnalysisDatum {
-        let mut retval:AnalysisDatum=AnalysisDatum::default();
-        for work_unit in workday.get_work_in_timespan(self.start, self.end)
-        {
+        let mut retval: AnalysisDatum = AnalysisDatum::default();
+        for work_unit in workday.get_work_in_timespan(self.start, self.end) {
             retval.add_workunit(work_unit);
         }
         retval
     }
 
-    fn collect_work_bydate(&self, workday: &CoverageAndWorkDay) -> HashMap<chrono::prelude::NaiveDate,AnalysisDatum> {
-        let mut retval: HashMap<chrono::prelude::NaiveDate,AnalysisDatum> = HashMap::new();
+    fn collect_work_bydate(
+        &self,
+        workday: &CoverageAndWorkDay,
+    ) -> HashMap<chrono::prelude::NaiveDate, AnalysisDatum> {
+        let mut retval: HashMap<chrono::prelude::NaiveDate, AnalysisDatum> = HashMap::new();
 
-        for work_unit in workday.get_work_in_timespan(self.start, self.end) {            
-            match retval.entry(work_unit.get_datetime().date())
-            {
+        for work_unit in workday.get_work_in_timespan(self.start, self.end) {
+            match retval.entry(work_unit.get_datetime().date()) {
                 std::collections::hash_map::Entry::Occupied(mut entry) => {
                     entry.get_mut().add_workunit(work_unit);
-                },
+                }
                 std::collections::hash_map::Entry::Vacant(empty) => {
-                    let mut newdat=AnalysisDatum::default();
+                    let mut newdat = AnalysisDatum::default();
                     newdat.add_workunit(work_unit);
                     empty.insert(newdat);
-                },
+                }
             };
         }
 

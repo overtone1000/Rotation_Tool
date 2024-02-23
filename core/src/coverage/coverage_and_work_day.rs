@@ -1,11 +1,15 @@
 use chrono::Timelike;
 use serde::Serialize;
 
-use crate::{analysis::analysis_datum::{AnalysisDatum, WorkUnit}, rotations::time_modifiers::{TimeSinceMidnight, NEXT_MIDNIGHT, THIS_MIDNIGHT}};
+use crate::{
+    analysis::analysis_datum::{AnalysisDatum, WorkUnit},
+    rotations::time_modifiers::{TimeSinceMidnight, NEXT_MIDNIGHT, THIS_MIDNIGHT},
+};
 
-use super::{malformed_coverage::{CoverageError, MalformedCoverage}, units::{temporal_coverage::TemporalCoverageUnit, Coverage, CoverageUnit}};
-
-
+use super::{
+    malformed_coverage::{CoverageError, MalformedCoverage},
+    units::{temporal_coverage::TemporalCoverageUnit, Coverage, CoverageUnit},
+};
 
 #[derive(Debug, Default, Serialize)]
 pub struct CoverageAndWorkDay {
@@ -70,37 +74,35 @@ impl CoverageAndWorkDay {
         end: TimeSinceMidnight,
     ) -> AnalysisDatum {
         let mut retval: AnalysisDatum = AnalysisDatum::default();
-        for work_unit in self.get_work_in_timespan(start, end)
-        {
+        for work_unit in self.get_work_in_timespan(start, end) {
             retval.add_workunit(work_unit);
         }
         retval
     }
 
     pub fn audit_coverage(&mut self) -> CoverageError {
-        
         self.sort_coverage();
 
         match &self.coverages {
-            None => {
-                CoverageError::NoCoverage(
-                    self.aggregate_work_in_timespan(THIS_MIDNIGHT, NEXT_MIDNIGHT)
-                        .get_rvu(),
-                )
-            }
+            None => CoverageError::NoCoverage(
+                self.aggregate_work_in_timespan(THIS_MIDNIGHT, NEXT_MIDNIGHT)
+                    .get_rvu(),
+            ),
             Some(coverages) => {
                 let mut retval = MalformedCoverage::default();
 
-                retval.no_work=self.work.is_empty();
-                
+                retval.no_work = self.work.is_empty();
+
                 match coverages {
                     Coverage::Temporal(temporal_coverages) => {
                         match temporal_coverages.split_first() {
                             Some((mut farthest_unit, rest)) => {
                                 //Check from midnight
                                 if farthest_unit.starts_after_this_midnight() {
-                                    let rvus = &self
-                                        .aggregate_work_in_timespan(THIS_MIDNIGHT, farthest_unit.start);
+                                    let rvus = &self.aggregate_work_in_timespan(
+                                        THIS_MIDNIGHT,
+                                        farthest_unit.start,
+                                    );
                                     retval.gaps.push((
                                         THIS_MIDNIGHT,
                                         farthest_unit.start,
@@ -122,8 +124,10 @@ impl CoverageAndWorkDay {
                                     } else if farthest_unit.gap_between_end_and_other(cu)
                                     //Check gap
                                     {
-                                        let rvus =
-                                            &self.aggregate_work_in_timespan(farthest_unit.end, cu.start);
+                                        let rvus = &self.aggregate_work_in_timespan(
+                                            farthest_unit.end,
+                                            cu.start,
+                                        );
                                         retval.gaps.push((
                                             farthest_unit.end,
                                             cu.start,
@@ -142,8 +146,10 @@ impl CoverageAndWorkDay {
                                 }
                                 //Check through midnight
                                 if farthest_unit.ends_before_next_midnight() {
-                                    let rvus = &self
-                                        .aggregate_work_in_timespan(farthest_unit.end, NEXT_MIDNIGHT);
+                                    let rvus = &self.aggregate_work_in_timespan(
+                                        farthest_unit.end,
+                                        NEXT_MIDNIGHT,
+                                    );
                                     retval.gaps.push((
                                         farthest_unit.end,
                                         NEXT_MIDNIGHT,
@@ -172,4 +178,3 @@ impl CoverageAndWorkDay {
         }
     }
 }
-

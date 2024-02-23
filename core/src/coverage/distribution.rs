@@ -19,8 +19,7 @@ pub(crate) fn get_time_row_index(hour: u32, minute: u32) -> usize {
     if minute_of_day < start_minute_of_day {
         minute_of_day += 24 * 60;
     }
-    (((minute_of_day - start_minute_of_day) as f32) / (TIME_STEP_MINUTES as f32)).floor()
-        as usize
+    (((minute_of_day - start_minute_of_day) as f32) / (TIME_STEP_MINUTES as f32)).floor() as usize
 }
 
 pub(crate) fn get_time_row_normal_dist_weights() -> HashMap<usize, f64> {

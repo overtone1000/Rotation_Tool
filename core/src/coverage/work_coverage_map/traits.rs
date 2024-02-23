@@ -1,35 +1,14 @@
-
 use std::collections::{hash_map::Entry, HashMap};
-
 
 use std::fmt::Debug;
 
-
 use std::hash::Hash;
 
-
-
-
-
-
-
-use crate::analysis::analysis_datum::{WorkUnit};
+use crate::analysis::analysis_datum::WorkUnit;
 
 use crate::coverage::coordinate::CoverageCoordinates;
 
-
 use crate::coverage::units::CoverageUnit;
-
-
-
-
-
-
-
-
-
-
-
 
 pub trait WorkCoverageMap {
     fn add_work(&mut self, coords: &CoverageCoordinates, work: WorkUnit);

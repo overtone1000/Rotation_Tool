@@ -1,4 +1,3 @@
-
 #[derive(Eq, Hash, PartialEq, Clone)]
 pub struct CoverageCoordinates {
     pub site: String,

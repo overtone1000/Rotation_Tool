@@ -1,12 +1,13 @@
-
-
 use serde::{Deserialize, Serialize};
 
 use crate::globals;
 
-use super::{stringtypes::StringTypes, timespan::Timespan, rotation_error::RotationManifestParseError, description::WrappedSortable};
+use super::{
+    description::WrappedSortable, rotation_error::RotationManifestParseError,
+    stringtypes::StringTypes, timespan::Timespan,
+};
 
-pub fn check(t: &StringTypes, poss: &[&str], desc: &str, errors:&mut Vec<String>){
+pub fn check(t: &StringTypes, poss: &[&str], desc: &str, errors: &mut Vec<String>) {
     match t.validate(poss) {
         Err(e) => {
             for i in e {
@@ -20,7 +21,7 @@ pub fn check(t: &StringTypes, poss: &[&str], desc: &str, errors:&mut Vec<String>
     };
 }
 
-pub fn validate_days(days_to_check:&StringTypes, errors:&mut Vec<String>) -> () {
+pub fn validate_days(days_to_check: &StringTypes, errors: &mut Vec<String>) -> () {
     let mon = chrono::Weekday::Mon.to_string();
     let tue = chrono::Weekday::Tue.to_string();
     let wed = chrono::Weekday::Wed.to_string();
@@ -63,7 +64,7 @@ impl RotationResponsibility {
             &self.exams,
             globals::SUBSPECIALTIES,
             "subspecialty",
-            &mut errors
+            &mut errors,
         );
         check(&self.contexts, globals::CONTEXTS, "context", &mut errors);
         //check(&self.modalities, globals::MODALITIES, "modality", &mut errors);
@@ -77,16 +78,11 @@ impl RotationResponsibility {
     }
 }
 
-impl PartialOrd for RotationResponsibility
-{
+impl PartialOrd for RotationResponsibility {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-
-        if self.weekly_fraction.is_some() && other.weekly_fraction.is_none()
-        {
+        if self.weekly_fraction.is_some() && other.weekly_fraction.is_none() {
             return Some(core::cmp::Ordering::Less);
-        }
-        else if self.weekly_fraction.is_none() && other.weekly_fraction.is_some()
-        {
+        } else if self.weekly_fraction.is_none() && other.weekly_fraction.is_some() {
             return Some(core::cmp::Ordering::Greater);
         }
 
@@ -95,7 +91,7 @@ impl PartialOrd for RotationResponsibility
             ord => return ord,
         }
 
-        self.time_periods.partial_cmp(&other.time_periods) 
+        self.time_periods.partial_cmp(&other.time_periods)
         /*
         match self.days.partial_cmp(&other.days) {
             Some(core::cmp::Ordering::Equal) => {}
@@ -118,94 +114,84 @@ impl PartialOrd for RotationResponsibility
     }
 }
 
-impl Ord for RotationResponsibility{
+impl Ord for RotationResponsibility {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
         self.partial_cmp(other).expect("Bad ordering")
     }
 }
-impl Eq for RotationResponsibility{}
+impl Eq for RotationResponsibility {}
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Clone)]
-pub struct TimePeriods
-{
-    value: Option<Vec<Timespan>>
+pub struct TimePeriods {
+    value: Option<Vec<Timespan>>,
 }
 
-impl WrappedSortable<Timespan> for TimePeriods
-{
-    fn get(&self)->&Option<Vec<Timespan>>{
+impl WrappedSortable<Timespan> for TimePeriods {
+    fn get(&self) -> &Option<Vec<Timespan>> {
         &self.value
     }
-    fn fromval(mut val:Option<Vec<Timespan>>)->TimePeriods{
-        match val
-        {
-            Some(mut x)=>{
+    fn fromval(mut val: Option<Vec<Timespan>>) -> TimePeriods {
+        match val {
+            Some(mut x) => {
                 x.sort();
-                val=Some(x);
-            },
-            None => {();},
+                val = Some(x);
+            }
+            None => {
+                ();
+            }
         }
 
-        TimePeriods{
-            value:val
-        }
+        TimePeriods { value: val }
     }
 }
 
-impl TimePeriods
-{
-    pub fn from_strings(strings:Vec<&str>)->Result<TimePeriods,RotationManifestParseError>
-    {
-        let mut periods:Vec<Timespan>=Vec::new();
-        for str in strings
-        {
+impl TimePeriods {
+    pub fn from_strings(strings: Vec<&str>) -> Result<TimePeriods, RotationManifestParseError> {
+        let mut periods: Vec<Timespan> = Vec::new();
+        for str in strings {
             periods.push(Timespan::from_string(str)?);
         }
-        Ok(TimePeriods{
-            value: Some(periods)
+        Ok(TimePeriods {
+            value: Some(periods),
         })
     }
 
-    pub fn get(&self)->&Option<Vec<Timespan>>{
+    pub fn get(&self) -> &Option<Vec<Timespan>> {
         &self.value
     }
 }
 
-impl <'de> Deserialize<'de> for TimePeriods
-{
+impl<'de> Deserialize<'de> for TimePeriods {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
-        D: serde::Deserializer<'de> {
-        let mut val = Option::<Vec::<Timespan>>::deserialize(deserializer)?;
-        match val
-        {
-            Some(mut x)=>{
+        D: serde::Deserializer<'de>,
+    {
+        let mut val = Option::<Vec<Timespan>>::deserialize(deserializer)?;
+        match val {
+            Some(mut x) => {
                 x.sort();
-                val=Some(x);
-            },
-            None => {();},
+                val = Some(x);
+            }
+            None => {
+                ();
+            }
         }
 
-        Ok(TimePeriods{
-            value:val
-        })
+        Ok(TimePeriods { value: val })
     }
 }
-impl Serialize for TimePeriods
-{
+impl Serialize for TimePeriods {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: serde::Serializer {
-        match &self.value
-        {
+        S: serde::Serializer,
+    {
+        match &self.value {
             Some(x) => {
-                let mut newvec:Vec<Timespan> = x.clone();
+                let mut newvec: Vec<Timespan> = x.clone();
                 newvec.sort();
                 newvec.serialize(serializer)
-            },
-            None => {
-                serializer.serialize_none()
-            },
+            }
+            None => serializer.serialize_none(),
         }
     }
 }

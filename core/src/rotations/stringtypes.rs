@@ -1,12 +1,10 @@
 use std::{collections::HashSet, fmt};
 
-
 use serde::{
     de::{self, Visitor},
-    Deserialize, Serialize, ser::SerializeSeq,
+    ser::SerializeSeq,
+    Deserialize, Serialize,
 };
-
-
 
 #[derive(Debug, PartialEq, Deserialize, Clone)]
 #[serde(untagged)]
@@ -60,10 +58,14 @@ impl StringTypes {
     }
 }
 
-fn serialize_hashset_alphabetically<S>(hashset:&HashSet<String>, serializer:S) -> Result<S::Ok, S::Error>
-where S:serde::Serializer
+fn serialize_hashset_alphabetically<S>(
+    hashset: &HashSet<String>,
+    serializer: S,
+) -> Result<S::Ok, S::Error>
+where
+    S: serde::Serializer,
 {
-    let mut asarr:Vec<&str> = Vec::new();
+    let mut asarr: Vec<&str> = Vec::new();
     for value in hashset {
         asarr.push(value);
     }
@@ -76,16 +78,16 @@ where S:serde::Serializer
     seq.end()
 }
 
-impl Serialize for StringTypes
-{
+impl Serialize for StringTypes {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: serde::Serializer,
     {
-        match self
-        {
+        match self {
             StringTypes::All(x) => x.serialize(serializer),
-            StringTypes::SlashSeparatedStringHashSet(x) => serialize_hashset_alphabetically(&x.values, serializer),
+            StringTypes::SlashSeparatedStringHashSet(x) => {
+                serialize_hashset_alphabetically(&x.values, serializer)
+            }
             StringTypes::Array(x) => serialize_hashset_alphabetically(x, serializer),
         }
     }
@@ -159,22 +161,20 @@ impl SlashSeparatedStringSet {
     }
 }
 
-pub fn cmphashsets(sel:&HashSet<String>, other:&HashSet<String>)->Option<std::cmp::Ordering>
-{
-    match sel.len().partial_cmp(&other.len())
-    {
+pub fn cmphashsets(sel: &HashSet<String>, other: &HashSet<String>) -> Option<std::cmp::Ordering> {
+    match sel.len().partial_cmp(&other.len()) {
         Some(core::cmp::Ordering::Equal) => {}
         ord => return ord,
     };
-    for selfval in sel
-    {
-        if !other.contains(selfval)
-        { return Some(core::cmp::Ordering::Greater) }
+    for selfval in sel {
+        if !other.contains(selfval) {
+            return Some(core::cmp::Ordering::Greater);
+        }
     }
-    for otherval in other
-    {
-        if !sel.contains(otherval)
-        { return Some(core::cmp::Ordering::Less) }
+    for otherval in other {
+        if !sel.contains(otherval) {
+            return Some(core::cmp::Ordering::Less);
+        }
     }
     Some(core::cmp::Ordering::Equal)
 }

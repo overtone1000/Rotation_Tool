@@ -1,18 +1,13 @@
-
-
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
 use std::error::Error;
 use std::fs::{self};
 
-
-
-
 use crate::globals::file_names::EXAMPLE_ROTATION_DESCRIPTIONS;
 use crate::serialization::output::JSONFileOut;
 
 use super::baseline::RotationBaseline;
-use super::description::{RotationDescription, WrappedSortable, Responsibilities, RotationHours};
+use super::description::{Responsibilities, RotationDescription, RotationHours, WrappedSortable};
 use super::responsibility::{RotationResponsibility, TimePeriods};
 use super::special::weekdays;
 use super::stringtypes::StringTypes;
@@ -84,7 +79,8 @@ impl Manifest {
                     time_periods: TimePeriods::from_strings(Vec::from([
                         "17:00 PBD-12:00 CD",
                         "13:00 CD-17:00 CD",
-                    ])).expect("Should be valid."),
+                    ]))
+                    .expect("Should be valid."),
                     weekly_fraction: None,
                     days: StringTypes::new_slash_separated_string_vec(
                         &(weekdays::weekday_to_str(chrono::Weekday::Mon)
@@ -117,10 +113,11 @@ impl Manifest {
                         "Modality B".to_string(),
                     ])),
                     */
-                    time_periods:  TimePeriods::from_strings(Vec::from([
+                    time_periods: TimePeriods::from_strings(Vec::from([
                         "17:00 PD-12:00 CD",
                         "13:00 CD-17:00 CD",
-                    ])).expect("Should be valid."),
+                    ]))
+                    .expect("Should be valid."),
                     weekly_fraction: None,
                     days: StringTypes::Array(HashSet::from([
                         weekdays::weekday_to_str(chrono::Weekday::Sat),
@@ -134,17 +131,16 @@ impl Manifest {
                 "But this section can be omitted entirely.".to_string(),
             ])),
             hours: Some(Vec::from([RotationHours::new(
-                RelativeTime::CurrentDay(TimeSinceMidnight::new(8*60)),
-                RelativeTime::CurrentDay(TimeSinceMidnight::new(17*60)),
-                StringTypes::new_slash_separated_string_vec("Sun/Mon/Tue/Wed/Thu/Fri")
+                RelativeTime::CurrentDay(TimeSinceMidnight::new(8 * 60)),
+                RelativeTime::CurrentDay(TimeSinceMidnight::new(17 * 60)),
+                StringTypes::new_slash_separated_string_vec("Sun/Mon/Tue/Wed/Thu/Fri"),
             )])),
             breaktime: Some((
-                Timespan{
-                    start:RelativeTime::CurrentDay(TimeSinceMidnight::new(12*60)),
-                    stop:RelativeTime::CurrentDay(TimeSinceMidnight::new(13*60))
-                }
-                ,
-                Some("Covered by Rotation C".to_string())
+                Timespan {
+                    start: RelativeTime::CurrentDay(TimeSinceMidnight::new(12 * 60)),
+                    stop: RelativeTime::CurrentDay(TimeSinceMidnight::new(13 * 60)),
+                },
+                Some("Covered by Rotation C".to_string()),
             )),
         });
 
@@ -163,6 +159,4 @@ impl Manifest {
     }
 }
 
-
-impl JSONFileOut for Manifest {
-}
+impl JSONFileOut for Manifest {}

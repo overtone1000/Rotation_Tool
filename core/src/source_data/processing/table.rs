@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 
-
 use std::io::Error;
 use std::io::ErrorKind;
 use std::ops::Range;
@@ -111,9 +110,7 @@ impl Table {
         let cell = datarow.get(index);
 
         match cell {
-            None => {
-                Err(format!("No val for {} in row {} ", header_label, row))
-            }
+            None => Err(format!("No val for {} in row {} ", header_label, row)),
             Some(val) => Ok(val.to_owned()),
         }
     }

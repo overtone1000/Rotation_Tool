@@ -88,7 +88,7 @@ const BC: &str = "BC";
 pub const SITES: &[&str] = &[SH, SC, "SRC", "WVH", WB, TPC];
 
 pub(crate) const MSK: &str = "MSK";
-pub(crate) const MSK_WE_AH0C:&str = "MSK Weekend AH0C";
+pub(crate) const MSK_WE_AH0C: &str = "MSK Weekend AH0C";
 pub(crate) const NEURO: &str = "Neuro";
 
 pub const SUBSPECIALTIES: &[&str] = &[
