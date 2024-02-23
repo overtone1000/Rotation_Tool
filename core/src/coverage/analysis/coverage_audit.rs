@@ -1,8 +1,4 @@
-use std::{
-    collections::{HashMap},
-    error::Error,
-    io::Write,
-};
+use std::{collections::HashMap, error::Error, io::Write};
 
 use crate::{
     coverage::{

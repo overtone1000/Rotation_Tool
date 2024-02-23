@@ -1,6 +1,4 @@
-use std::{
-    error::Error,
-};
+use std::error::Error;
 
 use crate::{
     analysis::analysis_datum::AnalysisDatum,

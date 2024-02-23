@@ -1,15 +1,10 @@
-use std::{
-    collections::{HashMap},
-    error::Error,
-    fs::File,
-    io::BufWriter,
-};
+use std::{collections::HashMap, error::Error, fs::File, io::BufWriter};
 
 use chrono::NaiveDate;
 
 use crate::{
     analysis::{
-        analysis_datum::{AnalysisDatum},
+        analysis_datum::AnalysisDatum,
         volumes::{CategorizedVolumes, VolumesMark},
     },
     coverage::{

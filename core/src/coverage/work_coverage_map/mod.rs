@@ -3,19 +3,14 @@ pub(crate) mod traits;
 use std::collections::HashSet;
 use std::collections::{hash_map::Entry, HashMap};
 
-
 use std::fmt::Debug;
-
-
-
-
 
 use std::str::FromStr;
 
 use chrono::{Datelike, Duration, NaiveDate, NaiveDateTime};
 use serde::Serialize;
 
-use crate::analysis::analysis_datum::{WorkUnit};
+use crate::analysis::analysis_datum::WorkUnit;
 
 use crate::coverage::coordinate::CoverageCoordinates;
 use crate::coverage::coverage_and_work_day::CoverageAndWorkDay;
@@ -23,7 +18,7 @@ use crate::coverage::distribution::get_normal_dist_weights;
 
 use crate::coverage::units::fractional_coverage::FractionalCoverageUnit;
 use crate::coverage::units::temporal_coverage::{weekday_plus, TemporalCoverageUnit};
-use crate::coverage::units::{CoverageUnit};
+use crate::coverage::units::CoverageUnit;
 
 use crate::globals::{self, ALL_DAYS};
 use crate::rotations::description::WrappedSortable;
