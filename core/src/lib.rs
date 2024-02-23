@@ -7,12 +7,12 @@ use analysis::analysis_datum::AnalysisDatum;
 use chrono::{NaiveDateTime, Weekday};
 use constraints::{is_not_holiday, ConstraintSet};
 
-use coverage::work_coverage_map::CoverageMap;
+use coverage::{analysis::{by_day_of_week::{analysis_to_csv, analyze_by_day_of_week}, coverage_audit::{audit, audit_to_stream}}, work_coverage_map::CoverageMap};
 use globals::file_names::COVERAGE_AUDIT_NOWORK_OUT;
 
 
 use crate::{
-    globals::file_names::{COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE, VOLUME_BY_DATE_ROTATION}, serialization::output::JSONFileOut, source_data::processing::processed_source::ProcessedSource
+    coverage::analysis::{rotation_day_details::details, volumes_by_date::{analysis_to_plot, sort_volumes_by_date}}, globals::file_names::{COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE, VOLUME_BY_DATE_ROTATION}, serialization::output::JSONFileOut, source_data::processing::processed_source::ProcessedSource
 };
 
 mod analysis;
@@ -79,11 +79,12 @@ pub fn analyze_rotations(common:&mut MainCommon) -> Result<HashMap<String, HashM
     let auditfile_nowork: File = File::create(COVERAGE_AUDIT_NOWORK_OUT)?;
     let mut writer_nowork = BufWriter::new(auditfile_nowork);
 
-    common.coverage_tree.audit_to_stream(&mut writer,&mut writer_nowork)?;
+    let audit_result = audit(&mut common.coverage_tree);
+    audit_to_stream(&audit_result,&mut writer,&mut writer_nowork)?;
 
-    let analysis = common.coverage_tree.analyze_by_day_of_week();
-    coverage::work_coverage_map::CoverageMap::analysis_to_csv(&analysis, COVERAGE_ANALYSIS_OUT.to_owned() + "_rvu.csv", true);
-    coverage::work_coverage_map::CoverageMap::analysis_to_csv(&analysis, COVERAGE_ANALYSIS_OUT.to_owned() + "_bvu.csv", false);
+    let analysis = analyze_by_day_of_week(&mut common.coverage_tree);
+    analysis_to_csv(&analysis, COVERAGE_ANALYSIS_OUT.to_owned() + "_rvu.csv", true);
+    analysis_to_csv(&analysis, COVERAGE_ANALYSIS_OUT.to_owned() + "_bvu.csv", false);
 
     Ok(analysis)
 }
@@ -112,7 +113,8 @@ pub fn generate_frontend_statics(common:&mut MainCommon)->Result<(),Box<dyn Erro
     common.source.exam_categories_list.to_json(&(base.to_string() + "/exam_categories"+&millistr+".json"))?;
 
     //Plots
-    common.coverage_tree.analysis_to_plot(base.to_string() + "/" + VOLUME_BY_DATE_ROTATION+&millistr+".json")?;
+    let mut plot=sort_volumes_by_date(&mut common.coverage_tree);
+    analysis_to_plot(&mut plot,base.to_string() + "/" + VOLUME_BY_DATE_ROTATION+&millistr+".json")?;
 
     Ok(())
 }
@@ -124,7 +126,7 @@ pub fn perform_detailed_analysis(common:&mut MainCommon) -> Result<(), Box<dyn E
 }
 
 fn detailed_analysis(common:&mut MainCommon, weekday:chrono::Weekday, rotation:&str) -> Result<(), Box<dyn Error>> {    
-    let details = common.coverage_tree.details(weekday,rotation)?;
+    let details = details(&mut common.coverage_tree, weekday,rotation)?;
 
     println!("Detailed analysis for {}-{}",rotation,weekday);
     for (exam,count) in details.get_studies()

@@ -4,9 +4,7 @@ use chrono::NaiveDate;
 
 use crate::{analysis::{analysis_datum::{AnalysisDatum, SerializeableNaiveDateTime}, volumes::{CategorizedVolumes, VolumesMark}}, coverage::{coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay, units::Coverage, work_collector::WorkCollector, work_coverage_map::CoverageMap}, globals::ALL_DAYS};
 
-impl CoverageMap
-{
-pub fn sort_volumes_by_date(&mut self) -> CategorizedVolumes {
+pub fn sort_volumes_by_date(coverage_map:&mut CoverageMap) -> CategorizedVolumes {
     let mut retval: CategorizedVolumes = CategorizedVolumes::new();
 
     let mut process_collection =
@@ -47,17 +45,15 @@ pub fn sort_volumes_by_date(&mut self) -> CategorizedVolumes {
             }
         };
 
-    self.foreach(func);
+    coverage_map.foreach(func);
 
     retval
 }
 
-pub fn analysis_to_plot(&mut self, filename: String) -> Result<(), Box<dyn Error>>  {
-    let plot=self.sort_volumes_by_date();
+pub fn analysis_to_plot(cat_vol:&mut CategorizedVolumes, filename: String) -> Result<(), Box<dyn Error>>  {
     //let plot = self.analyze_by_day_of_week();
     let cachefile = File::create(&filename).expect(format!("Couldn't create file {}",&filename).as_str());
     let writer = BufWriter::new(&cachefile);
-    serde_json::to_writer(writer,&plot)?;
+    serde_json::to_writer(writer,&cat_vol)?;
     Ok(())
-}
 }

@@ -2,9 +2,7 @@ use std::collections::{hash_map::Entry, HashMap};
 
 use crate::{analysis::analysis_datum::AnalysisDatum, coverage::{coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay, units::Coverage, work_collector::WorkCollector, work_coverage_map::CoverageMap}, globals::ALL_DAYS};
 
-impl CoverageMap
-{
-pub fn analyze_by_day_of_week(&mut self) -> HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>> {
+pub fn analyze_by_day_of_week(coverage_map:&mut CoverageMap) -> HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>> {
     let mut retval: HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>> = HashMap::new();
 
     let mut addfunc = |rotation: String, weekday: chrono::Weekday, data: AnalysisDatum| {
@@ -54,7 +52,7 @@ pub fn analyze_by_day_of_week(&mut self) -> HashMap<String, HashMap<chrono::Week
             }
         };
 
-    self.foreach(func);
+    coverage_map.foreach(func);
 
     retval
 }
@@ -114,5 +112,4 @@ pub fn analysis_to_csv(analysis:&HashMap<String, HashMap<chrono::Weekday, Analys
             Err(_) => panic!(),
         }
     }
-}
 }

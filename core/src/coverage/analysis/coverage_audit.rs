@@ -2,9 +2,7 @@ use std::{collections::{hash_map::Entry, HashMap}, error::Error, io::Write};
 
 use crate::{analysis::analysis_datum::AnalysisDatum, coverage::{coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay, malformed_coverage::CoverageError, units::Coverage, work_coverage_map::CoverageMap}, globals::ALL_DAYS, rotations::rotation_error::RotationManifestParseError};
 
-impl CoverageMap
-{
-pub fn audit(&mut self) -> HashMap<CoverageCoordinates, CoverageError> {
+pub fn audit(coverage_map:&mut CoverageMap) -> HashMap<CoverageCoordinates, CoverageError> {
     let mut retval: HashMap<CoverageCoordinates, CoverageError> = HashMap::new();
 
     //let testcoords=testcoords();
@@ -16,14 +14,13 @@ pub fn audit(&mut self) -> HashMap<CoverageCoordinates, CoverageError> {
             retval.insert(coords.to_owned(), errs);
         };
 
-    self.foreach(func);
+        coverage_map.foreach(func);
 
     retval
 }
 
 
-pub fn audit_to_stream<T: Write>(&mut self, primary_error_writer: &mut T, work_gap_writer: &mut T) -> Result<(), Box<dyn Error>> {
-    let audit_result = self.audit();
+pub fn audit_to_stream<T: Write>(audit_result:&HashMap<CoverageCoordinates, CoverageError>, primary_error_writer: &mut T, work_gap_writer: &mut T) -> Result<(), Box<dyn Error>> {
 
     let mut sorted_keys: Vec<&CoverageCoordinates> = audit_result.keys().collect();
     sorted_keys.sort();
@@ -113,5 +110,4 @@ pub fn audit_to_stream<T: Write>(&mut self, primary_error_writer: &mut T, work_g
     else {
         RotationManifestParseError::generate_boxed(0, "Audit returned errors.".to_string())
     }
-}
 }

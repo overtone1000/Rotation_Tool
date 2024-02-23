@@ -2,9 +2,7 @@ use std::{collections::{hash_map::Entry, HashMap}, error::Error};
 
 use crate::{analysis::analysis_datum::AnalysisDatum, coverage::{coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay, units::Coverage, work_collector::WorkCollector, work_coverage_map::CoverageMap}, globals::ALL_DAYS};
 
-impl CoverageMap
-{
-pub fn details(&mut self, analyzed_weekday:chrono::Weekday, analyzed_rotation:&str) -> Result<AnalysisDatum, Box<dyn Error>> {
+pub fn details(coverage_map:&mut CoverageMap, analyzed_weekday:chrono::Weekday, analyzed_rotation:&str) -> Result<AnalysisDatum, Box<dyn Error>> {
     let mut aggregate:AnalysisDatum = AnalysisDatum::default();
 
     let mut addfunc = |rotation: String, weekday: chrono::Weekday, data: AnalysisDatum| {
@@ -38,8 +36,7 @@ pub fn details(&mut self, analyzed_weekday:chrono::Weekday, analyzed_rotation:&s
             }
         };
 
-    self.foreach(func);
+    coverage_map.foreach(func);
 
     Ok(aggregate)
-}
 }
