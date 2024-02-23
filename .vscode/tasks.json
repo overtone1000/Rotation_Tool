@@ -24,7 +24,7 @@
         {
             "label": "cargo fix",
             "type": "shell",
-            "command": "cargo fix --all-features --all-targets --workspace --manifest-path ./core/Cargo.toml && git commit -m 'cargo fix'",
+            "command": "cargo fix --all-features --all-targets --workspace --manifest-path ./core/Cargo.toml && git add -A && git commit -m 'cargo fix'",
             "group": "none",
             "presentation": {
               "reveal": "always",
