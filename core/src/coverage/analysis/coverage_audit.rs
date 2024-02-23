@@ -1,16 +1,14 @@
 use std::{
-    collections::{hash_map::Entry, HashMap},
+    collections::{HashMap},
     error::Error,
     io::Write,
 };
 
 use crate::{
-    analysis::analysis_datum::AnalysisDatum,
     coverage::{
         coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay,
-        malformed_coverage::CoverageError, units::Coverage, work_coverage_map::CoverageMap,
+        malformed_coverage::CoverageError, work_coverage_map::CoverageMap,
     },
-    globals::ALL_DAYS,
     rotations::rotation_error::RotationManifestParseError,
 };
 

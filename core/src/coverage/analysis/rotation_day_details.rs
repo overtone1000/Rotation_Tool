@@ -1,5 +1,4 @@
 use std::{
-    collections::{hash_map::Entry, HashMap},
     error::Error,
 };
 
@@ -9,7 +8,6 @@ use crate::{
         coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay,
         units::Coverage, work_collector::WorkCollector, work_coverage_map::CoverageMap,
     },
-    globals::ALL_DAYS,
 };
 
 pub fn details(

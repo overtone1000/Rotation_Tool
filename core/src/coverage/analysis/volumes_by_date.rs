@@ -1,5 +1,5 @@
 use std::{
-    collections::{hash_map::Entry, HashMap},
+    collections::{HashMap},
     error::Error,
     fs::File,
     io::BufWriter,
@@ -9,14 +9,13 @@ use chrono::NaiveDate;
 
 use crate::{
     analysis::{
-        analysis_datum::{AnalysisDatum, SerializeableNaiveDateTime},
+        analysis_datum::{AnalysisDatum},
         volumes::{CategorizedVolumes, VolumesMark},
     },
     coverage::{
         coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay,
         units::Coverage, work_collector::WorkCollector, work_coverage_map::CoverageMap,
     },
-    globals::ALL_DAYS,
 };
 
 pub fn sort_volumes_by_date(coverage_map: &mut CoverageMap) -> CategorizedVolumes {
