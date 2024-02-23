@@ -17,10 +17,10 @@ impl RotationHours {
     pub fn new(start: RelativeTime, stop: RelativeTime, days: StringTypes) -> RotationHours {
         RotationHours {
             hours: Timespan {
-                start: start,
-                stop: stop,
+                start,
+                stop,
             },
-            days: days,
+            days,
         }
     }
 }

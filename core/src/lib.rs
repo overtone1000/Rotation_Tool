@@ -73,8 +73,8 @@ pub fn build_main_common() -> Result<MainCommon, Box<dyn Error>> {
     coverage_tree.add_work_from_source(&source, &date_constraint_set)?;
 
     Ok(MainCommon {
-        coverage_tree: coverage_tree,
-        source: source,
+        coverage_tree,
+        source,
     })
 }
 

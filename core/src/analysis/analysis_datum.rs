@@ -49,11 +49,11 @@ impl WorkUnit {
         exam_desc: String,
     ) -> WorkUnit {
         WorkUnit {
-            datetime: SerializeableNaiveDateTime { datetime: datetime },
-            rvu: rvu,
-            bvu: bvu,
-            exam_desc: exam_desc,
-            denominator: denominator,
+            datetime: SerializeableNaiveDateTime { datetime },
+            rvu,
+            bvu,
+            exam_desc,
+            denominator,
         }
     }
 }

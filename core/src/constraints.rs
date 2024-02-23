@@ -5,6 +5,12 @@ use crate::dates;
 pub struct ConstraintSet<'a, T> {
     constraints: Vec<&'a dyn Fn(&T) -> bool>,
 }
+impl<'a, T> Default for ConstraintSet<'a, T> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<'a, T> ConstraintSet<'a, T> {
     pub fn new() -> ConstraintSet<'a, T> {
         ConstraintSet {

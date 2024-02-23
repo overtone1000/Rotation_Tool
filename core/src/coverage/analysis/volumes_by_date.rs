@@ -67,7 +67,7 @@ pub fn analysis_to_plot(
 ) -> Result<(), Box<dyn Error>> {
     //let plot = self.analyze_by_day_of_week();
     let cachefile =
-        File::create(&filename).expect(format!("Couldn't create file {}", &filename).as_str());
+        File::create(&filename).unwrap_or_else(|_| panic!("Couldn't create file {}", &filename));
     let writer = BufWriter::new(&cachefile);
     serde_json::to_writer(writer, &cat_vol)?;
     Ok(())

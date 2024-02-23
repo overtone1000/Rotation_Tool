@@ -100,7 +100,10 @@ pub enum RelativeTime {
 
 impl PartialOrd for RelativeTime {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        let retval = match self {
+        
+
+        //println!("Comparison result: {:?}-{:?}: {:?}",self,other,retval);
+        match self {
             RelativeTime::PreviousBusinessDay(s) => match other {
                 RelativeTime::PreviousBusinessDay(o) => s.partial_cmp(o),
                 RelativeTime::DayAfterPreviousBusinessDay(_) => Some(std::cmp::Ordering::Less),
@@ -136,10 +139,7 @@ impl PartialOrd for RelativeTime {
                 RelativeTime::CurrentDay(_) => Some(std::cmp::Ordering::Greater),
                 RelativeTime::NextDay(o) => s.partial_cmp(o),
             },
-        };
-
-        //println!("Comparison result: {:?}-{:?}: {:?}",self,other,retval);
-        retval
+        }
     }
 }
 

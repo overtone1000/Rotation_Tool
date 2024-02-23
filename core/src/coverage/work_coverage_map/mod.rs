@@ -153,7 +153,7 @@ impl CoverageMap {
         let exam_rvu_map = build_salem_rvumap(&source.main_data_table)?;
         let exam_bvu_map: HashMap<String, f64> = build_salem_bvumap(&source.bvu_data_table)?;
 
-        let exam_code_map = get_categories_map(&source)?;
+        let exam_code_map = get_categories_map(source)?;
 
         let mut salem_weekday_count: HashMap<chrono::Weekday, u64> = HashMap::new();
         //Determine how many days worth for each weekday
@@ -438,7 +438,7 @@ impl CoverageMap {
                         number_of_exams
                             * bvus_per_exam
                             * (*distribution_weights.get(key).expect("Expected")) as f64,
-                        BUSINESS_DAYS_PER_YEAR as f64,
+                        BUSINESS_DAYS_PER_YEAR,
                         exam_code_map
                             .get(&exam_code)
                             .expect("Should be there!")

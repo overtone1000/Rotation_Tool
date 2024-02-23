@@ -50,7 +50,7 @@ impl TemporalCoverageUnit {
             start,
             end,
             rotation,
-            rotation_day: SerializeableWeekday { day: day }, //weekday_offset:offset //This is limited to one 24 hour period inclusive on each end.
+            rotation_day: SerializeableWeekday { day }, //weekday_offset:offset //This is limited to one 24 hour period inclusive on each end.
         }
     }
 

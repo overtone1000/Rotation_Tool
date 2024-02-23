@@ -21,7 +21,7 @@ pub fn check(t: &StringTypes, poss: &[&str], desc: &str, errors: &mut Vec<String
     };
 }
 
-pub fn validate_days(days_to_check: &StringTypes, errors: &mut Vec<String>) -> () {
+pub fn validate_days(days_to_check: &StringTypes, errors: &mut Vec<String>) {
     let mon = chrono::Weekday::Mon.to_string();
     let tue = chrono::Weekday::Tue.to_string();
     let wed = chrono::Weekday::Wed.to_string();

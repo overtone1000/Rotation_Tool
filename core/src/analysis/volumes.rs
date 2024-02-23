@@ -14,7 +14,7 @@ impl CategorizedVolumes {
             date_map: HashMap::new(),
         }
     }
-    pub fn add(&mut self, date: NaiveDate, category: &str, new_mark: VolumesMark) -> () {
+    pub fn add(&mut self, date: NaiveDate, category: &str, new_mark: VolumesMark) {
         match self.date_map.entry(date) {
             std::collections::hash_map::Entry::Occupied(mut entry) => {
                 match entry.get_mut().entry(category.to_owned()) {
