@@ -7,7 +7,7 @@ use analysis::analysis_datum::AnalysisDatum;
 use chrono::{NaiveDateTime, Weekday};
 use constraints::{is_not_holiday, ConstraintSet};
 
-use coverage::tree::work_coverage_map::CoverageMap;
+use coverage::work_coverage_map::CoverageMap;
 use globals::file_names::COVERAGE_AUDIT_NOWORK_OUT;
 
 
@@ -82,8 +82,8 @@ pub fn analyze_rotations(common:&mut MainCommon) -> Result<HashMap<String, HashM
     common.coverage_tree.audit_to_stream(&mut writer,&mut writer_nowork)?;
 
     let analysis = common.coverage_tree.analyze_by_day_of_week();
-    coverage::tree::work_coverage_map::CoverageMap::analysis_to_csv(&analysis, COVERAGE_ANALYSIS_OUT.to_owned() + "_rvu.csv", true);
-    coverage::tree::work_coverage_map::CoverageMap::analysis_to_csv(&analysis, COVERAGE_ANALYSIS_OUT.to_owned() + "_bvu.csv", false);
+    coverage::work_coverage_map::CoverageMap::analysis_to_csv(&analysis, COVERAGE_ANALYSIS_OUT.to_owned() + "_rvu.csv", true);
+    coverage::work_coverage_map::CoverageMap::analysis_to_csv(&analysis, COVERAGE_ANALYSIS_OUT.to_owned() + "_bvu.csv", false);
 
     Ok(analysis)
 }

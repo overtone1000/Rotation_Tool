@@ -13,18 +13,15 @@
 ## To Do
 - [ ] Coverage interface does need to update available tree options to make it easier to navigate.
 - [ ] Enable selecting "All" in coverage interface? Would need a much more complicated display. Maybe a tree (a lot like the old spreadsheet)
-- [x] Put modalities in exam categorizations so coverage queries don't need to input modality.
-- [x] Cached jsons need to be updated if the source is changed. How to do with static files?
-- [x] msk wet reads
-
-Board meeting 1/9/24
-- [x] Move WVH XR on weekends to OP2 instead of Call 2
-- [ ] Add butt-in-chair hours and lunchtimes for each rotation
-    - [x] add to rust structs
-    - [x] show in frontend
-    - [ ] should validate days for hours in backend (that they are valid days with the existing function and that there are no duplicates)
-- [x] Show location in frontend
-- [ ] Policy section
-    - [ ] Butt in chair rule (when someone else is covering, log in to second workstation or at least broadcast a primordial message)
-    - [ ] Copy existing policy stuff
-- [x] CT Myelograms
+- [ ] Should validate days for hours in backend (that they are valid days with the existing function and that there are no duplicates)
+- [ ] Copy existing policy stuff
+- [ ] Coverage tree improvement
+    - Data restructuring
+        - The existing coverage tree is a multiply nested HashMap. This structure is okay, but it doesn't handle the "All" case very well because it simply modifies the value for each key, resulting in a large structure with exponentially more key-value pairs than are necessary.
+        - Additionally, this is the primary reason that all the actual values for keys (sites, subspecialties, and contexts) need to be known in the code and not just in the source data.
+        - A better structure would be a modified map that takes an enum as a key. The enum would have an All, a Vec<String> for multiple keys, and a singular String member for a single key. When the value corresponding to a given key is accessed, the values in All, any Vec<String> containing that key, and the singular key should all be returned as an aggregate
+        - An advantage of this approach is that each entry in the rotation manifest would correlate with a single entry in this map.
+    - Simplification
+        - The existing structure also combines work with coverage. Work should probably be removed, and any structures of interest pertaining to work should be built with helper functions on the map.
+        - Similar to combining work and coverage, the audit and analysis functions should be separate.
+        - The foreach function is clumsy. Implementing iterator would be superior.
