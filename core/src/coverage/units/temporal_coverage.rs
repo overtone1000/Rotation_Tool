@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
-use chrono::Datelike;
-use serde::{ser::SerializeStruct, Serialize};
+use serde::Serialize;
 
 use crate::{
     analysis::analysis_datum::AnalysisDatum,

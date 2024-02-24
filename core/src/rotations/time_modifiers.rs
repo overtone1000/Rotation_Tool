@@ -89,7 +89,7 @@ impl fmt::Display for TimeSinceMidnight {
     }
 }
 
-#[derive(Debug, PartialEq, Eq, Ord, Clone)]
+#[derive(Debug, PartialEq, Eq, Clone)]
 pub enum RelativeTime {
     PreviousBusinessDay(TimeSinceMidnight),
     DayAfterPreviousBusinessDay(TimeSinceMidnight),
@@ -98,10 +98,18 @@ pub enum RelativeTime {
     NextDay(TimeSinceMidnight),
 }
 
+impl Ord for RelativeTime {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        match self.partial_cmp(other)
+        {
+            Some(x) => x,
+            None => std::cmp::Ordering::Equal,
+        }
+    }
+}
+
 impl PartialOrd for RelativeTime {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        
-
         //println!("Comparison result: {:?}-{:?}: {:?}",self,other,retval);
         match self {
             RelativeTime::PreviousBusinessDay(s) => match other {

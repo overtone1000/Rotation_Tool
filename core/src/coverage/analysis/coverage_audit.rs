@@ -36,8 +36,8 @@ pub fn audit_to_stream<T: Write>(
 
     let header = "Site \u{0009} Exam \u{0009} Context \u{0009} Day of Week \n";
 
-    primary_error_writer.write(header.as_bytes())?;
-    work_gap_writer.write(header.as_bytes())?;
+    primary_error_writer.write_all(header.as_bytes())?;
+    work_gap_writer.write_all(header.as_bytes())?;
 
     for coords in sorted_keys {
         let coordstr = format!(
