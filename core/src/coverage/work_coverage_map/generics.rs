@@ -21,7 +21,7 @@ pub trait WorkCoverageMap {
     ) -> Result<(), Box<dyn std::error::Error>>;
 }
 
-#[derive(Default, Debug, Serialize)]
+#[derive(Debug, Serialize, Default)]
 pub struct CoordinateMap<T, U>
 where
     T: Debug + Eq + PartialEq + Hash,
@@ -36,35 +36,21 @@ where
     T: 'a + Debug + Eq + PartialEq + Hash,
     U: Default + Debug,
 {
-    pub fn get_map(&mut self) -> &mut HashMap<T, U> {
+    pub fn get_map(&self) -> &HashMap<T, U> {
+        &self.map
+    }
+    pub fn get_map_mut(&mut self) -> &mut HashMap<T, U> {
         &mut self.map
     }
     pub fn get_branch(&'a mut self, coords: &'a CoverageCoordinates) -> &mut U {
         let key = Self::get_coordinate(coords);
-        let retval = match (*self.get_map()).entry(key) {
+        let retval = match self.map.entry(key) {
             Entry::Occupied(o) => o.into_mut(),
             Entry::Vacant(v) => v.insert(U::default()),
         };
         retval
     }
 }
-
-/*
-struct CoordinateMapIterator<T,U>
-{
-    keys:Vec<T>,
-    current_index:isize
-}
-
-impl <T> Iterator for CoordinateMapIterator<T>
-{
-    type Item;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        todo!()
-    }
-}
-*/
 
 //Default impl, overridden for WorkCoverageMap to handle pseudocoords for week fractions
 impl<T, U> WorkCoverageMap for CoordinateMap<T, U>

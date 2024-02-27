@@ -1,8 +1,5 @@
-use chrono::Datelike;
-
-use crate::analysis::analysis_datum::WorkUnit;
-
-use crate::coverage::coordinate::CoverageCoordinates;
+use crate::coverage::coordinate::{Context, Site, Subspecialty};
+use crate::{analysis::analysis_datum::WorkUnit, coverage::coordinate::CoverageCoordinates};
 use crate::coverage::coverage_and_work_day::CoverageAndWorkDay;
 
 use crate::coverage::units::CoverageUnit;
@@ -58,38 +55,38 @@ impl SpecifiedCoordinate<SerializeableWeekday> for WeekdayMap {
     }
 }
 
-type ContextMap = CoordinateMap<String, WeekdayMap>;
-impl SpecifiedCoordinate<String> for ContextMap {
-    fn get_coordinate(coords: &CoverageCoordinates) -> String {
-        coords.context.clone()
+type ContextMap = CoordinateMap<Context, WeekdayMap>;
+impl SpecifiedCoordinate<Context> for ContextMap {
+    fn get_coordinate(coords: &CoverageCoordinates) -> Context {
+        coords.context
     }
 }
 
-type SubspecialtyMap = CoordinateMap<String, ContextMap>;
-impl SpecifiedCoordinate<String> for SubspecialtyMap {
-    fn get_coordinate(coords: &CoverageCoordinates) -> String {
-        coords.subspecialty.clone()
+type SubspecialtyMap = CoordinateMap<Subspecialty, ContextMap>;
+impl SpecifiedCoordinate<Subspecialty> for SubspecialtyMap {
+    fn get_coordinate(coords: &CoverageCoordinates) -> Subspecialty {
+        coords.subspecialty
     }
 }
 
-pub type CoverageMap = CoordinateMap<String, SubspecialtyMap>;
-impl SpecifiedCoordinate<String> for CoverageMap {
-    fn get_coordinate(coords: &CoverageCoordinates) -> String {
-        coords.site.clone()
+pub type CoverageMap = CoordinateMap<Site, SubspecialtyMap>;
+impl SpecifiedCoordinate<Site> for CoverageMap {
+    fn get_coordinate(coords: &CoverageCoordinates) -> Site {
+        coords.site
     }
 }
 
 impl CoverageMap {
-    pub fn foreach(&mut self, mut func: impl FnMut(&CoverageCoordinates, &mut CoverageAndWorkDay)) {
-        for (site, subspecialtymap) in self.get_map().iter_mut() {
-            for (subspecialty, contextmap) in subspecialtymap.get_map().iter_mut() {
-                for (context, weekdaymap) in contextmap.get_map().iter_mut() {
+    pub fn foreach_mut(&mut self, mut func: impl FnMut(&CoverageCoordinates, &mut CoverageAndWorkDay)) {
+        for (site, subspecialtymap) in self.get_map_mut().iter_mut() {
+            for (subspecialty, contextmap) in subspecialtymap.get_map_mut().iter_mut() {
+                for (context, weekdaymap) in contextmap.get_map_mut().iter_mut() {
                     //for (modality, weekdaymap) in modalitymap.map.iter_mut() {
-                    for (weekday, coverage_and_workday) in weekdaymap.get_map().iter_mut() {
+                    for (weekday, coverage_and_workday) in weekdaymap.get_map_mut().iter_mut() {
                         let coords = CoverageCoordinates {
-                            site: site.to_string(),
-                            subspecialty: subspecialty.to_string(),
-                            context: context.to_string(),
+                            site: *site,
+                            subspecialty: *subspecialty,
+                            context: *context,
                             //modality: modality.to_string(),
                             weekday: weekday.day,
                         };

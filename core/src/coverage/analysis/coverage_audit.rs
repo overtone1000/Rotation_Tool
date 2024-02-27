@@ -19,7 +19,7 @@ pub fn audit(coverage_map: &mut CoverageMap) -> HashMap<CoverageCoordinates, Cov
         retval.insert(coords.to_owned(), errs);
     };
 
-    coverage_map.foreach(func);
+    coverage_map.foreach_mut(func);
 
     retval
 }

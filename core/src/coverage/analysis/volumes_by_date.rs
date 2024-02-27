@@ -56,7 +56,7 @@ pub fn sort_volumes_by_date(coverage_map: &mut CoverageMap) -> CategorizedVolume
         }
     };
 
-    coverage_map.foreach(func);
+    coverage_map.foreach_mut(func);
 
     retval
 }

@@ -44,7 +44,7 @@ pub fn details(
         }
     };
 
-    coverage_map.foreach(func);
+    coverage_map.foreach_mut(func);
 
     Ok(aggregate)
 }
