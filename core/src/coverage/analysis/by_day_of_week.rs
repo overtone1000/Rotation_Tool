@@ -4,7 +4,7 @@ use crate::{
     analysis::analysis_datum::AnalysisDatum,
     coverage::{
         coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay,
-        units::Coverage, work_collector::WorkCollector, work_coverage_map::CoverageMap,
+        units::Coverage, work_collector::WorkCollector, work_coverage_map::maps::CoverageMap,
     },
     globals::ALL_DAYS,
 };

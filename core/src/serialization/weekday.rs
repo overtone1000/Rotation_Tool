@@ -38,3 +38,9 @@ impl Ord for SerializeableWeekday {
         }
     }
 }
+
+impl Default for SerializeableWeekday {
+    fn default() -> Self {
+        Self { day: chrono::Weekday::Sun }
+    }
+}

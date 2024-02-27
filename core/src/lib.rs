@@ -13,8 +13,7 @@ use coverage::{
     analysis::{
         by_day_of_week::{analysis_to_csv, analyze_by_day_of_week},
         coverage_audit::{audit, audit_to_stream},
-    },
-    work_coverage_map::CoverageMap,
+    }, work_coverage_map::maps::CoverageMap
 };
 use globals::file_names::COVERAGE_AUDIT_NOWORK_OUT;
 
