@@ -27,16 +27,18 @@ where
     T: Debug + Eq + PartialEq + Hash,
     U: Default + Debug,
 {
-    map: HashMap<T,U>
+    map: HashMap<T, U>,
 }
 
-impl <'a, T, U> CoordinateMap<T, U>
+impl<'a, T, U> CoordinateMap<T, U>
 where
-    CoordinateMap<T,U>: SpecifiedCoordinate<T>,
+    CoordinateMap<T, U>: SpecifiedCoordinate<T>,
     T: 'a + Debug + Eq + PartialEq + Hash,
     U: Default + Debug,
 {
-    pub fn get_map(&mut self) -> &mut HashMap<T, U>{&mut self.map}
+    pub fn get_map(&mut self) -> &mut HashMap<T, U> {
+        &mut self.map
+    }
     pub fn get_branch(&'a mut self, coords: &'a CoverageCoordinates) -> &mut U {
         let key = Self::get_coordinate(coords);
         let retval = match (*self.get_map()).entry(key) {
@@ -65,11 +67,11 @@ impl <T> Iterator for CoordinateMapIterator<T>
 */
 
 //Default impl, overridden for WorkCoverageMap to handle pseudocoords for week fractions
-impl <T,U> WorkCoverageMap for CoordinateMap<T,U>
+impl<T, U> WorkCoverageMap for CoordinateMap<T, U>
 where
-    CoordinateMap<T,U>: SpecifiedCoordinate<T>,
+    CoordinateMap<T, U>: SpecifiedCoordinate<T>,
     T: Debug + Eq + PartialEq + Hash,
-    U: Default + Debug+ WorkCoverageMap,
+    U: Default + Debug + WorkCoverageMap,
 {
     fn add_work(&mut self, coords: &CoverageCoordinates, work: WorkUnit) {
         self.get_branch(coords).add_work(coords, work)
@@ -84,7 +86,6 @@ where
     }
 }
 
-pub trait SpecifiedCoordinate<T>
-{
+pub trait SpecifiedCoordinate<T> {
     fn get_coordinate(coords: &CoverageCoordinates) -> T;
 }

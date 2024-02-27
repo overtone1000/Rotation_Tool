@@ -1,13 +1,7 @@
-
 use std::collections::HashSet;
 use std::collections::{hash_map::Entry, HashMap};
 
-
-
-
-
 use chrono::{Datelike, Duration, NaiveDate, NaiveDateTime};
-
 
 use crate::analysis::analysis_datum::WorkUnit;
 
@@ -15,17 +9,9 @@ use crate::coverage::coordinate::CoverageCoordinates;
 
 use crate::coverage::distribution::get_normal_dist_weights;
 
-
-
-
-
-
 use crate::rotations::description::WrappedSortable;
 
-
-
 use crate::error::source_error::SourceError;
-
 
 use crate::source_data::processing::categorization::{
     build_salem_bvumap, build_salem_rvumap, get_categories_map,
@@ -37,7 +23,7 @@ use crate::{
     globals::{main_headers, tpc_headers, BUSINESS_DAYS, SITES},
 };
 
-use super::generics::{WorkCoverageMap};
+use super::generics::WorkCoverageMap;
 use super::maps::CoverageMap;
 
 impl CoverageMap {

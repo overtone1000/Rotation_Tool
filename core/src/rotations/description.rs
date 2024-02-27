@@ -16,10 +16,7 @@ pub struct RotationHours {
 impl RotationHours {
     pub fn new(start: RelativeTime, stop: RelativeTime, days: StringTypes) -> RotationHours {
         RotationHours {
-            hours: Timespan {
-                start,
-                stop,
-            },
+            hours: Timespan { start, stop },
             days,
         }
     }

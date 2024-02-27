@@ -1,35 +1,16 @@
-
-
-
-
-
-
-
-
-use chrono::{Datelike};
-
+use chrono::Datelike;
 
 use crate::analysis::analysis_datum::WorkUnit;
 
 use crate::coverage::coordinate::CoverageCoordinates;
 use crate::coverage::coverage_and_work_day::CoverageAndWorkDay;
 
-
-
-
 use crate::coverage::units::CoverageUnit;
 
-use crate::globals::{ALL_DAYS};
-
-
-
-
+use crate::globals::ALL_DAYS;
 
 use crate::serialization::output::JSONFileOut;
 use crate::serialization::weekday::SerializeableWeekday;
-
-
-
 
 use super::generics::{CoordinateMap, SpecifiedCoordinate, WorkCoverageMap};
 
@@ -69,10 +50,11 @@ impl WorkCoverageMap for WeekdayMap {
     }
 }
 
-
 impl SpecifiedCoordinate<SerializeableWeekday> for WeekdayMap {
     fn get_coordinate(coords: &CoverageCoordinates) -> SerializeableWeekday {
-        SerializeableWeekday{day:coords.weekday}
+        SerializeableWeekday {
+            day: coords.weekday,
+        }
     }
 }
 
@@ -120,6 +102,5 @@ impl CoverageMap {
         }
     }
 }
-
 
 impl JSONFileOut for CoverageMap {}

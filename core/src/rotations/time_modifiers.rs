@@ -100,8 +100,7 @@ pub enum RelativeTime {
 
 impl Ord for RelativeTime {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        match self.partial_cmp(other)
-        {
+        match self.partial_cmp(other) {
             Some(x) => x,
             None => std::cmp::Ordering::Equal,
         }
