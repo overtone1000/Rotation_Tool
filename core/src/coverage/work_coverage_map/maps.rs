@@ -1,4 +1,3 @@
-use crate::coverage::coordinate::{Context, Site, Subspecialty};
 use crate::{analysis::analysis_datum::WorkUnit, coverage::coordinate::CoverageCoordinates};
 use crate::coverage::coverage_and_work_day::CoverageAndWorkDay;
 
@@ -55,24 +54,24 @@ impl SpecifiedCoordinate<SerializeableWeekday> for WeekdayMap {
     }
 }
 
-type ContextMap = CoordinateMap<Context, WeekdayMap>;
-impl SpecifiedCoordinate<Context> for ContextMap {
-    fn get_coordinate(coords: &CoverageCoordinates) -> Context {
-        coords.context
+type ContextMap = CoordinateMap<String, WeekdayMap>;
+impl SpecifiedCoordinate<String> for ContextMap {
+    fn get_coordinate(coords: &CoverageCoordinates) -> String {
+        coords.context.to_string()
     }
 }
 
-type SubspecialtyMap = CoordinateMap<Subspecialty, ContextMap>;
-impl SpecifiedCoordinate<Subspecialty> for SubspecialtyMap {
-    fn get_coordinate(coords: &CoverageCoordinates) -> Subspecialty {
-        coords.subspecialty
+type SubspecialtyMap = CoordinateMap<String, ContextMap>;
+impl SpecifiedCoordinate<String> for SubspecialtyMap {
+    fn get_coordinate(coords: &CoverageCoordinates) -> String {
+        coords.subspecialty.to_string()
     }
 }
 
-pub type CoverageMap = CoordinateMap<Site, SubspecialtyMap>;
-impl SpecifiedCoordinate<Site> for CoverageMap {
-    fn get_coordinate(coords: &CoverageCoordinates) -> Site {
-        coords.site
+pub type CoverageMap = CoordinateMap<String, SubspecialtyMap>;
+impl SpecifiedCoordinate<String> for CoverageMap {
+    fn get_coordinate(coords: &CoverageCoordinates) -> String {
+        coords.site.to_string()
     }
 }
 
@@ -84,9 +83,9 @@ impl CoverageMap {
                     //for (modality, weekdaymap) in modalitymap.map.iter_mut() {
                     for (weekday, coverage_and_workday) in weekdaymap.get_map_mut().iter_mut() {
                         let coords = CoverageCoordinates {
-                            site: *site,
-                            subspecialty: *subspecialty,
-                            context: *context,
+                            site: site.to_string(),
+                            subspecialty: subspecialty.to_string(),
+                            context: context.to_string(),
                             //modality: modality.to_string(),
                             weekday: weekday.day,
                         };

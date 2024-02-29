@@ -17,6 +17,7 @@
 - [ ] Copy existing policy stuff
 - [ ] Coverage tree improvement
     - Data restructuring
+        - __Took a stab at this and got lost in complicated generics and enums.__
         - The existing coverage tree is a multiply nested HashMap. This structure is okay, but it doesn't handle the "All" case very well because it simply modifies the value for each key, resulting in a large structure with exponentially more key-value pairs than are necessary.
         - Additionally, this is the primary reason that all the actual values for keys (sites, subspecialties, and contexts) need to be known in the code and not just in the source data.
         - A better structure would be a modified map that takes an enum as a key. The enum would have an All, a Vec<String> for multiple keys, and a singular String member for a single key. When the value corresponding to a given key is accessed, the values in All, any Vec<String> containing that key, and the singular key should all be returned as an aggregate
@@ -24,4 +25,4 @@
     - Simplification
         - The existing structure also combines work with coverage. Work should probably be removed, and any structures of interest pertaining to work should be built with helper functions on the map.
         - Similar to combining work and coverage, the audit and analysis functions should be separate.
-        - The foreach function is clumsy. Implementing iterator would be superior.
+        - The foreach function is clumsy. Implementing iterator would be superior.    
