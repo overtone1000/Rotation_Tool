@@ -249,6 +249,8 @@ impl CoverageMap {
                 self.add_work(&coords, work);
             }
         }
+        
+        /*
         //Add TPC, which doesn't go by number of dates
         let distribution_weights = get_normal_dist_weights();
         for row_i in source.tpc_data_table.row_indices() {
@@ -335,6 +337,7 @@ impl CoverageMap {
                 }
             }
         }
+         */
 
         Ok(())
     }

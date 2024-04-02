@@ -19,7 +19,6 @@ use super::table::Table;
 #[derive(Serialize, Deserialize)]
 pub struct ProcessedSource {
     pub main_data_table: Table,
-    pub tpc_data_table: Table,
     pub bvu_data_table: Table,
     pub exam_categories_table: Table,
     pub location_categories_table: Table,
@@ -31,7 +30,6 @@ pub struct ProcessedSource {
 impl ProcessedSource {
     pub fn build() -> Result<ProcessedSource, Box<dyn Error>> {
         let main_data_table = Table::create(file_names::MAIN_DATA_FILE)?;
-        let tpc_data_table = Table::create(file_names::TPC_DATA_FILE)?;
         let bvu_data_table = Table::create(file_names::BVU_DATA_FILE)?;
         let mut exam_categories_table = Table::create(file_names::CATEGORIES_EXAM_FILE)?;
         let mut location_categories_table = Table::create(file_names::CATEGORIES_LOCATION_FILE)?;
@@ -100,7 +98,6 @@ impl ProcessedSource {
 
         Ok(ProcessedSource {
             main_data_table,
-            tpc_data_table,
             bvu_data_table,
             exam_categories_table,
             location_categories_table,

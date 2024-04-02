@@ -25,4 +25,4 @@
     - Simplification
         - The existing structure also combines work with coverage. Work should probably be removed, and any structures of interest pertaining to work should be built with helper functions on the map.
         - Similar to combining work and coverage, the audit and analysis functions should be separate.
-        - The foreach function is clumsy. Implementing iterator would be superior.    
+        - The foreach function is clumsy. Implementing iterator would be superior. __Took a stab at this an implementing an iterator was clumsier.__

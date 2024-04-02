@@ -80,6 +80,7 @@ pub(crate) mod location_categories {
     use std::cmp::Ordering;
 
     pub(crate) enum PertinentHeaders {
+        Site,
         Location,
         Context,
         Comments,
@@ -88,6 +89,7 @@ pub(crate) mod location_categories {
     impl PertinentHeaders {
         pub(crate) fn get_label(&self) -> String {
             match self {
+                PertinentHeaders::Site => "Site".to_string(),
                 PertinentHeaders::Location => "Location".to_string(),
                 PertinentHeaders::Context => "Context".to_string(),
                 PertinentHeaders::Comments => "Comments".to_string(),
@@ -95,7 +97,9 @@ pub(crate) mod location_categories {
         }
     }
 
+    #[derive(Hash)]
     pub(crate) struct LocationCategory {
+        pub site: u64,
         pub location: String,
         pub context: String,
         pub comments: String,
@@ -210,10 +214,41 @@ pub(crate) fn get_categories_map(
     Ok(retval)
 }
 
+fn get_exam_site_location_combinations_in_table(main_data_table: &Table) -> HashSet<(u64,String)> {
+
+}
+
+fn get_exam_context_map(exam_locations_table: &Table) -> HashMap<u64,HashMap<String,String>>{
+    let headervec = Vec::from([
+        location_categories::PertinentHeaders::Site.get_label(),
+        location_categories::PertinentHeaders::Location.get_label(),
+        location_categories::PertinentHeaders::Context.get_label(),
+        location_categories::PertinentHeaders::Comments.get_label()
+        ]);
+    let mut result:HashSet<location_categories::LocationCategory>=HashSet::new();
+    let get_location = |row:Vec<String>|->(){
+        let newloc = location_categories::LocationCategory{
+            site:row.get(0).expect("Doesn't contain site!").parse().expect("Not a parsable number!"),
+            location:*row.get(1).expect("No location"),
+            context:*row.get(2).expect("No context"),
+            comments:*row.get(3).expect("No comments")
+        };
+        result.insert (newloc);
+    };
+
+    //TODO change this to yield a hashmap of a hasmap
+    result
+}
+
 pub(crate) fn get_locations_list(
     main_data_table: &Table,
     exam_locations_table: &Table,
 ) -> Result<Vec<location_categories::LocationCategory>, String> {
+    
+    //TODO
+    //Added "for_each" function to table and modified "Categories_Location.csv" to include site IDs as may not be able to rely strictly on location.
+    //Added site ID to the LocationCategory, thus the error below. Need to test against site ID and location.
+
     let main_exam_locations = main_data_table
         .get_keyed_column_sample_map(&(main_headers::PertinentHeaders::Location.get_label()))?;
 

@@ -1,72 +1,125 @@
-Location,Context,Comments
-300,Inpatient,"Must be inpatient, it includes bedside XR"
-3N2,Inpatient,
-3W2,Inpatient,
-4NE2,Inpatient,
-4NW2,Inpatient,
-4SE2,Inpatient,
-4SW2,Inpatient,
-5NW,Inpatient,
-5S,Inpatient,
-A3E,Inpatient,
-A4E,Inpatient,
-A5E,Inpatient,
-A6E,Inpatient,
-A7E,Inpatient,
-ADMUNT,Inpatient,
-ANGIO,Inpatient,
-B4N,Inpatient,
-B4NS,Inpatient,
-B6S,Inpatient,
-BC,Outpatient,Breast Center
-CCIMG,ED,
-CCSRC,Outpatient,Deprecated? Not used summer 2023
-CT,Outpatient,
-CVCU,Inpatient,
-CVCUB,Inpatient,
-D5,Inpatient,
-DXR,Outpatient,
-EDA,ED,
-FBCOR,Inpatient,Deprecated? Not used summer 2023
-ICU,Inpatient,
-IMCU,Inpatient,
-IRU,Inpatient,
-LD,Inpatient,
-MEDSRG,Inpatient,
-MRI,Outpatient,
-NM,Outpatient,
-NTCU,Inpatient,
-ORA,Inpatient,
-PACUA,Inpatient,
-PMC,Inpatient,Inpatient psych
-PRPREC,Inpatient,Procedure recovery
-SCISXRAY,Outpatient,
-SCMCT,Outpatient,
-SCMMAMMO,Outpatient,
-SCMMRI,Outpatient,
-SCMUS,Outpatient,
-SCMXRAY,Outpatient,
-SCSXRAY,Outpatient,
-SCUNCT,Outpatient,
-SCUNMRI,Outpatient,
-SCUNXRAY,Outpatient,
-SRCCT,Outpatient,
-SRCDXA,Outpatient,
-SRCIRC,Outpatient,
-SRCMAM,Outpatient,
-SRCMRI,Outpatient,
-SRCULT,Outpatient,
-SRCXRY,Outpatient,
-TCU,Inpatient,
-US,Outpatient,
-WOODMM,Outpatient,
-WOODUS,Outpatient,
-WOODXR,Outpatient,
-WVBC,Outpatient,WV Breast Center
-WVCT,Outpatient,
-WVDRAD,Outpatient,
-WVED,ED,
-WVMRI,Outpatient,
-WVMSU,Inpatient,WV Med-Surg
-WVSRG,Inpatient,WV Surgery
-WVUS,Outpatient,
+Site,Location,Context,Comments
+1,300,Inpatient,"Must be inpatient, it includes bedside XR"
+1,3N2,Inpatient,
+1,3W2,Inpatient,
+1,4NE2,Inpatient,
+1,4NW2,Inpatient,
+1,4SE2,Inpatient,
+1,4SW2,Inpatient,
+1,5NW,Inpatient,
+1,5S,Inpatient,
+1,A3E,Inpatient,
+1,A4E,Inpatient,
+1,A5E,Inpatient,
+1,A6E,Inpatient,
+1,A7E,Inpatient,
+1,ADMUNT,Inpatient,
+1,ANGIO,Inpatient,
+1,B4N,Inpatient,
+1,B4NS,Inpatient,
+1,B6S,Inpatient,
+1,BC,Outpatient,Breast Center
+1,CCIMG,ED,
+1,CT,Outpatient,
+1,CVCU,Inpatient,
+1,CVCUB,Inpatient,
+1,D5,Inpatient,
+1,DXR,Outpatient,
+1,EDA,ED,
+1,FBCOR,Inpatient,Deprecated? Not used summer 2023
+1,ICU,Inpatient,
+1,IMCU,Inpatient,
+1,IRU,Inpatient,
+1,LD,Inpatient,
+1,MEDSRG,Inpatient,
+1,MRI,Outpatient,
+1,NM,Outpatient,
+1,NTCU,Inpatient,
+1,ORA,Inpatient,
+1,PACUA,Inpatient,
+1,PMC,Inpatient,Inpatient psych
+1,PRPREC,Inpatient,Procedure recovery
+1,TCU,Inpatient,
+1,US,Outpatient,
+1,WOODMM,Outpatient,
+1,WOODUS,Outpatient,
+1,WOODXR,Outpatient,
+1,WVBC,Outpatient,WV Breast Center
+1,WVCT,Outpatient,
+1,WVDRAD,Outpatient,
+1,WVED,ED,
+1,WVMRI,Outpatient,
+1,WVMSU,Inpatient,WV Med-Surg
+1,WVSRG,Inpatient,WV Surgery
+1,WVUS,Outpatient,
+4,SCISXRAY,Outpatient,
+4,SCMCT,Outpatient,
+4,SCMMAMMO,Outpatient,
+4,SCMMRI,Outpatient,
+4,SCMUS,Outpatient,
+4,SCMXRAY,Outpatient,
+4,SCSXRAY,Outpatient,
+4,SCUNCT,Outpatient,
+4,SCUNMRI,Outpatient,
+4,SCUNXRAY,Outpatient,
+7,CCSRC,Outpatient,Deprecated? Not used summer 2023
+7,SRCCT,Outpatient,
+7,SRCDXA,Outpatient,
+7,SRCIRC,Outpatient,
+7,SRCMAM,Outpatient,
+7,SRCMRI,Outpatient,
+7,SRCULT,Outpatient,
+7,SRCXRY,Outpatient,
+8,BPEDS,Outpatient,Found in TPC entries
+8,AMBSURGALB,Outpatient,Found in TPC entries
+8,WVCAR,Outpatient,Found in TPC entries
+8,NGYN,Outpatient,Found in TPC entries
+8,SGYN,Outpatient,Found in TPC entries
+8,NGI,Outpatient,Found in TPC entries
+8,TURO,Outpatient,Found in TPC entries
+8,DGI,Outpatient,Found in TPC entries
+8,NFM,Outpatient,Found in TPC entries
+8,NENT,Outpatient,Found in TPC entries
+8,NORTH,Outpatient,Found in TPC entries
+8,DOPHT,Outpatient,Found in TPC entries
+8,BDERM,Outpatient,Found in TPC entries
+8,MFMUS,Outpatient,Found in TPC entries
+8,XRAYST,Outpatient,Found in TPC entries
+8,MRIST,Outpatient,Found in TPC entries
+8,DGYN,Outpatient,Found in TPC entries
+8,USST,Outpatient,Found in TPC entries
+8,YQUA,Outpatient,Found in TPC entries
+8,OPRAD,Outpatient,Found in TPC entries
+8,DIM,Outpatient,Found in TPC entries
+8,TGI,Outpatient,Found in TPC entries
+8,NDIAB,Outpatient,Found in TPC entries
+8,WVIMAG,Outpatient,Found in TPC entries
+8,BGYN,Outpatient,Found in TPC entries
+8,EP,Outpatient,Found in TPC entries
+8,CALLCNTRBVT,Outpatient,Found in TPC entries
+8,B6N,Outpatient,Found in TPC entries
+8,SFM,Outpatient,Found in TPC entries
+8,TLAB,Outpatient,Found in TPC entries
+8,BFM,Outpatient,Found in TPC entries
+8,ORTHST,Outpatient,Found in TPC entries
+8,3.00E+02,Outpatient,Found in TPC entries
+8,BIM,Outpatient,Found in TPC entries
+8,BGI,Outpatient,Found in TPC entries
+8,TENT,Outpatient,Found in TPC entries
+8,SEMP,Outpatient,Found in TPC entries
+8,TORTH,Outpatient,Found in TPC entries
+8,SNEUR,Outpatient,Found in TPC entries
+8,TUC,Outpatient,Found in TPC entries
+8,XRAYSV,Outpatient,Found in TPC entries
+8,NMHP,Outpatient,Found in TPC entries
+8,TFAS,Outpatient,Found in TPC entries
+8,DURO,Outpatient,Found in TPC entries
+8,BOPHT,Outpatient,Found in TPC entries
+8,USSV,Outpatient,Found in TPC entries
+8,TPT,Outpatient,Found in TPC entries
+8,SIM,Outpatient,Found in TPC entries
+8,CALLCNTRNTE,Outpatient,Found in TPC entries
+8,ORTHSV,Outpatient,Found in TPC entries
+8,NULL,Outpatient,Found in TPC entries
+8,NIM,Outpatient,Found in TPC entries
+8,TSURG,Outpatient,Found in TPC entries
