@@ -72,7 +72,7 @@ Site,Location,Context,Comments
 7,SRCXRY,Outpatient,
 8,BPEDS,Outpatient,Found in TPC entries
 8,AMBSURGALB,Outpatient,Found in TPC entries
-8,WVCAR,Outpatient,Found in TPC entries
+8,WVCAR,Non-Radiology,Cardiology
 8,NGYN,Outpatient,Found in TPC entries
 8,SGYN,Outpatient,Found in TPC entries
 8,NGI,Outpatient,Found in TPC entries
@@ -83,26 +83,26 @@ Site,Location,Context,Comments
 8,NORTH,Outpatient,Found in TPC entries
 8,DOPHT,Outpatient,Found in TPC entries
 8,BDERM,Outpatient,Found in TPC entries
-8,MFMUS,Outpatient,Found in TPC entries
-8,XRAYST,Outpatient,Found in TPC entries
-8,MRIST,Outpatient,Found in TPC entries
+1,MFMUS,Non-Radiology,MFM Ultrasounds
+1,XRAYST,Non-Radiology,Hope Ortho?
+1,MRIST,Non-Radiology,Hope Ortho?
 8,DGYN,Outpatient,Found in TPC entries
-8,USST,Outpatient,Found in TPC entries
+1,USST,Non-Radiology,Hope Ortho?
 8,YQUA,Outpatient,Found in TPC entries
-8,OPRAD,Outpatient,Found in TPC entries
+1,OPRAD,Outpatient,XR MOBIL FLUORO excluded in Categories but this is okay
 8,DIM,Outpatient,Found in TPC entries
 8,TGI,Outpatient,Found in TPC entries
 8,NDIAB,Outpatient,Found in TPC entries
-8,WVIMAG,Outpatient,Found in TPC entries
+1,WVIMAG,Outpatient,
 8,BGYN,Outpatient,Found in TPC entries
-8,EP,Outpatient,Found in TPC entries
+8,EP,Outpatient,Found in TPC entries and confirmed rad names (not electrophysiology)
 8,CALLCNTRBVT,Outpatient,Found in TPC entries
-8,B6N,Outpatient,Found in TPC entries
+1,B6N,Inpatient,
 8,SFM,Outpatient,Found in TPC entries
 8,TLAB,Outpatient,Found in TPC entries
 8,BFM,Outpatient,Found in TPC entries
-8,ORTHST,Outpatient,Found in TPC entries
-8,3.00E+02,Outpatient,Found in TPC entries
+1,ORTHST,Non-Radiology,Hope Ortho?
+1,3.00E+02,Inpatient,Is really just "300"
 8,BIM,Outpatient,Found in TPC entries
 8,BGI,Outpatient,Found in TPC entries
 8,TENT,Outpatient,Found in TPC entries
@@ -110,16 +110,16 @@ Site,Location,Context,Comments
 8,TORTH,Outpatient,Found in TPC entries
 8,SNEUR,Outpatient,Found in TPC entries
 8,TUC,Outpatient,Found in TPC entries
-8,XRAYSV,Outpatient,Found in TPC entries
+1,XRAYSV,Non-Radiology,Hope Ortho?
 8,NMHP,Outpatient,Found in TPC entries
 8,TFAS,Outpatient,Found in TPC entries
 8,DURO,Outpatient,Found in TPC entries
 8,BOPHT,Outpatient,Found in TPC entries
-8,USSV,Outpatient,Found in TPC entries
+1,USSV,Non-Radiology,Hope Ortho?
 8,TPT,Outpatient,Found in TPC entries
 8,SIM,Outpatient,Found in TPC entries
 8,CALLCNTRNTE,Outpatient,Found in TPC entries
-8,ORTHSV,Outpatient,Found in TPC entries
-8,NULL,Outpatient,Found in TPC entries
+1,ORTHSV,Non-Radiology,Hope Ortho?
+8,NULL,Non-Radiology,A mix but mostly not radiologists
 8,NIM,Outpatient,Found in TPC entries
 8,TSURG,Outpatient,Found in TPC entries

@@ -353,13 +353,16 @@ pub fn build_salem_rvumap(main_data_table: &Table) -> Result<HashMap<String, f64
     let mut rvu_disc: f64 = 0.0;
 
     for row_i in main_data_table.row_indices() {
-        let rvus = match main_data_table
-            .get_val(&main_headers::PertinentHeaders::Rvu.get_label(), &row_i)?
-            .parse::<f64>()
+        let rawval=main_data_table.get_val(&main_headers::PertinentHeaders::Rvu.get_label(), &row_i)?;
+        let rvus = match rawval.parse::<f64>()
         {
             Ok(x) => x,
             Err(e) => {
-                return Err(format!("{:?}", e));
+                match rawval.as_str()
+                {
+                    "NULL" => 0f64,
+                    _ => {return Err(format!("{:?} trying to parse {}", e, rawval));}
+                }
             }
         };
         rvu_sum += rvus;
@@ -454,16 +457,17 @@ pub fn build_salem_bvumap(bvu_data_table: &Table) -> Result<HashMap<String, f64>
     let mut retval: HashMap<String, f64> = HashMap::new();
 
     for row_i in bvu_data_table.row_indices() {
-        let rvus = match bvu_data_table
-            .get_val(
-                &bvu_headers::PertinentHeaders::TargetPercentile.get_label(),
-                &row_i,
-            )?
+        let rawval=bvu_data_table
+        .get_val(
+            &bvu_headers::PertinentHeaders::TargetPercentile.get_label(),
+            &row_i,
+        )?;
+        let rvus = match rawval
             .parse::<f64>()
         {
             Ok(x) => x,
             Err(e) => {
-                return Err(format!("{:?}", e));
+                return Err(format!("{:?} for {}", e,rawval));
             }
         };
 
