@@ -57,6 +57,15 @@ impl Table {
         Ok(retval)
     }
 
+    pub fn structural_clone(&self) -> Table
+    {
+        Table {
+            headers:self.headers.clone(),
+            labelmap:self.labelmap.clone(),
+            data:Vec::new()
+        }
+    }
+
     pub fn write_to_file(&self, path: String) -> bool {
         let mut writer = match csv::WriterBuilder::new()
             .delimiter(b',')

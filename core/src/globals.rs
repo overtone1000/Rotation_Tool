@@ -4,6 +4,7 @@ pub mod file_names {
     pub(crate) const BVU_UPDATE_FILE: &str = "./data/BVU_modified.csv";
     pub(crate) const CATEGORIES_LOCATION_FILE: &str = "./categories/Categories_Location.csv";
     pub(crate) const CATEGORIES_EXAM_FILE: &str = "./categories/Categories_Exam.csv";
+    pub(crate) const UNACCOUNTED_CATEGORIES_FILE: &str = "./err/Unaccounted_Categories.csv";
     pub(crate) const EXAMPLE_ROTATION_DESCRIPTIONS: &str = "./rotations/Example.yml";
     pub(crate) const SOURCE_CACHE: &str = "./cache/ProcessedSource.yml";
     pub(crate) const COVERAGE_AUDIT_OUT: &str = "./err/Coverage_Audit.tsv";

@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::globals::{bvu_headers, file_names, main_headers};
+use crate::globals::{bvu_headers, file_names::{self, UNACCOUNTED_CATEGORIES_FILE}, main_headers};
 
 use super::{processed_source::ProcessedSource, table::Table};
 
@@ -29,7 +29,7 @@ pub mod exam_categories {
         }
     }
 
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Hash)]
     pub struct ExamCategory {
         pub procedure_code: String,
         pub exam: String,
@@ -142,13 +142,9 @@ pub(crate) fn get_categories_list(
 
     let mut complete_exam_code_list: Vec<exam_categories::ExamCategory> = Vec::new();
 
+    let mut unaccounted_codes: HashMap<String,String> = HashMap::new();
+
     for procedure_code in main_exam_categories.keys() {
-        let mut next_member: exam_categories::ExamCategory = exam_categories::ExamCategory {
-            procedure_code: procedure_code.to_string(),
-            exam: "".to_string(),
-            subspecialty: "".to_string(),
-            comments: "".to_string(),
-        };
 
         match existing_exam_categories.get(procedure_code) {
             None => {
@@ -159,41 +155,69 @@ pub(crate) fn get_categories_list(
                         return Err(format!("Coudldn't get sample row {} ", procedure_code));
                     }
                 };
-                next_member.procedure_code = main_data_table.get_val(
+
+                let procedure_code = main_data_table.get_val(
                     &main_headers::PertinentHeaders::ProcedureCode.get_label(),
                     sample_row_index,
                 )?;
-                next_member.exam = main_data_table.get_val(
+                let exam = main_data_table.get_val(
                     &main_headers::PertinentHeaders::Exam.get_label(),
                     sample_row_index,
                 )?;
+
+                unaccounted_codes.insert(procedure_code,exam);
             }
             Some(sample_row_index) => {
-                next_member.procedure_code = exam_categories_table.get_val(
-                    &exam_categories::PertinentHeaders::ProcedureCode.get_label(),
-                    sample_row_index,
-                )?;
-                next_member.exam = exam_categories_table.get_val(
-                    &exam_categories::PertinentHeaders::Exam.get_label(),
-                    sample_row_index,
-                )?;
-                next_member.subspecialty = exam_categories_table.get_val(
-                    &exam_categories::PertinentHeaders::Subspecialty.get_label(),
-                    sample_row_index,
-                )?;
-                next_member.comments = exam_categories_table.get_val(
-                    &exam_categories::PertinentHeaders::Comments.get_label(),
-                    sample_row_index,
-                )?;
+
+                let next_member: exam_categories::ExamCategory = exam_categories::ExamCategory {
+                    procedure_code: exam_categories_table.get_val(
+                        &exam_categories::PertinentHeaders::ProcedureCode.get_label(),
+                        sample_row_index,
+                    )?,
+                    exam: exam_categories_table.get_val(
+                        &exam_categories::PertinentHeaders::Exam.get_label(),
+                        sample_row_index,
+                    )?,
+                    subspecialty: exam_categories_table.get_val(
+                        &exam_categories::PertinentHeaders::Subspecialty.get_label(),
+                        sample_row_index,
+                    )?,
+                    comments: exam_categories_table.get_val(
+                        &exam_categories::PertinentHeaders::Comments.get_label(),
+                        sample_row_index,
+                    )?,
+                };
+
+                complete_exam_code_list.push(next_member);
             }
         }
-
-        complete_exam_code_list.push(next_member);
     }
 
-    complete_exam_code_list.sort();
-
-    Ok(complete_exam_code_list)
+    if unaccounted_codes.len()>0
+    {
+        let mut errtable = exam_categories_table.structural_clone();
+        let mut keys:Vec<&String>=unaccounted_codes.keys().collect();
+        keys.sort();
+        for key in keys
+        {
+            let val=unaccounted_codes.get(key).expect("Should be here.");
+            errtable.pushrow(
+                Vec::from([
+                    key.to_string(),
+                    val.to_string(),
+                    "".to_string(),
+                    "".to_string()
+                ])
+            )
+        }
+        errtable.write_to_file(UNACCOUNTED_CATEGORIES_FILE.to_string());
+        Err("Unaccounted codes.".to_string())
+    }
+    else {
+        let _ = std::fs::remove_file(UNACCOUNTED_CATEGORIES_FILE.to_string());
+        complete_exam_code_list.sort();
+        Ok(complete_exam_code_list)   
+    }
 }
 
 pub(crate) fn get_categories_map(
