@@ -20,6 +20,7 @@ pub mod main_headers {
         Location,
         ScheduledDatetime,
         Rvu,
+        SiteID
         //Modality, //Not using this anymore
     }
 
@@ -32,6 +33,7 @@ pub mod main_headers {
                 PertinentHeaders::Location => "LocationDescription".to_string(),
                 PertinentHeaders::ScheduledDatetime => "Exam Started".to_string(),
                 PertinentHeaders::Rvu => "WorkRVU".to_string(),
+                PertinentHeaders::SiteID => "SiteID".to_string()
                 //PertinentHeaders::Modality => "Modality".to_string(),
             }
         }
@@ -78,13 +80,24 @@ pub mod bvu_headers {
 const SH: &str = "SH";
 const SC: &str = "SC";
 const WB: &str = "WB";
+const SRC: &str = "SRC";
 pub const TPC: &str = "TPC";
 
 //locations
 const DXR: &str = "DXR";
 const BC: &str = "BC";
 
-pub const SITES: &[&str] = &[SH, SC, "SRC", "WVH", WB, TPC];
+pub const SITES: &[&str] = &[SH, SC, SRC, "WVH", WB, TPC];
+
+pub fn siteid_to_sitename(site_id:&u64)->Option<String>{
+    match site_id {
+        //1=>Some(SH.to_string()), //But could be WB or WVH! So, just ignore.
+        4=>Some(SC.to_string()),
+        7=>Some(SRC.to_string()),
+        8=>Some(TPC.to_string()),
+        _=>None
+    }
+}
 
 pub(crate) const MSK: &str = "MSK";
 pub(crate) const MSK_WE_AH0C: &str = "MSK Weekend AH0C";

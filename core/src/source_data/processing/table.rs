@@ -162,26 +162,28 @@ impl Table {
 
     pub fn for_each<F>(
         &self,
-        headers:Vec<&str>,
-        func: F
+        headers:Vec<String>,
+        mut func: F
     ) -> Result<(),String>
-    where F:Fn(Vec<String>)->()
+    where F:FnMut(&Vec<String>)->()
     {
         let mut header_indices:Vec<&usize>=Vec::with_capacity(headers.len());
         let mut condensed:Vec<String>=Vec::with_capacity(headers.len());
+
         for header in headers
         {
-            header_indices.push(self.get_header_column_index(header)?);
+            header_indices.push(self.get_header_column_index(header.as_str())?);
+            condensed.push("".to_string());
         }
         
-        for row in self.data
+        for row in &self.data
         {
             for n in 0..header_indices.len()
             {
-                let val = *row.get(n).expect("Invalid row index");
+                let val = row.get(n).expect("Invalid row index").to_string();
                 condensed[n]=val;
             }
-            func(condensed);
+            func(&condensed);
         }
 
         Ok(())

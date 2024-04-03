@@ -214,32 +214,49 @@ pub(crate) fn get_categories_map(
     Ok(retval)
 }
 
-fn get_exam_site_location_combinations_in_table(main_data_table: &Table) -> HashSet<(u64,String)> {
-
-}
-
-fn get_exam_context_map(exam_locations_table: &Table) -> HashMap<u64,HashMap<String,String>>{
+pub(crate) fn get_site_and_location_context_map(exam_locations_table: &Table) -> Result<HashMap<u64,HashMap<String,String>>,String>{
     let headervec = Vec::from([
         location_categories::PertinentHeaders::Site.get_label(),
         location_categories::PertinentHeaders::Location.get_label(),
         location_categories::PertinentHeaders::Context.get_label(),
         location_categories::PertinentHeaders::Comments.get_label()
         ]);
-    let mut result:HashSet<location_categories::LocationCategory>=HashSet::new();
-    let get_location = |row:Vec<String>|->(){
-        let newloc = location_categories::LocationCategory{
+
+    let mut err=false;
+
+    let mut result:HashMap<u64,HashMap<String,String>>=HashMap::new();
+
+    let process_location = |row:&Vec<String>|->() {
+        let newloc = location_categories::LocationCategory {
             site:row.get(0).expect("Doesn't contain site!").parse().expect("Not a parsable number!"),
-            location:*row.get(1).expect("No location"),
-            context:*row.get(2).expect("No context"),
-            comments:*row.get(3).expect("No comments")
+            location:row.get(1).expect("No location").to_string(),
+            context:row.get(2).expect("No context").to_string(),
+            comments:row.get(3).expect("No comments").to_string()
         };
-        result.insert (newloc);
+
+        let sitemap = match result.entry(newloc.site)
+        {
+            std::collections::hash_map::Entry::Occupied(x) => x.into_mut(),
+            std::collections::hash_map::Entry::Vacant(x) => x.insert(HashMap::new())
+        };
+
+        match sitemap.get(&newloc.location)
+        {
+            Some(x) => {
+                err=true;
+                eprintln!("Duplicate entries in map: {}/{}",newloc.site,newloc.location)
+            },
+            None => {sitemap.insert(newloc.location,newloc.context);}
+        };
     };
 
-    //TODO change this to yield a hashmap of a hasmap
-    result
+    exam_locations_table.for_each(headervec, process_location);
+
+    if err {return Err("Error building exam context map.".to_string());}
+    Ok(result)
 }
 
+/*
 pub(crate) fn get_locations_list(
     main_data_table: &Table,
     exam_locations_table: &Table,
@@ -303,6 +320,7 @@ pub(crate) fn get_locations_list(
 
     Ok(complete_exam_location_list)
 }
+*/
 
 pub fn build_salem_rvumap(main_data_table: &Table) -> Result<HashMap<String, f64>, String> {
     let mut retval: HashMap<String, f64> = HashMap::new();

@@ -9,6 +9,7 @@ use crate::coverage::coordinate::CoverageCoordinates;
 
 use crate::coverage::distribution::get_normal_dist_weights;
 
+use crate::globals::siteid_to_sitename;
 use crate::rotations::description::WrappedSortable;
 
 use crate::error::source_error::SourceError;
@@ -96,6 +97,11 @@ impl CoverageMap {
                     .expect("All weekdays should be populated")
                     as f64;
 
+                let site_id:u64 = source.main_data_table.get_val(
+                    &main_headers::PertinentHeaders::SiteID.get_label(),
+                    &row_i,
+                )?.parse()?;
+
                 let location = source.main_data_table.get_val(
                     &main_headers::PertinentHeaders::Location.get_label(),
                     &row_i,
@@ -118,7 +124,7 @@ impl CoverageMap {
                         }
                     };
 
-                    //Try site. If not valid, go by location.
+                    //Try to determine site from accession (good for separating SH, WB, WVH). If not valid, go by site ID. If not valid, go by location.
                     let mut selected_site: Option<String> = None;
                     let listed_site = source.main_data_table.get_val(
                         &main_headers::PertinentHeaders::Accession.get_label(),
@@ -131,6 +137,9 @@ impl CoverageMap {
                             selected_site = Some(site.to_string());
                             break;
                         }
+                    }
+                    if selected_site.is_none() {
+                        selected_site=siteid_to_sitename(&site_id);
                     }
                     if selected_site.is_none() {
                         selected_site = crate::globals::get_location_site_mapping(&location);
@@ -146,8 +155,18 @@ impl CoverageMap {
                     };
 
                     //Try context. If not valid, go by site map.
-                    let context = match source.location_to_context_map.get(&location) {
-                        Some(x) => x.to_string(),
+                    let context = match source.site_and_location_to_context_map.get(&site_id) {
+                        Some(x) => {
+                            match x.get(&location){
+                                Some(x) => x.to_string(),
+                                None => {
+                                    return SourceError::generate_boxed(format!(
+                                        "Could not determine context for location {}",
+                                        location
+                                    ));
+                                }
+                            }
+                        },
                         None => match crate::globals::get_location_site_mapping(&location) {
                             Some(x) => x,
                             None => {

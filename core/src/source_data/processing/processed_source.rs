@@ -10,11 +10,11 @@ use serde::{Deserialize, Serialize};
 use crate::{
     globals::file_names,
     source_data::processing::categorization::{
-        exam_categories::ExamCategory, get_categories_list, get_locations_list,
+        exam_categories::ExamCategory, get_categories_list,
     },
 };
 
-use super::table::Table;
+use super::{categorization::get_site_and_location_context_map, table::Table};
 
 #[derive(Serialize, Deserialize)]
 pub struct ProcessedSource {
@@ -24,7 +24,7 @@ pub struct ProcessedSource {
     pub location_categories_table: Table,
     pub exam_categories_list: Vec<ExamCategory>,
     pub exam_to_subspecialty_map: HashMap<String, String>,
-    pub location_to_context_map: HashMap<String, String>,
+    pub site_and_location_to_context_map: HashMap<u64, HashMap<String, String>>,
 }
 
 impl ProcessedSource {
@@ -35,7 +35,7 @@ impl ProcessedSource {
         let mut location_categories_table = Table::create(file_names::CATEGORIES_LOCATION_FILE)?;
         let exam_categories_list = get_categories_list(&main_data_table, &exam_categories_table)?;
         let mut exam_to_subspecialty_map: HashMap<String, String> = HashMap::new();
-        let mut location_to_context_map: HashMap<String, String> = HashMap::new();
+        let mut site_and_location_to_context_map: HashMap<u64, HashMap<String, String>>=get_site_and_location_context_map(&location_categories_table)?;
 
         exam_categories_table.clear();
         for category_row in exam_categories_list.as_slice() {
@@ -47,6 +47,7 @@ impl ProcessedSource {
             exam_categories_table.pushrow(newrow);
         }
 
+        /*
         let location_categories_list =
             get_locations_list(&main_data_table, &location_categories_table)?;
 
@@ -58,6 +59,7 @@ impl ProcessedSource {
             newrow.push(location_row.comments.to_owned());
             location_categories_table.pushrow(newrow);
         }
+         */
 
         let _dt = chrono::offset::Local::now();
 
@@ -92,10 +94,6 @@ impl ProcessedSource {
             );
         }
 
-        for location_category in location_categories_list {
-            location_to_context_map.insert(location_category.location, location_category.context);
-        }
-
         Ok(ProcessedSource {
             main_data_table,
             bvu_data_table,
@@ -103,7 +101,7 @@ impl ProcessedSource {
             location_categories_table,
             exam_categories_list,
             exam_to_subspecialty_map,
-            location_to_context_map,
+            site_and_location_to_context_map,
         })
     }
 
