@@ -28,3 +28,4 @@
         - The foreach function is clumsy. Implementing iterator would be superior. __Took a stab at this an implementing an iterator was clumsier.__
 - [ ] Need a full exam code reconciliation
 - [ ] Need a list of valid radiologist names and to check included/excluded exams against those names
+- [ ] Getting rid of generic table
