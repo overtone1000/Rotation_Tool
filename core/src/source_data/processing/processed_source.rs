@@ -9,19 +9,18 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     globals::file_names,
-    source_data::processing::categorization::{
+    source_data::{processing::categorization::{
         exam_categories::ExamCategory, get_categories_list,
-    },
+    }, tables::{bvu_map::{BVUMap, BVUMapEntry}, exam_categories::{ExamCategoryEntry, Exam_Categories}, exam_data::{Exam, ExamTable}, location_categories::{LocationCategoryEntry, Location_Categories}, table::Table}},
 };
 
-use super::{categorization::get_site_and_location_context_map, table::Table};
+use super::{categorization::get_site_and_location_context_map};
 
-#[derive(Serialize, Deserialize)]
 pub struct ProcessedSource {
-    pub main_data_table: Table,
-    pub bvu_data_table: Table,
-    pub exam_categories_table: Table,
-    pub location_categories_table: Table,
+    pub main_data_table: ExamTable,
+    pub bvu_data_table: Vec<BVUMapEntry>,
+    pub exam_categories_table: Vec<ExamCategoryEntry>,
+    pub location_categories_table: Vec<LocationCategoryEntry>,
     pub exam_categories_list: Vec<ExamCategory>,
     pub exam_to_subspecialty_map: HashMap<String, String>,
     pub site_and_location_to_context_map: HashMap<u64, HashMap<String, String>>,
@@ -29,10 +28,10 @@ pub struct ProcessedSource {
 
 impl ProcessedSource {
     pub fn build() -> Result<ProcessedSource, Box<dyn Error>> {
-        let main_data_table = Table::create(file_names::MAIN_DATA_FILE)?;
-        let bvu_data_table = Table::create(file_names::BVU_DATA_FILE)?;
-        let mut exam_categories_table = Table::create(file_names::CATEGORIES_EXAM_FILE)?;
-        let mut location_categories_table = Table::create(file_names::CATEGORIES_LOCATION_FILE)?;
+        let main_data_table = ExamTable::create(file_names::MAIN_DATA_FILE);
+        let bvu_data_table = BVUMap::create(file_names::BVU_DATA_FILE).collect();
+        let mut exam_categories_table = Exam_Categories::create(file_names::CATEGORIES_EXAM_FILE).collect();
+        let mut location_categories_table = Location_Categories::create(file_names::CATEGORIES_LOCATION_FILE).collect();
         let exam_categories_list = get_categories_list(&main_data_table, &exam_categories_table)?;
         let mut exam_to_subspecialty_map: HashMap<String, String> = HashMap::new();
         let mut site_and_location_to_context_map: HashMap<u64, HashMap<String, String>>=get_site_and_location_context_map(&location_categories_table)?;
@@ -46,46 +45,6 @@ impl ProcessedSource {
             newrow.push(category_row.comments.to_owned());
             exam_categories_table.pushrow(newrow);
         }
-
-        /*
-        let location_categories_list =
-            get_locations_list(&main_data_table, &location_categories_table)?;
-
-        location_categories_table.clear();
-        for location_row in location_categories_list.as_slice() {
-            let mut newrow: Vec<String> = Vec::new();
-            newrow.push(location_row.location.to_owned());
-            newrow.push(location_row.context.to_owned());
-            newrow.push(location_row.comments.to_owned());
-            location_categories_table.pushrow(newrow);
-        }
-         */
-
-        let _dt = chrono::offset::Local::now();
-
-        //Archive and save new file if changed
-        /*
-        match backup(dt,file_names::CATEGORIES_EXAM_FILE.to_string(),"Categories_Exam.csv".to_owned())
-        {
-            Ok(_)=>{
-                exam_categories_table.write_to_file(file_names::CATEGORIES_EXAM_FILE.to_owned());
-            },
-            Err(x)=>{
-                println!("{}",x);
-                return Err(Box::new(x));
-            }
-        }
-        match backup(dt,file_names::CATEGORIES_LOCATION_FILE.to_string(),"Categories_Location.csv".to_owned())
-        {
-            Ok(_)=>{
-                location_categories_table.write_to_file(file_names::CATEGORIES_LOCATION_FILE.to_owned());
-            },
-            Err(x)=>{
-                println!("{}",x);
-                return Err(Box::new(x));
-            }
-        }
-        */
 
         for exam_category in &exam_categories_list {
             exam_to_subspecialty_map.insert(
@@ -105,6 +64,7 @@ impl ProcessedSource {
         })
     }
 
+    /*
     pub fn save_to_cache(&self, filename: &str) -> Result<(), Box<dyn Error>> {
         println!("Saving processed source to cache.");
         let cachefile = File::create(filename)?;
@@ -129,6 +89,7 @@ impl ProcessedSource {
 
         Ok(ProcessedSource::deserialize(&mut deserializer)?)
     }
+    */
 
     pub fn check_bvusource(&mut self) {
         //This was only necessary to fix the data.

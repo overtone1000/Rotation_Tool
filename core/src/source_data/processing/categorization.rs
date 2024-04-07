@@ -1,80 +1,8 @@
 use std::collections::{HashMap, HashSet};
 
-use crate::globals::{bvu_headers, file_names::{self, UNACCOUNTED_CATEGORIES_FILE}, main_headers};
+use crate::{globals::{bvu_headers, file_names::{self, UNACCOUNTED_CATEGORIES_FILE}, main_headers}, source_data::tables::{exam_categories::{ExamCategoryEntry, Exam_Categories}, exam_data::{Exam, ExamTable}}};
 
-use super::{processed_source::ProcessedSource, table::Table};
-
-pub mod exam_categories {
-    use std::cmp::Ordering;
-
-    use serde::{Deserialize, Serialize};
-
-    use crate::serialization::output::JSONFileOut;
-
-    pub(crate) enum PertinentHeaders {
-        ProcedureCode,
-        Exam,
-        Subspecialty,
-        Comments,
-    }
-
-    impl PertinentHeaders {
-        pub(crate) fn get_label(&self) -> String {
-            match self {
-                PertinentHeaders::ProcedureCode => "Exam Code".to_string(),
-                PertinentHeaders::Exam => "Exam Description".to_string(),
-                PertinentHeaders::Subspecialty => "Subspecialty".to_string(),
-                PertinentHeaders::Comments => "Comments".to_string(),
-            }
-        }
-    }
-
-    #[derive(Serialize, Deserialize, Hash)]
-    pub struct ExamCategory {
-        pub procedure_code: String,
-        pub exam: String,
-        pub subspecialty: String,
-        pub comments: String,
-    }
-
-    impl JSONFileOut for Vec<ExamCategory> {}
-
-    impl Eq for ExamCategory {}
-
-    impl PartialOrd for ExamCategory {
-        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-            Some(self.cmp(other))
-        }
-    }
-
-    impl PartialEq for ExamCategory {
-        fn eq(&self, other: &Self) -> bool {
-            self.procedure_code == other.procedure_code && self.exam == other.exam
-            //self.subspecialty == other.subspecialty &&
-            //self.comments == other.comments
-        }
-    }
-
-    impl Ord for ExamCategory {
-        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-            match self.exam.cmp(&other.exam) {
-                std::cmp::Ordering::Equal => self.procedure_code.cmp(&other.procedure_code),
-                examcmp => examcmp,
-            }
-        }
-    }
-
-    impl ExamCategory {
-        pub fn copy(&self) -> ExamCategory {
-            ExamCategory {
-                procedure_code: self.procedure_code.to_string(),
-                exam: self.exam.to_string(),
-                subspecialty: self.subspecialty.to_string(),
-                comments: self.comments.to_string(),
-            }
-        }
-    }
-}
+use super::{processed_source::ProcessedSource};
 
 pub(crate) mod location_categories {
     use std::cmp::Ordering;
@@ -105,36 +33,14 @@ pub(crate) mod location_categories {
         pub comments: String,
     }
 
-    impl Eq for LocationCategory {}
-
-    impl PartialOrd for LocationCategory {
-        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-            Some(self.cmp(other))
-        }
-    }
-
-    impl PartialEq for LocationCategory {
-        fn eq(&self, other: &Self) -> bool {
-            self.location == other.location
-            //self.context == other.context &&
-            //self.comments == other.comments
-        }
-    }
-
-    impl Ord for LocationCategory {
-        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-            self.location.cmp(&other.location)
-        }
-    }
+    
 }
 
-pub(crate) fn get_categories_list(
-    main_data_table: &Table,
-    exam_categories_table: &Table,
-) -> Result<Vec<exam_categories::ExamCategory>, String> {
-    let main_exam_categories = main_data_table.get_keyed_column_sample_map(
-        &(main_headers::PertinentHeaders::ProcedureCode.get_label()),
-    )?;
+pub(crate) fn check_categories_list(
+    main_data_table: ExamTable,
+    exam_categories_table: &Exam_Categories,
+) -> Result<Vec<ExamCategoryEntry>, String> {
+    let main_exam_categories = main_data_table.get_procedure_codes();
 
     let existing_exam_categories = exam_categories_table.get_keyed_column_sample_map(
         &(exam_categories::PertinentHeaders::ProcedureCode.get_label()),

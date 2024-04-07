@@ -7,12 +7,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
     println!("Starting.");
 
-    let rebuild_source: bool = true;
-
-    if rebuild_source {
-        rotation_tool::cache_source()?;
-    }
-
     let mut common = rotation_tool::build_main_common()?;
 
     let rotation_analysis: bool = true;

@@ -46,7 +46,7 @@ pub struct MainCommon {
 }
 
 pub fn build_main_common() -> Result<MainCommon, Box<dyn Error>> {
-    //crate::rotations::manifest:: Manifest::create_example();
+    let source = ProcessedSource::build()?;
 
     let manifest: rotations::manifest::Manifest = parse_manifest()?;
 
@@ -59,15 +59,6 @@ pub fn build_main_common() -> Result<MainCommon, Box<dyn Error>> {
     println!("Adding coverage.");
     coverage_tree.add_coverage_from_manifest(manifest)?;
 
-    /*
-    let test = coverage_tree.get_map().get_mut("SH").expect("Testing")
-        .get_map().get_mut("Neuro (Other)").expect("Testing")
-        .get_map().get_mut("ED").expect("Testing")
-        .get_map().get_mut("MR").expect("Testing");
-    */
-
-    let source = ProcessedSource::load_from_cache(SOURCE_CACHE)?;
-    println!("Finished loading source from cache.");
 
     println!("Adding work to tree.");
     coverage_tree.add_work_from_source(&source, &date_constraint_set)?;
@@ -168,18 +159,4 @@ fn detailed_analysis(
     }
 
     Ok(())
-}
-
-pub fn cache_source() -> Result<(), Box<dyn Error>> {
-    println!("Processing source.");
-    let source = match ProcessedSource::build() {
-        Ok(x) => x,
-        Err(e) => {
-            return Err(e);
-        }
-    };
-
-    let retval = source.save_to_cache(SOURCE_CACHE);
-    println!("Finished caching source.");
-    retval
 }

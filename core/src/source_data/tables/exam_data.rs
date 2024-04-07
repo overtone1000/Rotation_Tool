@@ -1,10 +1,11 @@
-use std::{collections::HashMap, error::Error};
+use std::{collections::{HashMap, HashSet}, error::Error};
 
 use chrono::{NaiveDateTime};
 use serde::Deserialize;
 
 use super::table::Table;
 
+#[derive(Debug)]
 pub struct Exam {
     pub accession:String, //Accession
     pub procedure_code:String, //ProcedureCodeList
@@ -12,9 +13,10 @@ pub struct Exam {
     pub signer_acct_id:u64, //SignerAcctID
     pub rad_last_name:String, //RadLastNm
     pub rad_first_name:String, //RadFirstNm
-    pub list_time:NaiveDateTime, //ScheduledDatetime
+    pub list_datetime:NaiveDateTime, //ScheduledDatetime
     pub rvu:f64, //WorkRVU
     pub site_id:u64, //SiteID
+    pub location:String,
 }
 
 const ACCESSION_HEADER:&str="Accession";
@@ -26,22 +28,20 @@ const RAD_FIRST_NAME_HEADER:&str="RadFirstNm";
 const LIST_TIME_HEADER:&str="ScheduledDatetime";
 const RVU_HEADER:&str="WorkRVU";
 const SITE_ID_HEADER:&str="SiteID";
+const LOCATION_HEADER:&str="LocationDescription";
 
 pub struct ExamTable {
-    
+    filename:String
 }
 
 impl Table<Exam> for ExamTable
 {
-    fn build_from_headers_and_row(header_map:&HashMap<String,usize>, row:&Vec<String>)->Result<Exam,std::io::Error>{
+    fn get_file_path(&self)->&str {&self.filename}
+
+    fn build_from_headers_and_row(header_map:&HashMap<String,usize>, row:&Vec<String>)->Result<Exam, Box<dyn std::error::Error>>{
 
         let list_time_string=Self::get_from_row_with_header(LIST_TIME_HEADER, header_map, row);
-        let datetime = match NaiveDateTime::parse_from_str(&list_time_string, "%m/%d/%y %H:%M") {
-            Ok(x) => x,
-            Err(x) => {
-                return Err(std::io::Error::other(x));
-            }
-        };
+        let datetime = NaiveDateTime::parse_from_str(&list_time_string, "%m/%d/%y %H:%M")?;
 
         Ok(
             Exam{
@@ -51,14 +51,20 @@ impl Table<Exam> for ExamTable
                 signer_acct_id: Self::get_from_row_with_header(SIGNER_ACCT_ID_HEADER, header_map, row).parse().expect("Should parse to integer."),
                 rad_last_name: Self::get_from_row_with_header(RAD_LAST_NAME_HEADER, header_map, row),
                 rad_first_name: Self::get_from_row_with_header(RAD_FIRST_NAME_HEADER, header_map, row),
-                list_time: datetime,
+                list_datetime: datetime,
                 rvu: Self::get_from_row_with_header(RVU_HEADER, header_map, row).parse().expect("Should parse to float."),
                 site_id: Self::get_from_row_with_header(SITE_ID_HEADER, header_map, row).parse().expect("Should parse to integer."),
+                location: Self::get_from_row_with_header(LOCATION_HEADER, header_map, row),
             }
         )
     }
 }
 
 impl ExamTable {
-
+    pub fn create(filename:&str)->ExamTable{ExamTable{filename:filename.to_string()}}
+    pub fn get_procedure_codes(&self)->HashSet<String>{
+        let mut retval:HashSet<String>=HashSet::new();
+        self.for_each(|exam|{retval.insert(exam.procedure_code);Ok(())});
+        retval
+    }
 }

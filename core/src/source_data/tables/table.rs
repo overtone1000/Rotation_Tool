@@ -2,7 +2,9 @@ use std::collections::HashMap;
 
 pub trait Table<T>
 {
-    fn build_from_headers_and_row(header_map:&HashMap<String,usize>, row:&Vec<String>)->Result<T,std::io::Error>;
+    fn get_file_path(&self)->&str;
+
+    fn build_from_headers_and_row(header_map:&HashMap<String,usize>, row:&Vec<String>)->Result<T, Box<dyn std::error::Error>>;
 
     fn get_from_row_with_header(header:&str, header_map:&HashMap<String,usize>, row:&Vec<String>)->String
     {
@@ -10,14 +12,14 @@ pub trait Table<T>
         row.get(index).expect("Should have this member").to_string()
     }
 
-    fn for_each<F>(&self, file_path: &str, func:F) -> Result<(), std::io::Error> 
-    where F:Fn(T)->()
+    fn for_each<F>(&self, func:F) -> Result<(), Box<dyn std::error::Error>> 
+    where F:Fn(T)->Result<(),Box<dyn std::error::Error>>
     {
         let mut rdr = csv::ReaderBuilder::new()
             .delimiter(b',')
             .quote(b'"')
             .has_headers(true)
-            .from_path(file_path)?;
+            .from_path(self.get_file_path())?;
 
         let mut headers: Vec<String>=Vec::new();
         let mut labelmap: HashMap<String, usize>=HashMap::new();
@@ -30,6 +32,7 @@ pub trait Table<T>
         }
 
         n=0;
+        let iter = rdr.records();
         for record in rdr.records() {
             n+=1;
             let mut row: Vec<String> = Vec::new();
@@ -45,13 +48,19 @@ pub trait Table<T>
                 message += " contains ";
                 message += &(row.len().to_string());
                 message += " items.";
-                return Err(std::io::Error::new(std::io::ErrorKind::InvalidData, message));
+                return Err(Box::new(std::io::Error::new(std::io::ErrorKind::InvalidData, message)));
             }
 
             let member:T=Self::build_from_headers_and_row(&labelmap,&row)?;
-            func(member);
+            func(member)?;
         }
 
         Ok(())
+    }
+
+    fn collect(&self)->Vec<T>{
+        let mut retval:Vec<T>=Vec::new();
+        self.for_each(|row:T|{retval.push(row);Ok(())});
+        retval
     }
 }

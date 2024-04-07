@@ -18,6 +18,7 @@ use crate::source_data::processing::categorization::{
     build_salem_bvumap, build_salem_rvumap, get_categories_map,
 };
 use crate::source_data::processing::processed_source::ProcessedSource;
+use crate::source_data::tables::table::Table;
 use crate::{
     constraints::ConstraintSet,
     dates::BUSINESS_DAYS_PER_YEAR,
@@ -44,236 +45,154 @@ impl CoverageMap {
 
         let mut salem_weekday_count: HashMap<chrono::Weekday, u64> = HashMap::new();
         //Determine how many days worth for each weekday
-        {
-            let mut dateset: HashSet<NaiveDate> = HashSet::new();
-            for row_i in source.main_data_table.row_indices() {
-                let datetimestring = source.main_data_table.get_val(
-                    &main_headers::PertinentHeaders::ScheduledDatetime.get_label(),
-                    &row_i,
-                )?;
-
-                let datetime =
-                    match NaiveDateTime::parse_from_str(&datetimestring, "%m/%d/%y %H:%M") {
-                        Ok(x) => x,
-                        Err(x) => {
-                            return Err(Box::new(x));
-                        }
-                    };
-
-                if date_constraints.include(&datetime) {
-                    dateset.insert(NaiveDate::from(datetime));
+        let mut dateset: HashSet<NaiveDate> = HashSet::new();
+        source.main_data_table.for_each(
+            |exam| {
+                if date_constraints.include(&exam.list_datetime) {
+                    dateset.insert(NaiveDate::from(exam.list_datetime));
                 }
+                Ok(())
             }
+        );
 
-            for date in dateset {
-                match salem_weekday_count.entry(date.weekday()) {
-                    Entry::Occupied(x) => {
-                        let mutable = x.into_mut();
-                        *mutable += 1;
-                    }
-                    Entry::Vacant(x) => {
-                        x.insert(1);
-                    }
-                };
-            }
-        }
-        //Process Salem Data
-        for row_i in source.main_data_table.row_indices() {
-            let datetimestring = source.main_data_table.get_val(
-                &main_headers::PertinentHeaders::ScheduledDatetime.get_label(),
-                &row_i,
-            )?;
-
-            let datetime = match NaiveDateTime::parse_from_str(&datetimestring, "%m/%d/%y %H:%M") {
-                Ok(x) => x,
-                Err(x) => {
-                    return Err(Box::new(x));
+        for date in dateset {
+            match salem_weekday_count.entry(date.weekday()) {
+                Entry::Occupied(x) => {
+                    let mutable = x.into_mut();
+                    *mutable += 1;
+                }
+                Entry::Vacant(x) => {
+                    x.insert(1);
                 }
             };
+        }
+        
+        //Process Salem Data
+        source.main_data_table.for_each(
+            |exam| {
+                if date_constraints.include(&exam.list_datetime) {
+                    let denominator = *salem_weekday_count
+                        .get(&NaiveDate::from(exam.list_datetime).weekday())
+                        .expect("All weekdays should be populated")
+                        as f64;
 
-            if date_constraints.include(&datetime) {
-                let denominator = *salem_weekday_count
-                    .get(&NaiveDate::from(datetime).weekday())
-                    .expect("All weekdays should be populated")
-                    as f64;
-
-                let site_id:u64 = source.main_data_table.get_val(
-                    &main_headers::PertinentHeaders::SiteID.get_label(),
-                    &row_i,
-                )?.parse()?;
-
-                let location = source.main_data_table.get_val(
-                    &main_headers::PertinentHeaders::Location.get_label(),
-                    &row_i,
-                )?;
-                let exam_code = source.main_data_table.get_val(
-                    &main_headers::PertinentHeaders::ProcedureCode.get_label(),
-                    &row_i,
-                )?;
-
-                //Build coords and populate maps with this row.
-                let coords: CoverageCoordinates = {
-                    //Get subspecialty from exam code
-                    let subspecialty = match source.exam_to_subspecialty_map.get(&exam_code) {
-                        Some(x) => x.to_string(),
-                        None => {
-                            return SourceError::generate_boxed(format!(
-                                "Invalid exam_code {} in exam_to_subspeciality_map",
-                                exam_code
-                            ));
-                        }
-                    };
-
-                    //Try to determine site from accession (good for separating SH, WB, WVH). If not valid, go by site ID. If not valid, go by location.
-                    let mut selected_site: Option<String> = None;
-                    let listed_site = source.main_data_table.get_val(
-                        &main_headers::PertinentHeaders::Accession.get_label(),
-                        &row_i,
-                    )?;
-                    for site in SITES {
-                        if (listed_site[0..site.len()]).to_ascii_uppercase()
-                            == site.to_string().to_ascii_uppercase()
-                        {
-                            selected_site = Some(site.to_string());
-                            break;
-                        }
-                    }
-                    if selected_site.is_none() {
-                        selected_site=siteid_to_sitename(&site_id);
-                    }
-                    if selected_site.is_none() {
-                        selected_site = crate::globals::get_location_site_mapping(&location);
-                    }
-                    let site = match selected_site {
-                        Some(x) => x,
-                        None => {
-                            return SourceError::generate_boxed(format!(
-                                "Could not determine site for row {}",
-                                row_i
-                            ));
-                        }
-                    };
-
-                    //Try context. If not valid, go by site map.
-                    let context = match source.site_and_location_to_context_map.get(&site_id) {
-                        Some(x) => {
-                            match x.get(&location){
-                                Some(x) => x.to_string(),
-                                None => {
-                                    return SourceError::generate_boxed(format!(
-                                        "Could not determine context for location {}",
-                                        location
-                                    ));
-                                }
+                    //Build coords and populate maps with this row.
+                    let coords: CoverageCoordinates = {
+                        //Get subspecialty from exam code
+                        let subspecialty = match source.exam_to_subspecialty_map.get(&exam.procedure_code) {
+                            Some(x) => x.to_string(),
+                            None => {
+                                return SourceError::generate_boxed(format!(
+                                    "Invalid exam.procedure_code {} in exam_to_subspeciality_map",
+                                    exam.procedure_code
+                                ));
                             }
-                        },
-                        None => match crate::globals::get_location_site_mapping(&location) {
+                        };
+
+                        //Try to determine site from accession (good for separating SH, WB, WVH). If not valid, go by site ID. If not valid, go by location.
+                        let mut selected_site: Option<String> = None;
+;
+                        for site in SITES {
+                            if (exam.accession[0..site.len()]).to_ascii_uppercase()
+                                == site.to_string().to_ascii_uppercase()
+                            {
+                                selected_site = Some(site.to_string());
+                                break;
+                            }
+                        }
+                        if selected_site.is_none() {
+                            selected_site=siteid_to_sitename(&exam.site_id);
+                        }
+                        if selected_site.is_none() {
+                            selected_site = crate::globals::get_location_site_mapping(&exam.location);
+                        }
+                        let site = match selected_site {
                             Some(x) => x,
                             None => {
                                 return SourceError::generate_boxed(format!(
-                                    "Could not determine context for location {}",
-                                    location
+                                    "Could not determine site for exam {:?}",exam,
                                 ));
                             }
-                        },
-                    };
+                        };
 
-                    //Get modality, but check for aliases
-                    /*
-                    let listed_modality = source.main_data_table.get_val(
-                        &main_headers::PertinentHeaders::Modality.get_label(),
-                        &row_i,
-                    )?;
-                    let mut selected_modality: Option<String> = None;
-                    for modality in MODALITIES {
-                        if *modality == listed_modality {
-                            selected_modality = Some(modality.to_string());
-                            break;
-                        }
-                    }
-                    match selected_modality {
-                        None => {
-                            selected_modality = crate::globals::get_modality_alias(&listed_modality);
-                        }
-                        _ => {}
-                    }
-                    match selected_modality {
-                        None => {
-                            selected_modality = crate::globals::get_modality_from_procedure_desc(
-                                source.main_data_table.get_val(
-                                    &main_headers::PertinentHeaders::Exam.get_label(),
-                                    &row_i,
-                                )?,
-                            )
-                        }
-                        _ => {}
-                    }
-                    let modality = match selected_modality {
-                        Some(x) => x,
-                        None => {
-                            return SourceError::generate_boxed(format!(
-                                "Could not determine modality for row {}",
-                                row_i
-                            ));
-                        }
-                    };
-                    if !modality_map.contains_key(&exam_code) {
-                        modality_map.insert(exam_code.to_owned(), modality.to_string());
-                    }
-                    */
+                        //Try context. If not valid, go by site map.
+                        let context = match source.site_and_location_to_context_map.get(&exam.site_id) {
+                            Some(x) => {
+                                match x.get(&exam.location){
+                                    Some(x) => x.to_string(),
+                                    None => {
+                                        return SourceError::generate_boxed(format!(
+                                            "Could not determine context for location {}",
+                                            exam.location
+                                        ));
+                                    }
+                                }
+                            },
+                            None => match crate::globals::get_location_site_mapping(&exam.location) {
+                                Some(x) => x,
+                                None => {
+                                    return SourceError::generate_boxed(format!(
+                                        "Could not determine context for location {}",
+                                        exam.location
+                                    ));
+                                }
+                            },
+                        };
 
-                    CoverageCoordinates {
-                        site,
-                        subspecialty,
-                        context,
-                        //modality: modality.to_string(),
-                        weekday: datetime.weekday(),
-                    }
-                };
-
-                let work: WorkUnit = {
-                    let rvu = match exam_rvu_map.get(&exam_code) {
-                        Some(x) => x,
-                        None => {
-                            return SourceError::generate_boxed(format!(
-                                "Invalid exam_code {} in exam_to_subspeciality_map",
-                                exam_code
-                            ));
+                        CoverageCoordinates {
+                            site,
+                            subspecialty,
+                            context,
+                            //modality: modality.to_string(),
+                            weekday: exam.list_datetime.weekday(),
                         }
                     };
 
-                    let bvu = match exam_bvu_map.get(&exam_code) {
-                        Some(x) => x,
-                        None => {
-                            return SourceError::generate_boxed(format!(
-                                "Invalid exam_code {} in exam_to_subspeciality_map",
-                                exam_code
-                            ));
-                        }
+                    let work: WorkUnit = {
+                        let rvu = match exam_rvu_map.get(&exam.procedure_code) {
+                            Some(x) => x,
+                            None => {
+                                return SourceError::generate_boxed(format!(
+                                    "Invalid exam.procedure_code {} in exam_to_subspeciality_map",
+                                    exam.procedure_code
+                                ));
+                            }
+                        };
+
+                        let bvu = match exam_bvu_map.get(&exam.procedure_code) {
+                            Some(x) => x,
+                            None => {
+                                return SourceError::generate_boxed(format!(
+                                    "Invalid exam.procedure_code {} in exam_to_subspeciality_map",
+                                    exam.procedure_code
+                                ));
+                            }
+                        };
+
+                        WorkUnit::create(
+                            exam.list_datetime,
+                            *rvu,
+                            *bvu,
+                            denominator,
+                            exam_code_map
+                                .get(&exam.procedure_code)
+                                .expect("Should be there!")
+                                .exam
+                                .to_string(),
+                        )
                     };
 
-                    WorkUnit::create(
-                        datetime,
-                        *rvu,
-                        *bvu,
-                        denominator,
-                        exam_code_map
-                            .get(&exam_code)
-                            .expect("Should be there!")
-                            .exam
-                            .to_string(),
-                    )
-                };
-
-                self.add_work(&coords, work);
+                    self.add_work(&coords, work);
+                }
+                Ok(())
             }
-        }
+        );
         
         /*
         //Add TPC, which doesn't go by number of dates
         let distribution_weights = get_normal_dist_weights();
         for row_i in source.tpc_data_table.row_indices() {
-            let exam_code = source
+            let exam.procedure_code = source
                 .tpc_data_table
                 .get_val(&tpc_headers::PertinentHeaders::ExamCode.get_label(), &row_i)?;
 
@@ -289,30 +208,30 @@ impl CoverageMap {
                 }
             };
 
-            let rvus_per_exam = match exam_rvu_map.get(&exam_code) {
+            let rvus_per_exam = match exam_rvu_map.get(&exam.procedure_code) {
                 Some(val) => val.to_owned(),
                 None => {
-                    return SourceError::generate_boxed(format!("Bad exam code {}", exam_code));
+                    return SourceError::generate_boxed(format!("Bad exam code {}", exam.procedure_code));
                 }
             };
-            let bvus_per_exam = match exam_bvu_map.get(&exam_code) {
+            let bvus_per_exam = match exam_bvu_map.get(&exam.procedure_code) {
                 Some(val) => val.to_owned(),
                 None => {
-                    return SourceError::generate_boxed(format!("Bad exam code {}", exam_code));
+                    return SourceError::generate_boxed(format!("Bad exam code {}", exam.procedure_code));
                 }
             };
 
-            let subspecialty = match source.exam_to_subspecialty_map.get(&exam_code) {
+            let subspecialty = match source.exam_to_subspecialty_map.get(&exam.procedure_code) {
                 None => {
-                    return SourceError::generate_boxed(format!("Bad exam code {}", exam_code));
+                    return SourceError::generate_boxed(format!("Bad exam code {}", exam.procedure_code));
                 }
                 Some(val) => val.to_owned(),
             };
 
             /*
-            let modality = match modality_map.get(&exam_code) {
+            let modality = match modality_map.get(&exam.procedure_code) {
                 None => {
-                    return SourceError::generate_boxed(format!("Bad exam code {}", exam_code));
+                    return SourceError::generate_boxed(format!("Bad exam code {}", exam.procedure_code));
                 }
                 Some(val) => val.to_owned(),
             };
@@ -346,8 +265,8 @@ impl CoverageMap {
                             * bvus_per_exam
                             * (*distribution_weights.get(key).expect("Expected")) as f64,
                         BUSINESS_DAYS_PER_YEAR,
-                        exam_code_map
-                            .get(&exam_code)
+                        exam.procedure_code_map
+                            .get(&exam.procedure_code)
                             .expect("Should be there!")
                             .exam
                             .to_string(),
