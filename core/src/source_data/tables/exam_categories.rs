@@ -62,4 +62,17 @@ impl Table<ExamCategoryEntry> for Exam_Categories
 
 impl Exam_Categories {
     pub fn create(filename:&str)->Exam_Categories{Exam_Categories{filename:filename.to_string()}}
+    pub fn get_procedure_codes(&self)->HashSet<String>{
+        let mut retval:HashSet<String>=HashSet::new();
+        self.for_each(
+            |entry|{
+                if retval.insert(entry.procedure_code){                
+                    Ok(())
+                }
+                else {
+                    Err(std::io::Error::new(format!("Procedure code {} is duplicated in {}",entry.exam_code,self.filename),std::io::ErrorKind::InvalidData))
+                }
+            });
+        retval
+    }
 }

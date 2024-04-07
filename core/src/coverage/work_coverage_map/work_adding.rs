@@ -15,7 +15,7 @@ use crate::rotations::description::WrappedSortable;
 use crate::error::source_error::SourceError;
 
 use crate::source_data::processing::categorization::{
-    build_salem_bvumap, build_salem_rvumap, get_categories_map,
+    build_salem_bvumap, build_salem_rvumap, check_categories_list,
 };
 use crate::source_data::processing::processed_source::ProcessedSource;
 use crate::source_data::tables::table::Table;
@@ -41,7 +41,7 @@ impl CoverageMap {
         let exam_rvu_map = build_salem_rvumap(&source.main_data_table)?;
         let exam_bvu_map: HashMap<String, f64> = build_salem_bvumap(&source.bvu_data_table)?;
 
-        let exam_code_map = get_categories_map(source)?;
+        let exam_code_map = source.exam_categories_list;
 
         let mut salem_weekday_count: HashMap<chrono::Weekday, u64> = HashMap::new();
         //Determine how many days worth for each weekday

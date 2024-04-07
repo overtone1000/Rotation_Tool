@@ -6,7 +6,7 @@ use serde::Deserialize;
 use super::table::Table;
 
 pub struct LocationCategoryEntry {
-    pub side_id:u64,
+    pub site_id:u64,
     pub location:String,
     pub context:String,
 }
@@ -48,7 +48,7 @@ impl Table<LocationCategoryEntry> for Location_Categories
     fn build_from_headers_and_row(header_map:&HashMap<String,usize>, row:&Vec<String>)->Result<LocationCategoryEntry, Box<dyn std::error::Error>>{
         Ok(
             LocationCategoryEntry{
-                side_id:Self::get_from_row_with_header(SITE_HEADER, header_map, row).parse()?,
+                site_id:Self::get_from_row_with_header(SITE_HEADER, header_map, row).parse()?,
                 location: Self::get_from_row_with_header(LOCATION_HEADER, header_map, row),
                 context: Self::get_from_row_with_header(CONTEXT_HEADER, header_map, row),
             }

@@ -10,18 +10,17 @@ use serde::{Deserialize, Serialize};
 use crate::{
     globals::file_names,
     source_data::{processing::categorization::{
-        exam_categories::ExamCategory, get_categories_list,
     }, tables::{bvu_map::{BVUMap, BVUMapEntry}, exam_categories::{ExamCategoryEntry, Exam_Categories}, exam_data::{Exam, ExamTable}, location_categories::{LocationCategoryEntry, Location_Categories}, table::Table}},
 };
 
-use super::{categorization::get_site_and_location_context_map};
+use super::categorization::{check_categories_list, get_site_and_location_context_map};
 
 pub struct ProcessedSource {
     pub main_data_table: ExamTable,
     pub bvu_data_table: Vec<BVUMapEntry>,
     pub exam_categories_table: Vec<ExamCategoryEntry>,
     pub location_categories_table: Vec<LocationCategoryEntry>,
-    pub exam_categories_list: Vec<ExamCategory>,
+    pub exam_categories_list: Vec<ExamCategoryEntry>,
     pub exam_to_subspecialty_map: HashMap<String, String>,
     pub site_and_location_to_context_map: HashMap<u64, HashMap<String, String>>,
 }
@@ -32,7 +31,7 @@ impl ProcessedSource {
         let bvu_data_table = BVUMap::create(file_names::BVU_DATA_FILE).collect();
         let mut exam_categories_table = Exam_Categories::create(file_names::CATEGORIES_EXAM_FILE).collect();
         let mut location_categories_table = Location_Categories::create(file_names::CATEGORIES_LOCATION_FILE).collect();
-        let exam_categories_list = get_categories_list(&main_data_table, &exam_categories_table)?;
+        let exam_categories_list = check_categories_list(&main_data_table, &exam_categories_table)?;
         let mut exam_to_subspecialty_map: HashMap<String, String> = HashMap::new();
         let mut site_and_location_to_context_map: HashMap<u64, HashMap<String, String>>=get_site_and_location_context_map(&location_categories_table)?;
 
