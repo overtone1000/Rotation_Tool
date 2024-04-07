@@ -3,20 +3,20 @@ use std::{collections::{HashMap, HashSet}, error::Error};
 use chrono::{NaiveDateTime};
 use serde::Deserialize;
 
-use super::table::Table;
+use super::{table::Table, types::{ExamCode, ExamDescription, Location}};
 
 #[derive(Debug)]
 pub struct Exam {
     pub accession:String, //Accession
-    pub procedure_code:String, //ProcedureCodeList
-    pub procedure_description:String, //ProcedureDescList
+    pub exam_code:ExamCode, //ProcedureCodeList
+    pub procedure_description:ExamDescription, //ProcedureDescList
     pub signer_acct_id:u64, //SignerAcctID
     pub rad_last_name:String, //RadLastNm
     pub rad_first_name:String, //RadFirstNm
     pub list_datetime:NaiveDateTime, //ScheduledDatetime
     pub rvu:f64, //WorkRVU
     pub site_id:u64, //SiteID
-    pub location:String,
+    pub location:Location,
 }
 
 const ACCESSION_HEADER:&str="Accession";
@@ -46,7 +46,7 @@ impl Table<Exam> for ExamTable
         Ok(
             Exam{
                 accession:Self::get_from_row_with_header(ACCESSION_HEADER, header_map, row),
-                procedure_code: Self::get_from_row_with_header(PROCEDURE_CODE_HEADER, header_map, row),
+                exam_code: Self::get_from_row_with_header(PROCEDURE_CODE_HEADER, header_map, row),
                 procedure_description: Self::get_from_row_with_header(PROCEDURE_DESCRIPTION_HEADER, header_map, row),
                 signer_acct_id: Self::get_from_row_with_header(SIGNER_ACCT_ID_HEADER, header_map, row).parse().expect("Should parse to integer."),
                 rad_last_name: Self::get_from_row_with_header(RAD_LAST_NAME_HEADER, header_map, row),
@@ -64,15 +64,12 @@ impl ExamTable {
     pub fn create(filename:&str)->ExamTable{ExamTable{filename:filename.to_string()}}
     pub fn get_procedure_codes(&self)->HashSet<String>{
         let mut retval:HashSet<String>=HashSet::new();
-        self.for_each(
-            |entry|{
-                if retval.insert(entry.procedure_code){                
-                    Ok(())
-                }
-                else {
-                    Err(std::io::Error::new(format!("Procedure code {} is duplicated in {}",entry.exam_code,self.filename),std::io::ErrorKind::InvalidData))
-                }
-            });
+        for entry in self.iter()
+        {
+            if !retval.insert(entry.exam_code){                
+                eprintln!("Procedure code {} is duplicated in {}",entry.exam_code,self.filename);
+            }
+        }
         retval
     }
 }

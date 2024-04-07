@@ -3,11 +3,11 @@ use std::{collections::{HashMap, HashSet}, error::Error};
 use chrono::{NaiveDateTime};
 use serde::Deserialize;
 
-use super::table::Table;
+use super::{table::Table, types::ExamCode};
 
 pub struct BVUMapEntry {
-    pub exam_code:String,
-    pub bvu:String,
+    pub exam_code:ExamCode,
+    pub bvu:f64,
 }
 
 const EXAM_CODE_HEADER:&str="Location group";
@@ -25,7 +25,7 @@ impl Table<BVUMapEntry> for BVUMap
         Ok(
             BVUMapEntry{
                 exam_code:Self::get_from_row_with_header(EXAM_CODE_HEADER, header_map, row),
-                bvu: Self::get_from_row_with_header(BVU_HEADER, header_map, row),
+                bvu: Self::get_from_row_with_header(BVU_HEADER, header_map, row).parse()?,
             }
         )
     }

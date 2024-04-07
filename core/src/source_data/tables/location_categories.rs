@@ -3,12 +3,12 @@ use std::{collections::{HashMap, HashSet}, error::Error, num::ParseIntError};
 use chrono::{NaiveDateTime};
 use serde::Deserialize;
 
-use super::table::Table;
+use super::{table::Table, types::{Context, Location}};
 
 pub struct LocationCategoryEntry {
     pub site_id:u64,
-    pub location:String,
-    pub context:String,
+    pub location:Location,
+    pub context:Context,
 }
 
 impl Eq for LocationCategoryEntry {}

@@ -3,11 +3,11 @@ use std::{collections::{HashMap, HashSet}, error::Error};
 use chrono::{NaiveDateTime};
 use serde::Deserialize;
 
-use super::table::Table;
+use super::{table::Table, types::ExamCode};
 
 pub struct ExamAlias {
-    pub alias:String,
-    pub exam_code:String,
+    pub alias:ExamCode,
+    pub exam_code:ExamCode,
 }
 
 const EXAM_CODE_HEADER:&str="Exam Code";

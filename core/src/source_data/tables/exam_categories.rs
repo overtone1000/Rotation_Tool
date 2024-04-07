@@ -1,13 +1,15 @@
 use std::{collections::{HashMap, HashSet}, error::Error};
 
 use chrono::{NaiveDateTime};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-use super::table::Table;
+use crate::serialization::output::JSONFileOut;
+
+use super::{table::Table, types::{ExamCode, Subspecialty}};
 
 pub struct ExamCategoryEntry {
-    pub exam_code:String,
-    pub subspecialty:String,
+    pub exam_code:ExamCode,
+    pub subspecialty:Subspecialty,
 }
 
 impl Eq for ExamCategoryEntry {}
@@ -39,8 +41,8 @@ impl ExamCategoryEntry {
     }
 }
 
-const EXAM_CODE_HEADER:&str="Exam Code";
-const SUBSPECIALTY_HEADER:&str="Subspecialty";
+pub const EXAM_CODE_HEADER:&str="Exam Code";
+pub const SUBSPECIALTY_HEADER:&str="Subspecialty";
 
 pub struct Exam_Categories {
     filename:String
@@ -64,15 +66,26 @@ impl Exam_Categories {
     pub fn create(filename:&str)->Exam_Categories{Exam_Categories{filename:filename.to_string()}}
     pub fn get_procedure_codes(&self)->HashSet<String>{
         let mut retval:HashSet<String>=HashSet::new();
-        self.for_each(
-            |entry|{
-                if retval.insert(entry.procedure_code){                
-                    Ok(())
-                }
-                else {
-                    Err(std::io::Error::new(format!("Procedure code {} is duplicated in {}",entry.exam_code,self.filename),std::io::ErrorKind::InvalidData))
-                }
-            });
+        for entry in self.iter()
+        {
+            if !retval.insert(entry.exam_code){                
+                eprintln!("Procedure code {} is duplicated in {}",entry.exam_code,self.filename);
+            }
+        }
         retval
+    }
+}
+
+impl JSONFileOut for Exam_Categories
+{
+}
+
+impl Serialize for Exam_Categories
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer {
+        todo!()
+        need to do this
     }
 }

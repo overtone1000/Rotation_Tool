@@ -4,3 +4,4 @@ pub(crate) mod bvu_map;
 pub(crate) mod exam_categories;
 pub(crate) mod exam_aliases;
 pub(crate) mod location_categories;
+pub(crate) mod types;

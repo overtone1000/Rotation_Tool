@@ -24,10 +24,10 @@ use crate::{
         volumes_by_date::{analysis_to_plot, sort_volumes_by_date},
     },
     globals::file_names::{
-        COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE, VOLUME_BY_DATE_ROTATION,
+        self, COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE, VOLUME_BY_DATE_ROTATION
     },
     serialization::output::JSONFileOut,
-    source_data::processing::processed_source::ProcessedSource,
+    source_data::{processing::processed_source::ProcessedSource, tables::exam_categories::Exam_Categories},
 };
 
 mod analysis;
@@ -125,9 +125,7 @@ pub fn generate_frontend_statics(common: &mut MainCommon) -> Result<(), Box<dyn 
     coverage_tree.to_json(&(base.to_string() + "/active_coverage_tree" + &millistr + ".json"))?;
 
     //Categories lists
-    common
-        .source
-        .exam_categories_list
+    Exam_Categories::create(file_names::CATEGORIES_EXAM_FILE)
         .to_json(&(base.to_string() + "/exam_categories" + &millistr + ".json"))?;
 
     //Plots
