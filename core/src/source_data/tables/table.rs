@@ -36,7 +36,7 @@ pub trait Table<T>
         Ok(())
     }
 
-    fn iter(&self)->TableIter<'_,T>
+    fn iter<'a>(&'a self)->TableIter<'a,T>
     {
         let mut rdr = csv::ReaderBuilder::new()
             .delimiter(b',')
@@ -60,12 +60,12 @@ pub trait Table<T>
             Err(x) => panic!("Couldn't parse headers. {:?}",x),
         }
         
-        
         let bfunc =& |header_map:&HashMap<String,usize>, row:&Vec<String>|{Self::build_from_headers_and_row(header_map, row)};
-
+        
         TableIter { 
             build_function: bfunc,
-            iter: rdr.records(),
+            reader: rdr,
+            iter: None,
             headers: headers, 
             labelmap: labelmap
         }
@@ -75,9 +75,15 @@ pub trait Table<T>
 struct TableIter<'a,T>
 {
     build_function:&'a dyn Fn(&HashMap<String,usize>,&Vec<String>)->Result<T, Box<dyn std::error::Error>>,
-    iter:StringRecordsIter<'a,File>,
+    reader:Reader<File>,
+    iter:Option<StringRecordsIter<'a,File>>,
     headers:Vec<String>,
     labelmap:HashMap<String,usize>
+}
+
+impl TableIter<'a,T>
+{
+    need to create with iter
 }
 
 impl<'a,T> Iterator for TableIter<'a,T>

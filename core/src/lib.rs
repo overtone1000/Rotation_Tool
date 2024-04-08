@@ -125,7 +125,7 @@ pub fn generate_frontend_statics(common: &mut MainCommon) -> Result<(), Box<dyn 
     coverage_tree.to_json(&(base.to_string() + "/active_coverage_tree" + &millistr + ".json"))?;
 
     //Categories lists
-    Exam_Categories::create(file_names::CATEGORIES_EXAM_FILE)
+    common.source.subspecialty_map
         .to_json(&(base.to_string() + "/exam_categories" + &millistr + ".json"))?;
 
     //Plots

@@ -68,24 +68,10 @@ impl Exam_Categories {
         let mut retval:HashSet<String>=HashSet::new();
         for entry in self.iter()
         {
-            if !retval.insert(entry.exam_code){                
-                eprintln!("Procedure code {} is duplicated in {}",entry.exam_code,self.filename);
+            if !retval.insert(entry.exam_code.to_string()){                
+                eprintln!("Procedure code {} is duplicated in {}",&entry.exam_code,self.filename);
             }
         }
         retval
-    }
-}
-
-impl JSONFileOut for Exam_Categories
-{
-}
-
-impl Serialize for Exam_Categories
-{
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer {
-        todo!()
-        need to do this
     }
 }

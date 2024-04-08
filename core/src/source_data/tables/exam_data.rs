@@ -66,7 +66,7 @@ impl ExamTable {
         let mut retval:HashSet<String>=HashSet::new();
         for entry in self.iter()
         {
-            if !retval.insert(entry.exam_code){                
+            if !retval.insert(entry.exam_code.to_string()){                
                 eprintln!("Procedure code {} is duplicated in {}",entry.exam_code,self.filename);
             }
         }

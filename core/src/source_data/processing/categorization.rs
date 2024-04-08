@@ -1,4 +1,4 @@
-use std::{collections::{HashMap, HashSet}, f32::consts::E, io::ErrorKind};
+use std::{collections::{BTreeMap, HashMap, HashSet}, f32::consts::E, io::ErrorKind};
 
 use crate::{globals::{bvu_headers, file_names::{self, UNACCOUNTED_CATEGORIES_FILE}, main_headers}, source_data::tables::{bvu_map::{BVUMap, BVUMapEntry}, exam_categories::{ExamCategoryEntry, Exam_Categories, EXAM_CODE_HEADER, SUBSPECIALTY_HEADER}, exam_data::{Exam, ExamTable}, location_categories::{LocationCategoryEntry, Location_Categories}, table::Table, types::{Context, Location}}};
 
@@ -41,17 +41,17 @@ pub(crate) fn check_categories_list(
     }
 }
 
-pub(crate) fn get_site_and_location_context_map(exam_locations_table: &Location_Categories) -> Result<HashMap<u64,HashMap<Location,Context>>,String>{
+pub(crate) fn get_site_and_location_context_map(exam_locations_table: &Location_Categories) -> Result<BTreeMap<u64,BTreeMap<Location,Context>>,String>{
     let mut err=false;
 
-    let mut result:HashMap<u64,HashMap<String,String>>=HashMap::new();
+    let mut result:BTreeMap<u64,BTreeMap<String,String>>=BTreeMap::new();
 
     for entry in exam_locations_table.iter()
     {
         let sitemap = match result.entry(entry.site_id)
         {
-            std::collections::hash_map::Entry::Occupied(x) => x.into_mut(),
-            std::collections::hash_map::Entry::Vacant(x) => x.insert(HashMap::new())
+            std::collections::btree_map::Entry::Occupied(x) => x.into_mut(),
+            std::collections::btree_map::Entry::Vacant(x) => x.insert(BTreeMap::new())
         };
 
         match sitemap.get(&entry.location)

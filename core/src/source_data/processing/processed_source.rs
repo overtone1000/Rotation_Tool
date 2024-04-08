@@ -1,5 +1,5 @@
 use std::{
-    collections::HashMap,
+    collections::{BTreeMap, HashMap},
     error::Error,
     fs::File,
     io::{BufWriter, Read},
@@ -17,9 +17,9 @@ use super::categorization::{check_bvusource, check_categories_list, get_site_and
 
 pub struct ProcessedSource {
     pub main_data: ExamTable,
-    pub bvu_map: HashMap<ExamCode,f64>,
-    pub subspecialty_map: HashMap<ExamCode,Subspecialty>,
-    pub context_map: HashMap<u64,HashMap<Location,Context>>,
+    pub bvu_map: BTreeMap<ExamCode,f64>,
+    pub subspecialty_map: BTreeMap<ExamCode,Subspecialty>,
+    pub context_map: BTreeMap<u64,BTreeMap<Location,Context>>,
 }
 
 impl ProcessedSource {
@@ -31,7 +31,7 @@ impl ProcessedSource {
         check_categories_list(&main_data_table, &exam_categories_table)?;
         check_bvusource(&main_data_table,&bvu_data_table);
 
-        let mut bvu_map:HashMap<ExamCode,f64>=HashMap::new();
+        let mut bvu_map:BTreeMap<ExamCode,f64>=BTreeMap::new();
         for bvu_entry in bvu_data_table.iter()
         {
             bvu_map.insert(
@@ -40,7 +40,7 @@ impl ProcessedSource {
             );
         }
 
-        let mut subspecialty_map: HashMap<ExamCode,Subspecialty> = HashMap::new();        
+        let mut subspecialty_map: BTreeMap<ExamCode,Subspecialty> = BTreeMap::new();        
         for exam_category in exam_categories_table.iter() {
             subspecialty_map.insert(
                 exam_category.exam_code,
