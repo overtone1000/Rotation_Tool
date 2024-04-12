@@ -1,6 +1,7 @@
-use std::{collections::{HashMap, HashSet}, fs::File};
+use std::{collections::{HashMap, HashSet}, error::Error, fs::File, str::FromStr};
 
-use csv::{Reader, StringRecordsIter};
+use chrono::NaiveDateTime;
+use csv::{Reader, StringRecordsIntoIter, StringRecordsIter};
 use serde::Serialize;
 use statrs::function;
 
@@ -14,8 +15,46 @@ pub trait Table<T>
     
     fn get_from_row_with_header(header:&str, header_map:&HashMap<String,usize>, row:&Vec<String>)->String
     {
-        let index=*(header_map.get(header).expect("Should have this header."));
+        let index=*(header_map.get(header).expect(format!("Header {} not found. Header map: {:?}",header,header_map).as_str()));
         row.get(index).expect("Should have this member").to_string()
+    }
+
+    fn get_as_date(header:&str, header_map:&HashMap<String,usize>, row:&Vec<String>)->Result<NaiveDateTime,Box<dyn std::error::Error>>
+    {
+        let time_string=Self::get_from_row_with_header(header, header_map, row);
+
+        //let test2 = chrono::NaiveDate::from_ymd_opt(2023,11,9).unwrap().and_hms_opt(8,53,0).unwrap();
+        //let test2str=test2.format("%m/%d/%y %H:%M").to_string();
+        //let test = NaiveDateTime::parse_from_str("11/09/2023 08:53", "%m/%d/%y %H:%M").expect("Huh?");
+
+        match NaiveDateTime::parse_from_str(&time_string, "%m/%d/%Y %H:%M") //expects format like 11/09/2023 8:53
+        {
+            Ok(x)=>Ok(x),
+            Err(e)=>{
+                eprintln!("Bad date time {}",time_string);
+                return Err(Box::new(e));
+            }
+        }
+    }
+
+    fn parse<U>(header:&str, header_map:&HashMap<String,usize>, row:&Vec<String>)->Result<U,Box<dyn std::error::Error>>
+    where U: FromStr
+    {
+        let val=Self::get_from_row_with_header(header, header_map, row);
+        let str=match val.as_str()
+        {
+            "NULL"=>"0",
+            x=>x
+        };
+        
+        match str.parse()
+        {
+            Ok(x)=>Ok(x),
+            Err(e)=>{
+                eprintln!("Bad parse {}",str);
+                return Err(Box::new(std::io::Error::new(std::io::ErrorKind::InvalidData,"Bad parse")));
+            }
+        }
     }
 
     fn write(filename:&str, headers:&[String], entries:Vec<Vec<String>>)->Result<(),Box<dyn std::error::Error>>
@@ -38,7 +77,8 @@ pub trait Table<T>
 
     fn iter<'a>(&'a self)->TableIter<'a,T>
     {
-        let mut rdr = csv::ReaderBuilder::new()
+        println!("Accessing table {}",self.get_file_path());
+        let mut rdr: Reader<File> = csv::ReaderBuilder::new()
             .delimiter(b',')
             .quote(b'"')
             .has_headers(true)
@@ -64,33 +104,26 @@ pub trait Table<T>
         
         TableIter { 
             build_function: bfunc,
-            reader: rdr,
-            iter: None,
+            iter:rdr.into_records(),
             headers: headers, 
             labelmap: labelmap
         }
     }
 }
 
-struct TableIter<'a,T>
+pub struct TableIter<'a,T>
 {
     build_function:&'a dyn Fn(&HashMap<String,usize>,&Vec<String>)->Result<T, Box<dyn std::error::Error>>,
-    reader:Reader<File>,
-    iter:Option<StringRecordsIter<'a,File>>,
+    iter:StringRecordsIntoIter<File>,
     headers:Vec<String>,
     labelmap:HashMap<String,usize>
-}
-
-impl TableIter<'a,T>
-{
-    need to create with iter
 }
 
 impl<'a,T> Iterator for TableIter<'a,T>
 {
     type Item = T;
     
-    fn next(&mut self) -> Option<Self::Item> {
+    fn next(&mut self) -> Option<Self::Item>{
 
         match self.iter.next()
         {
@@ -113,8 +146,15 @@ impl<'a,T> Iterator for TableIter<'a,T>
                             message += " items.";
                             eprintln!("{}",message);
                         }
-
-                        Some((self.build_function)(&self.labelmap,&row).expect("Malformed table?"))
+                        Some(
+                            match (self.build_function)(&self.labelmap,&row)
+                            {
+                                Ok(x)=>x,
+                                Err(e)=>{
+                                    panic!("{}",e.to_string());
+                                }
+                            }
+                        )
                     },
                     Err(e) => {
                         eprintln!("{}",e.to_string());

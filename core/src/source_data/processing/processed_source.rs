@@ -16,7 +16,7 @@ use crate::{
 use super::categorization::{check_bvusource, check_categories_list, get_site_and_location_context_map};
 
 pub struct ProcessedSource {
-    pub main_data: ExamTable,
+    pub main_data: Vec<Exam>,
     pub bvu_map: BTreeMap<ExamCode,f64>,
     pub subspecialty_map: BTreeMap<ExamCode,Subspecialty>,
     pub context_map: BTreeMap<u64,BTreeMap<Location,Context>>,
@@ -24,12 +24,12 @@ pub struct ProcessedSource {
 
 impl ProcessedSource {
     pub fn build() -> Result<ProcessedSource, Box<dyn Error>> {
-        let main_data_table = ExamTable::create(file_names::MAIN_DATA_FILE);
+        let main_data:Vec<Exam> = ExamTable::create(file_names::MAIN_DATA_FILE).get_from_cache_or_build_and_cache()?;
         let bvu_data_table = BVUMap::create(file_names::BVU_DATA_FILE);
         let exam_categories_table=Exam_Categories::create(file_names::CATEGORIES_EXAM_FILE);
 
-        check_categories_list(&main_data_table, &exam_categories_table)?;
-        check_bvusource(&main_data_table,&bvu_data_table);
+        check_categories_list(&main_data, &exam_categories_table)?;
+        check_bvusource(&main_data,&bvu_data_table);
 
         let mut bvu_map:BTreeMap<ExamCode,f64>=BTreeMap::new();
         for bvu_entry in bvu_data_table.iter()
@@ -49,7 +49,7 @@ impl ProcessedSource {
         }
 
         Ok(ProcessedSource {
-            main_data: main_data_table,
+            main_data: main_data,
             bvu_map: bvu_map,
             subspecialty_map: subspecialty_map,
             context_map:get_site_and_location_context_map(&Location_Categories::create(file_names::CATEGORIES_LOCATION_FILE))?

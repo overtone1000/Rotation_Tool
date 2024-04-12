@@ -3,17 +3,16 @@ use std::{collections::{BTreeMap, HashMap, HashSet}, f32::consts::E, io::ErrorKi
 use crate::{globals::{bvu_headers, file_names::{self, UNACCOUNTED_CATEGORIES_FILE}, main_headers}, source_data::tables::{bvu_map::{BVUMap, BVUMapEntry}, exam_categories::{ExamCategoryEntry, Exam_Categories, EXAM_CODE_HEADER, SUBSPECIALTY_HEADER}, exam_data::{Exam, ExamTable}, location_categories::{LocationCategoryEntry, Location_Categories}, table::Table, types::{Context, Location}}};
 
 pub(crate) fn check_categories_list(
-    main_data_table: &ExamTable,
+    main_data: &Vec<Exam>,
     exam_categories_table: &Exam_Categories,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let main_exam_categories:Vec<Exam> = main_data_table.iter().collect();
     let existing_exam_categories = exam_categories_table.get_procedure_codes();
 
     let mut unaccounted_codes: HashMap<String,String> = HashMap::new();
 
-    for exam in main_exam_categories {
+    for exam in main_data {
         if !existing_exam_categories.contains(exam.exam_code.as_str()) {
-            unaccounted_codes.insert(exam.exam_code,exam.procedure_description);
+            unaccounted_codes.insert(exam.exam_code.to_owned(),exam.procedure_description.to_owned());
         }
     }
 
@@ -134,7 +133,7 @@ pub(crate) fn get_locations_list(
 }
 */
 
-pub fn build_salem_rvumap(main_data_table: &ExamTable) -> Result<HashMap<String, f64>, String> {
+pub fn build_salem_rvumap(main_data_table: &Vec<Exam>) -> Result<HashMap<String, f64>, String> {
     let mut retval: HashMap<String, f64> = HashMap::new();
 
     let mut rvu_sum: f64 = 0.0;
@@ -151,12 +150,12 @@ pub fn build_salem_rvumap(main_data_table: &ExamTable) -> Result<HashMap<String,
                     rvu_disc += (x - entry.rvu).abs();
                     if entry.rvu > x {
                         println!("Replacing RVUs for exam code {} with higher value found {}, previously {}",entry.exam_code,entry.rvu,x);
-                        retval.insert(entry.exam_code, entry.rvu);
+                        retval.insert(entry.exam_code.to_owned(), entry.rvu);
                     }
                 }
             }
             None => {
-                retval.insert(entry.exam_code, entry.rvu);
+                retval.insert(entry.exam_code.to_owned(), entry.rvu);
             }
         };
     }
@@ -171,7 +170,7 @@ pub fn build_salem_rvumap(main_data_table: &ExamTable) -> Result<HashMap<String,
 }
 
 //Check BVU source for missing exam codes.
-pub fn check_bvusource(main_data_table: &ExamTable, bvu_data_table: &BVUMap) -> Result<(), Box<dyn std::error::Error>>{
+pub fn check_bvusource(main_data: &Vec<Exam>, bvu_data_table: &BVUMap) -> Result<(), Box<dyn std::error::Error>>{
     let mut bvu_exam_codes:HashSet<String>=HashSet::new();
     for bvu_entry in bvu_data_table.iter()
     {
@@ -179,11 +178,11 @@ pub fn check_bvusource(main_data_table: &ExamTable, bvu_data_table: &BVUMap) -> 
     }
 
     let mut missing_codes:HashSet<String>=HashSet::new();
-    for main_data_table_entry in main_data_table.iter()
+    for main_data_table_entry in main_data
     {
         if !bvu_exam_codes.contains(&main_data_table_entry.exam_code)
         {
-            missing_codes.insert(main_data_table_entry.exam_code);
+            missing_codes.insert(main_data_table_entry.exam_code.to_owned());
         }
     }
     

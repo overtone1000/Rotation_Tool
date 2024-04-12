@@ -25,7 +25,7 @@ impl Table<BVUMapEntry> for BVUMap
         Ok(
             BVUMapEntry{
                 exam_code:Self::get_from_row_with_header(EXAM_CODE_HEADER, header_map, row),
-                bvu: Self::get_from_row_with_header(BVU_HEADER, header_map, row).parse()?,
+                bvu: Self::parse(BVU_HEADER, header_map, row)?,
             }
         )
     }

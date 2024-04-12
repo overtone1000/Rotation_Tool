@@ -169,7 +169,7 @@ impl CoverageMap {
                         *rvu,
                         *bvu,
                         denominator,
-                        exam.procedure_description
+                        exam.procedure_description.to_string()
                     )
                 };
 
