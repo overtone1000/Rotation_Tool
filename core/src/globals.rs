@@ -1,16 +1,17 @@
 pub mod file_names {
     pub(crate) const MAIN_DATA_FILE: &str = "./data/2024 to today.csv";
     pub(crate) const BVU_DATA_FILE: &str = "./data/BVU.csv";
-    pub(crate) const BVU_UPDATE_FILE: &str = "./data/BVU_modified.csv";
+    pub(crate) const BVU_UPDATE_FILE: &str = "./err/Unaccounted BVU Codes.csv";
     pub(crate) const CATEGORIES_LOCATION_FILE: &str = "./categories/Categories_Location.csv";
     pub(crate) const CATEGORIES_EXAM_FILE: &str = "./categories/Categories_Exam.csv";
-    pub(crate) const UNACCOUNTED_CATEGORIES_FILE: &str = "./err/Unaccounted_Categories.csv";
+    pub(crate) const UNACCOUNTED_EXAM_CODES_FILE: &str = "./err/Unaccounted_Exam_Codes.csv";
     pub(crate) const EXAMPLE_ROTATION_DESCRIPTIONS: &str = "./rotations/Example.yml";
     pub(crate) const SOURCE_CACHE: &str = "./cache/ProcessedSource.yml";
     pub(crate) const COVERAGE_AUDIT_OUT: &str = "./err/Coverage_Audit.tsv";
     pub(crate) const COVERAGE_AUDIT_NOWORK_OUT: &str = "./err/Coverage_Audit (no work).tsv";
     pub(crate) const COVERAGE_ANALYSIS_OUT: &str = "./output/WeekAnalysis";
     pub(crate) const VOLUME_BY_DATE_ROTATION: &str = "volume_by_date_and_rotation";
+    pub(crate) const EXAM_ALIAS_FILE: &str = "./categories/Exam_Aliases.csv";
 }
 
 pub mod main_headers {
@@ -83,13 +84,14 @@ const SC: &str = "SC";
 const WB: &str = "WB";
 const SRC: &str = "SRC";
 pub const TPC: &str = "TPC";
+pub const WVH: &str = "WVH";
 
 //locations
 const DXR: &str = "DXR";
 const BC: &str = "BC";
 
-//Sites are SH, SRC, SC, and TPC, but Facilities breaks down SH into its parts (SH, WVH, WB, ST (Hope Ortho?))
-pub const FACILITIES: &[&str] = &[SH, SC, SRC, "WVH", "ST", WB, TPC];
+//Sites are SH, SRC, SC, and TPC, but Facilities breaks down SH into its parts (SH, WVH, WB, ST (Hope Ortho?), SV (Not SRC?))
+pub const FACILITIES: &[&str] = &[SH, SC, SRC, WVH, "ST", "SV", WB, TPC];
 
 pub const SH_site_id:u64=1;
 pub const SC_site_id:u64=4;

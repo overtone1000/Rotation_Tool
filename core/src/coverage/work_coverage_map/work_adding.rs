@@ -18,6 +18,7 @@ use crate::source_data::processing::categorization::{
     build_salem_rvumap, check_categories_list,
 };
 use crate::source_data::processing::processed_source::ProcessedSource;
+use crate::source_data::tables::exam_data::Exam;
 use crate::source_data::tables::table::Table;
 use crate::{
     constraints::ConstraintSet,
@@ -27,6 +28,28 @@ use crate::{
 
 use super::generics::WorkCoverageMap;
 use super::maps::CoverageMap;
+
+fn get_SH_facility_from_metadata(exam:&Exam)->Option<String>{
+
+    let check_against_facility_list = |str:&str| -> Option<String>
+    {
+        for facility in FACILITIES {
+            let facstr=facility.to_string();
+            if str.len()>=facstr.len() && (str[0..facility.len()]).to_ascii_lowercase()
+                == facstr.to_ascii_lowercase()
+            {
+                return Some(facility.to_string());
+            }
+        }
+        None
+    };
+
+    match check_against_facility_list(&exam.accession)
+    {
+        Some(retval)=>Some(retval),
+        None=>{check_against_facility_list(&exam.location)}
+    }
+}
 
 impl CoverageMap {
     pub fn add_work_from_source(
@@ -62,7 +85,7 @@ impl CoverageMap {
             };
         }
         
-        //Process Salem Data
+        //Process Data
         for exam in source.main_data.iter()
         {
             if date_constraints.include(&exam.list_datetime) {
@@ -84,19 +107,11 @@ impl CoverageMap {
                         }
                     };
 
-                    //Try to determine site from accession (good for separating SH, WB, WVH). If not valid, go by site ID. If not valid, go by location.
+                    //Try to determine facility from accession (good for separating SH, WB, WVH) and then location. If not valid, go by site ID. If not valid, go by location.
                     let mut selected_facility: Option<String> = None;
-
-                    if exam.site_id==SH_site_id //Only check accession if it's a SH study
+                    if exam.site_id==SH_site_id //Only check accession and location if it's a SH study
                     {
-                        for facility in FACILITIES {
-                            if (exam.accession[0..facility.len()]).to_ascii_uppercase()
-                                == facility.to_string().to_ascii_uppercase()
-                            {
-                                selected_facility = Some(facility.to_string());
-                                break;
-                            }
-                        }
+                        selected_facility=get_SH_facility_from_metadata(exam);
                     }
                     if selected_facility.is_none() {
                         selected_facility=siteid_to_sitename(exam.site_id);

@@ -1,6 +1,6 @@
 use std::{collections::{BTreeMap, HashMap, HashSet}, f32::consts::E, io::ErrorKind};
 
-use crate::{globals::{bvu_headers, file_names::{self, UNACCOUNTED_CATEGORIES_FILE}, main_headers}, source_data::tables::{bvu_map::{BVUMap, BVUMapEntry}, exam_categories::{ExamCategoryEntry, Exam_Categories, EXAM_CODE_HEADER, SUBSPECIALTY_HEADER}, exam_data::{Exam, ExamTable}, location_categories::{LocationCategoryEntry, Location_Categories}, table::Table, types::{Context, Location}}};
+use crate::{globals::{bvu_headers, file_names::{self, UNACCOUNTED_EXAM_CODES_FILE}, main_headers}, source_data::tables::{bvu_map::{BVUMap, BVUMapEntry}, exam_categories::{ExamCategoryEntry, Exam_Categories, EXAM_CODE_HEADER, SUBSPECIALTY_HEADER}, exam_data::{Exam, ExamTable}, location_categories::{LocationCategoryEntry, Location_Categories}, table::Table, types::{Context, Location}}};
 
 pub(crate) fn check_categories_list(
     main_data: &Vec<Exam>,
@@ -30,12 +30,11 @@ pub(crate) fn check_categories_list(
             ])
         }
         
-        ExamTable::write(UNACCOUNTED_CATEGORIES_FILE,&headers,entries)?;
-        
-        Err(Box::new(std::io::Error::new(ErrorKind::InvalidData,"Unaccounted codes.".to_string())))
+        ExamTable::write(UNACCOUNTED_EXAM_CODES_FILE,&headers,entries)?;
+        Err(Box::new(std::io::Error::new(ErrorKind::InvalidData,"Unaccounted exam codes.".to_string())))
     }
     else {
-        let _ = std::fs::remove_file(UNACCOUNTED_CATEGORIES_FILE.to_string());
+        let _ = std::fs::remove_file(UNACCOUNTED_EXAM_CODES_FILE.to_string());
         Ok(())
     }
 }
@@ -201,6 +200,7 @@ pub fn check_bvusource(main_data: &Vec<Exam>, bvu_data_table: &BVUMap) -> Result
         Err(Box::new(std::io::Error::new(ErrorKind::InvalidData,"Missing BVU codes.")))
     }
     else {
+        let _ = std::fs::remove_file(file_names::BVU_UPDATE_FILE.to_string());
         Ok(())
     }
 }
