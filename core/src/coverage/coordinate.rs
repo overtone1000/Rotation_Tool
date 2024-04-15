@@ -1,6 +1,6 @@
 #[derive(Eq, Hash, PartialEq, Clone)]
 pub struct CoverageCoordinates {
-    pub site: String,
+    pub facility: String,
     pub subspecialty: String,
     pub context: String,
     //modality: String,
@@ -9,7 +9,7 @@ pub struct CoverageCoordinates {
 
 impl PartialOrd for CoverageCoordinates {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        match self.site.partial_cmp(&other.site) {
+        match self.facility.partial_cmp(&other.facility) {
             Some(core::cmp::Ordering::Equal) => {}
             ord => return ord,
         }
@@ -45,7 +45,7 @@ impl Ord for CoverageCoordinates {
 impl Default for CoverageCoordinates {
     fn default() -> Self {
         Self {
-            site: Default::default(),
+            facility: Default::default(),
             subspecialty: Default::default(),
             context: Default::default(),
             //modality: Default::default(),

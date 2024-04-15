@@ -141,7 +141,7 @@ impl ExamTable {
                     file_timestamp:last_modified_time,
                     data:self.iter().collect()
                 };
-                let cache_file= std::fs::File::open(crate::globals::file_names::SOURCE_CACHE)?;
+                let cache_file= std::fs::File::create(crate::globals::file_names::SOURCE_CACHE)?;
                 let writer=std::io::BufWriter::new(cache_file);
                 serde_json::to_writer(writer, &new_cache)?;
                 Ok(new_cache.data)

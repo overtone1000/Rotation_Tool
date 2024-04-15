@@ -177,26 +177,26 @@ pub fn check_bvusource(main_data: &Vec<Exam>, bvu_data_table: &BVUMap) -> Result
         bvu_exam_codes.insert(bvu_entry.exam_code);
     }
 
-    let mut missing_codes:HashSet<String>=HashSet::new();
+    let mut missing_codes:HashMap<String,String>=HashMap::new();
     for main_data_table_entry in main_data
     {
         if !bvu_exam_codes.contains(&main_data_table_entry.exam_code)
         {
-            missing_codes.insert(main_data_table_entry.exam_code.to_owned());
+            missing_codes.insert(main_data_table_entry.exam_code.to_owned(), main_data_table_entry.procedure_description.to_owned());
         }
     }
     
     if missing_codes.len()>0
     {
-        let mut missing_codes_vec:Vec<&String>=missing_codes.iter().collect();
+        let mut missing_codes_vec:Vec<&String>=missing_codes.keys().collect();
         missing_codes_vec.sort();
 
         let mut vecofvec:Vec<Vec<String>>=Vec::new();
         for missing_code in missing_codes_vec
         {
-            vecofvec.push(vec!(missing_code.to_string()));
+            vecofvec.push(vec!(missing_code.to_string(),missing_codes.get(missing_code).expect("Should have value").to_string()));
         }
-        BVUMap::write(file_names::BVU_UPDATE_FILE,&[EXAM_CODE_HEADER.to_string()],vecofvec);
+        BVUMap::write(file_names::BVU_UPDATE_FILE,&[EXAM_CODE_HEADER.to_string()],vecofvec).unwrap();
 
         Err(Box::new(std::io::Error::new(ErrorKind::InvalidData,"Missing BVU codes.")))
     }

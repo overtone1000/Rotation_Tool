@@ -77,7 +77,7 @@ pub mod bvu_headers {
     }
 }
 
-//sites
+//facilities
 const SH: &str = "SH";
 const SC: &str = "SC";
 const WB: &str = "WB";
@@ -88,14 +88,20 @@ pub const TPC: &str = "TPC";
 const DXR: &str = "DXR";
 const BC: &str = "BC";
 
-pub const SITES: &[&str] = &[SH, SC, SRC, "WVH", WB, TPC];
+//Sites are SH, SRC, SC, and TPC, but Facilities breaks down SH into its parts (SH, WVH, WB, ST (Hope Ortho?))
+pub const FACILITIES: &[&str] = &[SH, SC, SRC, "WVH", "ST", WB, TPC];
 
-pub fn siteid_to_sitename(site_id:&u64)->Option<String>{
+pub const SH_site_id:u64=1;
+pub const SC_site_id:u64=4;
+pub const SRC_site_id:u64=7;
+pub const TPC_site_id:u64=8;
+
+pub fn siteid_to_sitename(site_id:u64)->Option<String>{
     match site_id {
-        //1=>Some(SH.to_string()), //But could be WB or WVH! So, just ignore.
-        4=>Some(SC.to_string()),
-        7=>Some(SRC.to_string()),
-        8=>Some(TPC.to_string()),
+        //SH_site_id=>Some(SH.to_string()), //But could be WB or WVH! So, just ignore.
+        SC_site_id=>Some(SC.to_string()),
+        SRC_site_id=>Some(SRC.to_string()),
+        TPC_site_id=>Some(TPC.to_string()),
         _=>None
     }
 }

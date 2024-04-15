@@ -71,7 +71,7 @@ impl SpecifiedCoordinate<String> for SubspecialtyMap {
 pub type CoverageMap = CoordinateMap<String, SubspecialtyMap>;
 impl SpecifiedCoordinate<String> for CoverageMap {
     fn get_coordinate(coords: &CoverageCoordinates) -> String {
-        coords.site.to_string()
+        coords.facility.to_string()
     }
 }
 
@@ -83,7 +83,7 @@ impl CoverageMap {
                     //for (modality, weekdaymap) in modalitymap.map.iter_mut() {
                     for (weekday, coverage_and_workday) in weekdaymap.get_map_mut().iter_mut() {
                         let coords = CoverageCoordinates {
-                            site: site.to_string(),
+                            facility: site.to_string(),
                             subspecialty: subspecialty.to_string(),
                             context: context.to_string(),
                             //modality: modality.to_string(),

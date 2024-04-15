@@ -9,7 +9,7 @@ use crate::coverage::coordinate::CoverageCoordinates;
 
 use crate::coverage::distribution::get_normal_dist_weights;
 
-use crate::globals::siteid_to_sitename;
+use crate::globals::{siteid_to_sitename, SH_site_id};
 use crate::rotations::description::WrappedSortable;
 
 use crate::error::source_error::SourceError;
@@ -22,7 +22,7 @@ use crate::source_data::tables::table::Table;
 use crate::{
     constraints::ConstraintSet,
     dates::BUSINESS_DAYS_PER_YEAR,
-    globals::{main_headers, tpc_headers, BUSINESS_DAYS, SITES},
+    globals::{main_headers, tpc_headers, BUSINESS_DAYS, FACILITIES},
 };
 
 use super::generics::WorkCoverageMap;
@@ -85,27 +85,30 @@ impl CoverageMap {
                     };
 
                     //Try to determine site from accession (good for separating SH, WB, WVH). If not valid, go by site ID. If not valid, go by location.
-                    let mut selected_site: Option<String> = None;
-;
-                    for site in SITES {
-                        if (exam.accession[0..site.len()]).to_ascii_uppercase()
-                            == site.to_string().to_ascii_uppercase()
-                        {
-                            selected_site = Some(site.to_string());
-                            break;
+                    let mut selected_facility: Option<String> = None;
+
+                    if exam.site_id==SH_site_id //Only check accession if it's a SH study
+                    {
+                        for facility in FACILITIES {
+                            if (exam.accession[0..facility.len()]).to_ascii_uppercase()
+                                == facility.to_string().to_ascii_uppercase()
+                            {
+                                selected_facility = Some(facility.to_string());
+                                break;
+                            }
                         }
                     }
-                    if selected_site.is_none() {
-                        selected_site=siteid_to_sitename(&exam.site_id);
+                    if selected_facility.is_none() {
+                        selected_facility=siteid_to_sitename(exam.site_id);
                     }
-                    if selected_site.is_none() {
-                        selected_site = crate::globals::get_location_site_mapping(&exam.location);
+                    if selected_facility.is_none() {
+                        selected_facility = crate::globals::get_location_site_mapping(&exam.location);
                     }
-                    let site = match selected_site {
+                    let facility = match selected_facility {
                         Some(x) => x,
                         None => {
                             return SourceError::generate_boxed(format!(
-                                "Could not determine site for exam {:?}",exam,
+                                "Could not determine facility for exam {:?}",exam,
                             ));
                         }
                     };
@@ -135,7 +138,7 @@ impl CoverageMap {
                     };
 
                     CoverageCoordinates {
-                        site,
+                        facility,
                         subspecialty,
                         context,
                         //modality: modality.to_string(),
@@ -148,7 +151,7 @@ impl CoverageMap {
                         Some(x) => x,
                         None => {
                             return SourceError::generate_boxed(format!(
-                                "Invalid exam.procedure_code {} in exam_to_subspeciality_map",
+                                "Invalid exam.procedure_code {} in rvu map",
                                 exam.exam_code
                             ));
                         }
@@ -158,7 +161,7 @@ impl CoverageMap {
                         Some(x) => x,
                         None => {
                             return SourceError::generate_boxed(format!(
-                                "Invalid exam.procedure_code {} in exam_to_subspeciality_map",
+                                "Invalid exam.procedure_code {} in bvu map",
                                 exam.exam_code
                             ));
                         }

@@ -42,7 +42,7 @@ pub fn audit_to_stream<T: Write>(
     for coords in sorted_keys {
         let coordstr = format!(
             "{} \u{0009} {} \u{0009} {} \u{0009} {} \u{0009}",
-            coords.site,
+            coords.facility,
             coords.subspecialty,
             coords.context,
             //coords.modality,

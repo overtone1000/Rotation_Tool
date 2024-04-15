@@ -59,7 +59,7 @@ impl RotationResponsibility {
     pub fn validate(&self) -> Result<(), Vec<String>> {
         let mut errors: Vec<String> = Vec::new();
 
-        check(&self.sites, globals::SITES, "site", &mut errors);
+        check(&self.sites, globals::FACILITIES, "site", &mut errors);
         check(
             &self.exams,
             globals::SUBSPECIALTIES,
