@@ -1,6 +1,6 @@
-use std::{collections::{BTreeMap, HashMap, HashSet}, f32::consts::E, io::ErrorKind};
+use std::{collections::{BTreeMap, BTreeSet, HashMap, HashSet}, f32::consts::E, io::ErrorKind};
 
-use crate::{globals::{bvu_headers, file_names::{self, UNACCOUNTED_EXAM_CODES_FILE}, main_headers}, source_data::tables::{bvu_map::{BVUMap, BVUMapEntry}, exam_categories::{ExamCategoryEntry, Exam_Categories, EXAM_CODE_HEADER, SUBSPECIALTY_HEADER}, exam_data::{Exam, ExamTable}, location_categories::{LocationCategoryEntry, Location_Categories}, table::Table, types::{Context, Location}}};
+use crate::{globals::{bvu_headers, file_names::{self, UNACCOUNTED_EXAM_CODES_FILE}, main_headers}, source_data::tables::{bvu_map::{BVUMap, BVUMapEntry}, exam_categories::{ExamCategoryEntry, Exam_Categories, EXAM_CODE_HEADER, SUBSPECIALTY_HEADER}, exam_data::{Exam, ExamTable}, location_categories::{LocationCategoryEntry, Location_Categories}, readers::{ExamReader, ReaderTable}, table::Table, types::{Context, Location}}};
 
 pub(crate) fn check_categories_list(
     main_data: &Vec<Exam>,
@@ -202,6 +202,60 @@ pub fn check_bvusource(main_data: &Vec<Exam>, bvu_data_table: &BVUMap) -> Result
         BVUMap::write(file_names::BVU_UPDATE_FILE,&[EXAM_CODE_HEADER.to_string()],vecofvec).unwrap();
 
         Err(Box::new(std::io::Error::new(ErrorKind::InvalidData,"Missing BVU codes.")))
+    }
+    else {
+        let _ = std::fs::remove_file(file_names::BVU_UPDATE_FILE.to_string());
+        Ok(())
+    }
+}
+
+//Check Readers
+pub fn check_readers(main_data: &Vec<Exam>,readers:&BTreeMap<u64,ExamReader>) -> Result<(), Box<dyn std::error::Error>>{
+    
+    println!();
+    println!("Excluded Readers:");
+    for (_id,reader) in readers
+    {
+        if reader.excluded
+        {
+            println!("{},{}", reader.rad_last_name, reader.rad_first_name)
+        }
+    }
+
+    println!();
+    println!("Included Readers:");
+    for (_id,reader) in readers
+    {
+        if !reader.excluded
+        {
+            println!("{},{}", reader.rad_last_name, reader.rad_first_name)
+        }
+    }
+
+    
+    let reader_ids:BTreeSet<&u64>=readers.keys().collect();
+    let mut unrecognized_readers:BTreeSet<ExamReader>=BTreeSet::new();
+
+    for exam in main_data
+    {
+        if !reader_ids.contains(&exam.signer_acct_id)
+        {
+            unrecognized_readers.insert(
+                ExamReader { signer_acct_id: exam.signer_acct_id, rad_last_name:exam.rad_last_name.to_string(), rad_first_name:exam.rad_first_name.to_string(), excluded: false}
+            );
+        }
+    }
+    
+    if unrecognized_readers.len()>0
+    {
+        let mut vecofvec:Vec<Vec<String>>=Vec::new();
+        for reader in unrecognized_readers
+        {
+            vecofvec.push(vec!(reader.signer_acct_id.to_string(),reader.rad_last_name,reader.rad_first_name,reader.excluded.to_string()));
+        }
+        ReaderTable::write(file_names::UNRECOGNIZED_READERS_FILE,&ReaderTable::headers(),vecofvec).unwrap();
+
+        Err(Box::new(std::io::Error::new(ErrorKind::InvalidData,"Unrecognized Readers.")))
     }
     else {
         let _ = std::fs::remove_file(file_names::BVU_UPDATE_FILE.to_string());

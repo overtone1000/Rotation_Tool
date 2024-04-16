@@ -12,6 +12,8 @@ pub mod file_names {
     pub(crate) const COVERAGE_ANALYSIS_OUT: &str = "./output/WeekAnalysis";
     pub(crate) const VOLUME_BY_DATE_ROTATION: &str = "volume_by_date_and_rotation";
     pub(crate) const EXAM_ALIAS_FILE: &str = "./categories/Exam_Aliases.csv";
+    pub(crate) const READERS_FILE: &str = "./categories/Readers.csv";
+    pub(crate) const UNRECOGNIZED_READERS_FILE: &str = "./err/UnrecognizedReaders.csv";
 }
 
 pub mod main_headers {
