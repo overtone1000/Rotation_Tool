@@ -58,9 +58,13 @@ pub(crate) fn get_site_and_location_context_map(exam_locations_table: &Location_
                 err=true;
                 eprintln!("Duplicate entries in map: {}/{}",entry.site_id,entry.location)
             },
-            None => {sitemap.insert(entry.location,entry.context);}
+            None => {
+                sitemap.insert(entry.location,entry.context);
+            }
         };
     }
+
+    //println!("Context map:{:?}",result);
 
     if err {return Err("Error building exam context map.".to_string());}
     Ok(result)

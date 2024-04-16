@@ -17,6 +17,7 @@ pub struct Exam {
     pub rvu:f64, //WorkRVU
     pub site_id:u64, //SiteID
     pub location:Location,
+    pub class:u64, //PatientClassID
 }
 
 const ACCESSION_HEADER:&str="Accession";
@@ -29,6 +30,7 @@ const LIST_TIME_HEADER:&str="Exam Started";
 const RVU_HEADER:&str="WorkRVU";
 const SITE_ID_HEADER:&str="SiteID";
 const LOCATION_HEADER:&str="LocationDescription";
+const PATIENT_CLASS_HEADER:&str="PatientClassID";
 
 pub struct ExamTable {
     filename:String
@@ -52,6 +54,7 @@ impl Table<Exam> for ExamTable
                 rvu: Self::parse(RVU_HEADER,header_map,row)?,
                 site_id: Self::parse(SITE_ID_HEADER,header_map,row)?,
                 location: Self::get_from_row_with_header(LOCATION_HEADER, header_map, row),
+                class: Self::parse(PATIENT_CLASS_HEADER, header_map, row)?
             }
         )
     }

@@ -229,7 +229,7 @@ rotation_manifest:
     - 09:00 CD-16:00 CD
   - sites: SH/WVH/WB
     exams: Intraop Fluoro
-    contexts: All
+    contexts: ED/Inpatient/Outpatient/Wet Read
     #modalities: XR/RF
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
@@ -387,7 +387,7 @@ rotation_manifest:
   # Monday
   #- sites: SRC/TPC
    # exams: Mamm (Screening)
-   # contexts: All
+   # contexts: ED/Inpatient/Outpatient/Wet Read
    # #modalities: All
    # days: Mon
    # weekly_fraction: 0.2
@@ -533,7 +533,7 @@ rotation_manifest:
     # Mon SRC XR
   #- sites: SRC
   #  exams: General
-  #  contexts: All
+  #  contexts: ED/Inpatient/Outpatient/Wet Read
   #  #modalities: XR/RF
   #  days: Mon
   #  time_periods:
@@ -640,7 +640,7 @@ rotation_manifest:
     - 06:00 CD-09:00 CD
   - sites: SH/WVH/WB
     exams: Intraop Fluoro
-    contexts: All
+    contexts: ED/Inpatient/Outpatient/Wet Read
     #modalities: XR/RF
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
@@ -704,7 +704,7 @@ rotation_manifest:
     - 14:00 CD-16:00 CD
   - sites: SH/WVH/WB
     exams: Intraop Fluoro
-    contexts: All
+    contexts: ED/Inpatient/Outpatient/Wet Read
     #modalities: XR/RF
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
@@ -798,7 +798,7 @@ rotation_manifest:
     - 22:00 CD-06:00 ND
   - sites: SH/WVH/WB
     exams: Intraop Fluoro
-    contexts: All
+    contexts: ED/Inpatient/Outpatient/Wet Read
     #modalities: XR/RF
     days: Sun/Mon/Tue/Wed/Thu
     time_periods:
@@ -819,7 +819,7 @@ rotation_manifest:
     - 22:00 CD-07:00 ND
   - sites: SH/WVH/WB
     exams: Intraop Fluoro
-    contexts: All
+    contexts: ED/Inpatient/Outpatient/Wet Read
     #modalities: XR/RF
     days: Fri/Sat
     time_periods:
@@ -955,7 +955,7 @@ rotation_manifest:
     - 11:00 CD-19:00 CD
   - sites: SH/WVH/WB
     exams: Intraop Fluoro
-    contexts: All
+    contexts: ED/Inpatient/Outpatient/Wet Read
     #modalities: XR/RF
     days: Sat/Sun
     time_periods:
@@ -1005,7 +1005,7 @@ rotation_manifest:
     - 07:00 CD-11:00 CD
   - sites: SH/WVH/WB
     exams: Intraop Fluoro
-    contexts: All
+    contexts: ED/Inpatient/Outpatient/Wet Read
     #modalities: CT/US/XR/NM/MR/RF
     days: Sat/Sun
     time_periods:
@@ -1085,7 +1085,7 @@ rotation_manifest:
     - 20:00 CD-22:00 CD
   - sites: SH/WVH/WB
     exams: Intraop Fluoro
-    contexts: All
+    contexts: ED/Inpatient/Outpatient/Wet Read
     #modalities: XR/RF
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
@@ -1114,7 +1114,7 @@ rotation_manifest:
     - 19:00 CD-22:00 CD
   - sites: SH/WVH/WB
     exams: Intraop Fluoro
-    contexts: All
+    contexts: ED/Inpatient/Outpatient/Wet Read
     #modalities: XR/RF
     days: Sat/Sun
     time_periods:
@@ -1280,18 +1280,6 @@ rotation_manifest:
   comments:
   - These subspecialty exams are read through AH0C.
   - This list is not complete as many subspecialty exam types cannot be differentiated based on the available fields.
-- rotation: Non-Radiologist Interpreted
-  location: n/a
-  responsibilities:
-  - sites: All
-    exams: Non-Radiology
-    contexts: ED/Inpatient/Outpatient
-    #modalities: All
-    days: Mon/Tue/Wed/Thu/Fri/Sat/Sun
-    time_periods:
-    - 00:00 CD-24:00 CD
-  comments:
-  - These are studies that are not interpreted by a radiologist.
 - rotation: Schedule Blocks
   location: n/a
   responsibilities:

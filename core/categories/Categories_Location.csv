@@ -52,6 +52,8 @@ Site,Location,Context,Comments
 1,WVMSU,Inpatient,WV Med-Surg
 1,WVSRG,Inpatient,WV Surgery
 1,WVUS,Outpatient,
+1,WVCAR,Non-Radiology,WV Cardiology
+1,NULL,Non-Radiology,
 4,SCISXRAY,Outpatient,
 4,SCMCT,Outpatient,
 4,SCMMAMMO,Outpatient,

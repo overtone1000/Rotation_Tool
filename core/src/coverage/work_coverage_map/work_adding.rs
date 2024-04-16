@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::collections::{hash_map::Entry, HashMap};
 
 use chrono::{Datelike, Duration, NaiveDate, NaiveDateTime};
@@ -9,7 +9,7 @@ use crate::coverage::coordinate::CoverageCoordinates;
 
 use crate::coverage::distribution::get_normal_dist_weights;
 
-use crate::globals::{siteid_to_sitename, SH_site_id};
+use crate::globals::{map_SH_location_to_facility, siteid_to_sitename, SH_site_id, NON_RADIOLOGY, SH, WVH};
 use crate::rotations::description::WrappedSortable;
 
 use crate::error::source_error::SourceError;
@@ -31,24 +31,29 @@ use super::maps::CoverageMap;
 
 fn get_SH_facility_from_metadata(exam:&Exam)->Option<String>{
 
-    let check_against_facility_list = |str:&str| -> Option<String>
+    if exam.site_id!=SH_site_id {return None};
+
+    let test=|facstr:&str|->Option<String>
     {
-        for facility in FACILITIES {
-            let facstr=facility.to_string();
-            if str.len()>=facstr.len() && (str[0..facility.len()]).to_ascii_lowercase()
-                == facstr.to_ascii_lowercase()
-            {
-                return Some(facility.to_string());
-            }
+        if exam.accession.len()>=facstr.len() && (exam.accession[0..facstr.len()]).to_ascii_lowercase()
+            == facstr.to_ascii_lowercase()
+        {
+            return Some(facstr.to_string());
         }
         None
     };
 
-    match check_against_facility_list(&exam.accession)
-    {
-        Some(retval)=>Some(retval),
-        None=>{check_against_facility_list(&exam.location)}
+    //Check accession beginning against facility strings first
+    for facility in FACILITIES {
+        let testresult=test(facility);
+        if(testresult.is_some()){return testresult;}
     }
+
+    //Test ST and SV
+    if test("ST").is_some() || test("SV").is_some(){return Some(SH.to_string());}
+
+    //Then check against location
+    map_SH_location_to_facility(&exam.location)
 }
 
 impl CoverageMap {
@@ -84,6 +89,7 @@ impl CoverageMap {
                 }
             };
         }
+
         
         //Process Data
         for exam in source.main_data.iter()
@@ -109,10 +115,7 @@ impl CoverageMap {
 
                     //Try to determine facility from accession (good for separating SH, WB, WVH) and then location. If not valid, go by site ID. If not valid, go by location.
                     let mut selected_facility: Option<String> = None;
-                    if exam.site_id==SH_site_id //Only check accession and location if it's a SH study
-                    {
-                        selected_facility=get_SH_facility_from_metadata(exam);
-                    }
+                    selected_facility=get_SH_facility_from_metadata(exam);
                     if selected_facility.is_none() {
                         selected_facility=siteid_to_sitename(exam.site_id);
                     }
@@ -135,8 +138,8 @@ impl CoverageMap {
                                 Some(x) => x.to_string(),
                                 None => {
                                     return SourceError::generate_boxed(format!(
-                                        "Could not determine context for location {}",
-                                        exam.location
+                                        "Could not determine context {:?}",
+                                        exam
                                     ));
                                 }
                             }
@@ -145,8 +148,8 @@ impl CoverageMap {
                             Some(x) => x,
                             None => {
                                 return SourceError::generate_boxed(format!(
-                                    "Could not determine context for location {}",
-                                    exam.location
+                                    "Could not determine context {:?}",
+                                    exam
                                 ));
                             }
                         },
@@ -161,37 +164,43 @@ impl CoverageMap {
                     }
                 };
 
-                let work: WorkUnit = {
-                    let rvu = match exam_rvu_map.get(&exam.exam_code) {
-                        Some(x) => x,
-                        None => {
-                            return SourceError::generate_boxed(format!(
-                                "Invalid exam.procedure_code {} in rvu map",
-                                exam.exam_code
-                            ));
-                        }
+                //Filter out non-radiology exams to make rotation front end simpler
+                if
+                    coords.subspecialty != NON_RADIOLOGY &&
+                    coords.context != NON_RADIOLOGY
+                {
+                    let work: WorkUnit = {
+                        let rvu = match exam_rvu_map.get(&exam.exam_code) {
+                            Some(x) => x,
+                            None => {
+                                return SourceError::generate_boxed(format!(
+                                    "Invalid exam.procedure_code {} in rvu map",
+                                    exam.exam_code
+                                ));
+                            }
+                        };
+
+                        let bvu = match source.bvu_map.get(&exam.exam_code) {
+                            Some(x) => x,
+                            None => {
+                                return SourceError::generate_boxed(format!(
+                                    "Invalid exam.procedure_code {} in bvu map",
+                                    exam.exam_code
+                                ));
+                            }
+                        };
+
+                        WorkUnit::create(
+                            exam.list_datetime,
+                            *rvu,
+                            *bvu,
+                            denominator,
+                            exam.procedure_description.to_string()
+                        )
                     };
 
-                    let bvu = match source.bvu_map.get(&exam.exam_code) {
-                        Some(x) => x,
-                        None => {
-                            return SourceError::generate_boxed(format!(
-                                "Invalid exam.procedure_code {} in bvu map",
-                                exam.exam_code
-                            ));
-                        }
-                    };
-
-                    WorkUnit::create(
-                        exam.list_datetime,
-                        *rvu,
-                        *bvu,
-                        denominator,
-                        exam.procedure_description.to_string()
-                    )
-                };
-
-                self.add_work(&coords, work);
+                    self.add_work(&coords, work);
+                }
             }
         }
         

@@ -79,7 +79,7 @@ pub mod bvu_headers {
 }
 
 //facilities
-const SH: &str = "SH";
+pub const SH: &str = "SH";
 const SC: &str = "SC";
 const WB: &str = "WB";
 const SRC: &str = "SRC";
@@ -90,8 +90,8 @@ pub const WVH: &str = "WVH";
 const DXR: &str = "DXR";
 const BC: &str = "BC";
 
-//Sites are SH, SRC, SC, and TPC, but Facilities breaks down SH into its parts (SH, WVH, WB, ST (Hope Ortho?), SV (Not SRC?))
-pub const FACILITIES: &[&str] = &[SH, SC, SRC, WVH, "ST", "SV", WB, TPC];
+//Sites are SH, SRC, SC, and TPC, but Facilities breaks down SH into its parts (SH, WVH, WB)...leaving out ST (Hope Ortho?), SV (?)
+pub const FACILITIES: &[&str] = &[SH, SC, SRC, WVH, WB, TPC];
 
 pub const SH_site_id:u64=1;
 pub const SC_site_id:u64=4;
@@ -111,6 +111,8 @@ pub fn siteid_to_sitename(site_id:u64)->Option<String>{
 pub(crate) const MSK: &str = "MSK";
 pub(crate) const MSK_WE_AH0C: &str = "MSK Weekend AH0C";
 pub(crate) const NEURO: &str = "Neuro";
+
+pub const NON_RADIOLOGY:&str = "Non-Radiology";
 
 pub const SUBSPECIALTIES: &[&str] = &[
     "General XR",
@@ -139,14 +141,14 @@ pub const SUBSPECIALTIES: &[&str] = &[
     "Cardiac",
     "CT Colonography",
     "Breast MR",
-    "Non-Radiology",
+    NON_RADIOLOGY
 ];
 
 const INPATIENT: &str = "Inpatient";
 pub const OUTPATIENT: &str = "Outpatient";
 const ED: &str = "ED";
 
-pub const CONTEXTS: &[&str] = &[INPATIENT, OUTPATIENT, ED, "Wet Read"];
+pub const CONTEXTS: &[&str] = &[INPATIENT, OUTPATIENT, ED, "Wet Read",NON_RADIOLOGY];
 
 //modalities
 const XR: &str = "XR";
@@ -159,6 +161,13 @@ pub const MODALITIES: &[&str] = &[
     XR, "CT", US, "MR", "NM", PET, "DEXA", "RF", MG, "XA", "CVUS", ANG, "CLINIC",
 ];
 
+/*Patient class
+Non-Radiology: 1,2
+Outpatient: 2,5,8,
+ED: 1,2,4,6,8
+Inpatient: 0,1,6
+*/
+
 pub fn map_site_to_context(site: &str) -> Option<String> {
     match site {
         SH => Some(OUTPATIENT.to_string()),
@@ -168,14 +177,27 @@ pub fn map_site_to_context(site: &str) -> Option<String> {
     }
 }
 
+pub fn map_SH_location_to_facility(location:&str)->Option<String> {
+    match location
+    {
+        "OPRAD"=>Some(SH.to_string()),
+        location=>{
+            match &location[0..2]
+            {
+                "WV"=>Some(WVH.to_string()),
+                _=>None
+            }
+        }
+    }
+}
+
 pub fn get_modality_alias(modality: &String) -> Option<String> {
-    let retval = match modality.as_str() {
+    match modality.as_str() {
         "MAM" => Some(MG.to_string()),
         "CR" => Some(XR.to_string()),
         "PT" => Some(PET.to_string()),
         _ => None,
-    };
-    retval
+    }
 }
 
 pub fn get_modality_from_procedure_desc(desc: String) -> Option<String> {
