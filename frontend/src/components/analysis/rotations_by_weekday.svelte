@@ -14,8 +14,9 @@
 				if(value.ok)
 				{
 					value.json().then(
-						(res:string)=>{
-							data=JSON.parse(res) as AnalysisData;
+						(res:AnalysisData)=>{
+							data=res;
+							console.debug(data);
 						},
 						(err)=>{
 							console.error("Rejected promise.",err);
@@ -29,7 +30,7 @@
 		);
 	};
 
-    let valuetype:"bvu"|"rvu"="bvu";
+    let valuetype:"bvu"|"rvu"="rvu";
 	const rotation_filter = (d:AnalysisMark) => {
 		return d.rotation==="BR/US";
 	}
@@ -38,13 +39,36 @@
 		return d==="Mon";
 	}
 
-	const build_plot=(data:AnalysisData, width:number, y:string, title:string)=>{
+	const get_all_marks=(data:AnalysisData)=>{
+		let all_marks:AnalysisMark[]=[];
+		for(let date_string in data.date_map)
+		{
+			let date_data=data.date_map[date_string];
+			let date=new Date(date_string);
+			for(let rotation in date_data)
+			{
+				let rotation_data=date_data[rotation];
+				all_marks.push(
+					{
+						date:date,
+						rotation:rotation,
+						value:rotation_data[valuetype]
+					}
+				);
+			}
+		}
+		
+		return all_marks;		
+	}
 
+	const build_weekday_plot=(data:AnalysisData, width:number, y:string, title:string)=>{	
 		//console.debug("Building plot with",data,data.series);
+		let displayed_marks=get_all_marks(data).filter(rotation_filter);
+
 		let marks:any=[
 			Plot.frame(),
 			Plot.barY(
-				data.marks.filter(rotation_filter),
+				displayed_marks.filter(rotation_filter),
 				{	
 					x:"rotation",
 					y:y,
@@ -83,25 +107,84 @@
 		return retval;
 	}
 
+	const build_heatmap=(data:AnalysisData, width:number, y:string, title:string)=>{	
+		let displayed_marks=get_all_marks(data);
+
+		let max=0;
+		let min=0;
+		for(let mark of displayed_marks)
+		{
+			if(mark.value>max){max=mark.value;}
+			if(mark.value<min){min=mark.value;}
+		}
+
+		console.debug("Displayed marks:",displayed_marks);
+
+		let marks:any=[
+			Plot.rect(
+				displayed_marks,
+				Plot.binY(
+					{
+						fill:"proportion-facet",//count?,
+					},
+					//{
+					//	fill:"proportion-facet",//count?,
+					//},
+					{
+						y: "value",
+						fx: "rotation",
+						inset: 0
+						//thresholds:(max-min)/20
+					}
+					//{
+					//	y: "value",
+					//	//thresholds:(max-min)/20
+					//}
+				)
+			)
+		];
+
+		console.debug(marks);
+
+		const retval = Plot.plot({
+			title: title,
+			color: {legend:true},
+			width: width,
+			//aspectRatio: 1,
+			height: 600,
+			y:{grid:false},
+			padding: 0,
+			//fx:{
+			//	domain: displayed_marks.filter((d)=>d.rotation)
+			//},
+			marks: marks
+		})
+		return retval;
+	}
 	let plot_weekday_bvu:BuiltPlot|undefined=undefined;
 	let plot_weekday_rvu:BuiltPlot|undefined=undefined;
+	let plot_heatmap_rvu:BuiltPlot|undefined=undefined;
 
-	get_plot_data("data/rotation_by_weekday"+key+".json");
+	let selected_plot:BuiltPlot|undefined=undefined;
+
+	get_plot_data("data/volume_by_date_and_rotation"+key+".json");
 
     let container_width:any="5000px";
 
 	$:{
 		if(data!==undefined)
 		{
-			plot_weekday_bvu=build_plot(data,container_width,valuetype,"Rotation Volume by Weekday");
+
+			//selected_plot=build_weekday_plot(data,container_width,valuetype,"Rotation Volume by Weekday");
+			selected_plot=build_heatmap(data,container_width,valuetype,"Rotation Volumes");
 		}
 	}
 </script>
 
 <div class="container">
     <div bind:clientWidth={container_width}>
-        {#if plot_weekday_bvu!==undefined}
-            <ObservablePlot plot={plot_weekday_bvu}/>
+        {#if selected_plot!==undefined}
+            <ObservablePlot plot={selected_plot}/>
         {/if}
     </div>
     <div class="controls">

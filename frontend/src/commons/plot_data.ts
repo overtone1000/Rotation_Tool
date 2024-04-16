@@ -1,12 +1,20 @@
 export interface AnalysisData {
-    marks:AnalysisMark[]
+    date_map:{[date_string:string]:DateData}
 };
 
-export interface AnalysisMark {
-    weekday:string,
+export interface DateData {
+    [rotation:string]:ValueData
+}
+
+export interface ValueData {
     rvu:number,
-    bvu:number,
-    rotation:string
+    bvu:number
+}
+
+export interface AnalysisMark {
+    date:Date,
+    rotation:string,
+    value:number
 }
 
 export function generateColors (number_to_generate:number) {
