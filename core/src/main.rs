@@ -9,12 +9,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut common = rotation_tool::build_main_common()?;
 
-    let rebuild_source: bool = true;
-
-    if rebuild_source {
-        rotation_tool::cache_source()?;
-    }
-
     let rotation_analysis: bool = true;
     if rotation_analysis {
         rotation_tool::analyze_rotations(&mut common)?;

@@ -1,219 +1,85 @@
-use std::collections::{HashMap, HashSet};
+use std::{collections::{BTreeMap, BTreeSet, HashMap, HashSet}, f32::consts::E, io::ErrorKind};
 
-use crate::globals::{bvu_headers, file_names, main_headers};
+use crate::{globals::{bvu_headers, file_names::{self, UNACCOUNTED_EXAM_CODES_FILE}, main_headers}, source_data::tables::{bvu_map::{BVUMap, BVUMapEntry}, exam_categories::{ExamCategoryEntry, Exam_Categories, EXAM_CODE_HEADER, SUBSPECIALTY_HEADER}, exam_data::{Exam, ExamTable}, location_categories::{LocationCategoryEntry, Location_Categories}, readers::{ExamReader, ReaderTable}, table::Table, types::{Context, Location}}};
 
-use super::{processed_source::ProcessedSource, table::Table};
+pub(crate) fn check_categories_list(
+    main_data: &Vec<Exam>,
+    exam_categories_table: &Exam_Categories,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let existing_exam_categories = exam_categories_table.get_procedure_codes();
 
-pub mod exam_categories {
-    use std::cmp::Ordering;
+    let mut unaccounted_codes: HashMap<String,String> = HashMap::new();
 
-    use serde::{Deserialize, Serialize};
-
-    use crate::serialization::output::JSONFileOut;
-
-    pub(crate) enum PertinentHeaders {
-        ProcedureCode,
-        Exam,
-        Subspecialty,
-        Comments,
-    }
-
-    impl PertinentHeaders {
-        pub(crate) fn get_label(&self) -> String {
-            match self {
-                PertinentHeaders::ProcedureCode => "Exam Code".to_string(),
-                PertinentHeaders::Exam => "Exam Description".to_string(),
-                PertinentHeaders::Subspecialty => "Subspecialty".to_string(),
-                PertinentHeaders::Comments => "Comments".to_string(),
-            }
+    for exam in main_data {
+        if !existing_exam_categories.contains(exam.exam_code.as_str()) {
+            unaccounted_codes.insert(exam.exam_code.to_owned(),exam.procedure_description.to_owned());
         }
     }
 
-    #[derive(Serialize, Deserialize)]
-    pub struct ExamCategory {
-        pub procedure_code: String,
-        pub exam: String,
-        pub subspecialty: String,
-        pub comments: String,
-    }
-
-    impl JSONFileOut for Vec<ExamCategory> {}
-
-    impl Eq for ExamCategory {}
-
-    impl PartialOrd for ExamCategory {
-        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-            Some(self.cmp(other))
+    if unaccounted_codes.len()>0
+    {
+        let headers=[
+            crate::source_data::tables::exam_categories::EXAM_CODE_HEADER.to_owned(),
+            crate::source_data::tables::exam_categories::SUBSPECIALTY_HEADER.to_owned()];
+        let mut entries:Vec<Vec<String>>=Vec::new();
+        for (code,desc) in unaccounted_codes
+        {
+            entries.push(vec![
+                code,
+                desc
+            ])
         }
+        
+        ExamTable::write(UNACCOUNTED_EXAM_CODES_FILE,&headers,entries)?;
+        Err(Box::new(std::io::Error::new(ErrorKind::InvalidData,"Unaccounted exam codes.".to_string())))
     }
-
-    impl PartialEq for ExamCategory {
-        fn eq(&self, other: &Self) -> bool {
-            self.procedure_code == other.procedure_code && self.exam == other.exam
-            //self.subspecialty == other.subspecialty &&
-            //self.comments == other.comments
-        }
-    }
-
-    impl Ord for ExamCategory {
-        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-            match self.exam.cmp(&other.exam) {
-                std::cmp::Ordering::Equal => self.procedure_code.cmp(&other.procedure_code),
-                examcmp => examcmp,
-            }
-        }
-    }
-
-    impl ExamCategory {
-        pub fn copy(&self) -> ExamCategory {
-            ExamCategory {
-                procedure_code: self.procedure_code.to_string(),
-                exam: self.exam.to_string(),
-                subspecialty: self.subspecialty.to_string(),
-                comments: self.comments.to_string(),
-            }
-        }
+    else {
+        let _ = std::fs::remove_file(UNACCOUNTED_EXAM_CODES_FILE.to_string());
+        Ok(())
     }
 }
 
-pub(crate) mod location_categories {
-    use std::cmp::Ordering;
+pub(crate) fn get_site_and_location_context_map(exam_locations_table: &Location_Categories) -> Result<BTreeMap<u64,BTreeMap<Location,Context>>,String>{
+    let mut err=false;
 
-    pub(crate) enum PertinentHeaders {
-        Location,
-        Context,
-        Comments,
-    }
+    let mut result:BTreeMap<u64,BTreeMap<String,String>>=BTreeMap::new();
 
-    impl PertinentHeaders {
-        pub(crate) fn get_label(&self) -> String {
-            match self {
-                PertinentHeaders::Location => "Location".to_string(),
-                PertinentHeaders::Context => "Context".to_string(),
-                PertinentHeaders::Comments => "Comments".to_string(),
-            }
-        }
-    }
-
-    pub(crate) struct LocationCategory {
-        pub location: String,
-        pub context: String,
-        pub comments: String,
-    }
-
-    impl Eq for LocationCategory {}
-
-    impl PartialOrd for LocationCategory {
-        fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-            Some(self.cmp(other))
-        }
-    }
-
-    impl PartialEq for LocationCategory {
-        fn eq(&self, other: &Self) -> bool {
-            self.location == other.location
-            //self.context == other.context &&
-            //self.comments == other.comments
-        }
-    }
-
-    impl Ord for LocationCategory {
-        fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-            self.location.cmp(&other.location)
-        }
-    }
-}
-
-pub(crate) fn get_categories_list(
-    main_data_table: &Table,
-    exam_categories_table: &Table,
-) -> Result<Vec<exam_categories::ExamCategory>, String> {
-    let main_exam_categories = main_data_table.get_keyed_column_sample_map(
-        &(main_headers::PertinentHeaders::ProcedureCode.get_label()),
-    )?;
-
-    let existing_exam_categories = exam_categories_table.get_keyed_column_sample_map(
-        &(exam_categories::PertinentHeaders::ProcedureCode.get_label()),
-    )?;
-
-    let mut complete_exam_code_list: Vec<exam_categories::ExamCategory> = Vec::new();
-
-    for procedure_code in main_exam_categories.keys() {
-        let mut next_member: exam_categories::ExamCategory = exam_categories::ExamCategory {
-            procedure_code: procedure_code.to_string(),
-            exam: "".to_string(),
-            subspecialty: "".to_string(),
-            comments: "".to_string(),
+    for entry in exam_locations_table.iter()
+    {
+        let sitemap = match result.entry(entry.site_id)
+        {
+            std::collections::btree_map::Entry::Occupied(x) => x.into_mut(),
+            std::collections::btree_map::Entry::Vacant(x) => x.insert(BTreeMap::new())
         };
 
-        match existing_exam_categories.get(procedure_code) {
+        match sitemap.get(&entry.location)
+        {
+            Some(x) => {
+                err=true;
+                eprintln!("Duplicate entries in map: {}/{}",entry.site_id,entry.location)
+            },
             None => {
-                println!("Couldn't find procedure code {}", procedure_code);
-                let sample_row_index = match main_exam_categories.get(procedure_code) {
-                    Some(x) => x,
-                    None => {
-                        return Err(format!("Coudldn't get sample row {} ", procedure_code));
-                    }
-                };
-                next_member.procedure_code = main_data_table.get_val(
-                    &main_headers::PertinentHeaders::ProcedureCode.get_label(),
-                    sample_row_index,
-                )?;
-                next_member.exam = main_data_table.get_val(
-                    &main_headers::PertinentHeaders::Exam.get_label(),
-                    sample_row_index,
-                )?;
+                sitemap.insert(entry.location,entry.context);
             }
-            Some(sample_row_index) => {
-                next_member.procedure_code = exam_categories_table.get_val(
-                    &exam_categories::PertinentHeaders::ProcedureCode.get_label(),
-                    sample_row_index,
-                )?;
-                next_member.exam = exam_categories_table.get_val(
-                    &exam_categories::PertinentHeaders::Exam.get_label(),
-                    sample_row_index,
-                )?;
-                next_member.subspecialty = exam_categories_table.get_val(
-                    &exam_categories::PertinentHeaders::Subspecialty.get_label(),
-                    sample_row_index,
-                )?;
-                next_member.comments = exam_categories_table.get_val(
-                    &exam_categories::PertinentHeaders::Comments.get_label(),
-                    sample_row_index,
-                )?;
-            }
-        }
-
-        complete_exam_code_list.push(next_member);
+        };
     }
 
-    complete_exam_code_list.sort();
+    //println!("Context map:{:?}",result);
 
-    Ok(complete_exam_code_list)
+    if err {return Err("Error building exam context map.".to_string());}
+    Ok(result)
 }
 
-pub(crate) fn get_categories_map(
-    source: &ProcessedSource,
-) -> Result<HashMap<String, exam_categories::ExamCategory>, String> {
-    let list = get_categories_list(&source.main_data_table, &source.exam_categories_table)?;
-    let mut retval: HashMap<String, exam_categories::ExamCategory> = HashMap::new();
-
-    for member in &list {
-        match retval.entry(member.procedure_code.to_string()) {
-            std::collections::hash_map::Entry::Occupied(_) => panic!("Duplicate procedure code!"),
-            std::collections::hash_map::Entry::Vacant(v) => {
-                v.insert(member.copy());
-            }
-        }
-    }
-
-    Ok(retval)
-}
-
+/*
 pub(crate) fn get_locations_list(
     main_data_table: &Table,
     exam_locations_table: &Table,
 ) -> Result<Vec<location_categories::LocationCategory>, String> {
+    
+    //TODO
+    //Added "for_each" function to table and modified "Categories_Location.csv" to include site IDs as may not be able to rely strictly on location.
+    //Added site ID to the LocationCategory, thus the error below. Need to test against site ID and location.
+
     let main_exam_locations = main_data_table
         .get_keyed_column_sample_map(&(main_headers::PertinentHeaders::Location.get_label()))?;
 
@@ -268,43 +134,31 @@ pub(crate) fn get_locations_list(
 
     Ok(complete_exam_location_list)
 }
+*/
 
-pub fn build_salem_rvumap(main_data_table: &Table) -> Result<HashMap<String, f64>, String> {
+pub fn build_salem_rvumap(main_data_table: &Vec<Exam>) -> Result<HashMap<String, f64>, String> {
     let mut retval: HashMap<String, f64> = HashMap::new();
 
     let mut rvu_sum: f64 = 0.0;
     let mut rvu_disc: f64 = 0.0;
 
-    for row_i in main_data_table.row_indices() {
-        let rvus = match main_data_table
-            .get_val(&main_headers::PertinentHeaders::Rvu.get_label(), &row_i)?
-            .parse::<f64>()
-        {
-            Ok(x) => x,
-            Err(e) => {
-                return Err(format!("{:?}", e));
-            }
-        };
-        rvu_sum += rvus;
+    for entry in main_data_table.iter()
+    {
+        rvu_sum += entry.rvu;
 
-        let exam_code = main_data_table.get_val(
-            &main_headers::PertinentHeaders::ProcedureCode.get_label(),
-            &row_i,
-        )?;
-
-        let current = retval.get(&exam_code);
+        let current = retval.get(&entry.exam_code);
         match current {
             Some(&x) => {
-                if x != rvus {
-                    rvu_disc += (x - rvus).abs();
-                    if rvus > x {
-                        println!("Replacing RVUs for exam code {} with higher value found {}, previously {}",exam_code,rvus,x);
-                        retval.insert(exam_code, rvus);
+                if x != entry.rvu {
+                    rvu_disc += (x - entry.rvu).abs();
+                    if entry.rvu > x {
+                        println!("Replacing RVUs for exam code {} with higher value found {}, previously {}",entry.exam_code,entry.rvu,x);
+                        retval.insert(entry.exam_code.to_owned(), entry.rvu);
                     }
                 }
             }
             None => {
-                retval.insert(exam_code, rvus);
+                retval.insert(entry.exam_code.to_owned(), entry.rvu);
             }
         };
     }
@@ -318,116 +172,93 @@ pub fn build_salem_rvumap(main_data_table: &Table) -> Result<HashMap<String, f64
     Ok(retval)
 }
 
-//Check BVU source for missing exam codes. Also puts all exam descriptions in comments.
-pub fn check_bvusource(main_data_table: &Table, bvu_data_table: &mut Table) {
-    let mut found: HashSet<String> = HashSet::new();
-    for row_i in main_data_table.row_indices() {
-        let exam_code = main_data_table
-            .get_val(
-                &main_headers::PertinentHeaders::ProcedureCode.get_label(),
-                &row_i,
-            )
-            .expect("Couldn't get exam code from table!");
-
-        if !found.contains(&exam_code) {
-            found.insert(exam_code.to_owned());
-
-            let mut bvu_table_row: Option<usize> = None;
-            for row_b in bvu_data_table.row_indices() {
-                let this_code = bvu_data_table
-                    .get_val(&bvu_headers::PertinentHeaders::ExamCode.get_label(), &row_b)
-                    .expect("Couldn't get bvu row");
-                if this_code == exam_code {
-                    bvu_table_row = Some(row_b);
-                    break;
-                }
-            }
-            let desc = main_data_table
-                .get_val(&main_headers::PertinentHeaders::Exam.get_label(), &row_i)
-                .expect("Couldn't get exam description from table!");
-
-            match bvu_table_row {
-                Some(bvu_table_row) => {
-                    bvu_data_table
-                        .set_val(
-                            &bvu_headers::PertinentHeaders::ExamDescription.get_label(),
-                            &bvu_table_row,
-                            &desc,
-                        )
-                        .expect("Couldn't modify bvu data table.");
-                }
-                None => {
-                    let mut newrow: Vec<String> = Vec::new();
-                    newrow.push(exam_code);
-                    for _ in 0..6 {
-                        newrow.push("".to_string());
-                    }
-                    newrow.push(desc);
-                    newrow.push("".to_string());
-                    bvu_data_table.pushrow(newrow);
-                }
-            }
-        }
+//Check BVU source for missing exam codes.
+pub fn check_bvusource(main_data: &Vec<Exam>, bvu_data_table: &BVUMap) -> Result<(), Box<dyn std::error::Error>>{
+    let mut bvu_exam_codes:HashSet<String>=HashSet::new();
+    for bvu_entry in bvu_data_table.iter()
+    {
+        bvu_exam_codes.insert(bvu_entry.exam_code);
     }
 
-    bvu_data_table.write_to_file(file_names::BVU_UPDATE_FILE.to_string());
-}
-
-pub fn build_salem_bvumap(bvu_data_table: &Table) -> Result<HashMap<String, f64>, String> {
-    let mut retval: HashMap<String, f64> = HashMap::new();
-
-    for row_i in bvu_data_table.row_indices() {
-        let rvus = match bvu_data_table
-            .get_val(
-                &bvu_headers::PertinentHeaders::TargetPercentile.get_label(),
-                &row_i,
-            )?
-            .parse::<f64>()
+    let mut missing_codes:HashMap<String,String>=HashMap::new();
+    for main_data_table_entry in main_data
+    {
+        if !bvu_exam_codes.contains(&main_data_table_entry.exam_code)
         {
-            Ok(x) => x,
-            Err(e) => {
-                return Err(format!("{:?}", e));
-            }
-        };
-
-        let exam_code =
-            bvu_data_table.get_val(&bvu_headers::PertinentHeaders::ExamCode.get_label(), &row_i)?;
-
-        let current = retval.get(&exam_code);
-        match current {
-            Some(&_x) => {
-                eprintln!("Duplicate BVU table entires for {}", exam_code);
-            }
-            None => {
-                retval.insert(exam_code, rvus);
-            }
-        };
+            missing_codes.insert(main_data_table_entry.exam_code.to_owned(), main_data_table_entry.procedure_description.to_owned());
+        }
     }
+    
+    if missing_codes.len()>0
+    {
+        let mut missing_codes_vec:Vec<&String>=missing_codes.keys().collect();
+        missing_codes_vec.sort();
 
-    Ok(retval)
+        let mut vecofvec:Vec<Vec<String>>=Vec::new();
+        for missing_code in missing_codes_vec
+        {
+            vecofvec.push(vec!(missing_code.to_string(),missing_codes.get(missing_code).expect("Should have value").to_string()));
+        }
+        BVUMap::write(file_names::BVU_UPDATE_FILE,&[EXAM_CODE_HEADER.to_string()],vecofvec).unwrap();
+
+        Err(Box::new(std::io::Error::new(ErrorKind::InvalidData,"Missing BVU codes.")))
+    }
+    else {
+        let _ = std::fs::remove_file(file_names::BVU_UPDATE_FILE.to_string());
+        Ok(())
+    }
 }
 
-/*
-pub fn build_salem_modality_map(
-    main_data_table: &Table,
-) -> Result<HashMap<String, String>, String> {
-    let mut retval: HashMap<String, String> = HashMap::new();
-
-    for row_i in main_data_table.row_indices() {
-        let exam_code = main_data_table.get_val(
-            &main_headers::PertinentHeaders::ProcedureCode.get_label(),
-            &row_i,
-        )?;
-
-        if let std::collections::hash_map::Entry::Vacant(e) = retval.entry(exam_code) {
-            let listed_modality = main_data_table.get_val(
-                &main_headers::PertinentHeaders::Modality.get_label(),
-                &row_i,
-            )?;
-            e.insert(listed_modality);
+//Check Readers
+pub fn check_readers(main_data: &Vec<Exam>,readers:&BTreeMap<u64,ExamReader>) -> Result<(), Box<dyn std::error::Error>>{
+    
+    println!();
+    println!("Excluded Readers:");
+    for (_id,reader) in readers
+    {
+        if reader.excluded
+        {
+            println!("{},{}", reader.rad_last_name, reader.rad_first_name)
         }
     }
 
-    Ok(retval)
+    println!();
+    println!("Included Readers:");
+    for (_id,reader) in readers
+    {
+        if !reader.excluded
+        {
+            println!("{},{}", reader.rad_last_name, reader.rad_first_name)
+        }
+    }
+
+    
+    let reader_ids:BTreeSet<&u64>=readers.keys().collect();
+    let mut unrecognized_readers:BTreeSet<ExamReader>=BTreeSet::new();
+
+    for exam in main_data
+    {
+        if !reader_ids.contains(&exam.signer_acct_id)
+        {
+            unrecognized_readers.insert(
+                ExamReader { signer_acct_id: exam.signer_acct_id, rad_last_name:exam.rad_last_name.to_string(), rad_first_name:exam.rad_first_name.to_string(), excluded: false}
+            );
+        }
+    }
+    
+    if unrecognized_readers.len()>0
+    {
+        let mut vecofvec:Vec<Vec<String>>=Vec::new();
+        for reader in unrecognized_readers
+        {
+            vecofvec.push(vec!(reader.signer_acct_id.to_string(),reader.rad_last_name,reader.rad_first_name,reader.excluded.to_string()));
+        }
+        ReaderTable::write(file_names::UNRECOGNIZED_READERS_FILE,&ReaderTable::headers(),vecofvec).unwrap();
+
+        Err(Box::new(std::io::Error::new(ErrorKind::InvalidData,"Unrecognized Readers.")))
+    }
+    else {
+        let _ = std::fs::remove_file(file_names::BVU_UPDATE_FILE.to_string());
+        Ok(())
+    }
 }
-*/

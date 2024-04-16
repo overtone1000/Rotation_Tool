@@ -2,8 +2,7 @@ use std::{collections::HashMap, error::Error, io::Write};
 
 use crate::{
     coverage::{
-        coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay,
-        malformed_coverage::CoverageError, work_coverage_map::maps::CoverageMap,
+        self, coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay, malformed_coverage::CoverageError, work_coverage_map::maps::CoverageMap
     },
     rotations::rotation_error::RotationManifestParseError,
 };
@@ -11,15 +10,23 @@ use crate::{
 pub fn audit(coverage_map: &mut CoverageMap) -> HashMap<CoverageCoordinates, CoverageError> {
     let mut retval: HashMap<CoverageCoordinates, CoverageError> = HashMap::new();
 
-    //let testcoords=testcoords();
+    let mut rvu_total:f64=0.0;
 
     let func = |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| {
         let errs = coverage_and_workday.audit_coverage();
-
+        
+        for work in &coverage_and_workday.work
+        {
+            rvu_total+=work.get_absolute_rvu();
+        }
+        
         retval.insert(coords.to_owned(), errs);
     };
 
     coverage_map.foreach_mut(func);
+
+    println!();
+    println!("{} total RVUs in coverage map audited.",rvu_total);
 
     retval
 }
@@ -42,7 +49,7 @@ pub fn audit_to_stream<T: Write>(
     for coords in sorted_keys {
         let coordstr = format!(
             "{} \u{0009} {} \u{0009} {} \u{0009} {} \u{0009}",
-            coords.site,
+            coords.facility,
             coords.subspecialty,
             coords.context,
             //coords.modality,

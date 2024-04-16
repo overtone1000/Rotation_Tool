@@ -36,8 +36,8 @@ impl CoverageMap {
             match &rotation_description.responsibilities.get() {
                 Some(responsibilities) => {
                     for responsibility in responsibilities {
-                        for site in responsibility.sites.to_vec(globals::SITES) {
-                            coords.site = site.to_string();
+                        for site in responsibility.sites.to_vec(globals::FACILITIES) {
+                            coords.facility = site.to_string();
                             for subspecialty in responsibility.exams.to_vec(globals::SUBSPECIALTIES)
                             {
                                 coords.subspecialty = subspecialty.to_string();

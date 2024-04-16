@@ -57,6 +57,15 @@ impl Table {
         Ok(retval)
     }
 
+    pub fn structural_clone(&self) -> Table
+    {
+        Table {
+            headers:self.headers.clone(),
+            labelmap:self.labelmap.clone(),
+            data:Vec::new()
+        }
+    }
+
     pub fn write_to_file(&self, path: String) -> bool {
         let mut writer = match csv::WriterBuilder::new()
             .delimiter(b',')
@@ -90,7 +99,7 @@ impl Table {
         true
     }
 
-    fn get_header_column_index(&self, header_label: &String) -> Result<&usize, String> {
+    fn get_header_column_index(&self, header_label: &str) -> Result<&usize, String> {
         match self.labelmap.get(header_label) {
             None => Err(format!("No header {} found", header_label)),
             Some(x) => Ok(x),
@@ -158,6 +167,35 @@ impl Table {
         }
 
         Ok(retval)
+    }
+
+    pub fn for_each<F>(
+        &self,
+        headers:Vec<String>,
+        mut func: F
+    ) -> Result<(),String>
+    where F:FnMut(&Vec<String>)->()
+    {
+        let mut header_indices:Vec<&usize>=Vec::with_capacity(headers.len());
+        let mut condensed:Vec<String>=Vec::with_capacity(headers.len());
+
+        for header in headers
+        {
+            header_indices.push(self.get_header_column_index(header.as_str())?);
+            condensed.push("".to_string());
+        }
+        
+        for row in &self.data
+        {
+            for n in 0..header_indices.len()
+            {
+                let val = row.get(n).expect("Invalid row index").to_string();
+                condensed[n]=val;
+            }
+            func(&condensed);
+        }
+
+        Ok(())
     }
 
     pub fn clear(&mut self) {

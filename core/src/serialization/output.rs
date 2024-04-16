@@ -10,3 +10,6 @@ pub trait JSONFileOut: Serialize {
         Ok(())
     }
 }
+
+impl JSONFileOut for std::collections::BTreeMap<String,String> {
+}

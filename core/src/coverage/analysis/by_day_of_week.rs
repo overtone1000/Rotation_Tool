@@ -59,6 +59,7 @@ pub fn analyze_by_day_of_week(
 
     coverage_map.foreach_mut(func);
 
+
     retval
 }
 
