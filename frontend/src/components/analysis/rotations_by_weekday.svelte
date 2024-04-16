@@ -4,6 +4,7 @@
 	import { short_days_of_the_week_Mon_first } from "../../commons/time";
 	import ObservablePlot from "./observable_plot.svelte";
 	import * as Plot from "@observablehq/plot";
+	import { workaround } from "./workaround";
 
 	type BuiltPlot = (SVGSVGElement | HTMLElement) & Plot.Plot;
 
@@ -125,17 +126,12 @@
 				displayed_marks,
 				Plot.binY(
 					{
-						fill:"proportion-facet",//count?,
+						fill:"count",//"proportion-facet",//count?,
 					},
 					//{
 					//	fill:"proportion-facet",//count?,
 					//},
-					{
-						y: "value",
-						fx: "rotation",
-						inset: 0
-						//thresholds:(max-min)/20
-					}
+					workaround
 					//{
 					//	y: "value",
 					//	//thresholds:(max-min)/20
@@ -152,12 +148,27 @@
 			width: width,
 			//aspectRatio: 1,
 			height: 600,
-			y:{grid:false},
+			y:{
+				grid:false,
+				label:valuetype
+			},
 			padding: 0,
 			//fx:{
 			//	domain: displayed_marks.filter((d)=>d.rotation)
 			//},
-			marks: marks
+			marginBottom: 120,
+			marginLeft: 80,
+			x:{
+				grid:true,
+				label:"Rotation",
+			},
+			fx:{
+				tickRotate:-45,
+			},
+			marks: marks,
+			style:{
+				fontSize:"14px"
+			}
 		})
 		return retval;
 	}
