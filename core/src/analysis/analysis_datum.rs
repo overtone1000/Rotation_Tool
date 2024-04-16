@@ -41,6 +41,9 @@ impl WorkUnit {
     pub fn get_scaled_bvu(&self) -> f64 {
         self.bvu / self.denominator
     }
+    pub fn get_absolute_bvu(&self)->f64{
+        self.bvu
+    }
     pub fn get_exam_desc(&self) -> &str {
         self.exam_desc.as_str()
     }
@@ -100,8 +103,8 @@ impl AnalysisDatum {
     }
 
     pub fn add_workunit(&mut self, rhs: &WorkUnit) {
-        self.total_rvu += rhs.get_scaled_rvu();
-        self.total_bvu += rhs.get_scaled_bvu();
+        self.total_rvu += rhs.get_absolute_rvu();
+        self.total_bvu += rhs.get_absolute_bvu();
         self.add_studies(rhs.exam_desc.to_string(), 1.0 / rhs.denominator);
     }
 
