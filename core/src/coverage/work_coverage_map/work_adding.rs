@@ -14,6 +14,7 @@ use crate::rotations::description::WrappedSortable;
 
 use crate::error::source_error::SourceError;
 
+use crate::rotations::special::weekdays;
 use crate::source_data::processing::categorization::{
     build_salem_rvumap, check_categories_list,
 };
@@ -89,140 +90,165 @@ impl CoverageMap {
                 }
             };
         }
+
+        println!();
+        println!("Weekday counts in dataset:");
+        for weekday in crate::globals::ALL_DAYS
+        {
+            let count = salem_weekday_count.get(weekday).expect("All days should be populated");
+            println!("{}:{}",weekday.to_string(),count);
+        }
+        println!();
         
         let mut excluded_by_reader:Vec<&Exam>=Vec::new();
         let mut excluded_as_nonradiology:Vec<&Exam>=Vec::new();
+        let mut excluded_both:Vec<&Exam>=Vec::new();
 
         //Process Data
         for exam in source.main_data.iter()
         {
-            match source.readers.get(&exam.signer_acct_id)
+            let reader = match source.readers.get(&exam.signer_acct_id)
             {
                 Some(reader) => {
-                    if reader.excluded
+                    reader
+                },
+                None => {
+                    return SourceError::generate_boxed(format!(
+                        "Unrecognized reader {:?}",
+                        exam
+                    ));
+                },
+            };
+
+            if date_constraints.include(&exam.list_datetime) {
+                let denominator = *salem_weekday_count
+                    .get(&NaiveDate::from(exam.list_datetime).weekday())
+                    .expect("All weekdays should be populated")
+                    as f64;
+
+                //Build coords and populate maps with this row.
+                let coords: CoverageCoordinates = {
+                    //Get subspecialty from exam code
+                    let subspecialty = match source.subspecialty_map.get(&exam.exam_code) {
+                        Some(x) => x.to_string(),
+                        None => {
+                            return SourceError::generate_boxed(format!(
+                                "Invalid exam.procedure_code {} in exam_to_subspeciality_map",
+                                exam.exam_code
+                            ));
+                        }
+                    };
+
+                    //Try to determine facility from accession (good for separating SH, WB, WVH) and then location. If not valid, go by site ID. If not valid, go by location.
+                    let mut selected_facility: Option<String> = None;
+                    selected_facility=get_SH_facility_from_metadata(exam);
+                    if selected_facility.is_none() {
+                        selected_facility=siteid_to_sitename(exam.site_id);
+                    }
+                    if selected_facility.is_none() {
+                        selected_facility = crate::globals::get_location_site_mapping(&exam.location);
+                    }
+                    let facility = match selected_facility {
+                        Some(x) => x,
+                        None => {
+                            return SourceError::generate_boxed(format!(
+                                "Could not determine facility for exam {:?}",exam,
+                            ));
+                        }
+                    };
+
+                    //Try context. If not valid, go by site map.
+                    let context = match source.context_map.get(&exam.site_id) {
+                        Some(submap) => {
+                            match submap.get(&exam.location){
+                                Some(x) => x.to_string(),
+                                None => {
+                                    return SourceError::generate_boxed(format!(
+                                        "Could not determine context {:?}",
+                                        exam
+                                    ));
+                                }
+                            }
+                        },
+                        None => match crate::globals::get_location_site_mapping(&exam.location) {
+                            Some(x) => x,
+                            None => {
+                                return SourceError::generate_boxed(format!(
+                                    "Could not determine context {:?}",
+                                    exam
+                                ));
+                            }
+                        },
+                    };
+
+                    CoverageCoordinates {
+                        facility,
+                        subspecialty,
+                        context,
+                        //modality: modality.to_string(),
+                        weekday: exam.list_datetime.weekday(),
+                    }
+                };
+
+                //Filter out non-radiology exams to make rotation front end simpler
+                let filtered=
+                    coords.subspecialty == NON_RADIOLOGY ||
+                    coords.context == NON_RADIOLOGY
+                    ;
+
+                if filtered || reader.excluded
+                {
+                    if filtered && reader.excluded
+                    {
+                        excluded_both.push(&exam)
+                    }
+                    else if filtered
+                    {
+                        excluded_as_nonradiology.push(&exam)    
+                    }
+                    else if reader.excluded
                     {
                         excluded_by_reader.push(&exam);
                     }
                     else
                     {
-                        if date_constraints.include(&exam.list_datetime) {
-                            let denominator = *salem_weekday_count
-                                .get(&NaiveDate::from(exam.list_datetime).weekday())
-                                .expect("All weekdays should be populated")
-                                as f64;
-            
-                            //Build coords and populate maps with this row.
-                            let coords: CoverageCoordinates = {
-                                //Get subspecialty from exam code
-                                let subspecialty = match source.subspecialty_map.get(&exam.exam_code) {
-                                    Some(x) => x.to_string(),
-                                    None => {
-                                        return SourceError::generate_boxed(format!(
-                                            "Invalid exam.procedure_code {} in exam_to_subspeciality_map",
-                                            exam.exam_code
-                                        ));
-                                    }
-                                };
-            
-                                //Try to determine facility from accession (good for separating SH, WB, WVH) and then location. If not valid, go by site ID. If not valid, go by location.
-                                let mut selected_facility: Option<String> = None;
-                                selected_facility=get_SH_facility_from_metadata(exam);
-                                if selected_facility.is_none() {
-                                    selected_facility=siteid_to_sitename(exam.site_id);
-                                }
-                                if selected_facility.is_none() {
-                                    selected_facility = crate::globals::get_location_site_mapping(&exam.location);
-                                }
-                                let facility = match selected_facility {
-                                    Some(x) => x,
-                                    None => {
-                                        return SourceError::generate_boxed(format!(
-                                            "Could not determine facility for exam {:?}",exam,
-                                        ));
-                                    }
-                                };
-            
-                                //Try context. If not valid, go by site map.
-                                let context = match source.context_map.get(&exam.site_id) {
-                                    Some(submap) => {
-                                        match submap.get(&exam.location){
-                                            Some(x) => x.to_string(),
-                                            None => {
-                                                return SourceError::generate_boxed(format!(
-                                                    "Could not determine context {:?}",
-                                                    exam
-                                                ));
-                                            }
-                                        }
-                                    },
-                                    None => match crate::globals::get_location_site_mapping(&exam.location) {
-                                        Some(x) => x,
-                                        None => {
-                                            return SourceError::generate_boxed(format!(
-                                                "Could not determine context {:?}",
-                                                exam
-                                            ));
-                                        }
-                                    },
-                                };
-            
-                                CoverageCoordinates {
-                                    facility,
-                                    subspecialty,
-                                    context,
-                                    //modality: modality.to_string(),
-                                    weekday: exam.list_datetime.weekday(),
-                                }
-                            };
-            
-                            //Filter out non-radiology exams to make rotation front end simpler
-                            let filtered=
-                                coords.subspecialty == NON_RADIOLOGY ||
-                                coords.context == NON_RADIOLOGY
-                                ;
-            
-                            if filtered
-                            {
-                                excluded_as_nonradiology.push(exam)
-                            }
-                            else
-                            {
-                                let work: WorkUnit = {
-                                    let rvu = match exam_rvu_map.get(&exam.exam_code) {
-                                        Some(x) => x,
-                                        None => {
-                                            return SourceError::generate_boxed(format!(
-                                                "Invalid exam.procedure_code {} in rvu map",
-                                                exam.exam_code
-                                            ));
-                                        }
-                                    };
-            
-                                    let bvu = match source.bvu_map.get(&exam.exam_code) {
-                                        Some(x) => x,
-                                        None => {
-                                            return SourceError::generate_boxed(format!(
-                                                "Invalid exam.procedure_code {} in bvu map",
-                                                exam.exam_code
-                                            ));
-                                        }
-                                    };
-            
-                                    WorkUnit::create(
-                                        exam.list_datetime,
-                                        *rvu,
-                                        *bvu,
-                                        denominator,
-                                        exam.procedure_description.to_string()
-                                    )
-                                };
-            
-                                self.add_work(&coords, work);
-                            }
-                        }
+                        panic!("Logically impossible.");
                     }
-                },
-                None => (),
+                }
+                else
+                {
+                    let work: WorkUnit = {
+                        let rvu = match exam_rvu_map.get(&exam.exam_code) {
+                            Some(x) => x,
+                            None => {
+                                return SourceError::generate_boxed(format!(
+                                    "Invalid exam.procedure_code {} in rvu map",
+                                    exam.exam_code
+                                ));
+                            }
+                        };
+
+                        let bvu = match source.bvu_map.get(&exam.exam_code) {
+                            Some(x) => x,
+                            None => {
+                                return SourceError::generate_boxed(format!(
+                                    "Invalid exam.procedure_code {} in bvu map",
+                                    exam.exam_code
+                                ));
+                            }
+                        };
+
+                        WorkUnit::create(
+                            exam.list_datetime,
+                            *rvu,
+                            *bvu,
+                            denominator,
+                            exam.procedure_description.to_string()
+                        )
+                    };
+
+                    self.add_work(&coords, work);
+                }
             }
         }
 
@@ -266,13 +292,16 @@ impl CoverageMap {
             retval
         };
 
-        let mut rvu_total:f64=sum_rvus(&source.main_data);
-        let mut rvus_excluded_by_reader:f64=sum_rvus_ref(excluded_by_reader);
-        let mut rvus_filtered:f64=sum_rvus_ref(excluded_as_nonradiology);
+        let rvu_total:f64=sum_rvus(&source.main_data);
+        let rvus_excluded_by_reader:f64=sum_rvus_ref(excluded_by_reader);
+        let rvus_filtered:f64=sum_rvus_ref(excluded_as_nonradiology);
+        let rvus_mutually_excluded:f64=sum_rvus_ref(excluded_both);
 
         println!();
-        println!("{}% of RVUs filtered by reader.",rvus_excluded_by_reader/rvu_total*100.0);
-        println!("{}% of RVUs filtered by non-radiology categorization.",rvus_filtered/rvu_total*100.0);
+        println!("{} RVUs in data, and {} added to coverage map.",rvu_total,rvu_total-rvus_excluded_by_reader-rvus_filtered-rvus_mutually_excluded);
+        println!("   {:.3}% of RVUs filtered by reader and non-radiology categorization.",(rvus_mutually_excluded/rvu_total*100.0));
+        println!("   {:.3}% of RVUs filtered by reader only.",rvus_excluded_by_reader/rvu_total*100.0);
+        println!("   {:.3}% of RVUs filtered by non-radiology categorization only.",rvus_filtered/rvu_total*100.0);
         println!();
 
         Ok(())

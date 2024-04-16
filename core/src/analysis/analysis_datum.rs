@@ -35,6 +35,9 @@ impl WorkUnit {
     pub fn get_scaled_rvu(&self) -> f64 {
         self.rvu / self.denominator
     }
+    pub fn get_absolute_rvu(&self)->f64{
+        self.rvu
+    }
     pub fn get_scaled_bvu(&self) -> f64 {
         self.bvu / self.denominator
     }
