@@ -45,6 +45,7 @@ pub fn sort_volumes_by_date(coverage_map: &mut CoverageMap) -> CategorizedVolume
                                 coverage_unit.get_rotation(),
                                 coverage_unit.collect_work_bydate(coverage_and_workday),
                             );
+                            this is incorrect, have to spread this work out over the fractionally covered days of that week!!!
                         }
                     }
                 };
