@@ -100,7 +100,7 @@ impl CoverageMap {
                                                             rotation_description
                                                                 .rotation
                                                                 .to_string(),
-                                                            weekday, //the NOMINAL weekday
+                                                            -day_offset, //the NOMINAL weekday
                                                         );
 
                                                         match self.add_coverage(

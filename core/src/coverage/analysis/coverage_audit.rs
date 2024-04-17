@@ -15,10 +15,7 @@ pub fn audit(coverage_map: &mut CoverageMap) -> HashMap<CoverageCoordinates, Cov
     let func = |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| {
         let errs = coverage_and_workday.audit_coverage();
         
-        for work in &coverage_and_workday.work
-        {
-            rvu_total+=work.get_absolute_rvu();
-        }
+        rvu_total+=coverage_and_workday.total_rvus();
         
         retval.insert(coords.to_owned(), errs);
     };

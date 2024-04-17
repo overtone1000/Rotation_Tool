@@ -4,7 +4,7 @@ use serde::Serialize;
 
 use crate::{
     analysis::analysis_datum::AnalysisDatum,
-    coverage::{coverage_and_work_day::CoverageAndWorkDay, work_collector::WorkCollector},
+    coverage::{coverage_and_work_day::CoverageAndWorkDay},
     rotations::time_modifiers::{TimeSinceMidnight, NEXT_MIDNIGHT, THIS_MIDNIGHT},
 };
 
@@ -29,7 +29,8 @@ pub struct TemporalCoverageUnit {
     pub start: TimeSinceMidnight,
     pub end: TimeSinceMidnight,
     rotation: String,
-    rotation_day: SerializeableWeekday,
+    //rotation_day: SerializeableWeekday
+    rotation_day_offset:i64 //Day offset to get to the day of the rotation that will actually provide the coverage as compared to the day the study is done
 }
 
 impl Eq for TemporalCoverageUnit {}
@@ -43,13 +44,13 @@ impl TemporalCoverageUnit {
         start: TimeSinceMidnight,
         end: TimeSinceMidnight,
         rotation: String,
-        day: chrono::Weekday,
+        rotation_day_offset: i64,
     ) -> TemporalCoverageUnit {
         TemporalCoverageUnit {
             start,
             end,
             rotation,
-            rotation_day: SerializeableWeekday { day }, //weekday_offset:offset //This is limited to one 24 hour period inclusive on each end.
+            rotation_day_offset,
         }
     }
 
@@ -120,12 +121,14 @@ impl TemporalCoverageUnit {
     pub fn get_rotation(&self) -> String {
         self.rotation.to_string()
     }
-    pub fn get_day(&self) -> chrono::Weekday {
-        self.rotation_day.day
+
+    pub fn get_offset(&self) -> i64 {
+        self.rotation_day_offset
     }
 
+
     pub fn to_string(&self) -> String {
-        format!("{} ({})", self.rotation, self.rotation_day.day)
+        format!("{} ({})", self.rotation, self.rotation_day_offset)
     }
 }
 
@@ -150,38 +153,4 @@ impl Ord for TemporalCoverageUnit {
             None => core::cmp::Ordering::Equal,
         }
     }
-}
-
-impl WorkCollector for TemporalCoverageUnit {
-    fn collect_work(&self, workday: &CoverageAndWorkDay) -> AnalysisDatum {
-        let mut retval: AnalysisDatum = AnalysisDatum::default();
-        for work_unit in workday.get_work_in_timespan(self.start, self.end) {
-            retval.add_workunit(work_unit);
-        }
-        retval
-    }
-
-    /*
-    fn collect_work_bydate(
-        &self,
-        workday: &CoverageAndWorkDay,
-    ) -> HashMap<chrono::prelude::NaiveDate, AnalysisDatum> {
-        let mut retval: HashMap<chrono::prelude::NaiveDate, AnalysisDatum> = HashMap::new();
-
-        for work_unit in workday.get_work_in_timespan(self.start, self.end) {
-            match retval.entry(work_unit.get_datetime().date()) {
-                std::collections::hash_map::Entry::Occupied(mut entry) => {
-                    entry.get_mut().add_workunit(work_unit);
-                }
-                std::collections::hash_map::Entry::Vacant(empty) => {
-                    let mut newdat = AnalysisDatum::default();
-                    newdat.add_workunit(work_unit);
-                    empty.insert(newdat);
-                }
-            };
-        }
-
-        retval
-    }
-    */
 }

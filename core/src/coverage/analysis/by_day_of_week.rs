@@ -3,8 +3,7 @@ use std::collections::{hash_map::Entry, HashMap};
 use crate::{
     analysis::analysis_datum::AnalysisDatum,
     coverage::{
-        coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay,
-        units::Coverage, work_collector::WorkCollector, work_coverage_map::maps::CoverageMap,
+        self, coordinate::CoverageCoordinates, coverage_and_work_day::{CoverageAndWorkDay, TimeAdjustment}, units::Coverage, work_coverage_map::maps::CoverageMap
     },
     globals::ALL_DAYS,
 };
@@ -26,7 +25,7 @@ pub fn analyze_by_day_of_week(
         let datum: &mut AnalysisDatum = match daymap.entry(weekday) {
             Entry::Occupied(entry) => entry.into_mut(),
             Entry::Vacant(empty) => {
-                let entry = empty.insert(AnalysisDatum::default());
+                let entry = empty.insert(AnalysisDatum::create(rotation));
                 entry
             }
         };
@@ -34,30 +33,17 @@ pub fn analyze_by_day_of_week(
         *datum += data;
     };
 
-    let func = |_coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| {
-        match &coverage_and_workday.coverages {
-            Some(coverage) => match coverage {
-                Coverage::Temporal(coverages) => {
-                    for coverage in coverages {
-                        let collection = coverage.collect_work(coverage_and_workday);
-                        addfunc(coverage.get_rotation(), coverage.get_day(), collection);
-                    }
+    coverage_map.foreach_mut(
+        |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay|
+        {
+            coverage_and_workday.for_each_analysis_datum(
+                |ad:AnalysisDatum,ta:TimeAdjustment|
+                {
+                    addfunc(ad.get_rotation(),ta.get_weekday(coords),ad);
                 }
-                Coverage::Fractional(coverages) => {
-                    for coverage in coverages {
-                        let collection = coverage.collect_work(coverage_and_workday);
-                        addfunc(coverage.get_rotation(), coverage.get_day(), collection);
-                    }
-                }
-            },
-            None => {
-                eprintln!("Uncovered work!");
-                panic!("Uncovered work!");
-            }
+            );
         }
-    };
-
-    coverage_map.foreach_mut(func);
+    );
 
 
     retval

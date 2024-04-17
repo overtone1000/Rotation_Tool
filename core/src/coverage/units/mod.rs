@@ -10,7 +10,7 @@ use crate::{analysis::analysis_datum::AnalysisDatum, error::source_error::Source
 
 use self::{fractional_coverage::FractionalCoverageUnit, temporal_coverage::TemporalCoverageUnit};
 
-use super::{coverage_and_work_day::CoverageAndWorkDay, work_collector::WorkCollector};
+use super::{coverage_and_work_day::CoverageAndWorkDay};
 
 pub(crate) mod fractional_coverage;
 pub(crate) mod temporal_coverage;
@@ -25,59 +25,6 @@ pub enum CoverageUnit {
 pub enum Coverage {
     Temporal(Vec<TemporalCoverageUnit>),
     Fractional(Vec<FractionalCoverageUnit>),
-}
-
-impl WorkCollector for Coverage {
-    fn collect_work(&self, workday: &CoverageAndWorkDay) -> AnalysisDatum {
-        let mut retval: AnalysisDatum = AnalysisDatum::default();
-        match self {
-            Coverage::Temporal(x) => {
-                for cu in x {
-                    retval.add_assign(cu.collect_work(workday));
-                }
-            }
-            Coverage::Fractional(x) => {
-                for cu in x {
-                    retval.add_assign(cu.collect_work(workday));
-                }
-            }
-        };
-        retval
-    }
-
-    fn collect_work_bydate(
-        &self,
-        workday: &CoverageAndWorkDay,
-    ) -> HashMap<NaiveDate, AnalysisDatum> {
-        let mut retval: HashMap<NaiveDate, AnalysisDatum> = HashMap::new();
-
-        let mut addsub = |sub: HashMap<NaiveDate, AnalysisDatum>| {
-            for (key, val) in sub {
-                match retval.entry(key) {
-                    Entry::Occupied(mut entry) => {
-                        entry.get_mut().add_assign(val);
-                    }
-                    Entry::Vacant(empty) => {
-                        empty.insert(val);
-                    }
-                }
-            }
-        };
-
-        match self {
-            Coverage::Temporal(x) => {
-                for cu in x {
-                    addsub(cu.collect_work_bydate(workday));
-                }
-            }
-            Coverage::Fractional(x) => {
-                for cu in x {
-                    addsub(cu.collect_work_bydate(workday));
-                }
-            }
-        };
-        retval
-    }
 }
 
 impl Coverage {

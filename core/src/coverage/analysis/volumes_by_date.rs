@@ -8,8 +8,8 @@ use crate::{
         volumes::{CategorizedVolumes, VolumesMark},
     },
     coverage::{
-        coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay,
-        units::Coverage, work_collector::WorkCollector, work_coverage_map::maps::CoverageMap,
+        coordinate::CoverageCoordinates, coverage_and_work_day::{CoverageAndWorkDay, TimeAdjustment},
+        units::Coverage, work_coverage_map::maps::CoverageMap,
     },
 };
 
@@ -33,6 +33,7 @@ pub fn sort_volumes_by_date(coverage_map: &mut CoverageMap) -> CategorizedVolume
                 match coverage {
                     Coverage::Temporal(coverage) => {
                         for coverage_unit in coverage {
+                            coverage_unit.
                             process_collection(
                                 coverage_unit.get_rotation(),
                                 coverage_unit.collect_work(coverage_and_workday),
@@ -56,7 +57,23 @@ pub fn sort_volumes_by_date(coverage_map: &mut CoverageMap) -> CategorizedVolume
         }
     };
 
-    coverage_map.foreach_mut(func);
+    Here need to interate over analysis data segregated by dates of work
+
+    coverage_map.foreach_mut(
+        |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| {
+            coverage_and_workday.for_each_analysis_datum(
+                |ad:AnalysisDatum,ta:TimeAdjustment|
+                {
+                    let date:Option<NaiveDate>=None;
+                    for study in ad.get_studies()
+                    {
+
+                    }
+                    process_collection(ad.get_date())
+                }
+            )
+        }
+    );
 
     retval
 }

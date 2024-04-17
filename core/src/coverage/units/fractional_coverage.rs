@@ -4,7 +4,7 @@ use serde::Serialize;
 
 use crate::{
     analysis::analysis_datum::AnalysisDatum,
-    coverage::{coverage_and_work_day::CoverageAndWorkDay, work_collector::WorkCollector},
+    coverage::{coverage_and_work_day::CoverageAndWorkDay},
     serialization::weekday::SerializeableWeekday,
 };
 
@@ -62,45 +62,4 @@ impl FractionalCoverageUnit {
     pub fn get_fraction(&self) -> f64 {
         self.fraction
     }
-}
-
-impl WorkCollector for FractionalCoverageUnit {
-    fn collect_work(&self, workday: &CoverageAndWorkDay) -> AnalysisDatum {
-        let mut retval: AnalysisDatum = AnalysisDatum::default();
-
-        for work in &workday.work {
-            retval.add_workunit(work);
-        }
-        retval.scale(self.get_fraction());
-
-        retval
-    }
-
-    /*
-    fn collect_work_bydate(
-        &self,
-        workday: &CoverageAndWorkDay,
-    ) -> HashMap<chrono::prelude::NaiveDate, AnalysisDatum> {
-        let mut retval: HashMap<chrono::prelude::NaiveDate, AnalysisDatum> = HashMap::new();
-
-        for work_unit in &workday.work {
-            match retval.entry(work_unit.get_datetime().date()) {
-                std::collections::hash_map::Entry::Occupied(mut entry) => {
-                    entry.get_mut().add_workunit(work_unit);
-                }
-                std::collections::hash_map::Entry::Vacant(empty) => {
-                    let mut newdat = AnalysisDatum::default();
-                    newdat.add_workunit(work_unit);
-                    empty.insert(newdat);
-                }
-            };
-        }
-
-        for ad in retval.values_mut() {
-            ad.scale(self.get_fraction());
-        }
-
-        retval
-    }
-    */
 }

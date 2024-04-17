@@ -1,4 +1,4 @@
-use chrono::Timelike;
+use chrono::{Datelike, Days, NaiveDate, Timelike};
 use serde::Serialize;
 
 use crate::{
@@ -7,14 +7,58 @@ use crate::{
 };
 
 use super::{
-    malformed_coverage::{CoverageError, MalformedCoverage},
-    units::{temporal_coverage::TemporalCoverageUnit, Coverage, CoverageUnit},
+    coordinate::CoverageCoordinates, malformed_coverage::{CoverageError, MalformedCoverage}, units::{fractional_coverage::FractionalCoverageUnit, temporal_coverage::{weekday_plus, TemporalCoverageUnit}, Coverage, CoverageUnit}
 };
 
 #[derive(Debug, Default, Serialize)]
 pub struct CoverageAndWorkDay {
-    pub coverages: Option<Coverage>,
-    pub work: Vec<WorkUnit>,
+    coverages: Option<Coverage>,
+    work: Vec<WorkUnit>,
+}
+
+pub enum TimeAdjustment
+{
+    Fractional(chrono::Weekday),
+    Temporal(i64)
+}
+
+impl TimeAdjustment
+{
+    pub fn get_weekday(&self, coords:&CoverageCoordinates)->chrono::Weekday
+    {
+        match self
+        {
+            TimeAdjustment::Fractional(weekday) => *weekday,
+            TimeAdjustment::Temporal(offset) => weekday_plus(coords.weekday,*offset),
+        }
+    }
+
+    pub fn get_date(&self, date:NaiveDate)->NaiveDate
+    {
+        match self
+        {
+            TimeAdjustment::Fractional(weekday) => {
+                let mut shift=weekday.number_from_monday()-date.weekday().number_from_monday();
+                if shift<0 {shift+=7;}
+                date.checked_add_days(Days::new(shift));
+                assert!(*weekday==date.weekday());
+                date
+            },
+            TimeAdjustment::Temporal(offset) => {
+                if *offset>0
+                {
+                    date.checked_add_days(Days::new(offset.abs().try_into().unwrap())).expect("Should be a valid date.")
+                }
+                else if *offset<0
+                {
+                    date.checked_sub_days(Days::new(offset.abs().try_into().unwrap())).expect("Should be a valid date.")
+                }
+                else {
+                    date
+                }
+            }
+        }
+    }
 }
 
 impl CoverageAndWorkDay {
@@ -70,14 +114,76 @@ impl CoverageAndWorkDay {
 
     pub fn aggregate_work_in_timespan(
         &self,
+        rotation: String,
         start: TimeSinceMidnight,
         end: TimeSinceMidnight,
     ) -> AnalysisDatum {
-        let mut retval: AnalysisDatum = AnalysisDatum::default();
+        let mut retval: AnalysisDatum = AnalysisDatum::create(rotation);
         for work_unit in self.get_work_in_timespan(start, end) {
             retval.add_workunit(work_unit);
         }
         retval
+    }
+
+    pub fn total_rvus(
+        &self
+    )->f64
+    {
+        let mut retval:f64=0.0;
+        for work in &self.work
+        {
+            retval+=work.get_absolute_rvu();
+        }
+        retval
+    }
+
+    fn collect_temporal_work(&self,coverage:TemporalCoverageUnit)->AnalysisDatum
+    {
+        let mut retval: AnalysisDatum = AnalysisDatum::create(coverage.get_rotation());
+        for work_unit in self.get_work_in_timespan(coverage.start, coverage.end) {
+            retval.add_workunit(work_unit);
+        }
+        retval
+    }
+
+    fn collect_fractional_work(&self,coverage:FractionalCoverageUnit)->AnalysisDatum
+    {
+        let mut retval: AnalysisDatum = AnalysisDatum::create(coverage.get_rotation());
+
+        for work in &self.work {
+            retval.add_workunit(work);
+        }
+        retval.scale(coverage.get_fraction());
+
+        retval
+    }
+
+    pub fn for_each_analysis_datum<T>(&self, fun:T)->()
+    where T:Fn(AnalysisDatum,TimeAdjustment)->()
+    {
+        match self.coverages
+        {
+            Some(coverage) => match coverage {
+                Coverage::Temporal(coverages) => {
+                    for coverage in coverages {
+                        fun(self.collect_temporal_work(coverage),
+                            TimeAdjustment::Temporal(coverage.get_offset())
+                        );
+                    }
+                }
+                Coverage::Fractional(coverages) => {
+                    for coverage in coverages {
+                        fun(self.collect_fractional_work(coverage),
+                            TimeAdjustment::Fractional(coverage.get_day())
+                        );
+                    }
+                }
+            },
+            None => {
+                eprintln!("Uncovered work!");
+                panic!("Uncovered work!");
+            }
+        };
     }
 
     pub fn audit_coverage(&mut self) -> CoverageError {
@@ -85,7 +191,7 @@ impl CoverageAndWorkDay {
 
         match &self.coverages {
             None => CoverageError::NoCoverage(
-                self.aggregate_work_in_timespan(THIS_MIDNIGHT, NEXT_MIDNIGHT)
+                self.aggregate_work_in_timespan("None".to_string(),THIS_MIDNIGHT, NEXT_MIDNIGHT)
                     .get_rvu(),
             ),
             Some(coverages) => {
@@ -100,6 +206,7 @@ impl CoverageAndWorkDay {
                                 //Check from midnight
                                 if farthest_unit.starts_after_this_midnight() {
                                     let rvus = &self.aggregate_work_in_timespan(
+                                        farthest_unit.get_rotation(),
                                         THIS_MIDNIGHT,
                                         farthest_unit.start,
                                     );
@@ -125,6 +232,7 @@ impl CoverageAndWorkDay {
                                     //Check gap
                                     {
                                         let rvus = &self.aggregate_work_in_timespan(
+                                            farthest_unit.get_rotation(),
                                             farthest_unit.end,
                                             cu.start,
                                         );
@@ -147,6 +255,7 @@ impl CoverageAndWorkDay {
                                 //Check through midnight
                                 if farthest_unit.ends_before_next_midnight() {
                                     let rvus = &self.aggregate_work_in_timespan(
+                                        farthest_unit.get_rotation(),
                                         farthest_unit.end,
                                         NEXT_MIDNIGHT,
                                     );
@@ -177,4 +286,6 @@ impl CoverageAndWorkDay {
             }
         }
     }
+
+
 }

@@ -64,8 +64,9 @@ impl WorkUnit {
     }
 }
 
-#[derive(Default, Debug, Serialize)]
+#[derive(Debug, Serialize)]
 pub struct AnalysisDatum {
+    rotation: String,
     total_rvu: f64,
     total_bvu: f64,
     studies: HashMap<String, f64>,
@@ -73,16 +74,26 @@ pub struct AnalysisDatum {
 
 impl AddAssign for AnalysisDatum {
     fn add_assign(&mut self, rhs: Self) {
-        self.total_rvu += rhs.total_rvu;
-        self.total_bvu += rhs.total_bvu;
-
-        for (rhs_key, rhs_val) in rhs.studies {
-            self.add_studies(rhs_key, rhs_val);
-        }
+        if self.rotation!=rhs.rotation
+        {
+            panic!("Add assigned for different rotations.");
+        }        
     }
 }
 
 impl AnalysisDatum {
+    pub fn create(rotation:String)->AnalysisDatum
+    {
+        AnalysisDatum{
+            rotation,
+            total_rvu:0.0,
+            total_bvu:0.0,
+            studies:HashMap::new()
+        }
+    }
+    pub fn get_rotation(&self)->String{
+        self.rotation
+    }
     pub fn get_rvu(&self) -> f64 {
         self.total_rvu
     }
@@ -91,6 +102,16 @@ impl AnalysisDatum {
     }
     pub fn get_studies(&self) -> &HashMap<String, f64> {
         &self.studies
+    }
+
+    pub fn unchecked_add(&self, rhs:Self) -> ()
+    {
+        self.total_rvu += rhs.total_rvu;
+        self.total_bvu += rhs.total_bvu;
+
+        for (rhs_key, rhs_val) in rhs.studies {
+            self.add_studies(rhs_key, rhs_val);
+        }
     }
 
     pub fn scale(&mut self, scale: f64) {
