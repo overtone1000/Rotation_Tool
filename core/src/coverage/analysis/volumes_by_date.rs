@@ -17,8 +17,8 @@ pub fn sort_volumes_by_date(coverage_map: &mut CoverageMap) -> CategorizedVolume
     let mut retval: CategorizedVolumes = CategorizedVolumes::new();
 
     let mut process_collection =
-        |rotation: String, collected_by_date: HashMap<NaiveDate, AnalysisDatum>| {
-            for (date, datum) in collected_by_date {
+        |date:NaiveDate, rotation: String, work: Vec<AnalysisDatum>| {
+            for datum in work {
                 let new_mark = VolumesMark {
                     rvu: datum.get_rvu(),
                     bvu: datum.get_bvu(),
@@ -35,7 +35,7 @@ pub fn sort_volumes_by_date(coverage_map: &mut CoverageMap) -> CategorizedVolume
                         for coverage_unit in coverage {
                             process_collection(
                                 coverage_unit.get_rotation(),
-                                coverage_unit.collect_work_bydate(coverage_and_workday),
+                                coverage_unit.collect_work(coverage_and_workday),
                             );
                         }
                     }
@@ -43,9 +43,8 @@ pub fn sort_volumes_by_date(coverage_map: &mut CoverageMap) -> CategorizedVolume
                         for coverage_unit in coverage {
                             process_collection(
                                 coverage_unit.get_rotation(),
-                                coverage_unit.collect_work_bydate(coverage_and_workday),
+                                coverage_unit.collect_work(coverage_and_workday),
                             );
-                            this is incorrect, have to spread this work out over the fractionally covered days of that week!!!
                         }
                     }
                 };

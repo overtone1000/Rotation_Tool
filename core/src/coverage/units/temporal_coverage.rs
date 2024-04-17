@@ -161,6 +161,7 @@ impl WorkCollector for TemporalCoverageUnit {
         retval
     }
 
+    /*
     fn collect_work_bydate(
         &self,
         workday: &CoverageAndWorkDay,
@@ -182,4 +183,5 @@ impl WorkCollector for TemporalCoverageUnit {
 
         retval
     }
+    */
 }

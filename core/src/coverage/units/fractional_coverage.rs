@@ -76,6 +76,7 @@ impl WorkCollector for FractionalCoverageUnit {
         retval
     }
 
+    /*
     fn collect_work_bydate(
         &self,
         workday: &CoverageAndWorkDay,
@@ -101,4 +102,5 @@ impl WorkCollector for FractionalCoverageUnit {
 
         retval
     }
+    */
 }
