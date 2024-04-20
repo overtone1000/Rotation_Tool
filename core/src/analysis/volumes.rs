@@ -33,6 +33,34 @@ impl CategorizedVolumes {
             }
         };
     }
+    fn count_rotations(&self)->HashMap<String,u64>
+    {
+        let mut retval:HashMap<String,u64>=HashMap::new();
+        for (_date,map) in &self.date_map
+        {
+            for (rotation,_) in map
+            {
+                match retval.entry(rotation.to_string())
+                {
+                    std::collections::hash_map::Entry::Occupied(mut occ) => {*occ.get_mut()+=1;},
+                    std::collections::hash_map::Entry::Vacant(vac) => {vac.insert(1);},
+                };
+            }
+        }
+        retval
+    }
+}
+
+impl core::fmt::Debug for CategorizedVolumes
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        for (rotation,count) in &self.count_rotations()
+        {
+            f.write_str(format!("{}:{}
+            ",rotation,count).as_str())?;
+        }
+        Ok(())
+    }
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Serialize)]

@@ -121,10 +121,10 @@ impl CoverageMap {
             };
 
             if date_constraints.include(&exam.list_datetime) {
-                let denominator = *salem_weekday_count
-                    .get(&NaiveDate::from(exam.list_datetime).weekday())
-                    .expect("All weekdays should be populated")
-                    as f64;
+                //let denominator = *salem_weekday_count
+                //    .get(&NaiveDate::from(exam.list_datetime).weekday())
+                //    .expect("All weekdays should be populated")
+                //    as f64;
 
                 //Build coords and populate maps with this row.
                 let coords: CoverageCoordinates = {
@@ -242,7 +242,7 @@ impl CoverageMap {
                             exam.list_datetime,
                             *rvu,
                             *bvu,
-                            denominator,
+                            //denominator,
                             exam.procedure_description.to_string()
                         )
                     };

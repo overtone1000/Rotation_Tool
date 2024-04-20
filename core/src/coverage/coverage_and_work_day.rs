@@ -40,9 +40,9 @@ impl TimeAdjustment
         match self
         {
             TimeAdjustment::Fractional(weekday) => {
-                let mut shift:u64=u64::from(weekday.number_from_monday()-date.weekday().number_from_monday());
+                let mut shift:i64=i64::from(weekday.number_from_monday() as i64-date.weekday().number_from_monday() as i64);
                 if shift<0 {shift+=7;}
-                date.checked_add_days(Days::new(shift));
+                let date=date.checked_add_days(Days::new(shift as u64)).expect("Invalid date!");
                 assert!(*weekday==date.weekday());
                 date
             },
@@ -114,13 +114,12 @@ impl CoverageAndWorkDay {
         retval
     }
 
-    pub fn aggregate_work_in_timespan(
+    fn aggregate_work_in_timespan(
         &self,
-        rotation: String,
         start: TimeSinceMidnight,
         end: TimeSinceMidnight,
     ) -> AnalysisDatum {
-        let mut retval: AnalysisDatum = AnalysisDatum::create(rotation);
+        let mut retval: AnalysisDatum = AnalysisDatum::default();
         for work_unit in self.get_work_in_timespan(start, end) {
             retval.add_workunit(work_unit);
         }
@@ -139,79 +138,111 @@ impl CoverageAndWorkDay {
         retval
     }
 
-    fn collect_temporal_work(&self,coverage:TemporalCoverageUnit)->AnalysisDatum
+    fn collect_work_by_rotation_date(&self,coverage:&CoverageUnit)->HashMap<NaiveDate,AnalysisDatum>
     {
-        let mut retval: AnalysisDatum = AnalysisDatum::create(coverage.get_rotation());
-        for work_unit in self.get_work_in_timespan(coverage.start, coverage.end) {
-            retval.add_workunit(work_unit);
-        }
-        retval
-    }
-
-    fn collect_fractional_work(&self,coverage:FractionalCoverageUnit)->AnalysisDatum
-    {
-        let mut retval: AnalysisDatum = AnalysisDatum::create(coverage.get_rotation());
-
-        for work in &self.work {
-            retval.add_workunit(work);
-        }
-        retval.scale(coverage.get_fraction());
-
-        retval
-    }
-
-    fn work_by_date(&self)->HashMap<NaiveDate,Vec<&WorkUnit>>
-    {
-        let mut retval:HashMap<NaiveDate,Vec<&WorkUnit>>=HashMap::new();
-
-        for work in &self.work {
-            let vec=match retval.entry(work.get_datetime().date())
-            {
-                std::collections::hash_map::Entry::Occupied(mut occ) => {
-                    occ.get_mut()
-                },
-                std::collections::hash_map::Entry::Vacant(vac) => {
-                    vac.insert(Vec::new())
-                },
-            };
-            vec.push(work);
-        };
-
-        retval
-    }
-
-    pub fn for_each_analysis_datum<T>(&self, fun:T)->()
-    where T:Fn(AnalysisDatum,CoverageUnit)->()
-    {
-        match self.coverages
+        let mut retval: HashMap<NaiveDate,AnalysisDatum> = HashMap::new();
+        match coverage
         {
-            Some(coverage) => match coverage {
-                Coverage::Temporal(coverages) => {
-                    for coverage in coverages {
-                            fun(self.collect_temporal_work(coverage),
-                            CoverageUnit::Temporal(coverage)
-                        );
-                    }
-                }
-                Coverage::Fractional(coverages) => {
-                    for coverage in coverages {
-                            fun(self.collect_fractional_work(coverage),
-                            CoverageUnit::WeekFraction(coverage)
-                        );
-                    }
+            CoverageUnit::Temporal(tcu) => {
+                //Temporal work only collects work in a specific timespan
+                for work in &self.get_work_in_timespan(tcu.start, tcu.end) {
+                    let rotation_date=coverage.get_time_adjustment().get_date(work.get_datetime().date());
+                    match retval.entry(rotation_date)
+                    {
+                        std::collections::hash_map::Entry::Occupied(mut occ) => 
+                        {
+                            occ.get_mut().add_workunit(work)
+                        },
+                        std::collections::hash_map::Entry::Vacant(vac) => 
+                        {
+                            let mut new_unit:AnalysisDatum=AnalysisDatum::default();
+                            new_unit.add_workunit(work);
+                            vac.insert(new_unit);
+                        },
+                    };
                 }
             },
-            None => {
-                eprintln!("Uncovered work!");
-                panic!("Uncovered work!");
-            }
+            CoverageUnit::WeekFraction(fcu) => {
+                //Fractional work is for all the work in this coverage and workday but is scaled
+                for work in &self.work {
+                    let rotation_date=coverage.get_time_adjustment().get_date(work.get_datetime().date()); //Each fractional coverage is a separate entry so it only corresponds to a single date
+                    match retval.entry(rotation_date)
+                    {
+                        std::collections::hash_map::Entry::Occupied(mut occ) => 
+                        {
+                            occ.get_mut().add_workunit(work)
+                        },
+                        std::collections::hash_map::Entry::Vacant(vac) => 
+                        {
+                            let mut new_unit:AnalysisDatum=AnalysisDatum::default();
+                            new_unit.add_workunit(work);
+                            vac.insert(new_unit);
+                        },
+                    };
+                }
+                //Fractional work is scaled
+                for ad in retval.values_mut()
+                {
+                    ad.scale(fcu.get_fraction());
+                }
+            },
         };
+        retval
     }
 
-    pub fn for_each_analysis_datum_by_date<T>(&self,fun:T)->()
-    where T:Fn(NaiveDate,AnalysisDatum,CoverageUnit)->()
+    fn for_each_coverage_unit<T>(&self, mut fun:T)->()
+    where T:FnMut(&CoverageUnit)->()
     {
-        
+        for coverage in &self.coverages
+        {
+            let cu_iter:Vec<CoverageUnit> = match coverage
+            {
+                Coverage::Temporal(tcus) => {
+                    tcus.iter().map(|tcu|{CoverageUnit::Temporal(tcu.clone())}).collect()
+                },
+                Coverage::Fractional(fcus) => {
+                    fcus.iter().map(|fcu|{CoverageUnit::WeekFraction(fcu.clone())}).collect()
+                },
+            };
+
+            for cu in cu_iter
+            {
+                fun(&cu);
+            }
+        }
+    }
+
+    pub fn for_each_analysis_datum_aggregate_and_average<T>(&self, mut fun:T)->()
+    where T:FnMut(AnalysisDatum,&CoverageUnit)->()
+    {
+        self.for_each_coverage_unit(
+            |coverage:&CoverageUnit|
+            {
+                let collected_by_date=self.collect_work_by_rotation_date(&coverage);
+                let mut aggregate=AnalysisDatum::default();
+                for ad in collected_by_date.values()
+                {
+                    aggregate+=ad.clone();                 
+                }
+                let denom:f64=f64::from(collected_by_date.keys().len() as u32);
+                aggregate.scale(1.0/denom);
+                fun(aggregate,coverage);
+            }
+        );
+    }
+
+    pub fn for_each_analysis_datum_by_rotation_date<T>(&self,mut fun:T)->()
+    where T:FnMut(NaiveDate,AnalysisDatum,&CoverageUnit)->()
+    {
+        self.for_each_coverage_unit(
+            |coverage:&CoverageUnit|
+            {
+                for (date,ad) in self.collect_work_by_rotation_date(&coverage)
+                {
+                    fun(date,ad,&coverage);
+                }
+            }
+        );
     }
 
     pub fn audit_coverage(&mut self) -> CoverageError {
@@ -219,7 +250,7 @@ impl CoverageAndWorkDay {
 
         match &self.coverages {
             None => CoverageError::NoCoverage(
-                self.aggregate_work_in_timespan("None".to_string(),THIS_MIDNIGHT, NEXT_MIDNIGHT)
+                self.aggregate_work_in_timespan(THIS_MIDNIGHT, NEXT_MIDNIGHT)
                     .get_rvu(),
             ),
             Some(coverages) => {
@@ -234,7 +265,6 @@ impl CoverageAndWorkDay {
                                 //Check from midnight
                                 if farthest_unit.starts_after_this_midnight() {
                                     let rvus = &self.aggregate_work_in_timespan(
-                                        farthest_unit.get_rotation(),
                                         THIS_MIDNIGHT,
                                         farthest_unit.start,
                                     );
@@ -260,7 +290,6 @@ impl CoverageAndWorkDay {
                                     //Check gap
                                     {
                                         let rvus = &self.aggregate_work_in_timespan(
-                                            farthest_unit.get_rotation(),
                                             farthest_unit.end,
                                             cu.start,
                                         );
@@ -283,7 +312,6 @@ impl CoverageAndWorkDay {
                                 //Check through midnight
                                 if farthest_unit.ends_before_next_midnight() {
                                     let rvus = &self.aggregate_work_in_timespan(
-                                        farthest_unit.get_rotation(),
                                         farthest_unit.end,
                                         NEXT_MIDNIGHT,
                                     );

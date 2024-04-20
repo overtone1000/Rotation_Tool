@@ -25,7 +25,7 @@ pub fn analyze_by_day_of_week(
         let datum: &mut AnalysisDatum = match daymap.entry(weekday) {
             Entry::Occupied(entry) => entry.into_mut(),
             Entry::Vacant(empty) => {
-                let entry = empty.insert(AnalysisDatum::create(rotation));
+                let entry = empty.insert(AnalysisDatum::default());
                 entry
             }
         };
@@ -36,8 +36,8 @@ pub fn analyze_by_day_of_week(
     coverage_map.foreach_mut(
         |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay|
         {
-            coverage_and_workday.for_each_analysis_datum(
-                |ad:AnalysisDatum,cu:CoverageUnit|
+            coverage_and_workday.for_each_analysis_datum_aggregate_and_average(
+                |ad:AnalysisDatum,cu:&CoverageUnit|
                 {
                     
                     addfunc(cu.get_rotation(),cu.get_time_adjustment().get_weekday(coords),ad);

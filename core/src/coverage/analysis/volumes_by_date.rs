@@ -26,14 +26,16 @@ pub fn sort_volumes_by_date(coverage_map: &mut CoverageMap) -> CategorizedVolume
 
     coverage_map.foreach_mut(
         |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| {
-            coverage_and_workday.for_each_analysis_datum_by_date(
-                |date:NaiveDate,ad:AnalysisDatum,cu:CoverageUnit|
+            coverage_and_workday.for_each_analysis_datum_by_rotation_date(
+                |date:NaiveDate,ad:AnalysisDatum,cu:&CoverageUnit|
                 {
-                    cu.get_time_adjustment().get_date(coords.)
+                    process_datum(date,cu.get_rotation(),ad);
                 }
             )
         }
     );
+
+    println!("{:?}",retval);
 
     retval
 }

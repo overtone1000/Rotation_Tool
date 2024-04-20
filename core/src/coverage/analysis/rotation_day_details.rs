@@ -12,7 +12,7 @@ pub fn details(
     analyzed_weekday: chrono::Weekday,
     analyzed_rotation: &str,
 ) -> Result<AnalysisDatum, Box<dyn Error>> {
-    let mut aggregate: AnalysisDatum = AnalysisDatum::create("All Rotations Aggregated".to_string());
+    let mut aggregate: AnalysisDatum = AnalysisDatum::default();
 
     let mut addfunc = |rotation: String, weekday: chrono::Weekday, data: AnalysisDatum| {
         if weekday == analyzed_weekday && rotation == analyzed_rotation {
@@ -23,8 +23,8 @@ pub fn details(
     coverage_map.foreach_mut(
         |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay|
         {
-            coverage_and_workday.for_each_analysis_datum(
-                |ad:AnalysisDatum,cu:CoverageUnit|
+            coverage_and_workday.for_each_analysis_datum_aggregate_and_average(
+                |ad:AnalysisDatum,cu:&CoverageUnit|
                 {
                     addfunc(cu.get_rotation(),cu.get_time_adjustment().get_weekday(coords),ad);
                 }

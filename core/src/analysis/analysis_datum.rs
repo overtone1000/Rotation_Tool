@@ -1,6 +1,6 @@
 use std::{
     collections::{hash_map::Entry, HashMap},
-    ops::AddAssign,
+    ops::{AddAssign, DivAssign},
 };
 
 use chrono::NaiveDateTime;
@@ -25,22 +25,24 @@ pub struct WorkUnit {
     rvu: f64,
     bvu: f64,
     exam_desc: String,
-    denominator: f64,
+    //denominator: f64, //Used only for fractional type? No, was using in work adding! Get rid of this.
 }
 
 impl WorkUnit {
     pub fn get_datetime(&self) -> NaiveDateTime {
         self.datetime.datetime
     }
-    pub fn get_scaled_rvu(&self) -> f64 {
-        self.rvu / self.denominator
-    }
     pub fn get_absolute_rvu(&self)->f64{
         self.rvu
+    }
+    /*
+    pub fn get_scaled_rvu(&self) -> f64 {
+        self.rvu / self.denominator
     }
     pub fn get_scaled_bvu(&self) -> f64 {
         self.bvu / self.denominator
     }
+     */
     pub fn get_absolute_bvu(&self)->f64{
         self.bvu
     }
@@ -51,7 +53,7 @@ impl WorkUnit {
         datetime: NaiveDateTime,
         rvu: f64,
         bvu: f64,
-        denominator: f64,
+        //denominator: f64,
         exam_desc: String,
     ) -> WorkUnit {
         WorkUnit {
@@ -59,12 +61,12 @@ impl WorkUnit {
             rvu,
             bvu,
             exam_desc,
-            denominator,
+            //denominator,
         }
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Default, Clone)]
 pub struct AnalysisDatum {
     total_rvu: f64,
     total_bvu: f64,
@@ -83,14 +85,6 @@ impl AddAssign for AnalysisDatum {
 }
 
 impl AnalysisDatum {
-    pub fn create(rotation:String)->AnalysisDatum
-    {
-        AnalysisDatum{
-            total_rvu:0.0,
-            total_bvu:0.0,
-            studies:HashMap::new()
-        }
-    }
     pub fn get_rvu(&self) -> f64 {
         self.total_rvu
     }
@@ -113,7 +107,7 @@ impl AnalysisDatum {
     pub fn add_workunit(&mut self, rhs: &WorkUnit) {
         self.total_rvu += rhs.get_absolute_rvu();
         self.total_bvu += rhs.get_absolute_bvu();
-        self.add_studies(rhs.exam_desc.to_string(), 1.0 / rhs.denominator);
+        self.add_studies(rhs.exam_desc.to_string(), 1.0);// / rhs.denominator);
     }
 
     fn add_studies(&mut self, key: String, val: f64) {
