@@ -10,7 +10,7 @@ use crate::{analysis::analysis_datum::AnalysisDatum, error::source_error::Source
 
 use self::{fractional_coverage::FractionalCoverageUnit, temporal_coverage::TemporalCoverageUnit};
 
-use super::{coverage_and_work_day::CoverageAndWorkDay};
+use super::coverage_and_work_day::{CoverageAndWorkDay, TimeAdjustment};
 
 pub(crate) mod fractional_coverage;
 pub(crate) mod temporal_coverage;
@@ -19,6 +19,26 @@ pub(crate) mod temporal_coverage;
 pub enum CoverageUnit {
     Temporal(TemporalCoverageUnit),
     WeekFraction(FractionalCoverageUnit),
+}
+
+impl CoverageUnit
+{
+    pub fn get_rotation(&self)->String
+    {
+        match self
+        {
+            CoverageUnit::Temporal(tcu) => tcu.get_rotation(),
+            CoverageUnit::WeekFraction(fcu) => fcu.get_rotation(),
+        }
+    }
+    pub fn get_time_adjustment(&self)->TimeAdjustment
+    {
+        match self
+        {
+            CoverageUnit::Temporal(tcu) => {TimeAdjustment::Temporal(-tcu.get_offset())},
+            CoverageUnit::WeekFraction(fcu) => {TimeAdjustment::Fractional(fcu.get_day())},
+        }
+    }
 }
 
 #[derive(Debug, Serialize)]

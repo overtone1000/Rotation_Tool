@@ -30,7 +30,7 @@ pub struct TemporalCoverageUnit {
     pub end: TimeSinceMidnight,
     rotation: String,
     //rotation_day: SerializeableWeekday
-    rotation_day_offset:i64 //Day offset to get to the day of the rotation that will actually provide the coverage as compared to the day the study is done
+    work_to_rotation_day_offset:i64 //Day offset between work and rotation (relative to work, so + means work is before rotation, should generally be positive)
 }
 
 impl Eq for TemporalCoverageUnit {}
@@ -44,13 +44,14 @@ impl TemporalCoverageUnit {
         start: TimeSinceMidnight,
         end: TimeSinceMidnight,
         rotation: String,
-        rotation_day_offset: i64,
+        work_to_rotation_day_offset:i64,
     ) -> TemporalCoverageUnit {
         TemporalCoverageUnit {
             start,
             end,
             rotation,
-            rotation_day_offset,
+            work_to_rotation_day_offset
+            ,
         }
     }
 
@@ -123,12 +124,12 @@ impl TemporalCoverageUnit {
     }
 
     pub fn get_offset(&self) -> i64 {
-        self.rotation_day_offset
+        self.work_to_rotation_day_offset
     }
 
 
     pub fn to_string(&self) -> String {
-        format!("{} ({})", self.rotation, self.rotation_day_offset)
+        format!("{} ({})", self.rotation, self.work_to_rotation_day_offset)
     }
 }
 

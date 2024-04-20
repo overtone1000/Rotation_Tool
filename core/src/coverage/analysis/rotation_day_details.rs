@@ -3,7 +3,7 @@ use std::error::Error;
 use crate::{
     analysis::analysis_datum::AnalysisDatum,
     coverage::{
-        self, coordinate::CoverageCoordinates, coverage_and_work_day::{CoverageAndWorkDay, TimeAdjustment}, units::Coverage, work_coverage_map::maps::CoverageMap
+        self, coordinate::CoverageCoordinates, coverage_and_work_day::{CoverageAndWorkDay, TimeAdjustment}, units::{Coverage, CoverageUnit}, work_coverage_map::maps::CoverageMap
     },
 };
 
@@ -16,7 +16,7 @@ pub fn details(
 
     let mut addfunc = |rotation: String, weekday: chrono::Weekday, data: AnalysisDatum| {
         if weekday == analyzed_weekday && rotation == analyzed_rotation {
-            aggregate.unchecked_add(data);
+            aggregate+=data;
         }
     };
 
@@ -24,9 +24,9 @@ pub fn details(
         |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay|
         {
             coverage_and_workday.for_each_analysis_datum(
-                |ad:AnalysisDatum,ta:TimeAdjustment|
+                |ad:AnalysisDatum,cu:CoverageUnit|
                 {
-                    addfunc(ad.get_rotation(),ta.get_weekday(coords),ad);
+                    addfunc(cu.get_rotation(),cu.get_time_adjustment().get_weekday(coords),ad);
                 }
             );
         }

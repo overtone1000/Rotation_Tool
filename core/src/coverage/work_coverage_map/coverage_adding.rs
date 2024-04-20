@@ -90,9 +90,9 @@ impl CoverageMap {
                                                     let periods =
                                                         time_period.instantiate_periods(weekday);
 
-                                                    for (day_offset, start, end) in periods {
+                                                    for (work_to_rotation_day_offset, start, end) in periods {
                                                         coords.weekday =
-                                                            weekday_plus(weekday, day_offset);
+                                                            weekday_plus(weekday, work_to_rotation_day_offset);
 
                                                         let coverage = TemporalCoverageUnit::create(
                                                             start,
@@ -100,7 +100,7 @@ impl CoverageMap {
                                                             rotation_description
                                                                 .rotation
                                                                 .to_string(),
-                                                            -day_offset, //the NOMINAL weekday
+                                                            work_to_rotation_day_offset, //day_offset is the offset from the work to the rotation, so store it here
                                                         );
 
                                                         match self.add_coverage(

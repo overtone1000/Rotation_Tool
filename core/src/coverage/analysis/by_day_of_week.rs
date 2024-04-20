@@ -3,7 +3,7 @@ use std::collections::{hash_map::Entry, HashMap};
 use crate::{
     analysis::analysis_datum::AnalysisDatum,
     coverage::{
-        self, coordinate::CoverageCoordinates, coverage_and_work_day::{CoverageAndWorkDay, TimeAdjustment}, units::Coverage, work_coverage_map::maps::CoverageMap
+        self, coordinate::CoverageCoordinates, coverage_and_work_day::{CoverageAndWorkDay, TimeAdjustment}, units::{Coverage, CoverageUnit}, work_coverage_map::maps::CoverageMap
     },
     globals::ALL_DAYS,
 };
@@ -37,9 +37,10 @@ pub fn analyze_by_day_of_week(
         |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay|
         {
             coverage_and_workday.for_each_analysis_datum(
-                |ad:AnalysisDatum,ta:TimeAdjustment|
+                |ad:AnalysisDatum,cu:CoverageUnit|
                 {
-                    addfunc(ad.get_rotation(),ta.get_weekday(coords),ad);
+                    
+                    addfunc(cu.get_rotation(),cu.get_time_adjustment().get_weekday(coords),ad);
                 }
             );
         }

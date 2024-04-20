@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use chrono::{Datelike, Days, NaiveDate, Timelike};
 use serde::Serialize;
 
@@ -38,7 +40,7 @@ impl TimeAdjustment
         match self
         {
             TimeAdjustment::Fractional(weekday) => {
-                let mut shift=weekday.number_from_monday()-date.weekday().number_from_monday();
+                let mut shift:u64=u64::from(weekday.number_from_monday()-date.weekday().number_from_monday());
                 if shift<0 {shift+=7;}
                 date.checked_add_days(Days::new(shift));
                 assert!(*weekday==date.weekday());
@@ -158,23 +160,43 @@ impl CoverageAndWorkDay {
         retval
     }
 
+    fn work_by_date(&self)->HashMap<NaiveDate,Vec<&WorkUnit>>
+    {
+        let mut retval:HashMap<NaiveDate,Vec<&WorkUnit>>=HashMap::new();
+
+        for work in &self.work {
+            let vec=match retval.entry(work.get_datetime().date())
+            {
+                std::collections::hash_map::Entry::Occupied(mut occ) => {
+                    occ.get_mut()
+                },
+                std::collections::hash_map::Entry::Vacant(vac) => {
+                    vac.insert(Vec::new())
+                },
+            };
+            vec.push(work);
+        };
+
+        retval
+    }
+
     pub fn for_each_analysis_datum<T>(&self, fun:T)->()
-    where T:Fn(AnalysisDatum,TimeAdjustment)->()
+    where T:Fn(AnalysisDatum,CoverageUnit)->()
     {
         match self.coverages
         {
             Some(coverage) => match coverage {
                 Coverage::Temporal(coverages) => {
                     for coverage in coverages {
-                        fun(self.collect_temporal_work(coverage),
-                            TimeAdjustment::Temporal(coverage.get_offset())
+                            fun(self.collect_temporal_work(coverage),
+                            CoverageUnit::Temporal(coverage)
                         );
                     }
                 }
                 Coverage::Fractional(coverages) => {
                     for coverage in coverages {
-                        fun(self.collect_fractional_work(coverage),
-                            TimeAdjustment::Fractional(coverage.get_day())
+                            fun(self.collect_fractional_work(coverage),
+                            CoverageUnit::WeekFraction(coverage)
                         );
                     }
                 }
@@ -184,6 +206,12 @@ impl CoverageAndWorkDay {
                 panic!("Uncovered work!");
             }
         };
+    }
+
+    pub fn for_each_analysis_datum_by_date<T>(&self,fun:T)->()
+    where T:Fn(NaiveDate,AnalysisDatum,CoverageUnit)->()
+    {
+        
     }
 
     pub fn audit_coverage(&mut self) -> CoverageError {

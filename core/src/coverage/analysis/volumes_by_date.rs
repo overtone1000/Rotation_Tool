@@ -8,68 +8,28 @@ use crate::{
         volumes::{CategorizedVolumes, VolumesMark},
     },
     coverage::{
-        coordinate::CoverageCoordinates, coverage_and_work_day::{CoverageAndWorkDay, TimeAdjustment},
-        units::Coverage, work_coverage_map::maps::CoverageMap,
+        self, coordinate::CoverageCoordinates, coverage_and_work_day::{CoverageAndWorkDay, TimeAdjustment}, units::{Coverage, CoverageUnit}, work_coverage_map::maps::CoverageMap
     },
 };
 
 pub fn sort_volumes_by_date(coverage_map: &mut CoverageMap) -> CategorizedVolumes {
     let mut retval: CategorizedVolumes = CategorizedVolumes::new();
 
-    let mut process_collection =
-        |date:NaiveDate, rotation: String, work: Vec<AnalysisDatum>| {
-            for datum in work {
-                let new_mark = VolumesMark {
-                    rvu: datum.get_rvu(),
-                    bvu: datum.get_bvu(),
-                };
-                retval.add(date, &rotation, new_mark);
-            }
+    let mut process_datum =
+        |date:NaiveDate, rotation: String, work: AnalysisDatum| {
+            let new_mark = VolumesMark {
+                rvu: work.get_rvu(),
+                bvu: work.get_bvu(),
+            };
+            retval.add(date, &rotation, new_mark);
         };
-
-    let func = |_coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| {
-        match &coverage_and_workday.coverages {
-            Some(coverage) => {
-                match coverage {
-                    Coverage::Temporal(coverage) => {
-                        for coverage_unit in coverage {
-                            coverage_unit.
-                            process_collection(
-                                coverage_unit.get_rotation(),
-                                coverage_unit.collect_work(coverage_and_workday),
-                            );
-                        }
-                    }
-                    Coverage::Fractional(coverage) => {
-                        for coverage_unit in coverage {
-                            process_collection(
-                                coverage_unit.get_rotation(),
-                                coverage_unit.collect_work(coverage_and_workday),
-                            );
-                        }
-                    }
-                };
-            }
-            None => {
-                eprintln!("Uncovered work!");
-                panic!("Uncovered work!");
-            }
-        }
-    };
-
-    Here need to interate over analysis data segregated by dates of work
 
     coverage_map.foreach_mut(
         |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| {
-            coverage_and_workday.for_each_analysis_datum(
-                |ad:AnalysisDatum,ta:TimeAdjustment|
+            coverage_and_workday.for_each_analysis_datum_by_date(
+                |date:NaiveDate,ad:AnalysisDatum,cu:CoverageUnit|
                 {
-                    let date:Option<NaiveDate>=None;
-                    for study in ad.get_studies()
-                    {
-
-                    }
-                    process_collection(ad.get_date())
+                    cu.get_time_adjustment().get_date(coords.)
                 }
             )
         }
