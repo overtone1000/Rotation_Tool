@@ -8,19 +8,24 @@ export let workaround =
 
 export let workaround_tips =
 {
-    y: "value",
-    fx: "rotation",
-    count: "count",
-    members: "members",
-    
-    stroke: "white",
+    y: "value", //This pulls raw data into y channel for subseequent transformation
+    fx: "rotation", //This pulls raw data into fx channel for subsequent transformation
+    //members: "members",   
+    stroke: "red",
     fill: "black",
     
+    //title: (d)=>{return "Hello";},
+
+    tips:
+    {
+        members:"identity"
+    },
     format: {
         fx:true,
-        fill:false,
+        fill:true,
         count:false,
         members:true,
-        identity:true,
+        identity:false,
+        y:false
     }
 }

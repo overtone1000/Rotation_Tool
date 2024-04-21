@@ -119,6 +119,8 @@
 				if(mark.value<min){min=mark.value;}
 			}
 
+			let outputs:Plot.BinOutputs={};
+
 			let marks:any=[
 				Plot.rect(
 					displayed_marks,
@@ -134,12 +136,9 @@
 					displayed_marks,
 					Plot.binY(
 						{
-							members:"identity",
-							count:"count"
+							fill:"count",
 						},
-						Plot.pointer(
-							workaround_tips
-						)
+						workaround_tips//Plot.pointer(workaround_tips)
 					)
 				),
 			];
