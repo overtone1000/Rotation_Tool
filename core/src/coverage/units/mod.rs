@@ -81,4 +81,16 @@ impl Coverage {
         }
         Ok(())
     }
+    pub fn to_enum_version(&self)->Vec<CoverageUnit>
+    {
+        match self
+        {
+            Coverage::Temporal(tcus) => {
+                tcus.iter().map(|tcu|{CoverageUnit::Temporal(tcu.clone())}).collect()
+            },
+            Coverage::Fractional(fcus) => {
+                fcus.iter().map(|fcu|{CoverageUnit::WeekFraction(fcu.clone())}).collect()
+            },
+        }
+    }
 }

@@ -6,15 +6,14 @@ use std::{
 };
 
 use analysis::analysis_datum::AnalysisDatum;
-use chrono::{NaiveDateTime, Weekday};
+use chrono::{NaiveDate, NaiveDateTime, Weekday};
 use constraints::{is_not_holiday, ConstraintSet};
 
 use coverage::{
     analysis::{
         by_day_of_week::{analysis_to_csv, analyze_by_day_of_week},
         coverage_audit::{audit, audit_to_stream},
-    },
-    work_coverage_map::maps::CoverageMap,
+    }, coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay, units::CoverageUnit, work_coverage_map::maps::CoverageMap
 };
 use globals::file_names::COVERAGE_AUDIT_NOWORK_OUT;
 

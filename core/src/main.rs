@@ -1,5 +1,7 @@
 use std::error::Error;
 
+use chrono::NaiveDate;
+
 fn main() -> Result<(), Box<dyn Error>> {
     print!("{}[2J", 27 as char);
     for _ in 1..10 {
@@ -8,6 +10,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("Starting.");
 
     let mut common = rotation_tool::build_main_common()?;
+
+    let start:NaiveDate=NaiveDate::from_ymd_opt(2024, 1, 6).expect("Should be a valid date.");
+    let end:NaiveDate=NaiveDate::from_ymd_opt(2024, 3, 24).expect("Should be a valid date.");
+    common.coverage_tree.prune_by_rotation_date(start,end);
 
     let rotation_analysis: bool = true;
     if rotation_analysis {

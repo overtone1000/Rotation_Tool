@@ -1,5 +1,7 @@
 use std::error::Error;
 
+use chrono::NaiveDate;
+
 use crate::{
     analysis::analysis_datum::AnalysisDatum,
     coverage::{
@@ -23,8 +25,8 @@ pub fn details(
     coverage_map.foreach_mut(
         |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay|
         {
-            coverage_and_workday.for_each_analysis_datum_aggregate_and_average(
-                |ad:AnalysisDatum,cu:&CoverageUnit|
+            coverage_and_workday.for_each_analysis_datum_by_rotation_date(
+                |_date:NaiveDate,ad:AnalysisDatum,cu:&CoverageUnit|
                 {
                     addfunc(cu.get_rotation(),cu.get_time_adjustment().get_weekday(coords),ad);
                 }

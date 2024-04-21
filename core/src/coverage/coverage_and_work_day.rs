@@ -138,6 +138,27 @@ impl CoverageAndWorkDay {
         retval
     }
 
+    pub fn prune_by_rotation_date(&mut self, start:NaiveDate,end:NaiveDate)->()
+    {
+        self.work.retain(
+            |wu|
+            {
+                for coverage in &self.coverages
+                {
+                    for cu in coverage.to_enum_version()
+                    {
+                        let coverage_date=cu.get_time_adjustment().get_date(wu.get_datetime().date());
+                        if coverage_date>=start && coverage_date<=end
+                        {
+                            return true;
+                        }
+                    }
+                }
+                false
+            }
+        )
+    }
+
     fn collect_work_by_rotation_date(&self,coverage:&CoverageUnit)->HashMap<NaiveDate,AnalysisDatum>
     {
         let mut retval: HashMap<NaiveDate,AnalysisDatum> = HashMap::new();
@@ -195,40 +216,11 @@ impl CoverageAndWorkDay {
     {
         for coverage in &self.coverages
         {
-            let cu_iter:Vec<CoverageUnit> = match coverage
-            {
-                Coverage::Temporal(tcus) => {
-                    tcus.iter().map(|tcu|{CoverageUnit::Temporal(tcu.clone())}).collect()
-                },
-                Coverage::Fractional(fcus) => {
-                    fcus.iter().map(|fcu|{CoverageUnit::WeekFraction(fcu.clone())}).collect()
-                },
-            };
-
-            for cu in cu_iter
+            for cu in coverage.to_enum_version()
             {
                 fun(&cu);
             }
         }
-    }
-
-    pub fn for_each_analysis_datum_aggregate_and_average<T>(&self, mut fun:T)->()
-    where T:FnMut(AnalysisDatum,&CoverageUnit)->()
-    {
-        self.for_each_coverage_unit(
-            |coverage:&CoverageUnit|
-            {
-                let collected_by_date=self.collect_work_by_rotation_date(&coverage);
-                let mut aggregate=AnalysisDatum::default();
-                for ad in collected_by_date.values()
-                {
-                    aggregate+=ad.clone();                 
-                }
-                let denom:f64=f64::from(collected_by_date.keys().len() as u32);
-                aggregate.scale(1.0/denom);
-                fun(aggregate,coverage);
-            }
-        );
     }
 
     pub fn for_each_analysis_datum_by_rotation_date<T>(&self,mut fun:T)->()

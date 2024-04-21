@@ -1,49 +1,49 @@
-use std::collections::HashMap;
+use std::collections::{BTreeMap};
 
-use chrono::NaiveDate;
+use chrono::{Datelike, NaiveDate};
 use serde::Serialize;
 
 #[derive(Serialize)]
 pub struct CategorizedVolumes {
-    date_map: HashMap<NaiveDate, HashMap<String, VolumesMark>>,
+    date_map: BTreeMap<NaiveDate, BTreeMap<String, VolumesMark>>,
 }
 
 impl CategorizedVolumes {
     pub fn new() -> Self {
         Self {
-            date_map: HashMap::new(),
+            date_map: BTreeMap::new(),
         }
     }
     pub fn add(&mut self, date: NaiveDate, category: &str, new_mark: VolumesMark) {
         match self.date_map.entry(date) {
-            std::collections::hash_map::Entry::Occupied(mut entry) => {
+            std::collections::btree_map::Entry::Occupied(mut entry) => {
                 match entry.get_mut().entry(category.to_owned()) {
-                    std::collections::hash_map::Entry::Occupied(mut entry) => {
+                    std::collections::btree_map::Entry::Occupied(mut entry) => {
                         entry.insert(new_mark + *entry.get());
                     }
-                    std::collections::hash_map::Entry::Vacant(empty) => {
+                    std::collections::btree_map::Entry::Vacant(empty) => {
                         empty.insert(new_mark);
                     }
                 }
             }
-            std::collections::hash_map::Entry::Vacant(empty) => {
-                let mut new_member: HashMap<String, VolumesMark> = HashMap::new();
+            std::collections::btree_map::Entry::Vacant(empty) => {
+                let mut new_member: BTreeMap<String, VolumesMark> = BTreeMap::new();
                 new_member.insert(category.to_owned(), new_mark);
                 let _entry = empty.insert(new_member);
             }
         };
     }
-    fn count_rotations(&self)->HashMap<String,u64>
+    fn count_rotations(&self)->BTreeMap<String,u64>
     {
-        let mut retval:HashMap<String,u64>=HashMap::new();
+        let mut retval:BTreeMap<String,u64>=BTreeMap::new();
         for (_date,map) in &self.date_map
         {
             for (rotation,_) in map
             {
                 match retval.entry(rotation.to_string())
                 {
-                    std::collections::hash_map::Entry::Occupied(mut occ) => {*occ.get_mut()+=1;},
-                    std::collections::hash_map::Entry::Vacant(vac) => {vac.insert(1);},
+                    std::collections::btree_map::Entry::Occupied(mut occ) => {*occ.get_mut()+=1;},
+                    std::collections::btree_map::Entry::Vacant(vac) => {vac.insert(1);},
                 };
             }
         }
@@ -54,10 +54,33 @@ impl CategorizedVolumes {
 impl core::fmt::Debug for CategorizedVolumes
 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(format!("Categorized Volumes:
+        ").as_str())?;
+        
         for (rotation,count) in &self.count_rotations()
         {
             f.write_str(format!("{}:{}
             ",rotation,count).as_str())?;
+        }
+        f.write_str(format!("
+        ").as_str())?;
+
+        for (date,map) in &self.date_map
+        {
+            let mut rotation_string:String="".to_string();
+            for (rotation,_) in map
+            {
+                rotation_string+=rotation;
+                rotation_string+=" ";
+            }
+
+            f.write_str(format!(
+                "{}, {}: {}
+                ",
+                date.weekday(),
+                date.to_string().as_str(),
+                rotation_string.as_str()
+            ).as_str())?;
         }
         Ok(())
     }

@@ -1,3 +1,5 @@
+use chrono::NaiveDate;
+
 use crate::{analysis::analysis_datum::WorkUnit, coverage::coordinate::CoverageCoordinates};
 use crate::coverage::coverage_and_work_day::CoverageAndWorkDay;
 
@@ -96,6 +98,15 @@ impl CoverageMap {
                 }
             }
         }
+    }
+
+    pub fn prune_by_rotation_date(&mut self, start:NaiveDate,end:NaiveDate)->()
+    {
+        self.foreach_mut(
+            |_coords,coverage_and_workday|{
+                coverage_and_workday.prune_by_rotation_date(start, end);
+            }
+        )
     }
 }
 

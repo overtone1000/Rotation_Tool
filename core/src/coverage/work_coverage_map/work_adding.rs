@@ -69,6 +69,7 @@ impl CoverageMap {
 
         let exam_rvu_map = build_salem_rvumap(&source.main_data)?;
         
+        /*
         let mut salem_weekday_count: HashMap<chrono::Weekday, u64> = HashMap::new();
         //Determine how many days worth for each weekday
         let mut dateset: HashSet<NaiveDate> = HashSet::new();
@@ -99,6 +100,7 @@ impl CoverageMap {
             println!("{}:{}",weekday.to_string(),count);
         }
         println!();
+        */
         
         let mut excluded_by_reader:Vec<&Exam>=Vec::new();
         let mut excluded_as_nonradiology:Vec<&Exam>=Vec::new();

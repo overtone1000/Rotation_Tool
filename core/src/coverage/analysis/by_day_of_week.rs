@@ -1,4 +1,6 @@
-use std::collections::{hash_map::Entry, HashMap};
+use std::collections::{hash_map::Entry, HashMap, HashSet};
+
+use chrono::NaiveDate;
 
 use crate::{
     analysis::analysis_datum::AnalysisDatum,
@@ -12,8 +14,16 @@ pub fn analyze_by_day_of_week(
     coverage_map: &mut CoverageMap,
 ) -> HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>> {
     let mut retval: HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>> = HashMap::new();
-
+    let mut dates: HashMap<String,HashSet<NaiveDate>>;
+    
     let mut addfunc = |rotation: String, weekday: chrono::Weekday, data: AnalysisDatum| {
+
+        match dates.entry(rotation)
+        {
+            Entry::Occupied(occ) => todo!(),
+            Entry::Vacant(vac) => todo!(),
+        };
+
         let daymap: &mut HashMap<chrono::Weekday, AnalysisDatum> = match retval.entry(rotation) {
             Entry::Occupied(entry) => entry.into_mut(),
             Entry::Vacant(empty) => {
@@ -36,8 +46,8 @@ pub fn analyze_by_day_of_week(
     coverage_map.foreach_mut(
         |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay|
         {
-            coverage_and_workday.for_each_analysis_datum_aggregate_and_average(
-                |ad:AnalysisDatum,cu:&CoverageUnit|
+            coverage_and_workday.for_each_analysis_datum_by_rotation_date(
+                |_date:NaiveDate,ad:AnalysisDatum,cu:&CoverageUnit|
                 {
                     
                     addfunc(cu.get_rotation(),cu.get_time_adjustment().get_weekday(coords),ad);
