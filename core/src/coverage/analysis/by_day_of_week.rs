@@ -1,6 +1,6 @@
 use std::collections::{hash_map::Entry, HashMap, HashSet};
 
-use chrono::NaiveDate;
+use chrono::{Datelike, NaiveDate};
 
 use crate::{
     analysis::analysis_datum::AnalysisDatum,
@@ -14,15 +14,20 @@ pub fn analyze_by_day_of_week(
     coverage_map: &mut CoverageMap,
 ) -> HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>> {
     let mut retval: HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>> = HashMap::new();
-    let mut dates: HashMap<String,HashSet<NaiveDate>>;
+    let mut dates: HashMap<String,HashSet<NaiveDate>>=HashMap::new();
     
-    let mut addfunc = |rotation: String, weekday: chrono::Weekday, data: AnalysisDatum| {
+    let mut addfunc = |rotation: String, date: NaiveDate, data: AnalysisDatum| {
 
-        match dates.entry(rotation)
+        let rotation_set=match dates.entry(rotation.to_string())
         {
-            Entry::Occupied(occ) => todo!(),
-            Entry::Vacant(vac) => todo!(),
+            Entry::Occupied(occ) => {
+                occ.into_mut()
+            },
+            Entry::Vacant(vac) => {
+                vac.insert(HashSet::new())
+            },
         };
+        rotation_set.insert(date);
 
         let daymap: &mut HashMap<chrono::Weekday, AnalysisDatum> = match retval.entry(rotation) {
             Entry::Occupied(entry) => entry.into_mut(),
@@ -32,7 +37,7 @@ pub fn analyze_by_day_of_week(
             }
         };
 
-        let datum: &mut AnalysisDatum = match daymap.entry(weekday) {
+        let datum: &mut AnalysisDatum = match daymap.entry(date.weekday()) {
             Entry::Occupied(entry) => entry.into_mut(),
             Entry::Vacant(empty) => {
                 let entry = empty.insert(AnalysisDatum::default());
@@ -47,15 +52,24 @@ pub fn analyze_by_day_of_week(
         |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay|
         {
             coverage_and_workday.for_each_analysis_datum_by_rotation_date(
-                |_date:NaiveDate,ad:AnalysisDatum,cu:&CoverageUnit|
+                |date:NaiveDate,ad:AnalysisDatum,cu:&CoverageUnit|
                 {
-                    
-                    addfunc(cu.get_rotation(),cu.get_time_adjustment().get_weekday(coords),ad);
+                    addfunc(cu.get_rotation(),date,ad);
                 }
             );
         }
     );
 
+    for (rotation, rotation_data) in &mut retval
+    {
+        let dates=dates.get(rotation).expect("Shouldn't ever happen.");
+        for (weekday, datum) in rotation_data
+        {
+            let weekday_count=dates.iter().filter(|date|{date.weekday()==*weekday}).count();
+            let denominator:f64=f64::try_from(weekday_count as u32).expect("Invalid denominator");
+            datum.scale(1.0/denominator);
+        }
+    }
 
     retval
 }

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import RotationsByWeekday from "./rotations_by_weekday.svelte";
+	import RotationsByWeekday from "./rotation_volume_heatmap.svelte";
 
 	
 </script>

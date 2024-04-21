@@ -4,7 +4,7 @@
 	import { short_days_of_the_week_Mon_first } from "../../commons/time";
 	import ObservablePlot from "./observable_plot.svelte";
 	import * as Plot from "@observablehq/plot";
-	import { workaround } from "./workaround";
+	import { workaround, workaround_tips } from "./workaround";
 
 	type BuiltPlot = (SVGSVGElement | HTMLElement) & Plot.Plot;
 
@@ -108,69 +108,72 @@
 		return retval;
 	}
 
-	const build_heatmap=(data:AnalysisData, width:number, y:string, title:string)=>{	
-		let displayed_marks=get_all_marks(data);
-
-		let max=0;
-		let min=0;
-		for(let mark of displayed_marks)
+	const build_heatmap=(data:AnalysisData, width:number, y:string, title:string)=>{
+		if (displayed_marks!==undefined)
 		{
-			if(mark.value>max){max=mark.value;}
-			if(mark.value<min){min=mark.value;}
-		}
-
-		console.debug("Displayed marks:",displayed_marks);
-
-		let marks:any=[
-			Plot.rect(
-				displayed_marks,
-				Plot.binY(
-					{
-						fill:"count",//"proportion-facet",//count?,
-					},
-					//{
-					//	fill:"proportion-facet",//count?,
-					//},
-					workaround
-					//{
-					//	y: "value",
-					//	//thresholds:(max-min)/20
-					//}
-				)
-			)
-		];
-
-		console.debug(marks);
-
-		const retval = Plot.plot({
-			title: title,
-			color: {legend:true},
-			width: width,
-			//aspectRatio: 1,
-			height: 600,
-			y:{
-				grid:false,
-				label:valuetype
-			},
-			padding: 0,
-			//fx:{
-			//	domain: displayed_marks.filter((d)=>d.rotation)
-			//},
-			marginBottom: 120,
-			marginLeft: 80,
-			x:{
-				grid:true,
-				label:"Rotation",
-			},
-			fx:{
-				tickRotate:-45,
-			},
-			marks: marks,
-			style:{
-				fontSize:"14px"
+			let max=0;
+			let min=0;
+			for(let mark of displayed_marks)
+			{
+				if(mark.value>max){max=mark.value;}
+				if(mark.value<min){min=mark.value;}
 			}
-		})
-		return retval;
+
+			let marks:any=[
+				Plot.rect(
+					displayed_marks,
+					Plot.binY(
+						{
+							fill:"count",
+							members:"identity"
+						},
+						workaround,
+					)
+				),
+				Plot.tip(
+					displayed_marks,
+					Plot.binY(
+						{
+							members:"identity",
+							count:"count"
+						},
+						Plot.pointer(
+							workaround_tips
+						)
+					)
+				),
+			];
+
+			const retval = Plot.plot({
+				title: title,
+				color: {legend:true},
+				width: width,
+				//aspectRatio: 1,
+				height: 600,
+				y:{
+					grid:false,
+					label:valuetype
+				},
+				padding: 0,
+				//fx:{
+				//	domain: displayed_marks.filter((d)=>d.rotation)
+				//},
+				marginBottom: 120,
+				marginLeft: 80,
+				x:{
+					grid:true,
+					label:"Rotation",
+				},
+				fx:{
+					tickRotate:-45,
+				},
+				marks: marks,
+				style:{
+					fontSize:"14px"
+				}
+			})
+			return retval;
+		}
 	}
 	let plot_weekday_bvu:BuiltPlot|undefined=undefined;
 	let plot_weekday_rvu:BuiltPlot|undefined=undefined;
@@ -182,11 +185,14 @@
 
     let container_width:any="5000px";
 
+	let displayed_marks:AnalysisMark[]|undefined=undefined;
+
 	$:{
 		if(data!==undefined)
 		{
 
 			//selected_plot=build_weekday_plot(data,container_width,valuetype,"Rotation Volume by Weekday");
+			displayed_marks=get_all_marks(data);
 			selected_plot=build_heatmap(data,container_width,valuetype,"Rotation Volumes");
 		}
 	}

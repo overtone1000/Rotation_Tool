@@ -83,8 +83,8 @@ pub fn analyze_rotations(
     let auditfile_nowork: File = File::create(COVERAGE_AUDIT_NOWORK_OUT)?;
     let mut writer_nowork = BufWriter::new(auditfile_nowork);
 
-    let audit_result = audit(&mut common.coverage_tree);
-    audit_to_stream(&audit_result, &mut writer, &mut writer_nowork)?;
+    //let audit_result = audit(&mut common.coverage_tree);
+    //audit_to_stream(&audit_result, &mut writer, &mut writer_nowork)?;
 
     let analysis = analyze_by_day_of_week(&mut common.coverage_tree);
     analysis_to_csv(

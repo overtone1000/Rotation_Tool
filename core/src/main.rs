@@ -11,8 +11,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut common = rotation_tool::build_main_common()?;
 
-    let start:NaiveDate=NaiveDate::from_ymd_opt(2024, 1, 6).expect("Should be a valid date.");
-    let end:NaiveDate=NaiveDate::from_ymd_opt(2024, 3, 24).expect("Should be a valid date.");
+    let start:NaiveDate=NaiveDate::from_ymd_opt(2024, 1, 13).expect("Should be a valid date.");
+    let end:NaiveDate=NaiveDate::from_ymd_opt(2024, 3, 17).expect("Should be a valid date.");
     common.coverage_tree.prune_by_rotation_date(start,end);
 
     let rotation_analysis: bool = true;
