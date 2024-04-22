@@ -1,4 +1,4 @@
-export interface AnalysisData {
+export interface Rotation_Analysis_Data {
     date_map:{[date_string:string]:DateData}
 };
 

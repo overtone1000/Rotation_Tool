@@ -49,6 +49,11 @@ impl CategorizedVolumes {
         }
         retval
     }
+    pub fn retain<T>(&mut self, func:T)
+    where T:FnMut(&NaiveDate, &mut BTreeMap<std::string::String, VolumesMark>)->bool
+    {
+        self.date_map.retain(func);
+    }
 }
 
 impl core::fmt::Debug for CategorizedVolumes
@@ -82,6 +87,58 @@ impl core::fmt::Debug for CategorizedVolumes
                 rotation_string.as_str()
             ).as_str())?;
         }
+
+        f.write_str(format!("Outliers:
+        ").as_str())?;
+
+        let mut sorted_rotation_and_date:Vec<(&NaiveDate,&str,&VolumesMark)>=Vec::new();
+        for (date,map) in &self.date_map
+        {
+            for (rotation, mark) in map
+            {
+                if 
+                    rotation=="BR/US" ||
+                    rotation=="MSK" ||
+                    rotation=="NM" ||
+                    rotation=="SC-Main" ||
+                    rotation=="WVH"
+                {
+                    sorted_rotation_and_date.push((date,rotation,mark));
+                }
+            }
+        }
+        sorted_rotation_and_date.sort_by(
+        |first,second|
+        {
+            match first.2.rvu.total_cmp(&second.2.rvu)
+            {
+                std::cmp::Ordering::Equal => {
+                    first.2.bvu.total_cmp(&second.2.bvu)
+                },
+                x => x,
+            }
+        });
+
+        let mut outlier_count=100;
+        if outlier_count>sorted_rotation_and_date.len() {outlier_count=sorted_rotation_and_date.len();}
+
+        f.write_str(format!("Lowest outliers:
+        ").as_str())?;
+        for (date, rotation, mark) in &sorted_rotation_and_date[..outlier_count]
+        {
+            f.write_str(format!(
+                "{}, {}: {} ({} rvu, {} bvu)
+                ",
+                date.weekday(),
+                date.to_string().as_str(),
+                rotation,
+                mark.rvu,
+                mark.bvu
+            ).as_str())?;
+        }
+
+
+
         Ok(())
     }
 }
@@ -100,5 +157,12 @@ impl std::ops::Add for VolumesMark {
             rvu: self.rvu + other.rvu,
             bvu: self.bvu + other.bvu,
         }
+    }
+}
+
+impl std::ops::AddAssign for VolumesMark {
+    fn add_assign(&mut self, rhs: Self) {
+        self.rvu+=rhs.rvu;
+        self.bvu+=rhs.bvu;
     }
 }

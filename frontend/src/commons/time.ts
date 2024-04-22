@@ -1,4 +1,5 @@
 import type { MinutesSinceMidnight } from "../components/coverage/CoverageTree";
+import type { Weekday } from "../components/manifest/RotationManifest";
 
 export const days_of_the_week = [
     "Sunday",
@@ -10,7 +11,7 @@ export const days_of_the_week = [
     "Saturday"
 ];
 
-export const short_days_of_the_week_Sun_first = [
+export const short_days_of_the_week_Sun_first:Weekday[] = [
     "Sun",
     "Mon",
     "Tue",

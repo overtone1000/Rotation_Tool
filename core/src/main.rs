@@ -9,25 +9,32 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
     println!("Starting.");
 
-    let mut common = rotation_tool::build_main_common()?;
+    let facility_start:NaiveDate=NaiveDate::from_ymd_opt(2024, 1, 2).expect("Should be a valid date.");
+    let facility_end:NaiveDate=NaiveDate::from_ymd_opt(2024, 3, 24).expect("Should be a valid date.");
 
-    let start:NaiveDate=NaiveDate::from_ymd_opt(2024, 1, 13).expect("Should be a valid date.");
-    let end:NaiveDate=NaiveDate::from_ymd_opt(2024, 3, 17).expect("Should be a valid date.");
-    common.coverage_tree.prune_by_rotation_date(start,end);
+    let rotation_start:NaiveDate=NaiveDate::from_ymd_opt(2024, 1, 6).expect("Should be a valid date.");
+    let rotation_end:NaiveDate=NaiveDate::from_ymd_opt(2024, 3, 24).expect("Should be a valid date.");
+
+    let mut common = rotation_tool::build_main_common()?;
 
     let rotation_analysis: bool = true;
     if rotation_analysis {
-        rotation_tool::analyze_rotations(&mut common)?;
+        common.analyze_rotations()?;
     }
 
     let generate_frontend_statics: bool = true;
     if generate_frontend_statics {
-        rotation_tool::generate_frontend_statics(&mut common)?;
+        common.generate_frontend_statics(
+            facility_start,
+            facility_end,
+            rotation_start,
+            rotation_end
+        )?;
     }
 
     let perform_detailed_analysis: bool = false;
     if perform_detailed_analysis {
-        rotation_tool::perform_detailed_analysis(&mut common)?;
+        common.perform_detailed_analysis()?;
     }
 
     println!("Finished.");

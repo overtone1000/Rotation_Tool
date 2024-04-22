@@ -99,15 +99,6 @@ impl CoverageMap {
             }
         }
     }
-
-    pub fn prune_by_rotation_date(&mut self, start:NaiveDate,end:NaiveDate)->()
-    {
-        self.foreach_mut(
-            |_coords,coverage_and_workday|{
-                coverage_and_workday.prune_by_rotation_date(start, end);
-            }
-        )
-    }
 }
 
 impl JSONFileOut for CoverageMap {}

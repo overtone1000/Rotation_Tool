@@ -1,19 +1,19 @@
 <script lang="ts">
 	import { shortdowfunc, time_range_to_string } from "../../commons/time";
-	import type { Responsibility, Rotation, WorkHoursPeriod } from "./RotationManifest";
+	import type { Responsibility, Rotation, Weekday, WorkHoursPeriod } from "./RotationManifest";
 	import ResponsibilityDisplay from './responsibility_display.svelte';
 
 	export let rotation:Rotation;
 	export let dow:number;
 	export let hide_wetreads:boolean;
 
-	let shortdow:string;
+	let shortdow:Weekday;
 	$:{
 		shortdow = shortdowfunc(dow);
 	}
 
 	const should_display = (responsibility:Responsibility) => {
-		let retval = responsibility.days=="All" || responsibility.days.includes(shortdow);
+		let retval = responsibility.days=="All" || responsibility.days==shortdow || responsibility.days.includes(shortdow);
 		return retval;
 	}
 

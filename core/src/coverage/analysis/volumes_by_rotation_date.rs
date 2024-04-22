@@ -12,7 +12,7 @@ use crate::{
     },
 };
 
-pub fn sort_volumes_by_date(coverage_map: &mut CoverageMap) -> CategorizedVolumes {
+pub fn sort_volumes_by_rotation_date(coverage_map: &mut CoverageMap) -> CategorizedVolumes {
     let mut retval: CategorizedVolumes = CategorizedVolumes::new();
 
     let mut process_datum =
@@ -25,7 +25,7 @@ pub fn sort_volumes_by_date(coverage_map: &mut CoverageMap) -> CategorizedVolume
         };
 
     coverage_map.foreach_mut(
-        |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| {
+        |_coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| {
             coverage_and_workday.for_each_analysis_datum_by_rotation_date(
                 |date:NaiveDate,ad:AnalysisDatum,cu:&CoverageUnit|
                 {

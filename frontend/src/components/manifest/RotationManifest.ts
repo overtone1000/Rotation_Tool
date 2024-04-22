@@ -22,7 +22,7 @@ export interface Responsibility
 {
     sites:string|string[],
     contexts:string|string[],
-    days:Weekday|Weekday[],
+    days:Weekday|Weekday[]|"All",
     //modalities:string|string[],
     exams:string|string[],
     time_periods:null|[TimePeriodString],

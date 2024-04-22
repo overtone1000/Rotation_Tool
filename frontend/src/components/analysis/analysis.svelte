@@ -1,11 +1,22 @@
 <script lang="ts">
-	import RotationsByWeekday from "./rotation_volume_heatmap.svelte";
+	import Textfield from "@smui/textfield";
+	import PlotInstances from "./plot_instances.svelte";
 
-	
+	let admitted:boolean;
+	let text:string="";
+	$:{
+		admitted= text==="showmethestats";
+	}
 </script>
 
 <div class="container">
-	<RotationsByWeekday />
+
+	{#if admitted}
+		<PlotInstances />
+	{:else}
+		<Textfield bind:value={text} label="Passcode"/>
+	{/if}
+	
 </div>
 
 <style>

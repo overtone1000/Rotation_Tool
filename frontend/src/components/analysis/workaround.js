@@ -11,15 +11,11 @@ export let workaround_tips =
     y: "value", //This pulls raw data into y channel for subseequent transformation
     fx: "rotation", //This pulls raw data into fx channel for subsequent transformation
     //members: "members",   
-    stroke: "red",
-    fill: "black",
+    stroke: "green",
+    fill: "white",
     
     //title: (d)=>{return "Hello";},
 
-    tips:
-    {
-        members:"identity"
-    },
     format: {
         fx:true,
         fill:true,
