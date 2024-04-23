@@ -1,5 +1,14 @@
+use std::collections::HashSet;
+use std::error::Error;
+use std::fs::File;
+use std::io::BufWriter;
+
 use chrono::NaiveDate;
 
+use crate::analysis::volumes::VolumesMark;
+use crate::coverage;
+use crate::rotations::description::WrappedSortable;
+use crate::rotations::manifest::Manifest;
 use crate::{analysis::analysis_datum::WorkUnit, coverage::coordinate::CoverageCoordinates};
 use crate::coverage::coverage_and_work_day::CoverageAndWorkDay;
 
@@ -19,7 +28,7 @@ type WeekdayMap = CoordinateMap<SerializeableWeekday, CoverageAndWorkDay>;
 
 impl WorkCoverageMap for WeekdayMap {
     fn add_work(&mut self, coords: &CoverageCoordinates, work: WorkUnit) {
-        self.get_branch(coords).add_work(work);
+        self.get_branch_mut(coords).add_work(work);
     }
     fn add_coverage(
         &mut self,
@@ -27,13 +36,13 @@ impl WorkCoverageMap for WeekdayMap {
         coverage: CoverageUnit,
     ) -> Result<(), Box<dyn std::error::Error>> {
         match &coverage {
-            CoverageUnit::Temporal(_) => self.get_branch(coords).add_coverage(coverage),
+            CoverageUnit::Temporal(_) => self.get_branch_mut(coords).add_coverage(coverage),
             CoverageUnit::WeekFraction(_) => {
                 for weekday in ALL_DAYS {
                     let mut pseudocoords = coords.clone();
                     pseudocoords.weekday = **weekday;
                     match self
-                        .get_branch(&pseudocoords)
+                        .get_branch_mut(&pseudocoords)
                         .add_coverage(coverage.to_owned())
                     {
                         Ok(_) => (),
@@ -98,6 +107,58 @@ impl CoverageMap {
                 }
             }
         }
+    }
+
+    pub fn get_coverageandworkday<'a>(&'a self, coords:&'a CoverageCoordinates)->Option<&'a CoverageAndWorkDay>{
+        let subspecialty_branch = self.get_branch(&coords)?;
+        let context_branch = subspecialty_branch.get_branch(&coords)?;
+        let weekday_branch = context_branch.get_branch(&coords)?;
+        let coverage_and_work_day = weekday_branch.get_branch(&coords)?;
+        
+        Some(coverage_and_work_day)
+    }
+
+
+    pub fn populate_responsibility_volumes(
+        &mut self,
+        manifest: &mut Manifest,
+        rotation_start:&NaiveDate,
+        rotation_end:&NaiveDate
+    ) -> Result<(), Box<dyn std::error::Error>> 
+    {
+        for rotation_description in &mut manifest.rotation_manifest {
+            match rotation_description.responsibilities.get_mut() {
+                Some(responsibilities) => {
+                    for responsibility in responsibilities {
+                        let mut dates:HashSet<NaiveDate>=HashSet::new();
+                        let mut vm=VolumesMark{
+                            rvu:0.0,
+                            bvu:0.0
+                        };
+                        for (coords, coverage) in CoverageMap::responsibility_to_coverages(rotation_description.rotation.as_str(), responsibility)?
+                        {
+                            let coverage_and_work_day = self.get_coverageandworkday(&coords).expect("If built from same manifest, coords should exist in map.");
+                            let work=coverage_and_work_day.collect_work_by_rotation_date(&coverage);
+                            for (date,ad) in work
+                            {
+                                let rotation_date = coverage.get_time_adjustment().get_date(date);
+                                if rotation_start<=&rotation_date && &rotation_date<=rotation_end
+                                {
+                                    dates.insert(rotation_date);
+                                    vm.rvu+=ad.get_rvu();
+                                    vm.bvu+=ad.get_bvu();
+                                }
+                            }
+                        }
+                        vm.rvu/=f64::from(dates.len() as u32);
+                        vm.bvu/=f64::from(dates.len() as u32);
+                        responsibility.volume=Some(vm);
+                    }
+                }
+                None => (),
+            };
+        }
+        Ok(())
     }
 }
 

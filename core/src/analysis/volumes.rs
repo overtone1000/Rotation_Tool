@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap};
 
 use chrono::{Datelike, NaiveDate};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize)]
 pub struct CategorizedVolumes {
@@ -143,7 +143,7 @@ impl core::fmt::Debug for CategorizedVolumes
     }
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Serialize)]
+#[derive(Debug, Copy, Clone, PartialEq, Serialize, Deserialize)]
 pub struct VolumesMark {
     pub rvu: f64,
     pub bvu: f64,

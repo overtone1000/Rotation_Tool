@@ -6,6 +6,7 @@
 	export let responsibility:Responsibility;
     export let dow:number;
     export let hide_wetreads:boolean;
+    export let hide_volumes:boolean;
 
     /*const array_or_string_to_string = (array_or_string:string|string[]) => {
         if(typeof array_or_string == "string")
@@ -70,6 +71,16 @@
             </td>
         {:else}
             <td></td>
+        {/if}
+        {#if !hide_volumes}
+            <td>
+                {#if responsibility.volume!==undefined}
+                    <div>Average RVU={responsibility.volume.rvu.toFixed(1)}</div>
+                    <div>Average BVU={responsibility.volume.bvu.toFixed(0)}</div>
+                {:else}
+                    {console.debug(responsibility)}
+                {/if}
+            </td>
         {/if}
     </tr>
 {/if}

@@ -6,6 +6,7 @@
 	export let rotation:Rotation;
 	export let dow:number;
 	export let hide_wetreads:boolean;
+	export let hide_volumes:boolean;
 
 	let shortdow:Weekday;
 	$:{
@@ -46,6 +47,9 @@
 				<th>Context</th>
 				<th>Exams</th>
 				<th>Portions</th>
+				{#if !hide_volumes}
+					<th>Volumes</th>
+				{/if}
 			</tr>
 			{#key dow}
 				{#key rotation.responsibilities}
@@ -56,6 +60,7 @@
 									responsibility={responsibility}
 									dow={dow}
 									hide_wetreads={hide_wetreads}
+									hide_volumes={hide_volumes}
 								/>
 							{/if}
 						{/each}

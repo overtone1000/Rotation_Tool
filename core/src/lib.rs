@@ -105,7 +105,7 @@ impl MainCommon
         Ok(analysis)
     }
 
-    pub fn generate_frontend_statics(&mut self, facility_start:NaiveDate, facility_end:NaiveDate, rotation_start:NaiveDate, rotation_end:NaiveDate) -> Result<(), Box<dyn Error>> {
+    pub fn generate_frontend_statics(&mut self, facility_start:&NaiveDate, facility_end:&NaiveDate, rotation_start:&NaiveDate, rotation_end:&NaiveDate) -> Result<(), Box<dyn Error>> {
     
         let millistr = chrono::Local::now().timestamp_millis().to_string();
     
@@ -119,10 +119,10 @@ impl MainCommon
         std::fs::remove_dir_all(BASE)?;
         std::fs::create_dir(BASE)?;
     
-        let manifest = parse_manifest()?;
+        let mut manifest = parse_manifest()?;
+        self.coverage_tree.populate_responsibility_volumes(&mut manifest, rotation_start, rotation_end)?;
         manifest.to_json(&(BASE.to_string() + "/active_rotation_manifest" + &millistr + ".json"))?;
-    
-    
+        
         self.coverage_tree.to_json(&(BASE.to_string() + "/active_coverage_tree" + &millistr + ".json"))?;
     
         //Categories lists
@@ -134,7 +134,7 @@ impl MainCommon
         rotation_volume_heatmap.retain(
             |key,_value|
             {
-                rotation_start<=*key && rotation_end>=*key
+                rotation_start<=key && rotation_end>=key
             }
         );
         analysis_to_plot(
@@ -146,7 +146,7 @@ impl MainCommon
         facility_volume_chart.retain(
             |key,_value|
             {
-                facility_start<=*key && facility_end>=*key
+                facility_start<=key && facility_end>=key
             }
         );
         volumes_by_facility_and_date_to_plot(

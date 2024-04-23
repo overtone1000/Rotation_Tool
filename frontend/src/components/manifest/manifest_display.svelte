@@ -76,6 +76,7 @@
 	}
 
 	let show_wetreads:boolean=false;
+	let show_volumes:boolean=false;
 </script>
 
 {#if manifest !== undefined}
@@ -120,8 +121,12 @@
 								<Switch bind:checked={show_wetreads} />
 								<span slot="label">Show Wet Reads</span>
 							</FormField>
+							<FormField>
+								<Switch bind:checked={show_volumes} />
+								<span slot="label">Show Responsibility Volumes</span>
+							</FormField>
 					</div>
-					<RotationDisplay rotation={selected_rotation} dow={dow} hide_wetreads={!show_wetreads}/>
+					<RotationDisplay rotation={selected_rotation} dow={dow} hide_wetreads={!show_wetreads} hide_volumes={!show_volumes}/>
 					{#if empty_day}
 						<div class="warning warning_empty">
 							<div class="warning_empty_desc">
@@ -175,6 +180,7 @@
 
 	.rotation_label{
 		flex-shrink: 0;
+		flex-grow:1;
 		text-align: left;
 		text-justify: center;
 		font-size: larger;

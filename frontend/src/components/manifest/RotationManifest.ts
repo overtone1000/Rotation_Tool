@@ -1,3 +1,5 @@
+import type { ValueData } from "../../commons/rotation_plot_data";
+
 export interface RotationManifest
 {
     title:string,
@@ -26,7 +28,8 @@ export interface Responsibility
     //modalities:string|string[],
     exams:string|string[],
     time_periods:null|[TimePeriodString],
-    weekly_fraction:null|number
+    weekly_fraction:null|number,
+    volume?:ValueData
 }
 
 export type TimePeriodString = string;

@@ -149,7 +149,7 @@
 				analysis_marks,
 				Plot.binY(
 					{
-						fill:"count",
+						fill:"proportion-facet",
 						members:"identity"
 					},
 					workaround,
@@ -289,7 +289,7 @@
 </script>
 
 <div class="container">
-    <div bind:clientWidth={container_width}>
+    <div class="plot_container" bind:clientWidth={container_width}>
 		{#if facility_plot!==undefined}
 			<ObservablePlot plot={facility_plot}/>
 		{/if}
@@ -298,7 +298,7 @@
         {/if}
     </div>
     <div class="controls">
-        
+        Hello
     </div>
 </div>
 
@@ -307,6 +307,9 @@
 		display: flex;
 		flex-direction:row;
         width:100%;
+	}
+	.plot_container {
+		width:100%;
 	}
     .controls {
         display: flex;

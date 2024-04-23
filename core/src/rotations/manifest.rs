@@ -5,6 +5,7 @@ use std::fs::{self};
 
 use crate::globals::file_names::EXAMPLE_ROTATION_DESCRIPTIONS;
 use crate::serialization::output::JSONFileOut;
+use crate::MainCommon;
 
 use super::baseline::RotationBaseline;
 use super::description::{Responsibilities, RotationDescription, RotationHours, WrappedSortable};
@@ -29,7 +30,7 @@ impl Manifest {
 
         let mut noerrs = true;
         for desc in &retval.rotation_manifest {
-            match &desc.responsibilities.get() {
+            match desc.responsibilities.get() {
                 Some(responsibilities) => {
                     for resp in responsibilities {
                         match resp.validate() {
@@ -93,6 +94,7 @@ impl Manifest {
                             + "/"
                             + &weekdays::weekday_to_str(chrono::Weekday::Fri)),
                     ),
+                    volume:None
                 },
                 RotationResponsibility {
                     sites: StringTypes::Array(HashSet::from([
@@ -123,6 +125,7 @@ impl Manifest {
                         weekdays::weekday_to_str(chrono::Weekday::Sat),
                         weekdays::weekday_to_str(chrono::Weekday::Sun),
                     ])),
+                    volume:None
                 },
             ]),
             comments: Some(HashSet::from([
@@ -156,6 +159,11 @@ impl Manifest {
 
         serde_yaml::to_writer(writer, &example)?;
         Ok(())
+    }
+
+    pub fn populate_volumes(common:&MainCommon)
+    {
+        
     }
 }
 

@@ -62,13 +62,25 @@ pub trait WrappedSortable<T>
 where
     T: Ord,
 {
-    fn get(&self) -> &Option<Vec<T>>;
+    fn get(&self) -> Option<&Vec<T>>;
+    fn get_mut(&mut self) -> Option<&mut Vec<T>>;
     fn fromval(val: Option<Vec<T>>) -> Self;
 }
 
 impl WrappedSortable<RotationResponsibility> for Responsibilities {
-    fn get(&self) -> &Option<Vec<RotationResponsibility>> {
-        &self.value
+    fn get(&self) -> Option<&Vec<RotationResponsibility>> {
+        match &self.value
+        {
+            Some(value) => Some(&value),
+            None => None,
+        }
+    }
+    fn get_mut(&mut self) -> Option<&mut Vec<RotationResponsibility>> {
+        match &mut self.value
+        {
+            Some(value) => Some(value),
+            None => None,
+        }
     }
     fn fromval(mut val: Option<Vec<RotationResponsibility>>) -> Responsibilities {
         match val {

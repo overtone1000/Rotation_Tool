@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::globals;
+use crate::{analysis::{analysis_datum::AnalysisDatum, volumes::VolumesMark}, globals};
 
 use super::{
     description::WrappedSortable, rotation_error::RotationManifestParseError,
@@ -53,6 +53,7 @@ pub struct RotationResponsibility {
     pub days: StringTypes,
     pub weekly_fraction: Option<f64>,
     pub time_periods: TimePeriods,
+    pub volume: Option<VolumesMark>
 }
 
 impl RotationResponsibility {
@@ -127,8 +128,19 @@ pub struct TimePeriods {
 }
 
 impl WrappedSortable<Timespan> for TimePeriods {
-    fn get(&self) -> &Option<Vec<Timespan>> {
-        &self.value
+    fn get(&self) -> Option<&Vec<Timespan>> {
+        match &self.value
+        {
+            Some(value) => Some(value),
+            None => None,
+        }
+    }
+    fn get_mut(&mut self) -> Option<&mut Vec<Timespan>> {
+        match &mut self.value
+        {
+            Some(value) => Some(value),
+            None => None,
+        }
     }
     fn fromval(mut val: Option<Vec<Timespan>>) -> TimePeriods {
         match val {

@@ -140,7 +140,7 @@ impl CoverageAndWorkDay {
         retval
     }
 
-    fn collect_work_by_rotation_date(&self,coverage:&CoverageUnit)->HashMap<NaiveDate,AnalysisDatum>
+    pub fn collect_work_by_rotation_date(&self,coverage:&CoverageUnit)->HashMap<NaiveDate,AnalysisDatum>
     {
         let mut retval: HashMap<NaiveDate,AnalysisDatum> = HashMap::new();
 

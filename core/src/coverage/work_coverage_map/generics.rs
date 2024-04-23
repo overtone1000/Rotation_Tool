@@ -42,7 +42,11 @@ where
     pub fn get_map_mut(&mut self) -> &mut HashMap<T, U> {
         &mut self.map
     }
-    pub fn get_branch(&'a mut self, coords: &'a CoverageCoordinates) -> &mut U {
+    pub fn get_branch(&'a self, coords: &'a CoverageCoordinates) -> Option<&U> {
+        let key = Self::get_coordinate(coords);
+        self.map.get(&key)
+    }
+    pub fn get_branch_mut(&'a mut self, coords: &'a CoverageCoordinates) -> &mut U {
         let key = Self::get_coordinate(coords);
         let retval = match self.map.entry(key) {
             Entry::Occupied(o) => o.into_mut(),
@@ -60,7 +64,7 @@ where
     U: Default + Debug + WorkCoverageMap,
 {
     fn add_work(&mut self, coords: &CoverageCoordinates, work: WorkUnit) {
-        self.get_branch(coords).add_work(coords, work)
+        self.get_branch_mut(coords).add_work(coords, work)
     }
 
     fn add_coverage(
@@ -68,7 +72,7 @@ where
         coords: &CoverageCoordinates,
         coverage: CoverageUnit,
     ) -> Result<(), Box<dyn std::error::Error>> {
-        self.get_branch(coords).add_coverage(coords, coverage)
+        self.get_branch_mut(coords).add_coverage(coords, coverage)
     }
 }
 

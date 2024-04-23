@@ -9,11 +9,11 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
     println!("Starting.");
 
-    let facility_start:NaiveDate=NaiveDate::from_ymd_opt(2024, 1, 2).expect("Should be a valid date.");
-    let facility_end:NaiveDate=NaiveDate::from_ymd_opt(2024, 3, 24).expect("Should be a valid date.");
+    let facility_start=&NaiveDate::from_ymd_opt(2024, 1, 2).expect("Should be a valid date.");
+    let facility_end=&NaiveDate::from_ymd_opt(2024, 3, 24).expect("Should be a valid date.");
 
-    let rotation_start:NaiveDate=NaiveDate::from_ymd_opt(2024, 1, 6).expect("Should be a valid date.");
-    let rotation_end:NaiveDate=NaiveDate::from_ymd_opt(2024, 3, 24).expect("Should be a valid date.");
+    let rotation_start=&NaiveDate::from_ymd_opt(2024, 1, 6).expect("Should be a valid date.");
+    let rotation_end=&NaiveDate::from_ymd_opt(2024, 3, 24).expect("Should be a valid date.");
 
     let mut common = rotation_tool::build_main_common()?;
 
