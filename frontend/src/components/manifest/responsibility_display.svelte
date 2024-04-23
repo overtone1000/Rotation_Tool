@@ -75,10 +75,12 @@
         {#if !hide_volumes}
             <td>
                 {#if responsibility.volume!==undefined}
+                    {#if responsibility.volume.rvu!==null && responsibility.volume.bvu!==null}
                     <div>Average RVU={responsibility.volume.rvu.toFixed(1)}</div>
                     <div>Average BVU={responsibility.volume.bvu.toFixed(0)}</div>
-                {:else}
-                    {console.debug(responsibility)}
+                    {:else}
+                        No volume data for this entry
+                    {/if}
                 {/if}
             </td>
         {/if}
