@@ -41,7 +41,7 @@ impl CoverageUnit
     }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 pub enum Coverage {
     Temporal(Vec<TemporalCoverageUnit>),
     Fractional(Vec<FractionalCoverageUnit>),

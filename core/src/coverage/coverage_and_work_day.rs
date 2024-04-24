@@ -12,7 +12,7 @@ use super::{
     coordinate::CoverageCoordinates, malformed_coverage::{CoverageError, MalformedCoverage}, units::{fractional_coverage::FractionalCoverageUnit, temporal_coverage::{weekday_plus, TemporalCoverageUnit}, Coverage, CoverageUnit}
 };
 
-#[derive(Debug, Default, Serialize)]
+#[derive(Debug, Default, Serialize, Clone)]
 pub struct CoverageAndWorkDay {
     coverages: Option<Coverage>,
     work: Vec<WorkUnit>,
@@ -66,9 +66,11 @@ impl TimeAdjustment
 }
 
 impl CoverageAndWorkDay {
+    
     pub fn add_work(&mut self, work: WorkUnit) {
         self.work.push(work)
     }
+
     pub fn add_coverage(
         &mut self,
         coverage: CoverageUnit,
@@ -85,6 +87,10 @@ impl CoverageAndWorkDay {
                 retval
             }
         }
+    }
+
+    pub fn clear_coverage(&mut self) {
+        self.coverages=None
     }
 
     fn sort_coverage(&mut self) {
@@ -140,14 +146,14 @@ impl CoverageAndWorkDay {
         retval
     }
 
-    pub fn collect_work_by_rotation_date(&self,coverage:&CoverageUnit)->HashMap<NaiveDate,AnalysisDatum>
+    fn collect_work_by_rotation_date(&self,coverage:&CoverageUnit)->HashMap<NaiveDate,AnalysisDatum>
     {
         let mut retval: HashMap<NaiveDate,AnalysisDatum> = HashMap::new();
 
         let collected_work:Vec<&WorkUnit> = match coverage
         {
             CoverageUnit::Temporal(tcu) => self.get_work_in_timespan(tcu.start, tcu.end),
-            CoverageUnit::WeekFraction(fcu) => self.work.iter().collect()
+            CoverageUnit::WeekFraction(_fcu) => self.work.iter().collect()
         };
 
         for work in collected_work {
@@ -165,12 +171,9 @@ impl CoverageAndWorkDay {
                     vac.insert(new_unit);
                 },
             };
-            //if(work.get_datetime().date()!=rotation_date)
-            //{
-            //    println!("{} will read {} from {},{} on {},{}",coverage.get_rotation(),work.get_exam_desc(),work.get_datetime().weekday(),work.get_datetime(),rotation_date.weekday(),rotation_date.to_string());
-            //}
         }
 
+        //If it's fractional coverage, scale the result
         match coverage
         {
             CoverageUnit::Temporal(_tcu) => {

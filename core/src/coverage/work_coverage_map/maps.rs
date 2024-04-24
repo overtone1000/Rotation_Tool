@@ -5,6 +5,7 @@ use std::io::BufWriter;
 
 use chrono::NaiveDate;
 
+use crate::analysis::analysis_datum::AnalysisDatum;
 use crate::analysis::volumes::VolumesMark;
 use crate::coverage;
 use crate::rotations::description::WrappedSortable;
@@ -53,6 +54,15 @@ impl WorkCoverageMap for WeekdayMap {
                 }
                 Ok(())
             }
+        }
+    }
+    fn clear_coverage(
+        &mut self
+    )->()
+    {
+        for branch in self.get_all_branches()
+        {
+            branch.clear_coverage();
         }
     }
 }
@@ -129,30 +139,46 @@ impl CoverageMap {
         for rotation_description in &mut manifest.rotation_manifest {
             match rotation_description.responsibilities.get_mut() {
                 Some(responsibilities) => {
-                    for responsibility in responsibilities {
+                    for responsibility in responsibilities {                        
                         let mut dates:HashSet<NaiveDate>=HashSet::new();
                         let mut vm=VolumesMark{
                             rvu:0.0,
                             bvu:0.0
                         };
-                        for (coords, coverage) in CoverageMap::responsibility_to_coverages(rotation_description.rotation.as_str(), responsibility)?
+
+                        let coverages = CoverageMap::responsibility_to_coverages(rotation_description.rotation.as_str(), responsibility)?;
+                    
+                        for (coords, coverage) in coverages
                         {
-                            let coverage_and_work_day = self.get_coverageandworkday(&coords).expect("If built from same manifest, coords should exist in map.");
-                            let work=coverage_and_work_day.collect_work_by_rotation_date(&coverage);
-                            for (date,ad) in work
-                            {
-                                let rotation_date = coverage.get_time_adjustment().get_date(date);
-                                if rotation_start<=&rotation_date && &rotation_date<=rotation_end
+                            self.clear_coverage();
+                            self.add_coverage(&coords, coverage);
+                            
+                            self.foreach_mut(
+                                |_coord:&CoverageCoordinates, coverage_and_workday:&mut CoverageAndWorkDay|
                                 {
-                                    dates.insert(rotation_date);
-                                    vm.rvu+=ad.get_rvu();
-                                    vm.bvu+=ad.get_bvu();
+                                    coverage_and_workday.for_each_analysis_datum_by_rotation_date(
+                                        |rotation_date:NaiveDate,ad:AnalysisDatum,cu:&CoverageUnit|
+                                        {
+                                            if rotation_start<=&rotation_date && &rotation_date<=rotation_end
+                                            {
+                                                dates.insert(rotation_date);
+                                                vm.rvu+=ad.get_rvu();
+                                                vm.bvu+=ad.get_bvu();
+                                            }
+                                        }
+                                    )
                                 }
-                            }
+                            );
                         }
-                        vm.rvu/=f64::from(dates.len() as u32);
-                        vm.bvu/=f64::from(dates.len() as u32);
+
+                        if dates.len()>0
+                        {
+                            vm.rvu/=f64::from(dates.len() as u32);
+                            vm.bvu/=f64::from(dates.len() as u32);
+                        }
                         responsibility.volume=Some(vm);
+
+                
                     }
                 }
                 None => (),

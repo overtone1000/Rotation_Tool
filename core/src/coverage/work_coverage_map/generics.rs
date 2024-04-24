@@ -19,9 +19,10 @@ pub trait WorkCoverageMap {
         coords: &CoverageCoordinates,
         coverage: CoverageUnit,
     ) -> Result<(), Box<dyn std::error::Error>>;
+    fn clear_coverage(&mut self)->();
 }
 
-#[derive(Debug, Serialize, Default)]
+#[derive(Debug, Serialize, Default, Clone)]
 pub struct CoordinateMap<T, U>
 where
     T: Debug + Eq + PartialEq + Hash,
@@ -54,6 +55,10 @@ where
         };
         retval
     }
+    pub fn get_all_branches(&mut self)-> Vec<&mut U>
+    {
+        return self.map.values_mut().into_iter().collect()
+    }
 }
 
 //Default impl, overridden for WorkCoverageMap to handle pseudocoords for week fractions
@@ -73,6 +78,15 @@ where
         coverage: CoverageUnit,
     ) -> Result<(), Box<dyn std::error::Error>> {
         self.get_branch_mut(coords).add_coverage(coords, coverage)
+    }
+
+    fn clear_coverage(
+        &mut self
+    )->()
+    {
+        for branch in self.get_all_branches(){
+            branch.clear_coverage();
+        }
     }
 }
 

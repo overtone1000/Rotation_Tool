@@ -120,7 +120,8 @@ impl MainCommon
         std::fs::create_dir(BASE)?;
     
         let mut manifest = parse_manifest()?;
-        self.coverage_tree.populate_responsibility_volumes(&mut manifest, rotation_start, rotation_end)?;
+        let mut mutable_temporary_coverage_tree=self.coverage_tree.clone();
+        mutable_temporary_coverage_tree.populate_responsibility_volumes(&mut manifest, rotation_start, rotation_end)?;
         manifest.to_json(&(BASE.to_string() + "/active_rotation_manifest" + &millistr + ".json"))?;
         
         self.coverage_tree.to_json(&(BASE.to_string() + "/active_coverage_tree" + &millistr + ".json"))?;

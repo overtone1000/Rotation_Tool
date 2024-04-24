@@ -6,7 +6,7 @@ use std::{
 use chrono::NaiveDateTime;
 use serde::Serialize;
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub struct SerializeableNaiveDateTime {
     pub datetime: NaiveDateTime,
 }
@@ -19,7 +19,7 @@ impl Serialize for SerializeableNaiveDateTime {
     }
 }
 
-#[derive(Default, Debug, Serialize)]
+#[derive(Default, Debug, Serialize, Clone)]
 pub struct WorkUnit {
     datetime: SerializeableNaiveDateTime,
     rvu: f64,
