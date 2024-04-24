@@ -9,5 +9,5 @@ export interface Facility_Analysis_Data {
 export interface FacilityAnalysisMark {
     date:Date,
     facility:string,
-    value:number
+    value:ValueData
 }

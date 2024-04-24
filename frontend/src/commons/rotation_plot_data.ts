@@ -14,7 +14,7 @@ export interface ValueData {
 export interface AnalysisMark {
     date:Date,
     rotation:string,
-    value:number
+    value:ValueData
 }
 
 export function generateColors (number_to_generate:number) {

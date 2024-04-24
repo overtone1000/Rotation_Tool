@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Textfield from "@smui/textfield";
-	import PlotInstances from "./plot_instances.svelte";
+	import PlotInstances from "./plot_page.svelte";
 
 	let admitted:boolean;
 	let text:string="";
