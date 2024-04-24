@@ -8,16 +8,24 @@
 
 	export let filename:string;
     export let plot_options:PlotOptions;
+    export let data_callback:undefined|((data:DataFormat)=>void)=undefined;
     export let get_marks:(data:DataFormat)=>MarkFormat[];
     export let build_plot:(marks:MarkFormat[],width:number,options:PlotOptions)=>BuiltPlot;
-        
-    let data:DataFormat|undefined = undefined;
+    
+    let data:DataFormat|undefined=undefined;
+
     let marks:MarkFormat[]|undefined;
     let plot:BuiltPlot|undefined = undefined;
     let container_width:any="5000px";
 
     get_data(filename,(result:any)=>{data=result as DataFormat});
-    
+    $:{
+        if(data_callback!==undefined && data!==undefined)
+        {
+            data_callback(data);
+        }
+    }
+
     $:{
         if(data!==undefined)
         {

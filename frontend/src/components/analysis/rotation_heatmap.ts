@@ -24,27 +24,47 @@ export const get_rotation_marks=(data:Rotation_Analysis_Data)=>{
     return all_marks;		
 }
 
-export const build_heatmap=(analysis_marks:AnalysisMark[], width:number, options:{title:string, valuetype:ValueType})=>{
+export const build_heatmap=(analysis_marks:AnalysisMark[], width:number, options:{title:string, valuetype:ValueType, rotations:string[]})=>{
     let max=0;
     let min=0;
+
     for(let mark of analysis_marks)
     {
         if(mark.value[options.valuetype]>max){max=mark.value[options.valuetype];}
         if(mark.value[options.valuetype]<min){min=mark.value[options.valuetype];}
     }
 
+    let filtered_marks:AnalysisMark[]=analysis_marks.filter((mark)=>options.rotations.includes(mark.rotation));
+
     let marks:any=[
         Plot.rect(
-            analysis_marks,
+            filtered_marks,
             Plot.binY(
                 {
                     fill:"proportion-facet",
-                    members:"identity"
+                    z:"proportion-facet"
                 },
                 {
                     y: (d)=>d.value[options.valuetype],
                     fx: "rotation",
-                    inset: 0,  
+                    inset: 0,
+                    sort: {
+                        fx: "data",
+                        reduce: (data:AnalysisMark[][]) => {
+                            let sum=0;
+                            let count=0;
+                            for(const mark_group of data)
+                            {
+                                for(const mark of mark_group)
+                                {
+                                    console.debug("mark",mark);    
+                                    sum+=mark.value[options.valuetype]; 
+                                }
+                                count+=mark_group.length;
+                            }
+                            return sum/count;
+                        }
+                    }
                 } as Plot.BinYInputs<Plot.RectOptions>
             )
         ),
