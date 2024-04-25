@@ -111,12 +111,12 @@ impl TemporalCoverageUnit {
         cu: &TemporalCoverageUnit,
     ) -> String {
         farthest_unit.to_string()
-            + " goes to "
-            + farthest_unit.end.to_string().as_str()
-            + " and "
-            + cu.to_string().as_str()
-            + " starts at "
-            + cu.start.to_string().as_str()
+        + " goes to "
+        + farthest_unit.end.to_string().as_str()
+        + " and "
+        + cu.to_string().as_str()
+        + " starts at "
+        + cu.start.to_string().as_str()
     }
 
     pub fn get_rotation(&self) -> String {
@@ -129,7 +129,7 @@ impl TemporalCoverageUnit {
 
 
     pub fn to_string(&self) -> String {
-        format!("{} ({})", self.rotation, self.work_to_rotation_day_offset)
+        format!("{} (offset {} days)", self.rotation, self.work_to_rotation_day_offset)
     }
 }
 

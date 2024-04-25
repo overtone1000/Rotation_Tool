@@ -92,15 +92,16 @@ impl CoverageMap {
                                     let periods =
                                         time_period.instantiate_periods(weekday);
 
-                                    for (work_to_rotation_day_offset, start, end) in periods {
+                                    //work_day_offset is the offset required to get from the day of the rotation to the work. So, PD (previous day) is -1.
+                                    for (work_day_offset, start, end) in periods {
                                         coords.weekday =
-                                            weekday_plus(weekday, work_to_rotation_day_offset);
+                                            weekday_plus(weekday, work_day_offset);
 
                                         let coverage = TemporalCoverageUnit::create(
                                             start,
                                             end,
                                             rotation_name.to_string(),
-                                            work_to_rotation_day_offset, //day_offset is the offset from the work to the rotation, so store it here
+                                            -work_day_offset, //this is the offset to get from the day of the rotation to the day of the work, so invert this value
                                         );
 
                                         retval.push(

@@ -20,11 +20,10 @@ use rotations::manifest::Manifest;
 
 use crate::{
     coverage::analysis::{
-        rotation_day_details::details,
-        volumes_by_rotation_date::{analysis_to_plot, sort_volumes_by_rotation_date}, volumes_by_site_date::{sort_volumes_by_facility_and_date, volumes_by_facility_and_date_to_plot},
+        comparison::compare, rotation_day_details::details, volumes_by_rotation_date::{analysis_to_plot, sort_volumes_by_rotation_date}, volumes_by_site_date::{sort_volumes_by_facility_and_date, volumes_by_facility_and_date_to_plot}
     },
     globals::file_names::{
-        self, PROPOSED_COVERAGE_ANALYSIS_OUT, PROPOSED_COVERAGE_AUDIT_NOWORK_OUT, PROPOSED_COVERAGE_AUDIT_OUT, SOURCE_CACHE, VOLUME_BY_DATE_FACILITY, VOLUME_BY_DATE_ROTATION_ACTIVE
+        self, PROPOSED_COVERAGE_ANALYSIS_OUT, PROPOSED_COVERAGE_AUDIT_NOWORK_OUT, PROPOSED_COVERAGE_AUDIT_OUT, PROPOSED_DIFFERENTIAL, SOURCE_CACHE, VOLUME_BY_DATE_FACILITY, VOLUME_BY_DATE_ROTATION_ACTIVE
     },
     serialization::output::JSONFileOut,
     source_data::{processing::processed_source::ProcessedSource, tables::exam_categories::Exam_Categories},
@@ -94,14 +93,29 @@ fn build_coverage_tree_from_manifest(manifest:Manifest, source:&ProcessedSource)
     Ok(coverage_tree)
 }
 
+const rvu_suffix:&str="_rvu.csv";
+const bvu_suffix:&str="_bvu.csv";
+
 impl MainCommon
 {
+    fn clear_coveragetree_analyses(
+        coverage_audit_out:&str,
+        coverage_audit_nowork_out:&str,
+        coverage_analysis_out:&str
+    )->()
+    {
+        let _=std::fs::remove_file(coverage_audit_out);
+        let _=std::fs::remove_file(coverage_audit_nowork_out);
+        let _=std::fs::remove_file(coverage_analysis_out.to_string()+rvu_suffix);
+        let _=std::fs::remove_file(coverage_analysis_out.to_string()+bvu_suffix);
+    }
     fn analyze_coveragetree(
         coverage_tree:&mut CoverageMap,
         coverage_audit_out:&str,
         coverage_audit_nowork_out:&str,
         coverage_analysis_out:&str
     ) -> Result<(), Box<dyn Error>> {
+        
         let auditfile: File = File::create(coverage_audit_out)?;
         let mut writer = BufWriter::new(auditfile);
     
@@ -130,6 +144,12 @@ impl MainCommon
         &mut self,
     ) -> Result<(), Box<dyn Error>> {
 
+        Self::clear_coveragetree_analyses(
+            ACTIVE_COVERAGE_AUDIT_OUT,
+            ACTIVE_COVERAGE_AUDIT_NOWORK_OUT,
+            ACTIVE_COVERAGE_ANALYSIS_OUT
+        );
+
         Self::analyze_coveragetree(
             &mut self.coverage_tree,
             ACTIVE_COVERAGE_AUDIT_OUT,
@@ -137,21 +157,27 @@ impl MainCommon
             ACTIVE_COVERAGE_ANALYSIS_OUT
         )?;
 
+        Self::clear_coveragetree_analyses(
+            PROPOSED_COVERAGE_AUDIT_OUT,
+            PROPOSED_COVERAGE_AUDIT_NOWORK_OUT,
+            PROPOSED_COVERAGE_ANALYSIS_OUT
+        );
+
         match ManifestType::Proposed.get()
         {
             Ok(proposed_manifest) => {
                 println!();
                 println!("Analyzing proposed manifest.");
-                let proposed_coverage_tree=build_coverage_tree_from_manifest(proposed_manifest, &self.source)?;
+                let mut proposed_coverage_tree=build_coverage_tree_from_manifest(proposed_manifest, &self.source)?;
                 
                 Self::analyze_coveragetree(
-                    &mut self.coverage_tree,
+                    &mut proposed_coverage_tree,
                     PROPOSED_COVERAGE_AUDIT_OUT,
                     PROPOSED_COVERAGE_AUDIT_NOWORK_OUT,
                     PROPOSED_COVERAGE_ANALYSIS_OUT
                 )?;
             },
-            Err(_) => todo!(), //delete proposed files
+            Err(_) => () //nothing
         }
 
     
@@ -225,6 +251,9 @@ impl MainCommon
                 Self::volume_heatmap_to_json(&proposed_coverage_tree, rotation_start, rotation_end, 
                     BASE.to_string() + "/" + VOLUME_BY_DATE_ROTATION_PROPOSED + &millistr + ".json"
                 )?;
+
+                let comparison=compare(&self.coverage_tree, &proposed_coverage_tree);
+                comparison.to_json((BASE.to_string() + "/" + PROPOSED_DIFFERENTIAL + &millistr + ".json").as_str())?;
             },
             Err(_) => todo!(), //delete proposed files
         }

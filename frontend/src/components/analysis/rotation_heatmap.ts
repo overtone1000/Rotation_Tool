@@ -56,8 +56,7 @@ export const build_heatmap=(analysis_marks:AnalysisMark[], width:number, options
                             for(const mark_group of data)
                             {
                                 for(const mark of mark_group)
-                                {
-                                    console.debug("mark",mark);    
+                                { 
                                     sum+=mark.value[options.valuetype]; 
                                 }
                                 count+=mark_group.length;

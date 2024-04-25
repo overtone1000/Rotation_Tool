@@ -35,7 +35,7 @@ impl CoverageUnit
     {
         match self
         {
-            CoverageUnit::Temporal(tcu) => {TimeAdjustment::Temporal(-tcu.get_offset())},
+            CoverageUnit::Temporal(tcu) => {TimeAdjustment::Temporal(tcu.get_offset())},
             CoverageUnit::WeekFraction(fcu) => {TimeAdjustment::Fractional(fcu.get_day())},
         }
     }

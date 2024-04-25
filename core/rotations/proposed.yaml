@@ -65,7 +65,7 @@ rotation_manifest:
     contexts: Outpatient
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 00:00 CD-11:00 CD
+    - 10:00 CD-13:00 CD
   - sites: All
     exams: Body MR
     contexts: Outpatient
@@ -682,6 +682,12 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 06:00 CD-14:00 CD
+  - sites: SH
+    exams: General CT
+    contexts: Outpatient
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 13:00 PBD-15:00 PBD
 - rotation: Swing
   location: Remote
   hours: 
@@ -922,7 +928,7 @@ rotation_manifest:
     #modalities: CT
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 11:00 CD-15:00 CD
+    - 00:00 CD-10:00 CD
   comments:
   - Turnaround time for routine exams must be < 24 hrs
   - Turnaround time for stat exams (stat icon in PACS) must be< 1 hr

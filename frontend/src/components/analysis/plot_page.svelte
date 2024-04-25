@@ -10,6 +10,7 @@
 	import Button, { Icon, Label } from "@smui/button";
 	import MultiSelect from 'svelte-multiselect'
 	import type { Rotation_Analysis_Data } from "../../commons/rotation_plot_data";
+	import { build_comparison, get_comparison_marks } from "./comparison";
 
 	let valuetype:ValueType="bvu";
 	let valuetypeswitch:boolean=false;
@@ -18,6 +19,27 @@
 		{valuetype="bvu";}
 		else
 		{valuetype="rvu";}
+	}
+
+	let sourcetype:"active"|"proposed"="active";
+	let sourcetypeswitch:boolean=true;
+	$:{
+		if(sourcetypeswitch)
+		{sourcetype="active";}
+		else
+		{sourcetype="proposed";}
+	}
+	let heatmap_filename:string="";
+	$:{
+		if(sourcetype=="proposed")
+		{
+			heatmap_filename="data/volume_by_date_and_rotation_proposed"+key+".json"
+		}
+		else
+		{
+			heatmap_filename="data/volume_by_date_and_rotation_active"+key+".json"
+		}
+		console.debug("Heatmap filename is now" + heatmap_filename);
 	}
 
 	let rotation_list:string[]|undefined=undefined;
@@ -62,6 +84,13 @@
 				<span slot="label">{valuetype}</span>
 			</FormField>
 		</div>
+		<div>
+			<FormField>
+				Source:
+				<Switch bind:checked={sourcetypeswitch} color="secondary" icons={false} />
+				<span slot="label">{sourcetype}</span>
+			</FormField>
+		</div>
 		<div class="multiselect">
 			{#if rotation_list!==undefined}
 				<MultiSelect bind:selected options={rotation_list}  --sms-li-bg="black" />
@@ -70,11 +99,17 @@
 	</div>
     <div class="plot_container">
 		<ManagedPlot 
-			filename={"data/volume_by_date_and_rotation_active"+key+".json"}
+			filename={heatmap_filename}
 			plot_options={{valuetype:valuetype, title:"Rotation Volumes", rotations:selected}}
 			get_marks={get_rotation_marks}
 			build_plot={build_heatmap}
 			data_callback={volume_data_callback}
+		/>
+		<ManagedPlot 
+			filename={"data/proposed_differential"+key+".json"}
+			plot_options={{valuetype:valuetype, title:"Proposal Differentials", rotations:selected}}
+			get_marks={get_comparison_marks}
+			build_plot={build_comparison}
 		/>
         <ManagedPlot 
 			filename={"data/volume_by_date_and_facility"+key+".json"}

@@ -1,6 +1,6 @@
 use std::{
     collections::{hash_map::Entry, HashMap},
-    ops::{AddAssign, DivAssign},
+    ops::{AddAssign, DivAssign, Sub},
 };
 
 use chrono::NaiveDateTime;
@@ -82,6 +82,13 @@ impl AddAssign for AnalysisDatum {
             self.add_studies(rhs_key, rhs_val);
         } 
     }
+}
+
+
+#[derive(Debug, Serialize, Default, Clone)]
+pub struct ComparisonDatum {
+    pub rvu:f64,
+    pub bvu:f64
 }
 
 impl AnalysisDatum {

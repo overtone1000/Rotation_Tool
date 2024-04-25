@@ -18,7 +18,9 @@
     let plot:BuiltPlot|undefined = undefined;
     let container_width:any="5000px";
 
-    get_data(filename,(result:any)=>{data=result as DataFormat});
+    $:{
+        get_data(filename,(result:any)=>{data=result as DataFormat});
+    }
     $:{
         if(data_callback!==undefined && data!==undefined)
         {
