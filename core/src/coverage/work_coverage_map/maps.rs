@@ -97,7 +97,31 @@ impl SpecifiedCoordinate<String> for CoverageMap {
 }
 
 impl CoverageMap {
-    pub fn foreach_mut(&mut self, mut func: impl FnMut(&CoverageCoordinates, &mut CoverageAndWorkDay)) {
+    pub fn foreach<T>(&self, mut func:T)->()
+    where T:FnMut(&CoverageCoordinates, &CoverageAndWorkDay) {
+        for (site, subspecialtymap) in self.get_map().iter() {
+            for (subspecialty, contextmap) in subspecialtymap.get_map().iter() {
+                for (context, weekdaymap) in contextmap.get_map().iter() {
+                    //for (modality, weekdaymap) in modalitymap.map.iter_mut() {
+                    for (weekday, coverage_and_workday) in weekdaymap.get_map().iter() {
+                        let coords = CoverageCoordinates {
+                            facility: site.to_string(),
+                            subspecialty: subspecialty.to_string(),
+                            context: context.to_string(),
+                            //modality: modality.to_string(),
+                            weekday: weekday.day,
+                        };
+
+                        func(&coords, coverage_and_workday);
+                    }
+                    //}
+                }
+            }
+        }
+    }
+
+    pub fn foreach_mut<T>(&mut self, mut func:T)->()
+    where T:FnMut(&CoverageCoordinates, &mut CoverageAndWorkDay) {
         for (site, subspecialtymap) in self.get_map_mut().iter_mut() {
             for (subspecialty, contextmap) in subspecialtymap.get_map_mut().iter_mut() {
                 for (context, weekdaymap) in contextmap.get_map_mut().iter_mut() {

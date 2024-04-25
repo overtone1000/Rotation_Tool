@@ -1,6 +1,7 @@
 use std::error::Error;
 
 use chrono::NaiveDate;
+use rotation_tool::{MainCommon, ManifestType};
 
 fn main() -> Result<(), Box<dyn Error>> {
     print!("{}[2J", 27 as char);
@@ -19,7 +20,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let rotation_analysis: bool = true;
     if rotation_analysis {
-        common.analyze_rotations()?;
+        MainCommon::analyze_rotations(&mut common)?;
     }
 
     let generate_frontend_statics: bool = true;

@@ -1,4 +1,4 @@
-use std::collections::{hash_map::Entry, HashMap, HashSet};
+use std::{collections::{hash_map::Entry, HashMap, HashSet}, fs::File};
 
 use chrono::{Datelike, NaiveDate};
 
@@ -11,7 +11,7 @@ use crate::{
 };
 
 pub fn analyze_by_day_of_week(
-    coverage_map: &mut CoverageMap,
+    coverage_map: &CoverageMap,
 ) -> HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>> {
     let mut retval: HashMap<String, HashMap<chrono::Weekday, AnalysisDatum>> = HashMap::new();
     let mut dates: HashMap<String,HashSet<NaiveDate>>=HashMap::new();
@@ -48,8 +48,8 @@ pub fn analyze_by_day_of_week(
         *datum += data;
     };
 
-    coverage_map.foreach_mut(
-        |coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay|
+    coverage_map.foreach(
+        |_coords: &CoverageCoordinates, coverage_and_workday: &CoverageAndWorkDay|
         {
             coverage_and_workday.for_each_analysis_datum_by_rotation_date(
                 |date:NaiveDate,ad:AnalysisDatum,cu:&CoverageUnit|

@@ -15,7 +15,8 @@ use coverage::{
         coverage_audit::{audit, audit_to_stream}, volumes_by_site_date::VolBySiteAndDate,
     }, coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay, units::CoverageUnit, work_coverage_map::maps::CoverageMap
 };
-use globals::file_names::COVERAGE_AUDIT_NOWORK_OUT;
+use globals::file_names::{ACTIVE_COVERAGE_ANALYSIS_OUT, ACTIVE_COVERAGE_AUDIT_NOWORK_OUT, ACTIVE_COVERAGE_AUDIT_OUT, MANIFEST_ACTIVE, MANIFEST_PROPOSED, VOLUME_BY_DATE_ROTATION_PROPOSED};
+use rotations::manifest::Manifest;
 
 use crate::{
     coverage::analysis::{
@@ -23,7 +24,7 @@ use crate::{
         volumes_by_rotation_date::{analysis_to_plot, sort_volumes_by_rotation_date}, volumes_by_site_date::{sort_volumes_by_facility_and_date, volumes_by_facility_and_date_to_plot},
     },
     globals::file_names::{
-        self, COVERAGE_ANALYSIS_OUT, COVERAGE_AUDIT_OUT, SOURCE_CACHE, VOLUME_BY_DATE_FACILITY, VOLUME_BY_DATE_ROTATION
+        self, PROPOSED_COVERAGE_ANALYSIS_OUT, PROPOSED_COVERAGE_AUDIT_NOWORK_OUT, PROPOSED_COVERAGE_AUDIT_OUT, SOURCE_CACHE, VOLUME_BY_DATE_FACILITY, VOLUME_BY_DATE_ROTATION_ACTIVE
     },
     serialization::output::JSONFileOut,
     source_data::{processing::processed_source::ProcessedSource, tables::exam_categories::Exam_Categories},
@@ -44,11 +45,39 @@ pub struct MainCommon {
     pub source: ProcessedSource,
 }
 
+pub enum ManifestType
+{
+    Active,
+    Proposed
+}
+
+impl ManifestType
+{
+    pub fn get(&self)->Result<rotations::manifest::Manifest, Box<dyn Error>>
+    {
+        let filename = match self
+        {
+            ManifestType::Active=>MANIFEST_ACTIVE,
+            ManifestType::Proposed=>MANIFEST_PROPOSED
+        };
+        crate::rotations::manifest::Manifest::parse(filename)
+    }
+}
+
 pub fn build_main_common() -> Result<MainCommon, Box<dyn Error>> {
     let source = ProcessedSource::build()?;
 
-    let manifest: rotations::manifest::Manifest = parse_manifest()?;
+    let manifest=ManifestType::Active.get()?;
+    let coverage_tree=build_coverage_tree_from_manifest(manifest,&source)?;
 
+    Ok(MainCommon {
+        coverage_tree,
+        source
+    })
+}
+
+fn build_coverage_tree_from_manifest(manifest:Manifest, source:&ProcessedSource) -> Result<CoverageMap, Box<dyn Error>> 
+{
     println!("Building coverage tree.");
     let mut date_constraint_set: ConstraintSet<NaiveDateTime> = ConstraintSet::new();
     date_constraint_set.add(&is_not_holiday);
@@ -62,47 +91,87 @@ pub fn build_main_common() -> Result<MainCommon, Box<dyn Error>> {
     println!("Adding work to tree.");
     coverage_tree.add_work_from_source(&source, &date_constraint_set)?;
 
-    
-
-    Ok(MainCommon {
-        coverage_tree,
-        source
-    })
-}
-
-fn parse_manifest() -> Result<rotations::manifest::Manifest, Box<dyn Error>> {
-    println!("Parsing manifest.");
-    let filename = "./rotations/active.yaml";
-    crate::rotations::manifest::Manifest::parse(filename)
+    Ok(coverage_tree)
 }
 
 impl MainCommon
 {
-    pub fn analyze_rotations(
-        &mut self,
-    ) -> Result<HashMap<String, HashMap<Weekday, AnalysisDatum>>, Box<dyn Error>> {
-        let auditfile: File = File::create(COVERAGE_AUDIT_OUT)?;
+    fn analyze_coveragetree(
+        coverage_tree:&mut CoverageMap,
+        coverage_audit_out:&str,
+        coverage_audit_nowork_out:&str,
+        coverage_analysis_out:&str
+    ) -> Result<(), Box<dyn Error>> {
+        let auditfile: File = File::create(coverage_audit_out)?;
         let mut writer = BufWriter::new(auditfile);
     
-        let auditfile_nowork: File = File::create(COVERAGE_AUDIT_NOWORK_OUT)?;
+        let auditfile_nowork: File = File::create(coverage_audit_nowork_out)?;
         let mut writer_nowork = BufWriter::new(auditfile_nowork);
     
-        //let audit_result = audit(&mut common.coverage_tree);
-        //audit_to_stream(&audit_result, &mut writer, &mut writer_nowork)?;
-    
-        let analysis = analyze_by_day_of_week(&mut self.coverage_tree);
+        let audit_result = audit(coverage_tree);
+        audit_to_stream(&audit_result, &mut writer, &mut writer_nowork)?;
+
+        let analysis = analyze_by_day_of_week(coverage_tree);
         analysis_to_csv(
             &analysis,
-            COVERAGE_ANALYSIS_OUT.to_owned() + "_rvu.csv",
+            coverage_analysis_out.to_owned() + "_rvu.csv",
             true,
         );
         analysis_to_csv(
             &analysis,
-            COVERAGE_ANALYSIS_OUT.to_owned() + "_bvu.csv",
+            coverage_analysis_out.to_owned() + "_bvu.csv",
             false,
         );
+
+        Ok(())
+    }
+
+    pub fn analyze_rotations(
+        &mut self,
+    ) -> Result<(), Box<dyn Error>> {
+
+        Self::analyze_coveragetree(
+            &mut self.coverage_tree,
+            ACTIVE_COVERAGE_AUDIT_OUT,
+            ACTIVE_COVERAGE_AUDIT_NOWORK_OUT,
+            ACTIVE_COVERAGE_ANALYSIS_OUT
+        )?;
+
+        match ManifestType::Proposed.get()
+        {
+            Ok(proposed_manifest) => {
+                println!();
+                println!("Analyzing proposed manifest.");
+                let proposed_coverage_tree=build_coverage_tree_from_manifest(proposed_manifest, &self.source)?;
+                
+                Self::analyze_coveragetree(
+                    &mut self.coverage_tree,
+                    PROPOSED_COVERAGE_AUDIT_OUT,
+                    PROPOSED_COVERAGE_AUDIT_NOWORK_OUT,
+                    PROPOSED_COVERAGE_ANALYSIS_OUT
+                )?;
+            },
+            Err(_) => todo!(), //delete proposed files
+        }
+
     
-        Ok(analysis)
+        Ok(())
+    }
+
+    fn volume_heatmap_to_json(coverage_tree:&CoverageMap, rotation_start:&NaiveDate, rotation_end:&NaiveDate, filename:String)-> Result<(), Box<dyn Error>>
+    {
+        let mut rotation_volume_heatmap = sort_volumes_by_rotation_date(coverage_tree);
+        rotation_volume_heatmap.retain(
+            |key,_value|
+            {
+                rotation_start<=key && rotation_end>=key
+            }
+        );
+        
+        analysis_to_plot(
+            &mut rotation_volume_heatmap,
+            filename,
+        )
     }
 
     pub fn generate_frontend_statics(&mut self, facility_start:&NaiveDate, facility_end:&NaiveDate, rotation_start:&NaiveDate, rotation_end:&NaiveDate) -> Result<(), Box<dyn Error>> {
@@ -119,7 +188,8 @@ impl MainCommon
         std::fs::remove_dir_all(BASE)?;
         std::fs::create_dir(BASE)?;
     
-        let mut manifest = parse_manifest()?;
+        //Add volumes to the manifest before creating manifest json
+        let mut manifest = ManifestType::Active.get()?;
         let mut mutable_temporary_coverage_tree=self.coverage_tree.clone();
         mutable_temporary_coverage_tree.populate_responsibility_volumes(&mut manifest, rotation_start, rotation_end)?;
         manifest.to_json(&(BASE.to_string() + "/active_rotation_manifest" + &millistr + ".json"))?;
@@ -131,17 +201,7 @@ impl MainCommon
             .to_json(&(BASE.to_string() + "/exam_categories" + &millistr + ".json"))?;
     
         //Plots
-        let mut rotation_volume_heatmap = sort_volumes_by_rotation_date(&mut self.coverage_tree);
-        rotation_volume_heatmap.retain(
-            |key,_value|
-            {
-                rotation_start<=key && rotation_end>=key
-            }
-        );
-        analysis_to_plot(
-            &mut rotation_volume_heatmap,
-            BASE.to_string() + "/" + VOLUME_BY_DATE_ROTATION + &millistr + ".json",
-        )?;
+        Self::volume_heatmap_to_json(&self.coverage_tree, rotation_start, rotation_end,BASE.to_string() + "/" + VOLUME_BY_DATE_ROTATION_ACTIVE + &millistr + ".json")?;
     
         let mut facility_volume_chart=sort_volumes_by_facility_and_date(&mut self.coverage_tree);
         facility_volume_chart.retain(
@@ -155,6 +215,20 @@ impl MainCommon
             BASE.to_string() + "/" + VOLUME_BY_DATE_FACILITY + &millistr + ".json"
         )?;
     
+        //Proposal
+        match ManifestType::Proposed.get()
+        {
+            Ok(proposed_manifest) => {
+                println!();
+                println!("Generating proposal frontend statics.");
+                let proposed_coverage_tree=build_coverage_tree_from_manifest(proposed_manifest, &self.source)?;
+                Self::volume_heatmap_to_json(&proposed_coverage_tree, rotation_start, rotation_end, 
+                    BASE.to_string() + "/" + VOLUME_BY_DATE_ROTATION_PROPOSED + &millistr + ".json"
+                )?;
+            },
+            Err(_) => todo!(), //delete proposed files
+        }
+
         Ok(())
     }
     

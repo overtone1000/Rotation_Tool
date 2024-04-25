@@ -12,24 +12,19 @@ use crate::{
     },
 };
 
-pub fn sort_volumes_by_rotation_date(coverage_map: &mut CoverageMap) -> CategorizedVolumes {
+pub fn sort_volumes_by_rotation_date(coverage_map: &CoverageMap) -> CategorizedVolumes {
     let mut retval: CategorizedVolumes = CategorizedVolumes::new();
 
-    let mut process_datum =
-        |date:NaiveDate, rotation: String, work: AnalysisDatum| {
-            let new_mark = VolumesMark {
-                rvu: work.get_rvu(),
-                bvu: work.get_bvu(),
-            };
-            retval.add(date, &rotation, new_mark);
-        };
-
-    coverage_map.foreach_mut(
-        |_coords: &CoverageCoordinates, coverage_and_workday: &mut CoverageAndWorkDay| {
+    coverage_map.foreach(
+        |_coords: &CoverageCoordinates, coverage_and_workday: &CoverageAndWorkDay| {
             coverage_and_workday.for_each_analysis_datum_by_rotation_date(
                 |date:NaiveDate,ad:AnalysisDatum,cu:&CoverageUnit|
                 {
-                    process_datum(date,cu.get_rotation(),ad);
+                    let new_mark = VolumesMark {
+                        rvu: ad.get_rvu(),
+                        bvu: ad.get_bvu(),
+                    };
+                    retval.add(date, cu.get_rotation().as_str(), new_mark);
                 }
             )
         }

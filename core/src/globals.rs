@@ -1,20 +1,47 @@
 pub mod file_names {
+
+    //source data
     pub(crate) const MAIN_DATA_FILE: &str = "./data/2024 to today.csv";
+
+    //categorizations
     pub(crate) const BVU_DATA_FILE: &str = "./data/BVU.csv";
-    pub(crate) const BVU_UPDATE_FILE: &str = "./err/Unaccounted BVU Codes.csv";
     pub(crate) const CATEGORIES_LOCATION_FILE: &str = "./categories/Categories_Location.csv";
     pub(crate) const CATEGORIES_EXAM_FILE: &str = "./categories/Categories_Exam.csv";
-    pub(crate) const UNACCOUNTED_EXAM_CODES_FILE: &str = "./err/Unaccounted_Exam_Codes.csv";
-    pub(crate) const EXAMPLE_ROTATION_DESCRIPTIONS: &str = "./rotations/Example.yml";
-    pub(crate) const SOURCE_CACHE: &str = "./cache/ProcessedSource.yml";
-    pub(crate) const COVERAGE_AUDIT_OUT: &str = "./err/Coverage_Audit.tsv";
-    pub(crate) const COVERAGE_AUDIT_NOWORK_OUT: &str = "./err/Coverage_Audit (no work).tsv";
-    pub(crate) const COVERAGE_ANALYSIS_OUT: &str = "./output/WeekAnalysis";
-    pub(crate) const VOLUME_BY_DATE_ROTATION: &str = "volume_by_date_and_rotation";
-    pub(crate) const VOLUME_BY_DATE_FACILITY: &str = "volume_by_date_and_facility";
     pub(crate) const EXAM_ALIAS_FILE: &str = "./categories/Exam_Aliases.csv";
     pub(crate) const READERS_FILE: &str = "./categories/Readers.csv";
+    
+    //errors
+    pub(crate) const BVU_UPDATE_FILE: &str = "./err/Unaccounted BVU Codes.csv";
+    pub(crate) const UNACCOUNTED_EXAM_CODES_FILE: &str = "./err/Unaccounted_Exam_Codes.csv";
     pub(crate) const UNRECOGNIZED_READERS_FILE: &str = "./err/UnrecognizedReaders.csv";
+
+    //example
+    pub(crate) const EXAMPLE_ROTATION_DESCRIPTIONS: &str = "./rotations/@example.yml";
+
+    //cache
+    pub(crate) const SOURCE_CACHE: &str = "./cache/ProcessedSource.yml";
+
+    //audits
+    pub(crate) const ACTIVE_COVERAGE_AUDIT_OUT: &str = "./err/Active_Coverage_Audit.tsv";
+    pub(crate) const ACTIVE_COVERAGE_AUDIT_NOWORK_OUT: &str = "./err/Active_Coverage_Audit (no work).tsv";
+
+    pub(crate) const PROPOSED_COVERAGE_AUDIT_OUT: &str = "./err/Proposed_Coverage_Audit.tsv";
+    pub(crate) const PROPOSED_COVERAGE_AUDIT_NOWORK_OUT: &str = "./err/Proposed_Coverage_Audit (no work).tsv";
+
+    //analysis
+    pub(crate) const ACTIVE_COVERAGE_ANALYSIS_OUT: &str = "./output/Active_WeekAnalysis";
+    pub(crate) const PROPOSED_COVERAGE_ANALYSIS_OUT: &str = "./output/Proposed_WeekAnalysis";
+
+    //manifests
+    pub(crate) const MANIFEST_ACTIVE:&str = "./rotations/active.yaml";
+    pub(crate) const MANIFEST_PROPOSED:&str = "./rotations/proposed.yaml";
+
+    //frontend
+    pub(crate) const VOLUME_BY_DATE_FACILITY: &str = "volume_by_date_and_facility";
+    pub(crate) const VOLUME_BY_DATE_ROTATION_ACTIVE: &str = "volume_by_date_and_rotation_active";
+    pub(crate) const VOLUME_BY_DATE_ROTATION_PROPOSED: &str = "volume_by_date_and_rotation_proposed";
+    pub(crate) const PROPOSED_DIFFERENTIAL: &str = "proposed_differential";
+    
 }
 
 pub mod main_headers {

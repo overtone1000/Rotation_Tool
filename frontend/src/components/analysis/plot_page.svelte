@@ -70,7 +70,7 @@
 	</div>
     <div class="plot_container">
 		<ManagedPlot 
-			filename={"data/volume_by_date_and_rotation"+key+".json"}
+			filename={"data/volume_by_date_and_rotation_active"+key+".json"}
 			plot_options={{valuetype:valuetype, title:"Rotation Volumes", rotations:selected}}
 			get_marks={get_rotation_marks}
 			build_plot={build_heatmap}
