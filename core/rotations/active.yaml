@@ -844,7 +844,7 @@ rotation_manifest:
   #  time_periods:
   #  - 15:00 PBD-18:00 PBD
   comments:
-  - Contrast coverage at SRC on Saturday
+  - Contrast coverage at SRC on Saturday (usually starts at 08:00, call techs for schedule)
   - Finish by 17:00 on Monday
 - rotation: OP2
   location: Remote
