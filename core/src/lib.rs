@@ -1,7 +1,5 @@
 use std::{
-    error::Error,
-    fs::File,
-    io::BufWriter,
+    collections::{BTreeMap, BTreeSet}, error::Error, fs::File, io::BufWriter
 };
 
 use chrono::{NaiveDate, NaiveDateTime};
@@ -71,6 +69,49 @@ pub fn build_main_common() -> Result<MainCommon, Box<dyn Error>> {
         coverage_tree,
         source
     })
+}
+
+pub fn print_averages_by_modality_and_day(map:&CoverageMap) -> () {
+    let mut dates:BTreeSet<NaiveDate>=BTreeSet::new();
+    let mut aggregate:BTreeMap<String,(f64,f64)>=BTreeMap::new();
+    map.foreach(
+        |coord,cawd|
+        {
+            cawd.for_each_analysis_datum_by_rotation_date(
+                |date,datum,_cu|
+                {
+                    dates.insert(date);
+                    
+                    let value = match aggregate.entry(coord.subspecialty.to_string())
+                    {
+                        std::collections::btree_map::Entry::Vacant(e) => e.insert((0.0,0.0)),
+                        std::collections::btree_map::Entry::Occupied(e) => e.into_mut(),
+                    };
+
+                    let mut total_study_count:f64=0.0;
+                    for study_count in datum.get_studies().values()
+                    {
+                        total_study_count+=study_count;
+                    }
+
+                    (*value).0+=total_study_count;
+                    (*value).1+=datum.get_rvu();
+                }
+            );
+        }
+    );
+
+    println!();
+    println!("Averages");
+    println!("Subspecialty,Number of Studies,RVUs");
+    let denominator=f64::from(dates.len() as u32);
+    for (subspecialty,(study_count,rvus)) in aggregate
+    {
+        let average_number_of_studies=study_count/denominator;
+        let average_rvus=rvus/denominator;
+        println!("{},{},{}",subspecialty,average_number_of_studies,average_rvus);
+    }
+    println!();
 }
 
 fn build_coverage_tree_from_manifest(manifest:Manifest, source:&ProcessedSource) -> Result<CoverageMap, Box<dyn Error>> 
