@@ -1,8 +1,8 @@
-use std::{collections::{btree_map::{OccupiedEntry, VacantEntry}, BTreeMap}, error::Error, fs::File, io::BufWriter};
+use std::{collections::BTreeMap, error::Error, fs::File, io::BufWriter};
 
 use chrono::NaiveDate;
 
-use crate::{analysis::{analysis_datum::AnalysisDatum, volumes::VolumesMark}, coverage::{coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay, units::CoverageUnit, work_coverage_map::maps::CoverageMap}};
+use crate::{analysis::volumes::VolumesMark, coverage::{coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay, work_coverage_map::maps::CoverageMap}};
 
 pub type VolBySiteAndDate = BTreeMap<NaiveDate,BTreeMap<String,VolumesMark>>;
 

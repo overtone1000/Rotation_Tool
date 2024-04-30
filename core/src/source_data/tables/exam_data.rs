@@ -1,6 +1,6 @@
-use std::{collections::{HashMap, HashSet}, error::Error};
+use std::collections::{HashMap, HashSet};
 
-use chrono::{NaiveDateTime};
+use chrono::NaiveDateTime;
 use serde::{Deserialize, Serialize};
 
 use super::{table::Table, types::{ExamCode, ExamDescription, Location}};

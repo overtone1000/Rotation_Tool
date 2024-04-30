@@ -1,9 +1,9 @@
-use std::{collections::{HashMap, HashSet}, error::Error};
 
-use chrono::{NaiveDateTime};
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
-use super::{table::Table, types::{ExamCode, ExamDescription, Location}};
+use super::table::Table;
 
 #[derive(Debug,Serialize,Deserialize,Ord,PartialOrd,Eq,PartialEq)]
 pub struct ExamReader {

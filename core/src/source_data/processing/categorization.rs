@@ -1,6 +1,6 @@
 use std::{collections::{BTreeMap, BTreeSet, HashMap, HashSet}, f32::consts::E, io::ErrorKind};
 
-use crate::{globals::{bvu_headers, file_names::{self, UNACCOUNTED_EXAM_CODES_FILE}, main_headers}, source_data::tables::{bvu_map::{BVUMap, BVUMapEntry}, exam_categories::{ExamCategoryEntry, Exam_Categories, EXAM_CODE_HEADER, SUBSPECIALTY_HEADER}, exam_data::{Exam, ExamTable}, location_categories::{LocationCategoryEntry, Location_Categories}, readers::{ExamReader, ReaderTable}, table::Table, types::{Context, Location}}};
+use crate::{globals::{file_names::{self, UNACCOUNTED_EXAM_CODES_FILE}}, source_data::tables::{bvu_map::{BVUMap, BVUMapEntry}, exam_categories::{ExamCategoryEntry, Exam_Categories, EXAM_CODE_HEADER, SUBSPECIALTY_HEADER}, exam_data::{Exam, ExamTable}, location_categories::{LocationCategoryEntry, Location_Categories}, readers::{ExamReader, ReaderTable}, table::Table, types::{Context, Location}}};
 
 pub(crate) fn check_categories_list(
     main_data: &Vec<Exam>,
@@ -18,9 +18,6 @@ pub(crate) fn check_categories_list(
 
     if unaccounted_codes.len()>0
     {
-        let headers=[
-            crate::source_data::tables::exam_categories::EXAM_CODE_HEADER.to_owned(),
-            crate::source_data::tables::exam_categories::SUBSPECIALTY_HEADER.to_owned()];
         let mut entries:Vec<Vec<String>>=Vec::new();
         for (code,desc) in unaccounted_codes
         {
@@ -30,7 +27,7 @@ pub(crate) fn check_categories_list(
             ])
         }
         
-        ExamTable::write(UNACCOUNTED_EXAM_CODES_FILE,&headers,entries)?;
+        ExamTable::write(UNACCOUNTED_EXAM_CODES_FILE,entries)?;
         Err(Box::new(std::io::Error::new(ErrorKind::InvalidData,"Unaccounted exam codes.".to_string())))
     }
     else {
@@ -199,7 +196,7 @@ pub fn check_bvusource(main_data: &Vec<Exam>, bvu_data_table: &BVUMap) -> Result
         {
             vecofvec.push(vec!(missing_code.to_string(),missing_codes.get(missing_code).expect("Should have value").to_string()));
         }
-        BVUMap::write(file_names::BVU_UPDATE_FILE,&[EXAM_CODE_HEADER.to_string()],vecofvec).unwrap();
+        BVUMap::write(file_names::BVU_UPDATE_FILE,vecofvec).unwrap();
 
         Err(Box::new(std::io::Error::new(ErrorKind::InvalidData,"Missing BVU codes.")))
     }
@@ -253,7 +250,7 @@ pub fn check_readers(main_data: &Vec<Exam>,readers:&BTreeMap<u64,ExamReader>) ->
         {
             vecofvec.push(vec!(reader.signer_acct_id.to_string(),reader.rad_last_name,reader.rad_first_name,reader.excluded.to_string()));
         }
-        ReaderTable::write(file_names::UNRECOGNIZED_READERS_FILE,&ReaderTable::headers(),vecofvec).unwrap();
+        ReaderTable::write(file_names::UNRECOGNIZED_READERS_FILE,vecofvec).unwrap();
 
         Err(Box::new(std::io::Error::new(ErrorKind::InvalidData,"Unrecognized Readers.")))
     }

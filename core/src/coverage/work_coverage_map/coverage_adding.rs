@@ -1,11 +1,8 @@
-use std::collections::{HashMap, HashSet};
 use std::str::FromStr;
 
-use chrono::Datelike;
 
 use crate::coverage::coordinate::CoverageCoordinates;
 
-use crate::coverage::coverage_and_work_day;
 use crate::coverage::units::fractional_coverage::FractionalCoverageUnit;
 use crate::coverage::units::temporal_coverage::{weekday_plus, TemporalCoverageUnit};
 use crate::coverage::units::CoverageUnit;
@@ -132,7 +129,7 @@ impl CoverageMap {
                 }
             }
         }
-        Ok((retval))
+        Ok(retval)
     }
 
     pub fn add_coverage_from_manifest(

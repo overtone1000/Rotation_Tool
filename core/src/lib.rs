@@ -1,19 +1,17 @@
 use std::{
-    collections::HashMap,
     error::Error,
     fs::File,
-    io::{BufWriter, Write},
+    io::BufWriter,
 };
 
-use analysis::analysis_datum::AnalysisDatum;
-use chrono::{NaiveDate, NaiveDateTime, Weekday};
+use chrono::{NaiveDate, NaiveDateTime};
 use constraints::{is_not_holiday, ConstraintSet};
 
 use coverage::{
     analysis::{
         by_day_of_week::{analysis_to_csv, analyze_by_day_of_week},
-        coverage_audit::{audit, audit_to_stream}, volumes_by_site_date::VolBySiteAndDate,
-    }, coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay, units::CoverageUnit, work_coverage_map::maps::CoverageMap
+        coverage_audit::{audit, audit_to_stream},
+    }, work_coverage_map::maps::CoverageMap
 };
 use globals::file_names::{ACTIVE_COVERAGE_ANALYSIS_OUT, ACTIVE_COVERAGE_AUDIT_NOWORK_OUT, ACTIVE_COVERAGE_AUDIT_OUT, MANIFEST_ACTIVE, MANIFEST_PROPOSED, VOLUME_BY_DATE_ROTATION_PROPOSED};
 use rotations::manifest::Manifest;
@@ -23,10 +21,10 @@ use crate::{
         comparison::compare, rotation_day_details::details, volumes_by_rotation_date::{analysis_to_plot, sort_volumes_by_rotation_date}, volumes_by_site_date::{sort_volumes_by_facility_and_date, volumes_by_facility_and_date_to_plot}
     },
     globals::file_names::{
-        self, PROPOSED_COVERAGE_ANALYSIS_OUT, PROPOSED_COVERAGE_AUDIT_NOWORK_OUT, PROPOSED_COVERAGE_AUDIT_OUT, PROPOSED_DIFFERENTIAL, SOURCE_CACHE, VOLUME_BY_DATE_FACILITY, VOLUME_BY_DATE_ROTATION_ACTIVE
+        PROPOSED_COVERAGE_ANALYSIS_OUT, PROPOSED_COVERAGE_AUDIT_NOWORK_OUT, PROPOSED_COVERAGE_AUDIT_OUT, PROPOSED_DIFFERENTIAL, VOLUME_BY_DATE_FACILITY, VOLUME_BY_DATE_ROTATION_ACTIVE
     },
     serialization::output::JSONFileOut,
-    source_data::{processing::processed_source::ProcessedSource, tables::exam_categories::Exam_Categories},
+    source_data::processing::processed_source::ProcessedSource,
 };
 
 mod analysis;
@@ -93,8 +91,8 @@ fn build_coverage_tree_from_manifest(manifest:Manifest, source:&ProcessedSource)
     Ok(coverage_tree)
 }
 
-const rvu_suffix:&str="_rvu.csv";
-const bvu_suffix:&str="_bvu.csv";
+const RVU_SUFFIX:&str="_rvu.csv";
+const BVU_SUFFIX:&str="_bvu.csv";
 
 impl MainCommon
 {
@@ -106,8 +104,8 @@ impl MainCommon
     {
         let _=std::fs::remove_file(coverage_audit_out);
         let _=std::fs::remove_file(coverage_audit_nowork_out);
-        let _=std::fs::remove_file(coverage_analysis_out.to_string()+rvu_suffix);
-        let _=std::fs::remove_file(coverage_analysis_out.to_string()+bvu_suffix);
+        let _=std::fs::remove_file(coverage_analysis_out.to_string()+RVU_SUFFIX);
+        let _=std::fs::remove_file(coverage_analysis_out.to_string()+BVU_SUFFIX);
     }
     fn analyze_coveragetree(
         coverage_tree:&mut CoverageMap,
@@ -204,6 +202,8 @@ impl MainCommon
     
         let millistr = chrono::Local::now().timestamp_millis().to_string();
     
+        use std::io::Write;
+        
         let mut file = File::create("../frontend/src/commons/key.ts")?;
         writeln!(
             file,

@@ -1,11 +1,11 @@
-use std::{collections::{hash_map::Entry, BTreeSet, HashMap, HashSet}, fs::File};
+use std::collections::{hash_map::Entry, HashMap, HashSet};
 
 use chrono::{Datelike, NaiveDate};
 
 use crate::{
     analysis::analysis_datum::AnalysisDatum,
     coverage::{
-        self, coordinate::CoverageCoordinates, coverage_and_work_day::{CoverageAndWorkDay, TimeAdjustment}, units::{Coverage, CoverageUnit}, work_coverage_map::maps::CoverageMap
+        coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay, units::CoverageUnit, work_coverage_map::maps::CoverageMap
     },
     globals::ALL_DAYS,
 };

@@ -1,12 +1,9 @@
-use std::collections::HashMap;
 
 use serde::Serialize;
 
-use crate::{
-    analysis::analysis_datum::AnalysisDatum,
-    coverage::{coverage_and_work_day::CoverageAndWorkDay},
-    serialization::weekday::SerializeableWeekday,
-};
+use crate::
+    serialization::weekday::SerializeableWeekday
+;
 
 #[derive(Debug, PartialEq, Clone, Serialize)]
 pub struct FractionalCoverageUnit {

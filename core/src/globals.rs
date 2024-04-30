@@ -44,6 +44,7 @@ pub mod file_names {
     
 }
 
+/*
 pub mod main_headers {
     pub(crate) enum PertinentHeaders {
         Accession,
@@ -107,6 +108,7 @@ pub mod bvu_headers {
         }
     }
 }
+*/
 
 //facilities
 pub const SH: &str = "SH";
@@ -123,17 +125,17 @@ const BC: &str = "BC";
 //Sites are SH, SRC, SC, and TPC, but Facilities breaks down SH into its parts (SH, WVH, WB)...leaving out ST (Hope Ortho?), SV (?)
 pub const FACILITIES: &[&str] = &[SH, SC, SRC, WVH, WB, TPC];
 
-pub const SH_site_id:u64=1;
-pub const SC_site_id:u64=4;
-pub const SRC_site_id:u64=7;
-pub const TPC_site_id:u64=8;
+pub const SH_SITE_ID:u64=1;
+pub const SC_SITE_ID:u64=4;
+pub const SRC_SITE_ID:u64=7;
+pub const TPC_SITE_ID:u64=8;
 
 pub fn siteid_to_sitename(site_id:u64)->Option<String>{
     match site_id {
         //SH_site_id=>Some(SH.to_string()), //But could be WB or WVH! So, just ignore.
-        SC_site_id=>Some(SC.to_string()),
-        SRC_site_id=>Some(SRC.to_string()),
-        TPC_site_id=>Some(TPC.to_string()),
+        SC_SITE_ID=>Some(SC.to_string()),
+        SRC_SITE_ID=>Some(SRC.to_string()),
+        TPC_SITE_ID=>Some(TPC.to_string()),
         _=>None
     }
 }
@@ -207,7 +209,7 @@ pub fn map_site_to_context(site: &str) -> Option<String> {
     }
 }
 
-pub fn map_SH_location_to_facility(location:&str)->Option<String> {
+pub fn map_sh_location_to_facility(location:&str)->Option<String> {
     match location
     {
         "OPRAD"=>Some(SH.to_string()),

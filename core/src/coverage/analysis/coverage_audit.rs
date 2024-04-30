@@ -2,7 +2,7 @@ use std::{collections::HashMap, error::Error, io::Write};
 
 use crate::{
     coverage::{
-        self, coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay, malformed_coverage::CoverageError, work_coverage_map::maps::CoverageMap
+        coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay, malformed_coverage::CoverageError, work_coverage_map::maps::CoverageMap
     },
     rotations::rotation_error::RotationManifestParseError,
 };

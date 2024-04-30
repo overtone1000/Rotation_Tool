@@ -1,16 +1,11 @@
-use std::{
-    collections::{hash_map::Entry, HashMap},
-    ops::AddAssign,
-};
 
-use chrono::NaiveDate;
 use serde::Serialize;
 
-use crate::{analysis::analysis_datum::AnalysisDatum, error::source_error::SourceError};
+use crate::error::source_error::SourceError;
 
 use self::{fractional_coverage::FractionalCoverageUnit, temporal_coverage::TemporalCoverageUnit};
 
-use super::coverage_and_work_day::{CoverageAndWorkDay, TimeAdjustment};
+use super::coverage_and_work_day::TimeAdjustment;
 
 pub(crate) mod fractional_coverage;
 pub(crate) mod temporal_coverage;

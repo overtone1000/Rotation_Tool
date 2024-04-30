@@ -1,12 +1,7 @@
-use std::{collections::{HashMap, HashSet}, error::Error, fs::File, str::FromStr};
+use std::{collections::HashMap, fs::File, str::FromStr};
 
 use chrono::NaiveDateTime;
-use csv::{Reader, StringRecordsIntoIter, StringRecordsIter};
-use serde::Serialize;
-use statrs::function;
-
-use crate::serialization::output::JSONFileOut;
-
+use csv::{Reader, StringRecordsIntoIter};
 pub trait Table<T>
 {
     fn get_file_path(&self)->&str;
@@ -57,7 +52,7 @@ pub trait Table<T>
         }
     }
 
-    fn write(filename:&str, headers:&[String], entries:Vec<Vec<String>>)->Result<(),Box<dyn std::error::Error>>
+    fn write(filename:&str, entries:Vec<Vec<String>>)->Result<(),Box<dyn std::error::Error>>
     {
         let mut writer = csv::WriterBuilder::new()
             .delimiter(b',')
@@ -67,10 +62,10 @@ pub trait Table<T>
         
         for entry in entries
         {
-            writer.write_record(entry);
+            writer.write_record(entry)?;
         }
 
-        writer.flush();
+        writer.flush()?;
 
         Ok(())
     }

@@ -1,14 +1,10 @@
-use std::collections::HashMap;
 
 use serde::Serialize;
 
-use crate::{
-    analysis::analysis_datum::AnalysisDatum,
-    coverage::{coverage_and_work_day::CoverageAndWorkDay},
-    rotations::time_modifiers::{TimeSinceMidnight, NEXT_MIDNIGHT, THIS_MIDNIGHT},
-};
+use crate::
+    rotations::time_modifiers::{TimeSinceMidnight, NEXT_MIDNIGHT, THIS_MIDNIGHT}
+;
 
-use crate::serialization::weekday::SerializeableWeekday;
 
 pub fn weekday_plus(base_weekday: chrono::Weekday, delta: i64) -> chrono::Weekday {
     let mut retval = base_weekday;

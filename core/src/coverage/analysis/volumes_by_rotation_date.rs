@@ -1,4 +1,4 @@
-use std::{collections::HashMap, error::Error, fs::File, io::BufWriter};
+use std::{error::Error, fs::File, io::BufWriter};
 
 use chrono::NaiveDate;
 
@@ -8,7 +8,7 @@ use crate::{
         volumes::{CategorizedVolumes, VolumesMark},
     },
     coverage::{
-        self, coordinate::CoverageCoordinates, coverage_and_work_day::{CoverageAndWorkDay, TimeAdjustment}, units::{Coverage, CoverageUnit}, work_coverage_map::maps::CoverageMap
+        coordinate::CoverageCoordinates, coverage_and_work_day::CoverageAndWorkDay, units::CoverageUnit, work_coverage_map::maps::CoverageMap
     },
 };
 

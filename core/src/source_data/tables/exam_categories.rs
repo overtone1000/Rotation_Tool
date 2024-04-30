@@ -1,9 +1,4 @@
-use std::{collections::{HashMap, HashSet}, error::Error};
-
-use chrono::{NaiveDateTime};
-use serde::{Deserialize, Serialize};
-
-use crate::serialization::output::JSONFileOut;
+use std::collections::{HashMap, HashSet};
 
 use super::{table::Table, types::{ExamCode, Subspecialty}};
 

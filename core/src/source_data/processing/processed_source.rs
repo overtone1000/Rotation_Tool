@@ -1,16 +1,11 @@
 use std::{
-    collections::{BTreeMap, BTreeSet, HashMap},
+    collections::BTreeMap,
     error::Error,
-    fs::File,
-    io::{BufWriter, Read},
 };
-
-use serde::{Deserialize, Serialize};
 
 use crate::{
     globals::file_names,
-    source_data::{processing::categorization::{
-    }, tables::{bvu_map::{BVUMap, BVUMapEntry}, exam_aliases::Exam_Aliases, exam_categories::{self, ExamCategoryEntry, Exam_Categories}, exam_data::{Exam, ExamTable}, location_categories::{LocationCategoryEntry, Location_Categories}, readers::{ExamReader, ReaderTable}, table::Table, types::{Context, ExamCode, Location, Subspecialty}}},
+    source_data::tables::{bvu_map::BVUMap, exam_aliases::Exam_Aliases, exam_categories::Exam_Categories, exam_data::{Exam, ExamTable}, location_categories::Location_Categories, readers::{ExamReader, ReaderTable}, table::Table, types::{Context, ExamCode, Location, Subspecialty}},
 };
 
 use super::categorization::{check_bvusource, check_categories_list, check_readers, get_site_and_location_context_map};

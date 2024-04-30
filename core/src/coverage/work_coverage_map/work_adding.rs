@@ -1,38 +1,30 @@
-use std::collections::{BTreeMap, BTreeSet, HashSet};
-use std::collections::{hash_map::Entry, HashMap};
 
-use chrono::{Datelike, Duration, NaiveDate, NaiveDateTime};
+use chrono::{Datelike, NaiveDateTime};
 
 use crate::analysis::analysis_datum::WorkUnit;
 
 use crate::coverage::coordinate::CoverageCoordinates;
 
-use crate::coverage::distribution::get_normal_dist_weights;
-
-use crate::globals::{map_SH_location_to_facility, siteid_to_sitename, SH_site_id, NON_RADIOLOGY, SH, WVH};
-use crate::rotations::description::WrappedSortable;
+use crate::globals::{siteid_to_sitename, NON_RADIOLOGY, SH, SH_SITE_ID};
 
 use crate::error::source_error::SourceError;
 
-use crate::rotations::special::weekdays;
-use crate::source_data::processing::categorization::{
-    build_salem_rvumap, check_categories_list,
-};
+use crate::source_data::processing::categorization::
+    build_salem_rvumap
+;
 use crate::source_data::processing::processed_source::ProcessedSource;
 use crate::source_data::tables::exam_data::Exam;
-use crate::source_data::tables::table::Table;
 use crate::{
     constraints::ConstraintSet,
-    dates::BUSINESS_DAYS_PER_YEAR,
-    globals::{main_headers, tpc_headers, BUSINESS_DAYS, FACILITIES},
+    globals::FACILITIES,
 };
 
 use super::generics::WorkCoverageMap;
 use super::maps::CoverageMap;
 
-fn get_SH_facility_from_metadata(exam:&Exam)->Option<String>{
+fn get_sh_facility_from_metadata(exam:&Exam)->Option<String>{
 
-    if exam.site_id!=SH_site_id {return None};
+    if exam.site_id!=SH_SITE_ID {return None};
 
     let test=|facstr:&str|->Option<String>
     {
@@ -47,14 +39,14 @@ fn get_SH_facility_from_metadata(exam:&Exam)->Option<String>{
     //Check accession beginning against facility strings first
     for facility in FACILITIES {
         let testresult=test(facility);
-        if(testresult.is_some()){return testresult;}
+        if testresult.is_some() {return testresult;}
     }
 
     //Test ST and SV
     if test("ST").is_some() || test("SV").is_some(){return Some(SH.to_string());}
 
     //Then check against location
-    map_SH_location_to_facility(&exam.location)
+    crate::globals::map_sh_location_to_facility(&exam.location)
 }
 
 impl CoverageMap {
@@ -143,7 +135,7 @@ impl CoverageMap {
 
                     //Try to determine facility from accession (good for separating SH, WB, WVH) and then location. If not valid, go by site ID. If not valid, go by location.
                     let mut selected_facility: Option<String> = None;
-                    selected_facility=get_SH_facility_from_metadata(exam);
+                    selected_facility=get_sh_facility_from_metadata(exam);
                     if selected_facility.is_none() {
                         selected_facility=siteid_to_sitename(exam.site_id);
                     }

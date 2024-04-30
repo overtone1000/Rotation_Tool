@@ -9,7 +9,7 @@ use crate::{
 };
 
 use super::{
-    coordinate::CoverageCoordinates, malformed_coverage::{CoverageError, MalformedCoverage}, units::{fractional_coverage::FractionalCoverageUnit, temporal_coverage::{weekday_plus, TemporalCoverageUnit}, Coverage, CoverageUnit}
+    coordinate::CoverageCoordinates, malformed_coverage::{CoverageError, MalformedCoverage}, units::{temporal_coverage::{weekday_plus, TemporalCoverageUnit}, Coverage, CoverageUnit}
 };
 
 #[derive(Debug, Default, Serialize, Clone)]

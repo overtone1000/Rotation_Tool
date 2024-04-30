@@ -1,13 +1,9 @@
 use std::collections::HashSet;
-use std::error::Error;
-use std::fs::File;
-use std::io::BufWriter;
 
 use chrono::NaiveDate;
 
 use crate::analysis::analysis_datum::AnalysisDatum;
 use crate::analysis::volumes::VolumesMark;
-use crate::coverage;
 use crate::rotations::description::WrappedSortable;
 use crate::rotations::manifest::Manifest;
 use crate::{analysis::analysis_datum::WorkUnit, coverage::coordinate::CoverageCoordinates};
@@ -175,13 +171,13 @@ impl CoverageMap {
                         for (coords, coverage) in coverages
                         {
                             self.clear_coverage();
-                            self.add_coverage(&coords, coverage);
+                            self.add_coverage(&coords, coverage)?;
                             
                             self.foreach_mut(
                                 |_coord:&CoverageCoordinates, coverage_and_workday:&mut CoverageAndWorkDay|
                                 {
                                     coverage_and_workday.for_each_analysis_datum_by_rotation_date(
-                                        |rotation_date:NaiveDate,ad:AnalysisDatum,cu:&CoverageUnit|
+                                        |rotation_date:NaiveDate,ad:AnalysisDatum,_cu:&CoverageUnit|
                                         {
                                             if rotation_start<=&rotation_date && &rotation_date<=rotation_end
                                             {

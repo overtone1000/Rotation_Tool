@@ -1,7 +1,5 @@
-use std::{collections::{HashMap, HashSet}, error::Error};
+use std::collections::HashMap;
 
-use chrono::{NaiveDateTime};
-use serde::Deserialize;
 
 use super::{table::Table, types::ExamCode};
 
