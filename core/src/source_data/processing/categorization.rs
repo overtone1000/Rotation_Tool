@@ -230,18 +230,34 @@ pub fn check_readers(main_data: &Vec<Exam>,readers:&BTreeMap<u64,ExamReader>) ->
     }
 
     
-    let reader_ids:BTreeSet<&u64>=readers.keys().collect();
+    //let reader_ids:BTreeSet<&u64>=readers.keys().collect();
     let mut unrecognized_readers:BTreeSet<ExamReader>=BTreeSet::new();
+    
+    let mut exams_read_by_excluded_readers:u64=0;
+    let mut exams_read_by_included_readers:u64=0;
 
     for exam in main_data
     {
-        if !reader_ids.contains(&exam.signer_acct_id)
+        match readers.get(&exam.signer_acct_id)
         {
-            unrecognized_readers.insert(
-                ExamReader { signer_acct_id: exam.signer_acct_id, rad_last_name:exam.rad_last_name.to_string(), rad_first_name:exam.rad_first_name.to_string(), excluded: false}
-            );
+            Some(reader) => {
+                match reader.excluded
+                {
+                    true=>exams_read_by_excluded_readers+=1,
+                    false=>exams_read_by_included_readers+=1
+                }
+            },
+            None => {
+                unrecognized_readers.insert(
+                    ExamReader { signer_acct_id: exam.signer_acct_id, rad_last_name:exam.rad_last_name.to_string(), rad_first_name:exam.rad_first_name.to_string(), excluded: false}
+                );
+            },
         }
     }
+
+    println!();
+    println!("{} exams in data set, {} read by included readers.",main_data.len(),exams_read_by_included_readers);
+    println!();
     
     if unrecognized_readers.len()>0
     {

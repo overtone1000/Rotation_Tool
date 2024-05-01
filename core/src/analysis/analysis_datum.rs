@@ -70,7 +70,7 @@ impl WorkUnit {
 pub struct AnalysisDatum {
     total_rvu: f64,
     total_bvu: f64,
-    studies: HashMap<String, f64>,
+    study_counts_by_exam_code: HashMap<String, f64>,
 }
 
 impl AddAssign for AnalysisDatum {
@@ -78,7 +78,7 @@ impl AddAssign for AnalysisDatum {
         self.total_rvu += rhs.total_rvu;
         self.total_bvu += rhs.total_bvu;
 
-        for (rhs_key, rhs_val) in rhs.studies {
+        for (rhs_key, rhs_val) in rhs.study_counts_by_exam_code {
             self.add_studies(rhs_key, rhs_val);
         } 
     }
@@ -99,14 +99,14 @@ impl AnalysisDatum {
         self.total_bvu
     }
     pub fn get_studies(&self) -> &HashMap<String, f64> {
-        &self.studies
+        &self.study_counts_by_exam_code
     }
 
     pub fn scale(&mut self, scale: f64) {
         self.total_rvu *= scale;
         self.total_bvu *= scale;
 
-        for (_, val) in &mut self.studies {
+        for (_, val) in &mut self.study_counts_by_exam_code {
             *val *= scale;
         }
     }
@@ -118,7 +118,7 @@ impl AnalysisDatum {
     }
 
     fn add_studies(&mut self, key: String, val: f64) {
-        match self.studies.entry(key) {
+        match self.study_counts_by_exam_code.entry(key) {
             Entry::Occupied(mut o) => {
                 let curval = o.get_mut();
                 *curval += val;

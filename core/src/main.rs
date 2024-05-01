@@ -20,7 +20,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let print_averages:bool=true;
     if print_averages {
-        print_averages_by_modality_and_day(&common.coverage_tree);
+        print_averages_by_modality_and_day(&common.coverage_tree, rotation_start, rotation_end);
     }
 
     let rotation_analysis: bool = true;

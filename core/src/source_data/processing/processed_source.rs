@@ -63,6 +63,8 @@ impl ProcessedSource {
         
         let mut main_data:Vec<Exam> = ExamTable::create(file_names::MAIN_DATA_FILE).get_from_cache_or_build_and_cache()?;
         
+        println!("Data set contains {} exams.",main_data.len());
+        let recognized_reader_count:u64=0;
         //Substitute aliases and check readers
         for exam in &mut main_data
         {

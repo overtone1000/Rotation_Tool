@@ -71,7 +71,7 @@ pub fn build_main_common() -> Result<MainCommon, Box<dyn Error>> {
     })
 }
 
-pub fn print_averages_by_modality_and_day(map:&CoverageMap) -> () {
+pub fn print_averages_by_modality_and_day(map:&CoverageMap, rotation_start:&NaiveDate, rotation_end:&NaiveDate) -> () {
     let mut dates:BTreeSet<NaiveDate>=BTreeSet::new();
     let mut aggregate:BTreeMap<String,(f64,f64)>=BTreeMap::new();
     map.foreach(
@@ -80,22 +80,25 @@ pub fn print_averages_by_modality_and_day(map:&CoverageMap) -> () {
             cawd.for_each_analysis_datum_by_rotation_date(
                 |date,datum,_cu|
                 {
-                    dates.insert(date);
-                    
-                    let value = match aggregate.entry(coord.subspecialty.to_string())
+                    if date>=*rotation_start && date<=*rotation_end
                     {
-                        std::collections::btree_map::Entry::Vacant(e) => e.insert((0.0,0.0)),
-                        std::collections::btree_map::Entry::Occupied(e) => e.into_mut(),
-                    };
+                        dates.insert(date);
+                        
+                        let value = match aggregate.entry(coord.subspecialty.to_string())
+                        {
+                            std::collections::btree_map::Entry::Vacant(e) => e.insert((0.0,0.0)),
+                            std::collections::btree_map::Entry::Occupied(e) => e.into_mut(),
+                        };
 
-                    let mut total_study_count:f64=0.0;
-                    for study_count in datum.get_studies().values()
-                    {
-                        total_study_count+=study_count;
+                        let mut total_study_count:f64=0.0;
+                        for study_count in datum.get_studies().values()
+                        {
+                            total_study_count+=study_count;
+                        }
+
+                        (*value).0+=total_study_count;
+                        (*value).1+=datum.get_rvu();
                     }
-
-                    (*value).0+=total_study_count;
-                    (*value).1+=datum.get_rvu();
                 }
             );
         }
