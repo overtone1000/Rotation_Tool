@@ -28,7 +28,7 @@ export interface TemporalCoverage{
     start:MinutesSinceMidnight,
     end:MinutesSinceMidnight,
     rotation:string,
-    rotation_day:number
+    work_to_rotation_day_offset:number
 }
 
 export interface MinutesSinceMidnight

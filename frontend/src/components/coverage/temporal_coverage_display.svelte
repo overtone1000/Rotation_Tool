@@ -10,7 +10,7 @@
 
 <tr>
     <td>{coverage.rotation}</td>
-	<td>{dowfunc(coverage.rotation_day).toString()}</td>
+	<td>{dowfunc(coverage.work_to_rotation_day_offset).toString()}</td>
 	<td>{dowstring+minutes_since_midnight_to_time_string(coverage.start)}</td>
 	<td>{dowstring+minutes_since_midnight_to_time_string(coverage.end)}</td>
 </tr>
