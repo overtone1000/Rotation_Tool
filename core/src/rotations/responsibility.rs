@@ -68,8 +68,18 @@ impl RotationResponsibility {
             &mut errors,
         );
         check(&self.contexts, globals::CONTEXTS, "context", &mut errors);
-        //check(&self.modalities, globals::MODALITIES, "modality", &mut errors);
         validate_days(&self.days, &mut errors);
+
+        for time_period in self.time_periods.get()
+        {
+            for time_span in time_period
+            {
+                if time_span.start==time_span.stop
+                {
+                    errors.push(format!("Zero duration time period {} {}",time_span.start.get_time(), time_span.stop.get_time()));
+                }
+            }
+        }
 
         if !errors.is_empty() {
             Err(errors)
