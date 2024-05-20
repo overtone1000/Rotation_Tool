@@ -18,7 +18,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     let mut common = rotation_tool::build_main_common()?;
 
-    let print_averages:bool=true;
+    let print_averages:bool=false;
     if print_averages {
         print_averages_by_modality_and_day(&common.coverage_tree, rotation_start, rotation_end);
     }

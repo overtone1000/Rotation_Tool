@@ -299,7 +299,10 @@ impl MainCommon
                 let comparison=compare(&self.coverage_tree, &proposed_coverage_tree);
                 comparison.to_json((BASE.to_string() + "/" + PROPOSED_DIFFERENTIAL + &millistr + ".json").as_str())?;
             },
-            Err(_) => todo!(), //delete proposed files
+            Err(e) => {
+                println!("Proposed manifest error: {}", e.to_string());
+                return Err(e);
+            }
         }
 
         Ok(())
