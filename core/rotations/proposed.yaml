@@ -1133,7 +1133,21 @@ rotation_manifest:
     #modalities: CT
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 11:00 CD-15:00 CD
+    - 11:00 CD-12:00 CD
+  - sites: TPC
+    exams: General XR/General CT/General US
+    contexts: Outpatient
+    #modalities: CT/US/XR
+    days: Mon
+    time_periods:
+    - 00:00 CD-12:00 CD
+  - sites: TPC
+    exams: General XR/General CT/General US
+    contexts: Outpatient
+    #modalities: CT/US/XR
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-12:00 CD
 - rotation: Stack 4
   location: Remote
   hours:
@@ -1162,20 +1176,27 @@ rotation_manifest:
     days: Mon
     time_periods:
     - 00:00 PD-13:00 PD
+  - sites: SH
+    exams: General CT
+    contexts: Outpatient
+    #modalities: CT
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 12:00 CD-15:00 CD
   - sites: TPC
     exams: General XR/General CT/General US
     contexts: Outpatient
     #modalities: CT/US/XR
     days: Mon
     time_periods:
-    - 00:00 CD-15:00 CD
+    - 12:00 CD-15:00 CD
   - sites: TPC
     exams: General XR/General CT/General US
     contexts: Outpatient
     #modalities: CT/US/XR
     days: Tue/Wed/Thu/Fri
     time_periods:
-    - 15:00 PD-15:00 CD
+    - 12:00 CD-15:00 CD
 - rotation: Stack 5
   location: Remote
   hours:
