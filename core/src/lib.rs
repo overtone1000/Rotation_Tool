@@ -258,12 +258,21 @@ impl MainCommon
         std::fs::remove_dir_all(BASE)?;
         std::fs::create_dir(BASE)?;
     
-        //Add volumes to the manifest before creating manifest json
-        let mut manifest = ManifestType::Active.get()?;
-        let mut mutable_temporary_coverage_tree=self.coverage_tree.clone();
-        mutable_temporary_coverage_tree.populate_responsibility_volumes(&mut manifest, rotation_start, rotation_end)?;
-        manifest.to_json(&(BASE.to_string() + "/active_rotation_manifest" + &millistr + ".json"))?;
-        
+        //Add volumes to the manifest before creating active manifest json
+        {
+            let mut manifest = ManifestType::Active.get()?;
+            let mut mutable_temporary_coverage_tree=self.coverage_tree.clone();
+            mutable_temporary_coverage_tree.populate_responsibility_volumes(&mut manifest, rotation_start, rotation_end)?;
+            manifest.to_json(&(BASE.to_string() + "/active_rotation_manifest" + &millistr + ".json"))?;
+        }
+
+        //Add volumes to the manifest before creating proposed manifest json
+        {
+            let mut manifest = ManifestType::Proposed.get()?;
+            let mut mutable_temporary_coverage_tree=self.coverage_tree.clone();
+            mutable_temporary_coverage_tree.populate_responsibility_volumes(&mut manifest, rotation_start, rotation_end)?;
+            manifest.to_json(&(BASE.to_string() + "/proposed_rotation_manifest" + &millistr + ".json"))?;
+        }
         self.coverage_tree.to_json(&(BASE.to_string() + "/active_coverage_tree" + &millistr + ".json"))?;
     
         //Categories lists

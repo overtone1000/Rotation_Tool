@@ -1,5 +1,5 @@
 <script>
-	import Main from '../components/main.svelte';
+	import Main from '../../components/main.svelte';
 </script>
 
 <svelte:head>
@@ -8,4 +8,4 @@
 	</title>
 </svelte:head>
 
-<Main />
+<Main analysis=true />

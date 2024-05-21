@@ -1,6 +1,6 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, f32::consts::E};
 
-use chrono::{Datelike, Days, NaiveDate, Timelike};
+use chrono::{Datelike, Days, NaiveDate, NaiveDateTime, NaiveTime, Timelike};
 use serde::Serialize;
 
 use crate::{
@@ -150,11 +150,35 @@ impl CoverageAndWorkDay {
     {
         let mut retval: HashMap<NaiveDate,AnalysisDatum> = HashMap::new();
 
-        let collected_work:Vec<&WorkUnit> = match coverage
+        let mut collected_work:Vec<&WorkUnit> = match coverage
         {
             CoverageUnit::Temporal(tcu) => self.get_work_in_timespan(tcu.start, tcu.end),
             CoverageUnit::WeekFraction(_fcu) => self.work.iter().collect()
         };
+
+        /*
+        let wu;
+        if collected_work.is_empty()
+        {
+
+            let datetime = match self.work.first()
+            {
+                Some(first) => first.get_datetime(),
+                None => NaiveDateTime::from_timestamp_opt(0, 0).expect("Should be valid."),
+            };
+
+             wu = WorkUnit::create(
+                datetime, 
+                0.0,
+                0.0,
+                    "No work found for this rotation.".to_string()
+            );
+            
+            collected_work.push(
+                &wu
+            );
+        }
+        */
 
         for work in collected_work {
             let rotation_date=coverage.get_time_adjustment().get_date(work.get_datetime().date());

@@ -1,22 +1,9 @@
 <script lang="ts">
-	import Textfield from "@smui/textfield";
 	import PlotInstances from "./plot_page.svelte";
-
-	let admitted:boolean;
-	let text:string="";
-	$:{
-		admitted= text==="showmethestats";
-	}
 </script>
 
 <div class="container">
-
-	{#if admitted}
-		<PlotInstances />
-	{:else}
-		<Textfield bind:value={text} label="Passcode"/>
-	{/if}
-	
+	<PlotInstances />	
 </div>
 
 <style>

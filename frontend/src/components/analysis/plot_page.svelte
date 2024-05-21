@@ -39,7 +39,6 @@
 		{
 			heatmap_filename="data/volume_by_date_and_rotation_active"+key+".json"
 		}
-		console.debug("Heatmap filename is now" + heatmap_filename);
 	}
 
 	let rotation_list:string[]|undefined=undefined;

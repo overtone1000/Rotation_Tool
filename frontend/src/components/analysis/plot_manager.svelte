@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { onMount } from 'svelte';
 	import { get_data, type BuiltPlot } from "./commons";
     import ObservablePlot from "./plot_scaffold.svelte";
 
@@ -17,10 +18,19 @@
     let marks:MarkFormat[]|undefined;
     let plot:BuiltPlot|undefined = undefined;
     let container_width:any="5000px";
+    let mounted:boolean=false;
+
+    onMount(()=>{
+        mounted=true;
+    });
 
     $:{
-        get_data(filename,(result:any)=>{data=result as DataFormat});
+        if(mounted)
+        {
+            get_data(filename,(result:any)=>{data=result as DataFormat});
+        }
     }
+
     $:{
         if(data_callback!==undefined && data!==undefined)
         {

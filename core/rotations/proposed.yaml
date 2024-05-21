@@ -1090,22 +1090,7 @@ rotation_manifest:
     #modalities: CT
     days: Tue/Wed/Thu/Fri
     time_periods:
-    - 15:00 PBD-00:00 CD
-    #Prior day outpatient
-  - sites: SH
-    exams: General XR/General CT/General US
-    contexts: Outpatient
-    #modalities: CT/US/XR/RF
-    days: Tue/Wed/Thu/Fri
-    time_periods:
-    - 19:00 PD-24:00 PD
-  - sites: WB
-    exams: General XR/General US
-    contexts: Outpatient
-    #modalities: CT/US/XR/RF
-    days: Tue/Wed/Thu/Fri
-    time_periods:
-    - 19:00 PD-24:00 PD
+    - 15:00 PD-00:00 CD
 - rotation: Stack 3
   location: Remote
   hours:
@@ -1154,21 +1139,6 @@ rotation_manifest:
   - hours: 11:00 CD-15:00 CD
     days: Mon/Tue/Wed/Thu/Fri
   responsibilities:
-  - sites: SH
-    exams: General XR/General CT/General US
-    contexts: Outpatient
-    #modalities: XR/RF/US/CT
-    days: Tue/Wed/Thu/Fri
-    time_periods:
-    - 15:00 PD-19:00 PD
-  - sites: WB
-    exams: General XR/General US
-    contexts: Outpatient
-    #modalities: XR/RF/US/CT
-    days: Tue/Wed/Thu/Fri
-    time_periods:
-    - 15:00 PD-19:00 PD
-    #Monday only CT/XR/US from all sites on Sunday until 1pm
   - sites: All
     exams: General XR/General CT/General US
     contexts: Outpatient
@@ -1176,6 +1146,21 @@ rotation_manifest:
     days: Mon
     time_periods:
     - 00:00 PD-13:00 PD
+  - sites: SH
+    exams: General XR/General CT/General US
+    contexts: Outpatient
+    #modalities: XR/RF/US/CT
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-24:00 PD
+  - sites: WB
+    exams: General XR/General US
+    contexts: Outpatient
+    #modalities: XR/RF/US/CT
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-24:00 PD
+    #Monday only CT/XR/US from all sites on Sunday until 1pm
   - sites: SH
     exams: General CT
     contexts: Outpatient
@@ -1187,14 +1172,7 @@ rotation_manifest:
     exams: General XR/General CT/General US
     contexts: Outpatient
     #modalities: CT/US/XR
-    days: Mon
-    time_periods:
-    - 12:00 CD-15:00 CD
-  - sites: TPC
-    exams: General XR/General CT/General US
-    contexts: Outpatient
-    #modalities: CT/US/XR
-    days: Tue/Wed/Thu/Fri
+    days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 12:00 CD-15:00 CD
 - rotation: Stack 5

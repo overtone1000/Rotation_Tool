@@ -13,9 +13,23 @@
   	import FormField from '@smui/form-field';
 
 	let manifest:RotationManifest|undefined=undefined;
+	export let proposed:boolean;
+
+	let fetch_string:string;
+	$:{
+		if(proposed)
+		{
+			fetch_string="data/active_rotation_manifest"+key+".json";
+		}
+		else
+		{
+			fetch_string="data/proposed_rotation_manifest"+key+".json";
+		}
+	}
+
 	
 	onMount(() => {
-		fetch("data/active_rotation_manifest"+key+".json").then(
+		fetch(fetch_string).then(
 			(value:Response)=>{
 				if(value.ok)
 				{

@@ -7,20 +7,20 @@
 	import ManifestEdit from './edit/manifest_edit.svelte';
 	import Analysis from './analysis/analysis.svelte';
 
+	export let proposed:boolean=false;
+	export let analysis:boolean=false;
 	
 	enum Display
 	{
 		Manifest,
 		Coverage,
-		Edit,
-		Analysis
+		Edit
 	}
 
 	const displays = [
 		Display.Manifest,
 		Display.Coverage,
-		Display.Edit,
-		Display.Analysis
+		Display.Edit
 	];
 
 	const display_to_string = (display:Display) => {
@@ -29,7 +29,6 @@
 			case Display.Manifest:return "Rotation Descriptions";
 			case Display.Coverage:return "Coverage Query";
 			case Display.Edit:return "Editor";
-			case Display.Analysis:return "Volume Analysis";
 		}
 	}
 
@@ -39,6 +38,7 @@
 	let current_display=Display.Manifest;
 
 	let dark_mode:boolean|undefined=undefined;
+	$:{if(analysis){dark_mode=false;}}
 	let menu: Menu;
 </script>
 
@@ -63,52 +63,55 @@
   {/if}
 </svelte:head>
 
+
 <div class="vp_fill">
-	<div class="top_menu">
-		<div class="top_menu_item">
-			<IconButton on:click={() => menu.setOpen(true)}>
-				<Icon class="material-icons">menu</Icon>
-			</IconButton>
-			<Menu bind:this={menu}>
-				<List>
-					<SelectionGroup>
-						{#each displays as display_option}
-						<Item
-							on:SMUI:action={() => {
-								current_display = display_option;
-								menu.setOpen(false);
-							}}
-							selected={current_display === display_option}
-						>
-							<SelectionGroupIcon>
-							<i class="material-icons">check</i>
-							</SelectionGroupIcon>
-							<Text>{display_to_string(display_option)}</Text>
-						</Item>
-						{/each}
-					</SelectionGroup>
-				</List>
-			</Menu>
+	{#if analysis}
+		<Analysis/>
+	{:else}
+		<div class="top_menu">
+			<div class="top_menu_item">
+				<IconButton on:click={() => menu.setOpen(true)}>
+					<Icon class="material-icons">menu</Icon>
+				</IconButton>
+				<Menu bind:this={menu}>
+					<List>
+						<SelectionGroup>
+							{#each displays as display_option}
+							<Item
+								on:SMUI:action={() => {
+									current_display = display_option;
+									menu.setOpen(false);
+								}}
+								selected={current_display === display_option}
+							>
+								<SelectionGroupIcon>
+								<i class="material-icons">check</i>
+								</SelectionGroupIcon>
+								<Text>{display_to_string(display_option)}</Text>
+							</Item>
+							{/each}
+						</SelectionGroup>
+					</List>
+				</Menu>
+			</div>
+			<div class="spacer"></div>
+			<div class="top_menu_item">
+				<IconButton on:click={() => dark_mode=!dark_mode} toggle pressed={dark_mode}>
+					<Icon class="material-icons" on>light_mode</Icon>
+					<Icon class="material-icons">dark_mode</Icon>
+				</IconButton>
+			</div>
 		</div>
-		<div class="spacer"></div>
-		<div class="top_menu_item">
-			<IconButton on:click={() => dark_mode=!dark_mode} toggle pressed={dark_mode}>
-				<Icon class="material-icons" on>light_mode</Icon>
-				<Icon class="material-icons">dark_mode</Icon>
-			</IconButton>
+		<div class="page">
+			{#if current_display===Display.Manifest}
+				<ManifestDisplay proposed={proposed}/>
+			{:else if current_display===Display.Coverage}
+				<CoverageDisplay/>
+			{:else if current_display===Display.Edit}
+				<ManifestEdit/>
+			{/if}
 		</div>
-	</div>
-	<div class="page">
-		{#if current_display===Display.Manifest}
-			<ManifestDisplay/>
-		{:else if current_display===Display.Coverage}
-			<CoverageDisplay/>
-		{:else if current_display===Display.Edit}
-			<ManifestEdit/>
-		{:else if current_display===Display.Analysis}
-			<Analysis/>
-		{/if}
-	</div>
+	{/if}
 </div>
 
 <style>
