@@ -8,4 +8,4 @@
 	</title>
 </svelte:head>
 
-<Main />
+<Main proposed=true/>

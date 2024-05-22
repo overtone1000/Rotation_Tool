@@ -15,32 +15,42 @@
 	let manifest:RotationManifest|undefined=undefined;
 	export let proposed:boolean;
 
-	let fetch_string:string;
+	let loaded:boolean=false;
 	$:{
-		if(proposed)
+		console.debug("Running...");
+		if(loaded)
 		{
-			fetch_string="data/active_rotation_manifest"+key+".json";
-		}
-		else
-		{
-			fetch_string="data/proposed_rotation_manifest"+key+".json";
+			console.debug("Loaded...");
+			let fetch_string:string;
+			if(proposed)
+			{
+				console.debug("Proposed...");
+				fetch_string="data/proposed_rotation_manifest"+key+".json";
+			}
+			else
+			{
+				console.debug("Active...");
+				fetch_string="data/active_rotation_manifest"+key+".json";
+			}
+
+			fetch(fetch_string).then(
+				(value:Response)=>{
+					if(value.ok)
+					{
+						value.json().then(
+							(res:RotationManifest)=>{
+								manifest=res;
+							}
+						);
+					}
+				}
+			);
 		}
 	}
 
 	
 	onMount(() => {
-		fetch(fetch_string).then(
-			(value:Response)=>{
-				if(value.ok)
-				{
-					value.json().then(
-						(res:RotationManifest)=>{
-							manifest=res;
-						}
-					);
-				}
-			}
-		);
+		loaded=true;
 	});
 
 	let selected_rotation:Rotation|undefined = undefined;
