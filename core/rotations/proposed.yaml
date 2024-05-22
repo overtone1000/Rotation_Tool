@@ -799,14 +799,7 @@ rotation_manifest:
     #modalities: CT/US/MR/RF/XR
     days: Sun
     time_periods:
-    - 17:00 PBD-12:00 PBD+1
-  - sites: All
-    exams: General XR/General CT/General US/Body MR
-    contexts: Outpatient
-    #modalities: CT/US/MR/RF/XR
-    days: Sun
-    time_periods:
-    - 12:00 PBD+1-24:00 PBD+1
+    - 17:00 PBD-13:00 PBD+1
   comments:
     - Finish by 17:00 on Monday
 - rotation: Call 1
@@ -1064,6 +1057,13 @@ rotation_manifest:
   - hours: 11:00 CD-15:00 CD
     days: Mon/Tue/Wed/Thu/Fri
   responsibilities:
+  - sites: All
+    exams: General XR/General CT/General US/Body MR
+    contexts: Outpatient
+    #modalities: CT/US/MR/RF/XR
+    days: Mon
+    time_periods:
+    - 13:00 PBD+1-15:00 PBD+1
   - sites: SRC
     exams: General US
     contexts: Outpatient
@@ -1077,6 +1077,13 @@ rotation_manifest:
   - hours: 11:00 CD-15:00 CD
     days: Mon/Tue/Wed/Thu/Fri
   responsibilities:
+  - sites: All
+    exams: General XR/General CT/General US/Body MR
+    contexts: Outpatient
+    #modalities: CT/US/MR/RF/XR
+    days: Mon
+    time_periods:
+    - 15:00 PBD+1-24:00 PBD+1
   - sites: SRC
     exams: General CT
     contexts: Outpatient
@@ -1105,13 +1112,6 @@ rotation_manifest:
     days: Tue/Wed/Thu/Fri
     time_periods:
     - 15:00 PD-24:00 PD
-  - sites: SH
-    exams: General CT
-    contexts: Outpatient
-    #modalities: CT
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 11:00 CD-12:00 CD
   - sites: TPC
     exams: General XR/General CT/General US
     contexts: Outpatient
@@ -1188,6 +1188,13 @@ rotation_manifest:
     days: Tue/Wed/Thu/Fri
     time_periods:
     - 15:00 PD-24:00 PD
+  - sites: SH
+    exams: General CT
+    contexts: Outpatient
+    #modalities: CT
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 11:00 CD-12:00 CD
 - rotation: PA-US
   location: SH
   hours:
