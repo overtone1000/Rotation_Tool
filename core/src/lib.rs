@@ -11,8 +11,9 @@ use coverage::{
         coverage_audit::{audit, audit_to_stream},
     }, work_coverage_map::maps::CoverageMap
 };
-use globals::file_names::{ACTIVE_COVERAGE_ANALYSIS_OUT, ACTIVE_COVERAGE_AUDIT_NOWORK_OUT, ACTIVE_COVERAGE_AUDIT_OUT, MANIFEST_ACTIVE, MANIFEST_PROPOSED, VOLUME_BY_DATE_ROTATION_PROPOSED};
+use globals::file_names::{self, ACTIVE_COVERAGE_ANALYSIS_OUT, ACTIVE_COVERAGE_AUDIT_NOWORK_OUT, ACTIVE_COVERAGE_AUDIT_OUT, MANIFEST_ACTIVE, MANIFEST_PROPOSED, VOLUME_BY_DATE_ROTATION_PROPOSED};
 use rotations::manifest::Manifest;
+use source_data::tables::{exam_data::{Exam, ExamTable}, table::Table};
 
 use crate::{
     coverage::analysis::{
@@ -57,6 +58,14 @@ impl ManifestType
         };
         crate::rotations::manifest::Manifest::parse(filename)
     }
+}
+
+pub fn source_check() -> Result<(), Box<dyn Error>> {
+    let main_data_1:Vec<Exam> = ExamTable::create(file_names::MAIN_DATA_FILE).iter().collect();
+    let main_data_2:Vec<Exam> = ExamTable::create(file_names::MAIN_DATA_FILE).iter().collect();
+
+    unimplemented!("Not implemented!");
+    //Ok(())
 }
 
 pub fn build_main_common() -> Result<MainCommon, Box<dyn Error>> {

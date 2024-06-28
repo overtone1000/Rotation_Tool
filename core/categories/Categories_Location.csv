@@ -125,3 +125,5 @@ Site,Location,Context,Comments
 8,NULL,Non-Radiology,A mix but mostly not radiologists
 8,NIM,Outpatient,Found in TPC entries
 8,TSURG,Outpatient,Found in TPC entries
+8,BLAB,Outpatient,Found in TPC entries
+8,BMHP,Outpatient,Found in TPC entries

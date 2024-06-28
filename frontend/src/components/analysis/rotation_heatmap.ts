@@ -25,7 +25,19 @@ export const get_rotation_marks=(data:Rotation_Analysis_Data)=>{
     return all_marks;		
 }
 
-export const build_heatmap=(analysis_marks:AnalysisMark[], width:number, options:{title:string, valuetype:ValueType, rotations:string[]})=>{
+export const dateset_to_string=(dates:Set<Date>)=>
+{
+    let retval="";
+    for(const date of dates)
+    {
+        let cust_date_str=short_days_of_the_week_Mon_first[date.getDay()]+" "+(date.getMonth()+1).toString()+"/"+(date.getDate()+1).toString()+"/"+date.getFullYear().toString().substring(2,4);
+        retval+=cust_date_str+", ";
+    }
+    retval=retval.substring(0,retval.length-2);
+    return retval;
+}
+
+export const build_heatmap=(analysis_marks:AnalysisMark[], width:number, options:{title:string, valuetype:ValueType, rotations:string[], dates_callback:(dates:Set<Date>)=>void})=>{
     let max=0;
     let min=0;
 
@@ -43,7 +55,10 @@ export const build_heatmap=(analysis_marks:AnalysisMark[], width:number, options
             z:"proportion-facet",
         },
         {
-            y: (d)=>d.value[options.valuetype],
+            y: {
+                thresholds: 150/5,
+                value:(d)=>d.value[options.valuetype]
+            },
             fx: "rotation",
             inset: 0,
             channels: {
@@ -81,18 +96,10 @@ export const build_heatmap=(analysis_marks:AnalysisMark[], width:number, options
                     fx: true,
                     y: true,
                     dates: (d:Set<Date>,i)=>{
-                        let retval="";
-                        for(const date of d)
-                        {
-                            let cust_date_str=short_days_of_the_week_Mon_first[date.getDay()]+" "+(date.getMonth()+1).toString()+"/"+(date.getDate()+1).toString()+"/"+date.getFullYear().toString().substring(2,4);
-                            retval+=cust_date_str+", ";
-                        }
-                        retval=retval.substring(0,retval.length-2);
-                        console.debug("Dates: " + retval);
-                        return retval;
+                        options.dates_callback(d);
+                        return d.size.toString();
                     },
                 },
-                dates:(d:any)=>{console.debug("dates",d);}
             } as Plot.TipOptions
         } as Plot.BinYInputs<Plot.RectOptions>
     );

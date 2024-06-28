@@ -2,7 +2,7 @@
 	import { key } from "../../commons/key";
 	import ManagedPlot from "./plot_manager.svelte";
 	import { build_site_plot, get_facility_marks } from "./facility_volumes";
-	import { build_heatmap, get_rotation_marks } from "./rotation_heatmap";
+	import { build_heatmap, dateset_to_string, get_rotation_marks } from "./rotation_heatmap";
 	import type { ValueType } from "./commons";
 	import FormField from "@smui/form-field";
 	import Radio from '@smui/radio';
@@ -57,6 +57,7 @@
 				rotation_set.add(rotation);
 			}
 		}
+		
 		if(rotation_set.size>0)
 		{
 			selected=[];
@@ -71,6 +72,14 @@
 		{
 			rotation_list=undefined;
 		}
+	}
+
+	let dates_string:undefined|String;
+	$: dates_string=undefined;
+
+	const dates_callback = (dates:Set<Date>)=>
+	{
+		dates_string=dateset_to_string(dates);
 	}
 </script>
 
@@ -99,11 +108,16 @@
     <div class="plot_container">
 		<ManagedPlot 
 			filename={heatmap_filename}
-			plot_options={{valuetype:valuetype, title:"Rotation Volumes", rotations:selected}}
+			plot_options={{valuetype:valuetype, title:"Rotation Volumes", rotations:selected, dates_callback:dates_callback}}
 			get_marks={get_rotation_marks}
 			build_plot={build_heatmap}
 			data_callback={volume_data_callback}
 		/>
+		<div>
+			{#if dates_string!==undefined}
+				Dates in this bin: {dates_string}
+			{/if}
+		</div>
 		<ManagedPlot 
 			filename={"data/proposed_differential"+key+".json"}
 			plot_options={{valuetype:valuetype, title:"Proposal Differentials", rotations:selected}}

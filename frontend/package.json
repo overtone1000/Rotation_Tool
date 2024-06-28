@@ -4,6 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
+		"build": "vite build",
 		"build_and_deploy": "vite build && bash ../deploy/testing_autoscheda_deploy.sh",
 		"preview": "vite preview",
 		"check": "svelte-check",

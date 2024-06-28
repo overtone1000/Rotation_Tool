@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use chrono::NaiveDate;
-use rotation_tool::{print_averages_by_modality_and_day, MainCommon};
+use rotation_tool::{print_averages_by_modality_and_day, source_check, MainCommon};
 
 fn main() -> Result<(), Box<dyn Error>> {
     print!("{}[2J", 27 as char);
@@ -11,10 +11,15 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("Starting.");
 
     let facility_start=&NaiveDate::from_ymd_opt(2024, 1, 2).expect("Should be a valid date.");
-    let facility_end=&NaiveDate::from_ymd_opt(2024, 3, 24).expect("Should be a valid date.");
+    let facility_end=&NaiveDate::from_ymd_opt(2024, 6, 24).expect("Should be a valid date.");
 
     let rotation_start=&NaiveDate::from_ymd_opt(2024, 1, 6).expect("Should be a valid date.");
-    let rotation_end=&NaiveDate::from_ymd_opt(2024, 3, 24).expect("Should be a valid date.");
+    let rotation_end=&NaiveDate::from_ymd_opt(2024, 6, 24).expect("Should be a valid date.");
+
+    let check_source:bool=false;
+    if check_source {
+        source_check()?;
+    }
 
     let mut common = rotation_tool::build_main_common()?;
 
