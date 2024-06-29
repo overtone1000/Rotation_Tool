@@ -4,7 +4,7 @@ pub mod file_names {
     pub(crate) const MAIN_DATA_FILE: &str = "./data/2024 to today v01.csv";
 
     //categorizations
-    pub(crate) const BVU_DATA_FILE: &str = "./data/BVU.csv";
+    pub(crate) const BVU_DATA_FILE: &str = "./categories/BVU.csv";
     pub(crate) const CATEGORIES_LOCATION_FILE: &str = "./categories/Categories_Location.csv";
     pub(crate) const CATEGORIES_EXAM_FILE: &str = "./categories/Categories_Exam.csv";
     pub(crate) const EXAM_ALIAS_FILE: &str = "./categories/Exam_Aliases.csv";
