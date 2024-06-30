@@ -1,5 +1,5 @@
 use std::{
-    collections::{BTreeMap, BTreeSet}, error::Error, fs::File, io::BufWriter
+    collections::{BTreeMap, BTreeSet}, error::Error, fs::File, io::{BufWriter, Read}
 };
 
 use chrono::{NaiveDate, NaiveDateTime};
@@ -11,7 +11,7 @@ use coverage::{
         coverage_audit::{audit, audit_to_stream},
     }, work_coverage_map::maps::CoverageMap
 };
-use globals::file_names::{self, ACTIVE_COVERAGE_ANALYSIS_OUT, ACTIVE_COVERAGE_AUDIT_NOWORK_OUT, ACTIVE_COVERAGE_AUDIT_OUT, MANIFEST_ACTIVE, MANIFEST_PROPOSED, VOLUME_BY_DATE_ROTATION_PROPOSED};
+use globals::file_names::{self, ACTIVE_COVERAGE_ANALYSIS_OUT, ACTIVE_COVERAGE_AUDIT_NOWORK_OUT, ACTIVE_COVERAGE_AUDIT_OUT, MANIFEST_ACTIVE, MANIFEST_PROPOSED, TEST_GROUP_FILE, VOLUME_BY_DATE_ROTATION_PROPOSED};
 use rotations::manifest::Manifest;
 use source_data::tables::{exam_data::{Exam, ExamTable}, table::Table};
 
@@ -348,5 +348,33 @@ impl MainCommon
     }
 }
 
-const BASE: &str = "../frontend/static/data";
+pub fn run_test(common:&MainCommon)-> Result<(), Box<dyn Error>> 
+{
+    let mut file=std::fs::File::open(TEST_GROUP_FILE)?;
+    let mut filestr:String="".to_string();
+    file.read_to_string(&mut filestr)?;
+    let members:Vec<&str>=filestr.split("\n").collect();
 
+    println!("Spot test:");
+    for member in members
+    {
+        let mut found:bool=false;
+        for exam in &common.source.main_data
+        {
+            if exam.accession == member
+            {
+                found=true;
+                break;
+            }
+        }
+        if !found
+        {
+            println!("Missing member: {}",member);
+        }
+    }
+    println!("");
+
+    Ok(())
+}
+
+const BASE: &str = "../frontend/static/data";
