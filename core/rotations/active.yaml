@@ -835,14 +835,7 @@ rotation_manifest:
     #modalities: CT/US/XR/MR/RF
     days: Sat
     time_periods:
-    - 15:00 PBD-18:00 PBD
-  #- sites: SC
-  #  exams: General
-  #  contexts: Outpatient
-  #  #modalities: CVUS
-  #  days: Sat
-  #  time_periods:
-  #  - 15:00 PBD-18:00 PBD
+    - 15:00 PBD-17:00 PBD
   comments:
   - Contrast coverage at SRC on Saturday (usually starts at 08:00, call techs for schedule)
   - Finish by 17:00 on Monday
@@ -855,25 +848,25 @@ rotation_manifest:
     #modalities: CT/US/MR/RF/XR
     days: Sun
     time_periods:
-    - 18:00 PBD-24:00 PBD+1
-  #- sites: SC
-  #  exams: General
-  #  contexts: Outpatient
-  #  #modalities: CVUS
-  #  days: Sun
-  #  time_periods:
-  #  - 18:00 PBD-24:00 PBD+1
+    - 17:00 PBD-15:00 PBD+1
   comments:
     - Finish by 17:00 on Monday
 - rotation: TPC
   location: Remote
   hours: 
     - hours: 07:30 CD-15:00 CD
-      days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
+      days: Mon/Tue/Wed/Thu/Fri
   breaktime:
     - 12:00 CD-13:00 CD
     - "Urgent reads covered by MED"
   responsibilities:
+  - sites: All
+    exams: General XR/General CT/General US/Body MR
+    contexts: Outpatient
+    #modalities: CT/US/MR/RF/XR
+    days: Mon
+    time_periods:
+    - 15:00 PBD+1-24:00 PBD+1
   - sites: TPC
     exams: General XR/General CT/General US
     contexts: Outpatient
@@ -923,7 +916,7 @@ rotation_manifest:
   location: SH
   hours: 
   - hours: 11:00 CD-19:00 CD
-    days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
+    days: Sat/Sun
   responsibilities:
   - sites: All
     exams: General XR/General CT/General US
