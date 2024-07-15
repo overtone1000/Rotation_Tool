@@ -1,7 +1,8 @@
 pub mod file_names {
 
     //source data
-    pub(crate) const MAIN_DATA_FILE: &str = "./data/2024 to today v02_2.csv";
+    //pub(crate) const MAIN_DATA_FILE: &str = "./data/2024 to today v02_2.csv";
+    pub(crate) const MAIN_DATA_FILE: &str = "./data/2024 to today v01.csv";
     pub(crate) const TEST_GROUP_FILE: &str = "./data/test_group.csv";
 
     //categorizations

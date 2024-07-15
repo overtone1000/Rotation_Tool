@@ -372,7 +372,6 @@ pub fn run_test(common:&MainCommon)-> Result<(), Box<dyn Error>>
             println!("Missing member: {}",member);
         }
     }
-    println!("");
 
     Ok(())
 }
