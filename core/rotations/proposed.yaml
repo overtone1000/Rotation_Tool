@@ -1,4 +1,4 @@
-title: Rotations v.2023-01-05
+title: Rotations v.2023-07-15
 rotation_manifest:
 - rotation: SC-Main
   location: SC-Main
@@ -577,7 +577,7 @@ rotation_manifest:
     time_periods:
     - 07:30 CD-08:00 CD
   comments:
-    - Supervise and interpret SH fluoro
+    - Supervise and interpret all outpatient SH fluoro and all inpatient SH fluoro that hits the list during busines hours
     - Supervise PA US Procedures
     - IR Clinic
 - rotation: MED
@@ -1208,7 +1208,9 @@ rotation_manifest:
   comments:
   - Preprocedural and postprocedural care of all fluoro procedure patients
   - Dictate fluoro procedures
-  - Review GI imaging with IR2
+  - Put signout of the procedure into Primordial as an "Exam Note"
+  - Outpatient fluoroscopy should be read by IR2 during business hours.
+  - Inpatient fluoroscopy that hits the worklist outside business hours will be read by the on call radiologist (typically EVE).
 - rotation: PA-IR
   location: SH
   hours:
