@@ -29,3 +29,4 @@
 - [ ] Need a full exam code reconciliation
 - [ ] Need a list of valid radiologist names and to check included/excluded exams against those names
 - [ ] Getting rid of generic table
+- [ ] Search by exam description is broken
