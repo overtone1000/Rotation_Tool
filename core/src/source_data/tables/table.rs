@@ -1,22 +1,37 @@
-use std::{collections::HashMap, fs::File, str::FromStr};
+use std::{borrow::BorrowMut, collections::HashMap, fs::File, str::FromStr};
 
 use chrono::NaiveDateTime;
 use csv::{Reader, StringRecordsIntoIter};
-pub trait Table<T>
-{
-    fn get_file_path(&self)->&str;
+use serde::Serialize;
 
-    fn build_from_headers_and_row(header_map:&HashMap<String,usize>, row:&Vec<String>)->Result<T, Box<dyn std::error::Error>>;
-    
-    fn get_from_row_with_header(header:&str, header_map:&HashMap<String,usize>, row:&Vec<String>)->String
-    {
-        let index=*(header_map.get(header).expect(format!("Header {} not found. Header map: {:?}",header,header_map).as_str()));
+use crate::serialization::output::JSONFileOut;
+pub trait Table {
+    type Entry;
+
+    fn get_file_path(&self) -> &str;
+
+    fn build_from_headers_and_row(
+        header_map: &HashMap<String, usize>,
+        row: &Vec<String>,
+    ) -> Result<Self::Entry, Box<dyn std::error::Error>>;
+
+    fn get_from_row_with_header(
+        header: &str,
+        header_map: &HashMap<String, usize>,
+        row: &Vec<String>,
+    ) -> String {
+        let index = *(header_map
+            .get(header)
+            .expect(format!("Header {} not found. Header map: {:?}", header, header_map).as_str()));
         row.get(index).expect("Should have this member").to_string()
     }
 
-    fn get_as_date(header:&str, header_map:&HashMap<String,usize>, row:&Vec<String>)->Result<NaiveDateTime,Box<dyn std::error::Error>>
-    {
-        let time_string=Self::get_from_row_with_header(header, header_map, row);
+    fn get_as_date(
+        header: &str,
+        header_map: &HashMap<String, usize>,
+        row: &Vec<String>,
+    ) -> Result<NaiveDateTime, Box<dyn std::error::Error>> {
+        let time_string = Self::get_from_row_with_header(header, header_map, row);
 
         //let test2 = chrono::NaiveDate::from_ymd_opt(2023,11,9).unwrap().and_hms_opt(8,53,0).unwrap();
         //let test2str=test2.format("%m/%d/%y %H:%M").to_string();
@@ -32,36 +47,40 @@ pub trait Table<T>
         }
     }
 
-    fn parse<U>(header:&str, header_map:&HashMap<String,usize>, row:&Vec<String>)->Result<U,Box<dyn std::error::Error>>
-    where U: FromStr
+    fn parse<U>(
+        header: &str,
+        header_map: &HashMap<String, usize>,
+        row: &Vec<String>,
+    ) -> Result<U, Box<dyn std::error::Error>>
+    where
+        U: FromStr,
     {
-        let val=Self::get_from_row_with_header(header, header_map, row);
-        let str=match val.as_str()
-        {
-            "NULL"=>"0",
-            x=>x
+        let val = Self::get_from_row_with_header(header, header_map, row);
+        let str = match val.as_str() {
+            "NULL" => "0",
+            x => x,
         };
-        
-        match str.parse()
-        {
-            Ok(x)=>Ok(x),
-            Err(e)=>{
-                eprintln!("Bad parse {}",str);
-                return Err(Box::new(std::io::Error::new(std::io::ErrorKind::InvalidData,"Bad parse")));
+
+        match str.parse() {
+            Ok(x) => Ok(x),
+            Err(e) => {
+                eprintln!("Bad parse {}", str);
+                return Err(Box::new(std::io::Error::new(
+                    std::io::ErrorKind::InvalidData,
+                    "Bad parse",
+                )));
             }
         }
     }
 
-    fn write(filename:&str, entries:Vec<Vec<String>>)->Result<(),Box<dyn std::error::Error>>
-    {
+    fn write(filename: &str, entries: Vec<Vec<String>>) -> Result<(), Box<dyn std::error::Error>> {
         let mut writer = csv::WriterBuilder::new()
             .delimiter(b',')
             .quote(b'"')
             .has_headers(true)
             .from_path(filename)?;
-        
-        for entry in entries
-        {
+
+        for entry in entries {
             writer.write_record(entry)?;
         }
 
@@ -70,94 +89,105 @@ pub trait Table<T>
         Ok(())
     }
 
-    fn iter<'a>(&'a self)->TableIter<'a,T>
-    {
-        println!("Accessing table {}",self.get_file_path());
+    fn iter<'a>(&'a self) -> TableIter<'a, Self::Entry> {
+        println!("Accessing table {}", self.get_file_path());
         let mut rdr: Reader<File> = csv::ReaderBuilder::new()
             .delimiter(b',')
             .quote(b'"')
             .has_headers(true)
-            .from_path(self.get_file_path()).expect(format!("Couldn't parse CSV file {}",self.get_file_path()).as_str());
+            .from_path(self.get_file_path())
+            .expect(format!("Couldn't parse CSV file {}", self.get_file_path()).as_str());
 
-        let mut headers: Vec<String>=Vec::new();
-        let mut labelmap: HashMap<String, usize>=HashMap::new();
+        let mut headers: Vec<String> = Vec::new();
+        let mut labelmap: HashMap<String, usize> = HashMap::new();
 
         let mut n: usize = 0;
-        match rdr.headers()
-        {
+        match rdr.headers() {
             Ok(header_records) => {
                 for header in header_records {
                     headers.push(header.to_string());
                     labelmap.insert(header.to_string(), n);
                     n += 1;
                 }
-            },
-            Err(x) => panic!("Couldn't parse headers. {:?}",x),
+            }
+            Err(x) => panic!("Couldn't parse headers. {:?}", x),
         }
-        
-        let bfunc =& |header_map:&HashMap<String,usize>, row:&Vec<String>|{Self::build_from_headers_and_row(header_map, row)};
-        
-        TableIter { 
+
+        let bfunc = &|header_map: &HashMap<String, usize>, row: &Vec<String>| {
+            Self::build_from_headers_and_row(header_map, row)
+        };
+
+        TableIter {
             build_function: bfunc,
-            iter:rdr.into_records(),
-            headers: headers, 
-            labelmap: labelmap
+            iter: rdr.into_records(),
+            headers: headers,
+            labelmap: labelmap,
         }
     }
 }
 
-pub struct TableIter<'a,T>
-{
-    build_function:&'a dyn Fn(&HashMap<String,usize>,&Vec<String>)->Result<T, Box<dyn std::error::Error>>,
-    iter:StringRecordsIntoIter<File>,
-    headers:Vec<String>,
-    labelmap:HashMap<String,usize>
+pub struct TableIter<'a, T> {
+    build_function:
+        &'a dyn Fn(&HashMap<String, usize>, &Vec<String>) -> Result<T, Box<dyn std::error::Error>>,
+    iter: StringRecordsIntoIter<File>,
+    headers: Vec<String>,
+    labelmap: HashMap<String, usize>,
 }
 
-impl<'a,T> Iterator for TableIter<'a,T>
-{
+impl<'a, T> Iterator for TableIter<'a, T> {
     type Item = T;
-    
-    fn next(&mut self) -> Option<Self::Item>{
 
-        match self.iter.next()
-        {
-            Some(record) => {
-                match record
-                {
-                    Ok(record) => {
-                        let mut row: Vec<String> = Vec::new();
-                        for cell in record.iter() {
-                            row.push(cell.to_string());
-                        }
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.iter.next() {
+            Some(record) => match record {
+                Ok(record) => {
+                    let mut row: Vec<String> = Vec::new();
+                    for cell in record.iter() {
+                        row.push(cell.to_string());
+                    }
 
-                        if row.len() != self.labelmap.keys().len() {
-                            let mut message: String = "Malformed data. Header length is ".to_string();
-                            message += &(self.headers.len().to_string());
-                            message += " but row ";
-                            message += format!("{:?}",row).as_str();
-                            message += " contains ";
-                            message += &(row.len().to_string());
-                            message += " items.";
-                            eprintln!("{}",message);
+                    if row.len() != self.labelmap.keys().len() {
+                        let mut message: String = "Malformed data. Header length is ".to_string();
+                        message += &(self.headers.len().to_string());
+                        message += " but row ";
+                        message += format!("{:?}", row).as_str();
+                        message += " contains ";
+                        message += &(row.len().to_string());
+                        message += " items.";
+                        eprintln!("{}", message);
+                    }
+                    Some(match (self.build_function)(&self.labelmap, &row) {
+                        Ok(x) => x,
+                        Err(e) => {
+                            panic!("{}", e.to_string());
                         }
-                        Some(
-                            match (self.build_function)(&self.labelmap,&row)
-                            {
-                                Ok(x)=>x,
-                                Err(e)=>{
-                                    panic!("{}",e.to_string());
-                                }
-                            }
-                        )
-                    },
-                    Err(e) => {
-                        eprintln!("{}",e.to_string());
-                        None
-                    },
+                    })
+                }
+                Err(e) => {
+                    eprintln!("{}", e.to_string());
+                    None
                 }
             },
             None => None,
         }
     }
+}
+
+pub trait SerializableTable<T>: Table<Entry = T>
+where
+    T: Serialize,
+{
+    fn table_serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.collect_seq(self.iter())
+    }
+}
+
+impl<'a, T, U> SerializableTable<T> for U
+where
+    T: Serialize,
+    U: Table<Entry = T>,
+{
 }

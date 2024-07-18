@@ -1,10 +1,21 @@
 use std::collections::{HashMap, HashSet};
 
-use super::{table::Table, types::{ExamCode, Subspecialty}};
+use serde::Serialize;
 
+use crate::serialization::output::JSONFileOut;
+
+use super::{
+    exam_data::Exam,
+    table::{SerializableTable, Table},
+    types::{ExamCode, Subspecialty},
+};
+
+#[derive(Serialize)]
 pub struct ExamCategoryEntry {
-    pub exam_code:ExamCode,
-    pub subspecialty:Subspecialty,
+    pub exam_code: ExamCode,
+    pub exam_description: String,
+    pub subspecialty: Subspecialty,
+    pub comments: String,
 }
 
 impl Eq for ExamCategoryEntry {}
@@ -31,42 +42,71 @@ impl ExamCategoryEntry {
     pub fn copy(&self) -> ExamCategoryEntry {
         ExamCategoryEntry {
             exam_code: self.exam_code.to_string(),
-            subspecialty: self.subspecialty.to_string()
+            exam_description: self.exam_description.to_string(),
+            subspecialty: self.subspecialty.to_string(),
+            comments: self.comments.to_string(),
         }
     }
 }
 
-pub const EXAM_CODE_HEADER:&str="Exam Code";
-pub const SUBSPECIALTY_HEADER:&str="Subspecialty";
+pub const EXAM_CODE_HEADER: &str = "Exam Code";
+pub const EXAM_DESCRIPTION_HEADER: &str = "Exam Description";
+pub const SUBSPECIALTY_HEADER: &str = "Subspecialty";
+pub const COMMENTS_HEADER: &str = "Comments";
 
-pub struct Exam_Categories {
-    filename:String
+pub struct ExamCategories {
+    filename: String,
 }
 
-impl Table<ExamCategoryEntry> for Exam_Categories
-{
-    fn get_file_path(&self)->&str {&self.filename}
+impl Table for ExamCategories {
+    type Entry = ExamCategoryEntry;
+    fn get_file_path(&self) -> &str {
+        &self.filename
+    }
 
-    fn build_from_headers_and_row(header_map:&HashMap<String,usize>, row:&Vec<String>)->Result<ExamCategoryEntry, Box<dyn std::error::Error>>{
-        Ok(
-            ExamCategoryEntry{
-                exam_code:Self::get_from_row_with_header(EXAM_CODE_HEADER, header_map, row),
-                subspecialty: Self::get_from_row_with_header(SUBSPECIALTY_HEADER, header_map, row),
-            }
-        )
+    fn build_from_headers_and_row(
+        header_map: &HashMap<String, usize>,
+        row: &Vec<String>,
+    ) -> Result<ExamCategoryEntry, Box<dyn std::error::Error>> {
+        Ok(ExamCategoryEntry {
+            exam_code: Self::get_from_row_with_header(EXAM_CODE_HEADER, header_map, row),
+            exam_description: Self::get_from_row_with_header(
+                EXAM_DESCRIPTION_HEADER,
+                header_map,
+                row,
+            ),
+            subspecialty: Self::get_from_row_with_header(SUBSPECIALTY_HEADER, header_map, row),
+            comments: Self::get_from_row_with_header(COMMENTS_HEADER, header_map, row),
+        })
     }
 }
 
-impl Exam_Categories {
-    pub fn create(filename:&str)->Exam_Categories{Exam_Categories{filename:filename.to_string()}}
-    pub fn get_procedure_codes(&self)->HashSet<String>{
-        let mut retval:HashSet<String>=HashSet::new();
-        for entry in self.iter()
-        {
-            if !retval.insert(entry.exam_code.to_string()){                
-                eprintln!("Procedure code {} is duplicated in {}",&entry.exam_code,self.filename);
+impl ExamCategories {
+    pub fn create(filename: &str) -> ExamCategories {
+        ExamCategories {
+            filename: filename.to_string(),
+        }
+    }
+    pub fn get_procedure_codes(&self) -> HashSet<String> {
+        let mut retval: HashSet<String> = HashSet::new();
+        for entry in self.iter() {
+            if !retval.insert(entry.exam_code.to_string()) {
+                eprintln!(
+                    "Procedure code {} is duplicated in {}",
+                    &entry.exam_code, self.filename
+                );
             }
         }
         retval
     }
 }
+
+impl Serialize for ExamCategories {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.table_serialize(serializer)
+    }
+}
+impl JSONFileOut for ExamCategories {}

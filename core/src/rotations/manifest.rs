@@ -94,7 +94,7 @@ impl Manifest {
                             + "/"
                             + &weekdays::weekday_to_str(chrono::Weekday::Fri)),
                     ),
-                    volume:None
+                    volume: None,
                 },
                 RotationResponsibility {
                     sites: StringTypes::Array(HashSet::from([
@@ -125,7 +125,7 @@ impl Manifest {
                         weekdays::weekday_to_str(chrono::Weekday::Sat),
                         weekdays::weekday_to_str(chrono::Weekday::Sun),
                     ])),
-                    volume:None
+                    volume: None,
                 },
             ]),
             comments: Some(HashSet::from([
@@ -161,10 +161,7 @@ impl Manifest {
         Ok(())
     }
 
-    pub fn populate_volumes(common:&MainCommon)
-    {
-        
-    }
+    pub fn populate_volumes(common: &MainCommon) {}
 }
 
 impl JSONFileOut for Manifest {}

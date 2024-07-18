@@ -4,10 +4,10 @@ use chrono::NaiveDate;
 
 use crate::analysis::analysis_datum::AnalysisDatum;
 use crate::analysis::volumes::VolumesMark;
+use crate::coverage::coverage_and_work_day::CoverageAndWorkDay;
 use crate::rotations::description::WrappedSortable;
 use crate::rotations::manifest::Manifest;
 use crate::{analysis::analysis_datum::WorkUnit, coverage::coordinate::CoverageCoordinates};
-use crate::coverage::coverage_and_work_day::CoverageAndWorkDay;
 
 use crate::coverage::units::CoverageUnit;
 
@@ -52,12 +52,8 @@ impl WorkCoverageMap for WeekdayMap {
             }
         }
     }
-    fn clear_coverage(
-        &mut self
-    )->()
-    {
-        for branch in self.get_all_branches()
-        {
+    fn clear_coverage(&mut self) -> () {
+        for branch in self.get_all_branches() {
             branch.clear_coverage();
         }
     }
@@ -93,8 +89,10 @@ impl SpecifiedCoordinate<String> for CoverageMap {
 }
 
 impl CoverageMap {
-    pub fn foreach<T>(&self, mut func:T)->()
-    where T:FnMut(&CoverageCoordinates, &CoverageAndWorkDay) {
+    pub fn foreach<T>(&self, mut func: T) -> ()
+    where
+        T: FnMut(&CoverageCoordinates, &CoverageAndWorkDay),
+    {
         for (site, subspecialtymap) in self.get_map().iter() {
             for (subspecialty, contextmap) in subspecialtymap.get_map().iter() {
                 for (context, weekdaymap) in contextmap.get_map().iter() {
@@ -116,8 +114,10 @@ impl CoverageMap {
         }
     }
 
-    pub fn foreach_mut<T>(&mut self, mut func:T)->()
-    where T:FnMut(&CoverageCoordinates, &mut CoverageAndWorkDay) {
+    pub fn foreach_mut<T>(&mut self, mut func: T) -> ()
+    where
+        T: FnMut(&CoverageCoordinates, &mut CoverageAndWorkDay),
+    {
         for (site, subspecialtymap) in self.get_map_mut().iter_mut() {
             for (subspecialty, contextmap) in subspecialtymap.get_map_mut().iter_mut() {
                 for (context, weekdaymap) in contextmap.get_map_mut().iter_mut() {
@@ -139,40 +139,40 @@ impl CoverageMap {
         }
     }
 
-    pub fn get_coverageandworkday<'a>(&'a self, coords:&'a CoverageCoordinates)->Option<&'a CoverageAndWorkDay>{
+    pub fn get_coverageandworkday<'a>(
+        &'a self,
+        coords: &'a CoverageCoordinates,
+    ) -> Option<&'a CoverageAndWorkDay> {
         let subspecialty_branch = self.get_branch(&coords)?;
         let context_branch = subspecialty_branch.get_branch(&coords)?;
         let weekday_branch = context_branch.get_branch(&coords)?;
         let coverage_and_work_day = weekday_branch.get_branch(&coords)?;
-        
+
         Some(coverage_and_work_day)
     }
-
 
     pub fn populate_responsibility_volumes(
         &mut self,
         manifest: &mut Manifest,
-        rotation_start:&NaiveDate,
-        rotation_end:&NaiveDate
-    ) -> Result<(), Box<dyn std::error::Error>> 
-    {
+        rotation_start: &NaiveDate,
+        rotation_end: &NaiveDate,
+    ) -> Result<(), Box<dyn std::error::Error>> {
         for rotation_description in &mut manifest.rotation_manifest {
             match rotation_description.responsibilities.get_mut() {
                 Some(responsibilities) => {
-                    for responsibility in responsibilities {                        
-                        let mut dates:HashSet<NaiveDate>=HashSet::new();
-                        let mut vm=VolumesMark{
-                            rvu:0.0,
-                            bvu:0.0
-                        };
+                    for responsibility in responsibilities {
+                        let mut dates: HashSet<NaiveDate> = HashSet::new();
+                        let mut vm = VolumesMark { rvu: 0.0, bvu: 0.0 };
 
-                        let coverages = CoverageMap::responsibility_to_coverages(rotation_description.rotation.as_str(), responsibility)?;
-                    
-                        for (coords, coverage) in coverages
-                        {
+                        let coverages = CoverageMap::responsibility_to_coverages(
+                            rotation_description.rotation.as_str(),
+                            responsibility,
+                        )?;
+
+                        for (coords, coverage) in coverages {
                             self.clear_coverage();
                             self.add_coverage(&coords, coverage)?;
-                            
+
                             self.foreach_mut(
                                 |_coord:&CoverageCoordinates, coverage_and_workday:&mut CoverageAndWorkDay|
                                 {
@@ -191,14 +191,11 @@ impl CoverageMap {
                             );
                         }
 
-                        if dates.len()>0
-                        {
-                            vm.rvu/=f64::from(dates.len() as u32);
-                            vm.bvu/=f64::from(dates.len() as u32);
+                        if dates.len() > 0 {
+                            vm.rvu /= f64::from(dates.len() as u32);
+                            vm.bvu /= f64::from(dates.len() as u32);
                         }
-                        responsibility.volume=Some(vm);
-
-                
+                        responsibility.volume = Some(vm);
                     }
                 }
                 None => (),

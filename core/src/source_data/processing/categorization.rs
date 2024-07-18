@@ -1,69 +1,90 @@
-use std::{collections::{BTreeMap, BTreeSet, HashMap, HashSet}, f32::consts::E, io::ErrorKind};
+use std::{
+    collections::{BTreeMap, BTreeSet, HashMap, HashSet},
+    f32::consts::E,
+    io::ErrorKind,
+};
 
-use crate::{globals::{file_names::{self, UNACCOUNTED_EXAM_CODES_FILE}}, source_data::tables::{bvu_map::{BVUMap, BVUMapEntry}, exam_categories::{ExamCategoryEntry, Exam_Categories, EXAM_CODE_HEADER, SUBSPECIALTY_HEADER}, exam_data::{Exam, ExamTable}, location_categories::{LocationCategoryEntry, Location_Categories}, readers::{ExamReader, ReaderTable}, table::Table, types::{Context, Location}}};
+use crate::{
+    globals::file_names::{self, UNACCOUNTED_EXAM_CODES_FILE},
+    source_data::tables::{
+        bvu_map::{BVUMap, BVUMapEntry},
+        exam_categories::{
+            ExamCategories, ExamCategoryEntry, EXAM_CODE_HEADER, SUBSPECIALTY_HEADER,
+        },
+        exam_data::{Exam, ExamTable},
+        location_categories::{LocationCategoryEntry, Location_Categories},
+        readers::{ExamReader, ReaderTable},
+        table::Table,
+        types::{Context, Location},
+    },
+};
 
 pub(crate) fn check_categories_list(
     main_data: &Vec<Exam>,
-    exam_categories_table: &Exam_Categories,
+    exam_categories_table: &ExamCategories,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let existing_exam_categories = exam_categories_table.get_procedure_codes();
 
-    let mut unaccounted_codes: HashMap<String,String> = HashMap::new();
+    let mut unaccounted_codes: HashMap<String, String> = HashMap::new();
 
     for exam in main_data {
         if !existing_exam_categories.contains(exam.exam_code.as_str()) {
-            unaccounted_codes.insert(exam.exam_code.to_owned(),exam.procedure_description.to_owned());
+            unaccounted_codes.insert(
+                exam.exam_code.to_owned(),
+                exam.procedure_description.to_owned(),
+            );
         }
     }
 
-    if unaccounted_codes.len()>0
-    {
-        let mut entries:Vec<Vec<String>>=Vec::new();
-        for (code,desc) in unaccounted_codes
-        {
-            entries.push(vec![
-                code,
-                desc
-            ])
+    if unaccounted_codes.len() > 0 {
+        let mut entries: Vec<Vec<String>> = Vec::new();
+        for (code, desc) in unaccounted_codes {
+            entries.push(vec![code, desc])
         }
-        
-        ExamTable::write(UNACCOUNTED_EXAM_CODES_FILE,entries)?;
-        Err(Box::new(std::io::Error::new(ErrorKind::InvalidData,"Unaccounted exam codes.".to_string())))
-    }
-    else {
+
+        ExamTable::write(UNACCOUNTED_EXAM_CODES_FILE, entries)?;
+        Err(Box::new(std::io::Error::new(
+            ErrorKind::InvalidData,
+            "Unaccounted exam codes.".to_string(),
+        )))
+    } else {
         let _ = std::fs::remove_file(UNACCOUNTED_EXAM_CODES_FILE.to_string());
         Ok(())
     }
 }
 
-pub(crate) fn get_site_and_location_context_map(exam_locations_table: &Location_Categories) -> Result<BTreeMap<u64,BTreeMap<Location,Context>>,String>{
-    let mut err=false;
+pub(crate) fn get_site_and_location_context_map(
+    exam_locations_table: &Location_Categories,
+) -> Result<BTreeMap<u64, BTreeMap<Location, Context>>, String> {
+    let mut err = false;
 
-    let mut result:BTreeMap<u64,BTreeMap<String,String>>=BTreeMap::new();
+    let mut result: BTreeMap<u64, BTreeMap<String, String>> = BTreeMap::new();
 
-    for entry in exam_locations_table.iter()
-    {
-        let sitemap = match result.entry(entry.site_id)
-        {
+    for entry in exam_locations_table.iter() {
+        let sitemap = match result.entry(entry.site_id) {
             std::collections::btree_map::Entry::Occupied(x) => x.into_mut(),
-            std::collections::btree_map::Entry::Vacant(x) => x.insert(BTreeMap::new())
+            std::collections::btree_map::Entry::Vacant(x) => x.insert(BTreeMap::new()),
         };
 
-        match sitemap.get(&entry.location)
-        {
+        match sitemap.get(&entry.location) {
             Some(x) => {
-                err=true;
-                eprintln!("Duplicate entries in map: {}/{}",entry.site_id,entry.location)
-            },
+                err = true;
+                eprintln!(
+                    "Duplicate entries in map: {}/{}",
+                    entry.site_id, entry.location
+                )
+            }
             None => {
-                sitemap.insert(entry.location,entry.context);
+                sitemap.insert(entry.location, entry.context);
             }
         };
     }
 
     //println!("Context map:{:?}",result);
 
-    if err {return Err("Error building exam context map.".to_string());}
+    if err {
+        return Err("Error building exam context map.".to_string());
+    }
     Ok(result)
 }
 
@@ -72,7 +93,7 @@ pub(crate) fn get_locations_list(
     main_data_table: &Table,
     exam_locations_table: &Table,
 ) -> Result<Vec<location_categories::LocationCategory>, String> {
-    
+
     //TODO
     //Added "for_each" function to table and modified "Categories_Location.csv" to include site IDs as may not be able to rely strictly on location.
     //Added site ID to the LocationCategory, thus the error below. Need to test against site ID and location.
@@ -139,8 +160,7 @@ pub fn build_salem_rvumap(main_data_table: &Vec<Exam>) -> Result<HashMap<String,
     let mut rvu_sum: f64 = 0.0;
     let mut rvu_disc: f64 = 0.0;
 
-    for entry in main_data_table.iter()
-    {
+    for entry in main_data_table.iter() {
         rvu_sum += entry.rvu;
 
         let current = retval.get(&entry.exam_code);
@@ -170,107 +190,120 @@ pub fn build_salem_rvumap(main_data_table: &Vec<Exam>) -> Result<HashMap<String,
 }
 
 //Check BVU source for missing exam codes.
-pub fn check_bvusource(main_data: &Vec<Exam>, bvu_data_table: &BVUMap) -> Result<(), Box<dyn std::error::Error>>{
-    let mut bvu_exam_codes:HashSet<String>=HashSet::new();
-    for bvu_entry in bvu_data_table.iter()
-    {
+pub fn check_bvusource(
+    main_data: &Vec<Exam>,
+    bvu_data_table: &BVUMap,
+) -> Result<(), Box<dyn std::error::Error>> {
+    let mut bvu_exam_codes: HashSet<String> = HashSet::new();
+    for bvu_entry in bvu_data_table.iter() {
         bvu_exam_codes.insert(bvu_entry.exam_code);
     }
 
-    let mut missing_codes:HashMap<String,String>=HashMap::new();
-    for main_data_table_entry in main_data
-    {
-        if !bvu_exam_codes.contains(&main_data_table_entry.exam_code)
-        {
-            missing_codes.insert(main_data_table_entry.exam_code.to_owned(), main_data_table_entry.procedure_description.to_owned());
+    let mut missing_codes: HashMap<String, String> = HashMap::new();
+    for main_data_table_entry in main_data {
+        if !bvu_exam_codes.contains(&main_data_table_entry.exam_code) {
+            missing_codes.insert(
+                main_data_table_entry.exam_code.to_owned(),
+                main_data_table_entry.procedure_description.to_owned(),
+            );
         }
     }
-    
-    if missing_codes.len()>0
-    {
-        let mut missing_codes_vec:Vec<&String>=missing_codes.keys().collect();
+
+    if missing_codes.len() > 0 {
+        let mut missing_codes_vec: Vec<&String> = missing_codes.keys().collect();
         missing_codes_vec.sort();
 
-        let mut vecofvec:Vec<Vec<String>>=Vec::new();
-        for missing_code in missing_codes_vec
-        {
-            vecofvec.push(vec!(missing_code.to_string(),missing_codes.get(missing_code).expect("Should have value").to_string()));
+        let mut vecofvec: Vec<Vec<String>> = Vec::new();
+        for missing_code in missing_codes_vec {
+            vecofvec.push(vec![
+                missing_code.to_string(),
+                missing_codes
+                    .get(missing_code)
+                    .expect("Should have value")
+                    .to_string(),
+            ]);
         }
-        BVUMap::write(file_names::BVU_UPDATE_FILE,vecofvec).unwrap();
+        BVUMap::write(file_names::BVU_UPDATE_FILE, vecofvec).unwrap();
 
-        Err(Box::new(std::io::Error::new(ErrorKind::InvalidData,"Missing BVU codes.")))
-    }
-    else {
+        Err(Box::new(std::io::Error::new(
+            ErrorKind::InvalidData,
+            "Missing BVU codes.",
+        )))
+    } else {
         let _ = std::fs::remove_file(file_names::BVU_UPDATE_FILE.to_string());
         Ok(())
     }
 }
 
 //Check Readers
-pub fn check_readers(main_data: &Vec<Exam>,readers:&BTreeMap<u64,ExamReader>) -> Result<(), Box<dyn std::error::Error>>{
-    
+pub fn check_readers(
+    main_data: &Vec<Exam>,
+    readers: &BTreeMap<u64, ExamReader>,
+) -> Result<(), Box<dyn std::error::Error>> {
     println!();
     println!("Excluded Readers:");
-    for (_id,reader) in readers
-    {
-        if reader.excluded
-        {
+    for (_id, reader) in readers {
+        if reader.excluded {
             println!("{},{}", reader.rad_last_name, reader.rad_first_name)
         }
     }
 
     println!();
     println!("Included Readers:");
-    for (_id,reader) in readers
-    {
-        if !reader.excluded
-        {
+    for (_id, reader) in readers {
+        if !reader.excluded {
             println!("{},{}", reader.rad_last_name, reader.rad_first_name)
         }
     }
 
-    
     //let reader_ids:BTreeSet<&u64>=readers.keys().collect();
-    let mut unrecognized_readers:BTreeSet<ExamReader>=BTreeSet::new();
-    
-    let mut exams_read_by_excluded_readers:u64=0;
-    let mut exams_read_by_included_readers:u64=0;
+    let mut unrecognized_readers: BTreeSet<ExamReader> = BTreeSet::new();
 
-    for exam in main_data
-    {
-        match readers.get(&exam.signer_acct_id)
-        {
-            Some(reader) => {
-                match reader.excluded
-                {
-                    true=>exams_read_by_excluded_readers+=1,
-                    false=>exams_read_by_included_readers+=1
-                }
+    let mut exams_read_by_excluded_readers: u64 = 0;
+    let mut exams_read_by_included_readers: u64 = 0;
+
+    for exam in main_data {
+        match readers.get(&exam.signer_acct_id) {
+            Some(reader) => match reader.excluded {
+                true => exams_read_by_excluded_readers += 1,
+                false => exams_read_by_included_readers += 1,
             },
             None => {
-                unrecognized_readers.insert(
-                    ExamReader { signer_acct_id: exam.signer_acct_id, rad_last_name:exam.rad_last_name.to_string(), rad_first_name:exam.rad_first_name.to_string(), excluded: false}
-                );
-            },
+                unrecognized_readers.insert(ExamReader {
+                    signer_acct_id: exam.signer_acct_id,
+                    rad_last_name: exam.rad_last_name.to_string(),
+                    rad_first_name: exam.rad_first_name.to_string(),
+                    excluded: false,
+                });
+            }
         }
     }
 
     println!();
-    println!("{} exams in data set, {} read by included readers.",main_data.len(),exams_read_by_included_readers);
+    println!(
+        "{} exams in data set, {} read by included readers.",
+        main_data.len(),
+        exams_read_by_included_readers
+    );
     println!();
-    
-    if unrecognized_readers.len()>0
-    {
-        let mut vecofvec:Vec<Vec<String>>=Vec::new();
-        for reader in unrecognized_readers
-        {
-            vecofvec.push(vec!(reader.signer_acct_id.to_string(),reader.rad_last_name,reader.rad_first_name,reader.excluded.to_string()));
-        }
-        ReaderTable::write(file_names::UNRECOGNIZED_READERS_FILE,vecofvec).unwrap();
 
-        Err(Box::new(std::io::Error::new(ErrorKind::InvalidData,"Unrecognized Readers.")))
-    }
-    else {
+    if unrecognized_readers.len() > 0 {
+        let mut vecofvec: Vec<Vec<String>> = Vec::new();
+        for reader in unrecognized_readers {
+            vecofvec.push(vec![
+                reader.signer_acct_id.to_string(),
+                reader.rad_last_name,
+                reader.rad_first_name,
+                reader.excluded.to_string(),
+            ]);
+        }
+        ReaderTable::write(file_names::UNRECOGNIZED_READERS_FILE, vecofvec).unwrap();
+
+        Err(Box::new(std::io::Error::new(
+            ErrorKind::InvalidData,
+            "Unrecognized Readers.",
+        )))
+    } else {
         let _ = std::fs::remove_file(file_names::BVU_UPDATE_FILE.to_string());
         Ok(())
     }

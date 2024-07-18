@@ -14,7 +14,6 @@
 - [ ] Coverage interface does need to update available tree options to make it easier to navigate.
 - [ ] Enable selecting "All" in coverage interface? Would need a much more complicated display. Maybe a tree (a lot like the old spreadsheet)
 - [ ] Should validate days for hours in backend (that they are valid days with the existing function and that there are no duplicates)
-- [ ] Copy existing policy stuff
 - [ ] Coverage tree improvement
     - Data restructuring
         - __Took a stab at this and got lost in complicated generics and enums.__
@@ -27,6 +26,7 @@
         - Similar to combining work and coverage, the audit and analysis functions should be separate.
         - The foreach function is clumsy. Implementing iterator would be superior. __Took a stab at this an implementing an iterator was clumsier.__
 - [ ] Need a full exam code reconciliation
-- [ ] Need a list of valid radiologist names and to check included/excluded exams against those names
-- [ ] Getting rid of generic table
-- [ ] Search by exam description is broken
+- [x] Need a list of valid radiologist names and to check included/excluded exams against those names
+- [x] Getting rid of generic table
+- [x] Search by exam description is broken
+- [ ] Exam aliases (and their respective descriptions) aren't in the converage query

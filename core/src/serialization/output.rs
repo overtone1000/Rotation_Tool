@@ -11,5 +11,4 @@ pub trait JSONFileOut: Serialize {
     }
 }
 
-impl JSONFileOut for std::collections::BTreeMap<String,String> {
-}
+impl JSONFileOut for std::collections::BTreeMap<String, String> {}

@@ -308,7 +308,7 @@ impl MainCommon {
 
         //Categories lists
         self.source
-            .subspecialty_map
+            .exam_categories_table
             .to_json(&(BASE.to_string() + "/exam_categories" + &millistr + ".json"))?;
 
         //Plots
