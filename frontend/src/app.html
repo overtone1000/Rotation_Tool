@@ -1,36 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" href="%sveltekit.assets%/favicon.png" />
-		<meta name="viewport" content="width=device-width" />
 
-		%sveltekit.head%
+<head>
+	<meta charset="utf-8" />
+	<link rel="icon" href="%sveltekit.assets%/favicon.png" />
+	<meta name="viewport" content="width=device-width" />
 
-		<!-- SMUI Styles are in main.svelte to allow toggle switch
+	%sveltekit.head%
+
+	<!-- SMUI Styles are in main.svelte to allow toggle switch
 		<link rel="stylesheet" href="./smui.css" media="(prefers-color-scheme: light)" />
 		<link rel="stylesheet" href="./smui-dark.css" media="screen and (prefers-color-scheme: dark)" />
 		-->
 
-		<!-- Material Icons -->
-		<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-		<!-- Roboto -->
-		<link
-			rel="stylesheet"
-			href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,600,700"
-		/>
-		<!-- Roboto Mono -->
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono" />
+	<!-- Material Icons (deprecated, now comes from a package)-->
+	<!--  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" /> -->
+
+	<!-- Roboto -->
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,600,700" />
+	<!-- Roboto Mono -->
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono" />
 
 
-		<style>
-			html {
-				visibility: visible;
-			}
-		</style>
+	<style>
+		html {
+			visibility: visible;
+		}
+	</style>
 
-	</head>
-	<body style="margin: 0px" data-sveltekit-preload-data="hover">
-		<div style="display: contents">%sveltekit.body%</div>
-	</body>
+</head>
+
+<body style="margin: 0px" data-sveltekit-preload-data="hover">
+	<div style="display: contents">%sveltekit.body%</div>
+</body>
+
 </html>

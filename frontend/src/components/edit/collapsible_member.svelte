@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { mdiArrowDown, mdiArrowRight } from "@mdi/js";
     import IconButton, { Icon } from '@smui/icon-button';
 	
     export let name:string;
@@ -8,8 +9,12 @@
 <div class="outer_container">
     <div class="top">
         <IconButton on:click={() => {}} toggle bind:pressed={show_children}>
-            <Icon class="material-icons" on>arrow_drop_down</Icon>
-            <Icon class="material-icons">arrow_right</Icon>
+            <Icon tag="svg" viewBox="0 0 24 24" on>
+                <path fill="currentColor" d={mdiArrowDown} />
+            </Icon>
+            <Icon tag="svg" viewBox="0 0 24 24">
+                <path fill="currentColor" d={mdiArrowRight} />
+            </Icon>
         </IconButton>
         {name}
     </div>
