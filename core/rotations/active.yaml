@@ -41,7 +41,7 @@ rotation_manifest:
     - 09:30 CD-12:00 CD
     - 13:00 CD-16:00 CD
 - rotation: NM
-  location: SH
+  location: Remote
   hours:
   - hours: 07:30 CD-16:30 CD
     days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
@@ -236,6 +236,7 @@ rotation_manifest:
     - 09:00 CD-16:00 CD
   comments:
     - First rad called in case of IV contrast reaction at SH
+    - Cover PM NM procedures (either personally or through PA), which include lymphoscintigraphy injections of the feet and genitalia and mapping.
 - rotation: Neuro 1
   location: SC-Union
   hours: 
@@ -580,6 +581,7 @@ rotation_manifest:
     - Supervise and interpret all outpatient SH fluoro and all inpatient SH fluoro that hits the list during busines hours
     - Supervise PA US Procedures
     - IR Clinic
+    - Cover AM NM procedures (either personally or through PA), which include lymphoscintigraphy injections of the feet and genitalia and mapping.
 - rotation: MED
   location: Remote
   hours: 
