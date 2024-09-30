@@ -1,4 +1,4 @@
-title: Rotations v.2023-07-15
+title: Rotations v.2024-10-01
 rotation_manifest:
 - rotation: SC-Main
   location: SC-Main
@@ -684,6 +684,14 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 06:00 CD-14:00 CD
+  - sites: TPC
+    exams: General XR/General CT/General US
+    contexts: Wet Read
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 07:30 CD-14:00 CD
+  comments:
+  - Turnaround time for stat TPC exams (stat icon in PACS) must be < 1 hr
 - rotation: Swing
   location: Remote
   hours: 
@@ -759,7 +767,7 @@ rotation_manifest:
     #modalities: All
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 15:00 CD-20:00 CD
+    - 14:00 CD-20:00 CD
   - sites: SH/WVH/WB
     exams: General XR/General US
     contexts: ED
@@ -776,6 +784,7 @@ rotation_manifest:
     - 15:00 CD-16:00 CD
   comments:
   - If caught up, help EVE
+  - Turnaround time for stat TPC exams (stat icon in PACS) must be < 1 hr
 - rotation: OVN
   location: Remote
   hours:
@@ -853,14 +862,8 @@ rotation_manifest:
     - 17:00 PBD-15:00 PBD+1
   comments:
     - Finish by 17:00 on Monday
-- rotation: TPC
+- rotation: Stack 1 (AM)
   location: Remote
-  hours: 
-    - hours: 07:30 CD-15:00 CD
-      days: Mon/Tue/Wed/Thu/Fri
-  breaktime:
-    - 12:00 CD-13:00 CD
-    - "Urgent reads covered by MED"
   responsibilities:
   - sites: All
     exams: General XR/General CT/General US/Body MR
@@ -872,53 +875,58 @@ rotation_manifest:
   - sites: TPC
     exams: General XR/General CT/General US
     contexts: Outpatient
-    #modalities: CT/US/XR
     days: Mon
     time_periods:
-    - 00:00 CD-15:00 CD
+    - 00:00 CD-11:00 CD
   - sites: TPC
     exams: General XR/General CT/General US
     contexts: Outpatient
-    #modalities: CT/US/XR
     days: Tue/Wed/Thu/Fri
     time_periods:
-    - 15:00 PD-15:00 CD
-  - sites: TPC
-    exams: General XR/General CT/General US
-    contexts: Wet Read
-    #modalities: All
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 07:30 CD-15:00 CD
+    - 15:00 PD-11:00 CD
   - sites: SRC
     exams: General US
     contexts: Outpatient
-    #modalities: US
     days: Tue/Wed/Thu/Fri
     time_periods:
     - 15:00 PD-00:00 CD
   - sites: SRC
     exams: General CT
     contexts: Outpatient
-    #modalities: CT
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 00:00 CD-15:00 CD
+    - 00:00 CD-11:00 CD
+  comments:
+  - Turnaround time for routine TPC exams must be < 24 hrs
+- rotation: Stack 2 (Mid)
+  location: Remote
+  responsibilities:
+  - sites: TPC
+    exams: General XR/General CT/General US
+    contexts: Outpatient
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 11:00 CD-15:00 CD
+  - sites: SRC
+    exams: General CT
+    contexts: Outpatient
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 11:00 CD-15:00 CD
   - sites: SH
     exams: General CT
     contexts: Outpatient
-    #modalities: CT
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 11:00 CD-15:00 CD
   comments:
-  - Turnaround time for routine exams must be < 24 hrs
-  - Turnaround time for stat exams (stat icon in PACS) must be< 1 hr
+  - Turnaround time for routine TPC exams must be < 24 hrs
+  - Turnaround time for stat TPC exams (stat icon in PACS) must be < 1 hr
 - rotation: Call 1
   location: SH
   hours: 
   - hours: 11:00 CD-19:00 CD
-    days: Sat/Sun
+    days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
   responsibilities:
   - sites: All
     exams: General XR/General CT/General US

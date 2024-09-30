@@ -292,16 +292,26 @@ impl MainCommon {
 
         //Add volumes to the manifest before creating proposed manifest json
         {
-            let mut manifest = ManifestType::Proposed.get()?;
-            let mut mutable_temporary_coverage_tree = self.coverage_tree.clone();
-            mutable_temporary_coverage_tree.populate_responsibility_volumes(
-                &mut manifest,
-                rotation_start,
-                rotation_end,
-            )?;
-            manifest.to_json(
-                &(BASE.to_string() + "/proposed_rotation_manifest" + &millistr + ".json"),
-            )?;
+            let proposed_json_filename =
+                &(BASE.to_string() + "/proposed_rotation_manifest" + &millistr + ".json");
+            match ManifestType::Proposed.get() {
+                Ok(mut manifest) => {
+                    let mut mutable_temporary_coverage_tree = self.coverage_tree.clone();
+                    mutable_temporary_coverage_tree.populate_responsibility_volumes(
+                        &mut manifest,
+                        rotation_start,
+                        rotation_end,
+                    )?;
+                    manifest.to_json(proposed_json_filename)?;
+                }
+                Err(_) => {
+                    println!("No proposed rotation. Deleting file if it exists.");
+                    if std::fs::metadata(proposed_json_filename).is_ok() {
+                        std::fs::remove_file(proposed_json_filename)
+                            .expect("Should be able to delete this file.");
+                    }
+                }
+            }
         }
         self.coverage_tree
             .to_json(&(BASE.to_string() + "/active_coverage_tree" + &millistr + ".json"))?;
