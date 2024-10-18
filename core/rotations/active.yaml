@@ -676,7 +676,7 @@ rotation_manifest:
     #modalities: CT/US/XR/RF
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
-    - 06:00 CD-07:30 CD
+    - 06:00 CD-14:00 CD
   - sites: SH/WB
     exams: General CT
     contexts: Inpatient
@@ -684,12 +684,6 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 06:00 CD-14:00 CD
-  - sites: TPC
-    exams: General XR/General CT/General US
-    contexts: Wet Read
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 07:30 CD-14:00 CD
   comments:
   - Turnaround time for stat TPC exams (stat icon in PACS) must be < 1 hr
 - rotation: Swing

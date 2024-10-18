@@ -66,11 +66,18 @@ pub enum ManifestType {
 
 impl ManifestType {
     pub fn get(&self) -> Result<rotations::manifest::Manifest, Box<dyn Error>> {
-        let filename = match self {
+        crate::rotations::manifest::Manifest::parse(self.filename())
+    }
+
+    fn filename(&self) -> &str {
+        match self {
             ManifestType::Active => MANIFEST_ACTIVE,
             ManifestType::Proposed => MANIFEST_PROPOSED,
-        };
-        crate::rotations::manifest::Manifest::parse(filename)
+        }
+    }
+
+    pub fn exists(&self) -> bool {
+        std::path::Path::new(self.filename()).exists()
     }
 }
 
@@ -224,21 +231,23 @@ impl MainCommon {
             PROPOSED_COVERAGE_ANALYSIS_OUT,
         );
 
-        match ManifestType::Proposed.get() {
-            Ok(proposed_manifest) => {
-                println!();
-                println!("Analyzing proposed manifest.");
-                let mut proposed_coverage_tree =
-                    build_coverage_tree_from_manifest(proposed_manifest, &self.source)?;
+        if ManifestType::Proposed.exists() {
+            match ManifestType::Proposed.get() {
+                Ok(proposed_manifest) => {
+                    println!();
+                    println!("Analyzing proposed manifest.");
+                    let mut proposed_coverage_tree =
+                        build_coverage_tree_from_manifest(proposed_manifest, &self.source)?;
 
-                Self::analyze_coveragetree(
-                    &mut proposed_coverage_tree,
-                    PROPOSED_COVERAGE_AUDIT_OUT,
-                    PROPOSED_COVERAGE_AUDIT_NOWORK_OUT,
-                    PROPOSED_COVERAGE_ANALYSIS_OUT,
-                )?;
+                    Self::analyze_coveragetree(
+                        &mut proposed_coverage_tree,
+                        PROPOSED_COVERAGE_AUDIT_OUT,
+                        PROPOSED_COVERAGE_AUDIT_NOWORK_OUT,
+                        PROPOSED_COVERAGE_ANALYSIS_OUT,
+                    )?;
+                }
+                Err(_) => (), //nothing
             }
-            Err(_) => (), //nothing
         }
 
         Ok(())
@@ -291,28 +300,31 @@ impl MainCommon {
         }
 
         //Add volumes to the manifest before creating proposed manifest json
-        {
-            let proposed_json_filename =
-                &(BASE.to_string() + "/proposed_rotation_manifest" + &millistr + ".json");
-            match ManifestType::Proposed.get() {
-                Ok(mut manifest) => {
-                    let mut mutable_temporary_coverage_tree = self.coverage_tree.clone();
-                    mutable_temporary_coverage_tree.populate_responsibility_volumes(
-                        &mut manifest,
-                        rotation_start,
-                        rotation_end,
-                    )?;
-                    manifest.to_json(proposed_json_filename)?;
-                }
-                Err(_) => {
-                    println!("No proposed rotation. Deleting file if it exists.");
-                    if std::fs::metadata(proposed_json_filename).is_ok() {
-                        std::fs::remove_file(proposed_json_filename)
-                            .expect("Should be able to delete this file.");
+        if ManifestType::Proposed.exists() {
+            {
+                let proposed_json_filename =
+                    &(BASE.to_string() + "/proposed_rotation_manifest" + &millistr + ".json");
+                match ManifestType::Proposed.get() {
+                    Ok(mut manifest) => {
+                        let mut mutable_temporary_coverage_tree = self.coverage_tree.clone();
+                        mutable_temporary_coverage_tree.populate_responsibility_volumes(
+                            &mut manifest,
+                            rotation_start,
+                            rotation_end,
+                        )?;
+                        manifest.to_json(proposed_json_filename)?;
+                    }
+                    Err(_) => {
+                        println!("No proposed rotation. Deleting file if it exists.");
+                        if std::fs::metadata(proposed_json_filename).is_ok() {
+                            std::fs::remove_file(proposed_json_filename)
+                                .expect("Should be able to delete this file.");
+                        }
                     }
                 }
             }
         }
+
         self.coverage_tree
             .to_json(&(BASE.to_string() + "/active_coverage_tree" + &millistr + ".json"))?;
 
@@ -337,27 +349,34 @@ impl MainCommon {
         )?;
 
         //Proposal
-        match ManifestType::Proposed.get() {
-            Ok(proposed_manifest) => {
-                println!();
-                println!("Generating proposal frontend statics.");
-                let proposed_coverage_tree =
-                    build_coverage_tree_from_manifest(proposed_manifest, &self.source)?;
-                Self::volume_heatmap_to_json(
-                    &proposed_coverage_tree,
-                    rotation_start,
-                    rotation_end,
-                    BASE.to_string() + "/" + VOLUME_BY_DATE_ROTATION_PROPOSED + &millistr + ".json",
-                )?;
+        if ManifestType::Proposed.exists() {
+            match ManifestType::Proposed.get() {
+                Ok(proposed_manifest) => {
+                    println!();
+                    println!("Generating proposal frontend statics.");
+                    let proposed_coverage_tree =
+                        build_coverage_tree_from_manifest(proposed_manifest, &self.source)?;
+                    Self::volume_heatmap_to_json(
+                        &proposed_coverage_tree,
+                        rotation_start,
+                        rotation_end,
+                        BASE.to_string()
+                            + "/"
+                            + VOLUME_BY_DATE_ROTATION_PROPOSED
+                            + &millistr
+                            + ".json",
+                    )?;
 
-                let comparison = compare(&self.coverage_tree, &proposed_coverage_tree);
-                comparison.to_json(
-                    (BASE.to_string() + "/" + PROPOSED_DIFFERENTIAL + &millistr + ".json").as_str(),
-                )?;
-            }
-            Err(e) => {
-                println!("Proposed manifest error: {}", e.to_string());
-                return Err(e);
+                    let comparison = compare(&self.coverage_tree, &proposed_coverage_tree);
+                    comparison.to_json(
+                        (BASE.to_string() + "/" + PROPOSED_DIFFERENTIAL + &millistr + ".json")
+                            .as_str(),
+                    )?;
+                }
+                Err(e) => {
+                    println!("Proposed manifest error: {}", e.to_string());
+                    return Err(e);
+                }
             }
         }
 
