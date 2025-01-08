@@ -11,7 +11,7 @@ pub mod file_names {
     pub(crate) const CATEGORIES_EXAM_FILE: &str = "./categories/Categories_Exam.csv";
     pub(crate) const EXAM_ALIAS_FILE: &str = "./categories/Exam_Aliases.csv";
     pub(crate) const READERS_FILE: &str = "./categories/Readers.csv";
-    
+
     //errors
     pub(crate) const BVU_UPDATE_FILE: &str = "./err/Unaccounted BVU Codes.csv";
     pub(crate) const UNACCOUNTED_EXAM_CODES_FILE: &str = "./err/Unaccounted_Exam_Codes.csv";
@@ -25,25 +25,27 @@ pub mod file_names {
 
     //audits
     pub(crate) const ACTIVE_COVERAGE_AUDIT_OUT: &str = "./err/Active_Coverage_Audit.tsv";
-    pub(crate) const ACTIVE_COVERAGE_AUDIT_NOWORK_OUT: &str = "./err/Active_Coverage_Audit (no work).tsv";
+    pub(crate) const ACTIVE_COVERAGE_AUDIT_NOWORK_OUT: &str =
+        "./err/Active_Coverage_Audit (no work).tsv";
 
     pub(crate) const PROPOSED_COVERAGE_AUDIT_OUT: &str = "./err/Proposed_Coverage_Audit.tsv";
-    pub(crate) const PROPOSED_COVERAGE_AUDIT_NOWORK_OUT: &str = "./err/Proposed_Coverage_Audit (no work).tsv";
+    pub(crate) const PROPOSED_COVERAGE_AUDIT_NOWORK_OUT: &str =
+        "./err/Proposed_Coverage_Audit (no work).tsv";
 
     //analysis
     pub(crate) const ACTIVE_COVERAGE_ANALYSIS_OUT: &str = "./output/Active_WeekAnalysis";
     pub(crate) const PROPOSED_COVERAGE_ANALYSIS_OUT: &str = "./output/Proposed_WeekAnalysis";
 
     //manifests
-    pub(crate) const MANIFEST_ACTIVE:&str = "./rotations/active.yaml";
-    pub(crate) const MANIFEST_PROPOSED:&str = "./rotations/proposed.yaml";
+    pub(crate) const MANIFEST_ACTIVE: &str = "./rotations/active.yaml";
+    pub(crate) const MANIFEST_PROPOSED: &str = "./rotations/proposed.yaml";
 
     //frontend
     pub(crate) const VOLUME_BY_DATE_FACILITY: &str = "volume_by_date_and_facility";
     pub(crate) const VOLUME_BY_DATE_ROTATION_ACTIVE: &str = "volume_by_date_and_rotation_active";
-    pub(crate) const VOLUME_BY_DATE_ROTATION_PROPOSED: &str = "volume_by_date_and_rotation_proposed";
+    pub(crate) const VOLUME_BY_DATE_ROTATION_PROPOSED: &str =
+        "volume_by_date_and_rotation_proposed";
     pub(crate) const PROPOSED_DIFFERENTIAL: &str = "proposed_differential";
-    
 }
 
 /*
@@ -119,26 +121,27 @@ const WB: &str = "WB";
 const SRC: &str = "SRC";
 pub const TPC: &str = "TPC";
 pub const WVH: &str = "WVH";
+const LMH: &str = "LMH";
 
 //locations
 const DXR: &str = "DXR";
 const BC: &str = "BC";
 
 //Sites are SH, SRC, SC, and TPC, but Facilities breaks down SH into its parts (SH, WVH, WB)...leaving out ST (Hope Ortho?), SV (?)
-pub const FACILITIES: &[&str] = &[SH, SC, SRC, WVH, WB, TPC];
+pub const FACILITIES: &[&str] = &[SH, SC, SRC, WVH, WB, TPC, LMH];
 
-pub const SH_SITE_ID:u64=1;
-pub const SC_SITE_ID:u64=4;
-pub const SRC_SITE_ID:u64=7;
-pub const TPC_SITE_ID:u64=8;
+pub const SH_SITE_ID: u64 = 1;
+pub const SC_SITE_ID: u64 = 4;
+pub const SRC_SITE_ID: u64 = 7;
+pub const TPC_SITE_ID: u64 = 8;
 
-pub fn siteid_to_sitename(site_id:u64)->Option<String>{
+pub fn siteid_to_sitename(site_id: u64) -> Option<String> {
     match site_id {
         //SH_site_id=>Some(SH.to_string()), //But could be WB or WVH! So, just ignore.
-        SC_SITE_ID=>Some(SC.to_string()),
-        SRC_SITE_ID=>Some(SRC.to_string()),
-        TPC_SITE_ID=>Some(TPC.to_string()),
-        _=>None
+        SC_SITE_ID => Some(SC.to_string()),
+        SRC_SITE_ID => Some(SRC.to_string()),
+        TPC_SITE_ID => Some(TPC.to_string()),
+        _ => None,
     }
 }
 
@@ -146,7 +149,7 @@ pub(crate) const MSK: &str = "MSK";
 pub(crate) const MSK_WE_AH0C: &str = "MSK Weekend AH0C";
 pub(crate) const NEURO: &str = "Neuro";
 
-pub const NON_RADIOLOGY:&str = "Non-Radiology";
+pub const NON_RADIOLOGY: &str = "Non-Radiology";
 
 pub const SUBSPECIALTIES: &[&str] = &[
     "General XR",
@@ -175,14 +178,22 @@ pub const SUBSPECIALTIES: &[&str] = &[
     "Cardiac",
     "CT Colonography",
     "Breast MR",
-    NON_RADIOLOGY
+    NON_RADIOLOGY,
 ];
 
 const INPATIENT: &str = "Inpatient";
 pub const OUTPATIENT: &str = "Outpatient";
 const ED: &str = "ED";
 
-pub const CONTEXTS: &[&str] = &[INPATIENT, OUTPATIENT, ED, "Wet Read",NON_RADIOLOGY];
+pub const CONTEXTS: &[&str] = &[
+    INPATIENT,
+    OUTPATIENT,
+    ED,
+    "Wet Read",
+    "STAT",
+    "ASAP",
+    NON_RADIOLOGY,
+];
 
 //modalities
 const XR: &str = "XR";
@@ -211,17 +222,13 @@ pub fn map_site_to_context(site: &str) -> Option<String> {
     }
 }
 
-pub fn map_sh_location_to_facility(location:&str)->Option<String> {
-    match location
-    {
-        "OPRAD"=>Some(SH.to_string()),
-        location=>{
-            match &location[0..2]
-            {
-                "WV"=>Some(WVH.to_string()),
-                _=>None
-            }
-        }
+pub fn map_sh_location_to_facility(location: &str) -> Option<String> {
+    match location {
+        "OPRAD" => Some(SH.to_string()),
+        location => match &location[0..2] {
+            "WV" => Some(WVH.to_string()),
+            _ => None,
+        },
     }
 }
 
