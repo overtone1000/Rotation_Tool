@@ -128,7 +128,7 @@ impl Manifest {
                     volume: None,
                 },
             ]),
-            comments: Some(HashSet::from([
+            comments: Some(Vec::from([
                 "Comments can go here.".to_string(),
                 "Comments are an array.".to_string(),
                 "But this section can be omitted entirely.".to_string(),

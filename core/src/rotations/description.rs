@@ -30,7 +30,7 @@ pub struct RotationDescription {
     pub(crate) hours: Option<Vec<RotationHours>>,
     pub(crate) breaktime: Option<(Timespan, Option<String>)>,
     pub(crate) responsibilities: Responsibilities,
-    pub(crate) comments: Option<HashSet<String>>,
+    pub(crate) comments: Option<Vec<String>>,
 }
 
 impl PartialOrd for RotationDescription {
@@ -69,15 +69,13 @@ where
 
 impl WrappedSortable<RotationResponsibility> for Responsibilities {
     fn get(&self) -> Option<&Vec<RotationResponsibility>> {
-        match &self.value
-        {
+        match &self.value {
             Some(value) => Some(&value),
             None => None,
         }
     }
     fn get_mut(&mut self) -> Option<&mut Vec<RotationResponsibility>> {
-        match &mut self.value
-        {
+        match &mut self.value {
             Some(value) => Some(value),
             None => None,
         }
