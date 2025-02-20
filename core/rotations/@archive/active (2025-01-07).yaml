@@ -1,4 +1,4 @@
-title: Rotations v.2025-02-19
+title: Rotations v.2025-01-07
 rotation_manifest:
 - rotation: SC-Main
   location: SC-Main
@@ -810,7 +810,6 @@ rotation_manifest:
     time_periods:
     - 21:00 PD-16:00 CD
   comments:
-  - All ED/Inpatient OB (FBC) exams and cases of suspected fetal demise or ectopic pregnancy are also to be read by Legacy 1/2
   - Overnight ED CTs have prelim reports and are in a separate worklist
   - Overnight ED XRs were interpreted by ED providers who document prelim in their note
   - Required TAT for stroke non-contrast head CT is 15 minutes
@@ -832,6 +831,7 @@ rotation_manifest:
     time_periods:
     - 16:00 CD-21:00 CD
   comments:
+  - Read outpatients as able
   - Required TAT for stroke non-contrast head CT is 15 minutes
   - Required TAT for STAT is 30 minutes
   - Required TAT for ASAP is 3 hours
