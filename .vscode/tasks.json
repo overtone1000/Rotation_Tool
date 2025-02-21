@@ -10,7 +10,7 @@
             "group": "build",
             "problemMatcher": [],
             "label": "npm: build_and_deploy - frontend",
-            "detail": "vite build && bash ../deploy/testing_autoscheda_deploy.sh"
+            "detail": "Build frontend and deploy to server"
         },
         {
             "type": "npm",
@@ -27,12 +27,12 @@
             "command": "cargo fix --all-features --all-targets --workspace --manifest-path ./core/Cargo.toml && cargo clippy --manifest-path ./core/Cargo.toml --fix && cargo fmt --manifest-path ./core/Cargo.toml && git add -A && git commit -m 'cargo fix and format'",
             "group": "none",
             "presentation": {
-              "reveal": "always",
-              "panel": "new"
+                "reveal": "always",
+                "panel": "new"
             },
             "options": {
                 "cwd": "${workspaceFolder}"
             },
         }
     ]
-  }
+}

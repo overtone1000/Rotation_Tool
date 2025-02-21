@@ -1,4 +1,4 @@
-title: Rotations v.2023-01-05
+title: Rotations v.2025-02-19
 rotation_manifest:
 - rotation: SC-Main
   location: SC-Main
@@ -21,19 +21,7 @@ rotation_manifest:
     time_periods:
     - 15:00 PBD-15:00 CD
   - sites: SC
-    exams: General CT
-    contexts: Outpatient
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 00:00 CD-15:00 CD
-  - sites: SC
-    exams: General US
-    contexts: Outpatient
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 00:00 CD-15:00 CD
-  - sites: SC
-    exams: General XR
+    exams: General CT/General US/General XR
     contexts: Outpatient
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
@@ -53,7 +41,7 @@ rotation_manifest:
     - 09:30 CD-12:00 CD
     - 13:00 CD-16:00 CD
 - rotation: NM
-  location: SH
+  location: Remote
   hours:
   - hours: 07:30 CD-16:30 CD
     days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
@@ -61,12 +49,12 @@ rotation_manifest:
     - 12:00 CD-12:30 CD
     - "Urgent reads covered by MED"
   responsibilities:
-  - sites: All
+  - sites: SH/SRC
     exams: PET
     contexts: Outpatient/Inpatient
     days: Mon/Tue/Wed/Thu/Fri
     weekly_fraction: 0.2
-  - sites: All
+  - sites: SH
     exams: NM
     contexts: Outpatient
     days: Mon/Tue/Wed/Thu/Fri
@@ -78,13 +66,13 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 00:00 CD-11:00 CD
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: Body MR
     contexts: Outpatient
     days: Tue/Wed/Thu/Fri
     time_periods:
     - 15:00 PD-15:00 CD
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: Body MR
     contexts: Outpatient
     days: Mon
@@ -165,6 +153,37 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 08:00 CD-17:00 CD
+    #SRC CT from prior day Tues-Fri
+  - sites: SRC
+    exams: General CT
+    contexts: Outpatient
+    #modalities: CT
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PBD-00:00 CD
+    #Prior day outpatient
+  - sites: SH
+    exams: General XR/General CT/General US
+    contexts: Outpatient
+    #modalities: XR/RF/US/CT
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-19:00 PD
+  - sites: WB
+    exams: General XR/General US
+    contexts: Outpatient
+    #modalities: XR/RF/US/CT
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-19:00 PD
+    #Monday only CT/XR/US from all sites on Sunday until 1pm
+  - sites: SH/SC/SRC/WVH/WB/TPC
+    exams: General XR/General CT/General US
+    contexts: Outpatient
+    #modalities: CT/US/RF
+    days: Mon
+    time_periods:
+    - 00:00 PD-13:00 PD
 - rotation: BR/US
   location: SH
   hours: 
@@ -217,6 +236,7 @@ rotation_manifest:
     - 09:00 CD-16:00 CD
   comments:
     - First rad called in case of IV contrast reaction at SH
+    - Cover PM NM procedures (either personally or through PA), which include lymphoscintigraphy injections of the feet and genitalia and mapping.
 - rotation: Neuro 1
   location: SC-Union
   hours: 
@@ -227,7 +247,7 @@ rotation_manifest:
     - "Urgent reads covered by MED"
   #Monday
   responsibilities:
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: Neuro
     contexts: Outpatient
     #modalities: CT/MR
@@ -235,7 +255,7 @@ rotation_manifest:
     time_periods:
     - 09:00 PD-15:00 CD
   #Tue-Fri
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: Neuro
     contexts: Outpatient
     #modalities: CT/MR
@@ -263,7 +283,7 @@ rotation_manifest:
 - rotation: Neuro 2
   location: Remote
   responsibilities:
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: Neuro
     contexts: Outpatient
     #modalities: CT/MR
@@ -277,7 +297,7 @@ rotation_manifest:
   location: Remote
   responsibilities:
     # Monday
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: MSK
     contexts: Outpatient
     #modalities: MR/DEXA/CT
@@ -305,14 +325,14 @@ rotation_manifest:
     time_periods:
     - 08:00 CD-16:00 CD
   #Mon only
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: MSK
     contexts: Outpatient
     days: Mon
     time_periods:
     - 18:00 PBD+1-15:00 CD
   # Tues-Fri
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: MSK
     contexts: Outpatient
     #modalities: MR/DEXA/CT
@@ -393,14 +413,7 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     weekly_fraction: 0.2
   - sites: SRC
-    exams: General US
-    contexts: Outpatient
-    #modalities: XR/RF
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 00:00 CD-15:00 CD
-  - sites: SRC
-    exams: General XR
+    exams: General XR/General US
     contexts: Outpatient
     #modalities: XR/RF
     days: Mon/Tue/Wed/Thu/Fri
@@ -465,7 +478,7 @@ rotation_manifest:
     days: Fri
     time_periods:
     - 16:30 CD-07:00 ND
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: Vascular US
     contexts: ED/Inpatient/Outpatient
     #modalities: US/CVUS/CLINIC
@@ -479,8 +492,45 @@ rotation_manifest:
     days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
   breaktime:
     - 12:00 CD-13:00 CD
-    - ""
+    -
   responsibilities:
+  # Mon prior day work
+  - sites: SH/SC/SRC/WVH/WB/TPC
+    exams: General XR/General CT/General US
+    contexts: Outpatient
+    #modalities: CT/US/XR/CVUS/RF
+    days: Mon
+    time_periods:
+    - 13:00 PD-24:00 PD
+  # Tue-Thu prior day work
+  - sites: SC
+    exams: General XR/General CT/General US
+    contexts: Outpatient
+    #modalities: CT/US/XR/CVUS/RF
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-24:00 PD
+  - sites: SRC
+    exams: General XR
+    contexts: Outpatient
+    #modalities: XR/RF
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-24:00 PD
+  - sites: SH
+    exams: General XR/General CT/General US
+    contexts: Outpatient
+    #modalities: CT/US/XR/RF
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 19:00 PD-24:00 PD
+  - sites: WB
+    exams: General XR/General US
+    contexts: Outpatient
+    #modalities: CT/US/XR/RF
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 19:00 PD-24:00 PD
     # Mon SRC XR
   #- sites: SRC
   #  exams: General
@@ -490,7 +540,7 @@ rotation_manifest:
   #  time_periods:
   #  - 11:30 CD-15:00 CD
     # Every day
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: Complex CTA+MRA
     contexts: Outpatient
     #modalities: CT/MR
@@ -528,9 +578,10 @@ rotation_manifest:
     time_periods:
     - 07:30 CD-08:00 CD
   comments:
-    - Supervise and interpret SH fluoro
+    - Supervise and interpret all outpatient SH fluoro and all inpatient SH fluoro that hits the list during busines hours
     - Supervise PA US Procedures
     - IR Clinic
+    - Cover AM NM procedures (either personally or through PA), which include lymphoscintigraphy injections of the feet and genitalia and mapping.
 - rotation: MED
   location: Remote
   hours: 
@@ -633,6 +684,8 @@ rotation_manifest:
     days: Mon/Tue/Wed/Thu/Fri
     time_periods:
     - 06:00 CD-14:00 CD
+  comments:
+  - Turnaround time for stat TPC exams (stat icon in PACS) must be < 1 hr
 - rotation: Swing
   location: Remote
   hours: 
@@ -725,6 +778,106 @@ rotation_manifest:
     - 15:00 CD-16:00 CD
   comments:
   - If caught up, help EVE
+  - Turnaround time for stat TPC exams (stat icon in PACS) must be < 1 hr
+- rotation: Legacy 1/2
+  location: Remote
+  hours:
+  - hours: 08:00 CD-16:00 CD
+    days: Mon/Tue/Wed/Thu/Fri
+  responsibilities:
+  - sites: LMH
+    exams: All
+    contexts: Outpatient
+    days: Mon
+    time_periods:
+    - 00:00 PD-15:00 CD
+  - sites: LMH
+    exams: All
+    contexts: ED/Inpatient/STAT/ASAP
+    days: Mon
+    time_periods:
+    - 17:00 PD-16:00 CD
+  - sites: LMH
+    exams: All
+    contexts: Outpatient
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-15:00 CD
+  - sites: LMH
+    exams: All
+    contexts: ED/Inpatient/STAT/ASAP
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 21:00 PD-16:00 CD
+  comments:
+  - All ED/Inpatient OB (FBC) exams and cases of suspected fetal demise or ectopic pregnancy are also to be read by Legacy 1/2
+  - Overnight ED CTs have prelim reports and are in a separate worklist
+  - Overnight ED XRs were interpreted by ED providers who document prelim in their note
+  - Required TAT for stroke non-contrast head CT is 15 minutes
+  - Required TAT for STAT is 30 minutes
+  - Required TAT for ASAP is 3 hours
+  - Required TAT for routine is 24 hours
+  - Subspecialty exams can be read for ah0c by another SRC rad, if caught up, or outside business hours
+  - If a subspecialty exam cannot be interpreted within the required TAT, call film library to send to PIA
+- rotation: Legacy Swing
+  location: Remote
+  hours:
+  - hours: 08:00 CD-16:00 CD
+    days: Mon/Tue/Wed/Thu/Fri
+  responsibilities:
+  - sites: LMH
+    exams: All
+    contexts: ED/Inpatient/STAT/ASAP
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 16:00 CD-21:00 CD
+  comments:
+  - Required TAT for stroke non-contrast head CT is 15 minutes
+  - Required TAT for STAT is 30 minutes
+  - Required TAT for ASAP is 3 hours
+  - Required TAT for routine is 24 hours
+  - Subspecialty exams can be read for ah0c by another SRC rad, if caught up, or outside business hours
+  - If a subspecialty exam cannot be interpreted within the required TAT, call film library to send to PIA
+- rotation: Legacy Call
+  location: Remote
+  hours:
+  - hours: 08:00 CD-17:00 CD
+    days: Sat/Sun
+  responsibilities:
+  - sites: LMH
+    exams: All
+    contexts: Outpatient
+    days: Sat
+    time_periods:
+    - 15:00 PD-12:00 CD
+  - sites: LMH
+    exams: All
+    contexts: ED/Inpatient/STAT/ASAP
+    days: Sat
+    time_periods:
+    - 21:00 PD-17:00 CD
+  - sites: LMH
+    exams: All
+    contexts: Outpatient
+    days: Sun
+    time_periods:
+    - 12:00 PD-00:00 CD
+  - sites: LMH
+    exams: All
+    contexts: ED/Inpatient/STAT/ASAP
+    days: Sun
+    time_periods:
+    - 17:00 PD-17:00 CD
+  comments:
+  - Overnight ED CTs have prelim reports and are in a separate worklist
+  - Overnight ED XRs were interpreted by ED providers who document prelim in their note
+  - Read outpatients as able
+  - Required TAT for stroke non-contrast head CT is 15 minutes
+  - Required TAT for STAT is 30 minutes
+  - Required TAT for ASAP is 3 hours
+  - Required TAT for routine is 24 hours
+  - Subspecialty exams can be read for ah0c by another SRC rad, if caught up, or outside business hours
+  - If a subspecialty exam cannot be interpreted within the required TAT, call film library to send to PIA
 - rotation: OVN
   location: Remote
   hours:
@@ -733,7 +886,7 @@ rotation_manifest:
   - hours: 22:00 CD-07:00 ND
     days: Fri/Sat
   responsibilities:
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: General XR/General CT/General US
     contexts: Wet Read
     #modalities: CT/US/XR/MR/NM/RF/MG/DEXA
@@ -754,7 +907,7 @@ rotation_manifest:
     days: Sun/Mon/Tue/Wed/Thu
     time_periods:
     - 22:00 CD-06:00 ND
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: General XR/General CT/General US
     contexts: Wet Read
     #modalities: CT/US/XR/MR/NM/RF/MG/DEXA
@@ -780,7 +933,7 @@ rotation_manifest:
 - rotation: OP1
   location: SRC
   responsibilities:
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: General XR/General CT/General US/Body MR
     contexts: Outpatient
     #modalities: CT/US/XR/MR/RF
@@ -793,22 +946,82 @@ rotation_manifest:
 - rotation: OP2
   location: Remote
   responsibilities:
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: General XR/General CT/General US/Body MR
     contexts: Outpatient
     #modalities: CT/US/MR/RF/XR
     days: Sun
     time_periods:
-    - 17:00 PBD-13:00 PBD+1
+    - 17:00 PBD-15:00 PBD+1
   comments:
     - Finish by 17:00 on Monday
+- rotation: Stack 1 (AM)
+  location: Remote
+  responsibilities:
+  - sites: SH/SC/SRC/WVH/WB/TPC
+    exams: General XR/General CT/General US/Body MR
+    contexts: Outpatient
+    #modalities: CT/US/MR/RF/XR
+    days: Mon
+    time_periods:
+    - 15:00 PBD+1-24:00 PBD+1
+  - sites: TPC
+    exams: General XR/General CT/General US
+    contexts: Outpatient
+    days: Mon
+    time_periods:
+    - 00:00 CD-11:00 CD
+  - sites: TPC
+    exams: General XR/General CT/General US
+    contexts: Outpatient
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-11:00 CD
+  - sites: SRC
+    exams: General US
+    contexts: Outpatient
+    days: Tue/Wed/Thu/Fri
+    time_periods:
+    - 15:00 PD-00:00 CD
+  - sites: SRC
+    exams: General CT
+    contexts: Outpatient
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 00:00 CD-11:00 CD
+  comments:
+  - Turnaround time for routine TPC exams must be < 24 hrs
+- rotation: Stack 2 (Mid)
+  location: Remote
+  responsibilities:
+  - sites: TPC
+    exams: General XR/General CT/General US
+    contexts: Outpatient
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 11:00 CD-15:00 CD
+  - sites: SRC
+    exams: General CT
+    contexts: Outpatient
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 11:00 CD-15:00 CD
+  - sites: SH
+    exams: General CT
+    contexts: Outpatient
+    days: Mon/Tue/Wed/Thu/Fri
+    time_periods:
+    - 11:00 CD-15:00 CD
+  comments:
+  - Turnaround time for routine TPC exams must be < 24 hrs
+  - Turnaround time for stat TPC exams (stat icon in PACS) must be < 1 hr
 - rotation: Call 1
   location: SH
   hours: 
   - hours: 11:00 CD-19:00 CD
     days: Sun/Mon/Tue/Wed/Thu/Fri/Sat
   responsibilities:
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: General XR/General CT/General US
     contexts: Wet Read
     #modalities: CT/US/XR/NM/MR/RF
@@ -872,7 +1085,7 @@ rotation_manifest:
     time_periods:
     - 07:00 CD-08:00 CD
   # Diagnostic Work
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: General XR/General CT/General US
     contexts: Wet Read
     #modalities: CT/US/XR/NM/MR/RF
@@ -924,7 +1137,7 @@ rotation_manifest:
     days: Sat/Sun
   responsibilities:
     # Weekdays
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: General XR/General US/General CT
     contexts: Wet Read
     #modalities: CT/NM/MR/DEXA
@@ -967,7 +1180,7 @@ rotation_manifest:
     time_periods:
     - 20:00 CD-22:00 CD
     # Weekends
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: General XR/General CT/General US
     contexts: Wet Read
     #modalities: CT/US/XR/MR/NM/RF
@@ -1051,150 +1264,6 @@ rotation_manifest:
     days: Sun
     time_periods:
     - 19:00 CD-07:30 ND
-- rotation: Stack 1
-  location: Remote
-  hours:
-  - hours: 11:00 CD-15:00 CD
-    days: Mon/Tue/Wed/Thu/Fri
-  responsibilities:
-  - sites: All
-    exams: General XR/General CT/General US/Body MR
-    contexts: Outpatient
-    #modalities: CT/US/MR/RF/XR
-    days: Mon
-    time_periods:
-    - 13:00 PBD+1-15:00 PBD+1
-  - sites: SRC
-    exams: General US
-    contexts: Outpatient
-    #modalities: US
-    days: Tue/Wed/Thu/Fri
-    time_periods:
-    - 15:00 PD-00:00 CD
-- rotation: Stack 2
-  location: Remote
-  hours:
-  - hours: 11:00 CD-15:00 CD
-    days: Mon/Tue/Wed/Thu/Fri
-  responsibilities:
-  - sites: All
-    exams: General XR/General CT/General US/Body MR
-    contexts: Outpatient
-    #modalities: CT/US/MR/RF/XR
-    days: Mon
-    time_periods:
-    - 15:00 PBD+1-24:00 PBD+1
-  - sites: SRC
-    exams: General CT
-    contexts: Outpatient
-    #modalities: CT
-    days: Tue/Wed/Thu/Fri
-    time_periods:
-    - 15:00 PD-00:00 CD
-- rotation: Stack 3
-  location: Remote
-  hours:
-  - hours: 11:00 CD-15:00 CD
-    days: Mon/Tue/Wed/Thu/Fri
-  responsibilities:
-  - sites: All
-    exams: General XR/General CT/General US
-    contexts: Outpatient
-    #modalities: CT/US/XR/CVUS/RF
-    days: Mon
-    time_periods:
-    - 13:00 PD-24:00 PD
-  # Tue-Thu prior day work
-  - sites: SC
-    exams: General XR/General CT/General US
-    contexts: Outpatient
-    #modalities: CT/US/XR/CVUS/RF
-    days: Tue/Wed/Thu/Fri
-    time_periods:
-    - 15:00 PD-24:00 PD
-  - sites: TPC
-    exams: General XR/General CT/General US
-    contexts: Outpatient
-    #modalities: CT/US/XR
-    days: Mon
-    time_periods:
-    - 00:00 CD-12:00 CD
-  - sites: TPC
-    exams: General XR/General CT/General US
-    contexts: Outpatient
-    #modalities: CT/US/XR
-    days: Tue/Wed/Thu/Fri
-    time_periods:
-    - 15:00 PD-12:00 CD
-- rotation: Stack 4
-  location: Remote
-  hours:
-  - hours: 11:00 CD-15:00 CD
-    days: Mon/Tue/Wed/Thu/Fri
-  responsibilities:
-  - sites: All
-    exams: General XR/General CT/General US
-    contexts: Outpatient
-    #modalities: CT/US/RF
-    days: Mon
-    time_periods:
-    - 00:00 PD-13:00 PD
-  - sites: SH
-    exams: General XR/General CT/General US
-    contexts: Outpatient
-    #modalities: XR/RF/US/CT
-    days: Tue/Wed/Thu/Fri
-    time_periods:
-    - 15:00 PD-24:00 PD
-  - sites: WB
-    exams: General XR/General US
-    contexts: Outpatient
-    #modalities: XR/RF/US/CT
-    days: Tue/Wed/Thu/Fri
-    time_periods:
-    - 15:00 PD-24:00 PD
-    #Monday only CT/XR/US from all sites on Sunday until 1pm
-  - sites: SH
-    exams: General CT
-    contexts: Outpatient
-    #modalities: CT
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 12:00 CD-15:00 CD
-  - sites: TPC
-    exams: General XR/General CT/General US
-    contexts: Outpatient
-    #modalities: CT/US/XR
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 12:00 CD-15:00 CD
-- rotation: Stack 5
-  location: Remote
-  hours:
-  - hours: 11:00 CD-15:00 CD
-    days: Mon/Tue/Wed/Thu/Fri
-  responsibilities:
-  - sites: SRC
-    exams: General CT
-    contexts: Outpatient
-    #modalities: CT
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 00:00 CD-15:00 CD
-  - sites: SRC
-    exams: General XR
-    contexts: Outpatient
-    #modalities: XR/RF
-    days: Tue/Wed/Thu/Fri
-    time_periods:
-    - 15:00 PD-24:00 PD
-  - sites: SH
-    exams: General CT
-    contexts: Outpatient
-    #modalities: CT
-    days: Mon/Tue/Wed/Thu/Fri
-    time_periods:
-    - 11:00 CD-12:00 CD
 - rotation: PA-US
   location: SH
   hours:
@@ -1234,7 +1303,9 @@ rotation_manifest:
   comments:
   - Preprocedural and postprocedural care of all fluoro procedure patients
   - Dictate fluoro procedures
-  - Review GI imaging with IR2
+  - Put signout of the procedure into Primordial as an "Exam Note"
+  - Outpatient fluoroscopy should be read by IR2 during business hours.
+  - Inpatient fluoroscopy that hits the worklist outside business hours will be read by the on call radiologist (typically EVE).
 - rotation: PA-IR
   location: SH
   hours:
@@ -1290,7 +1361,7 @@ rotation_manifest:
 - rotation: Subspecialty Work
   location: Remote
   responsibilities:
-  - sites: All
+  - sites: SH/SC/SRC/WVH/WB/TPC
     exams: Breast MR/Cardiac/CT Colonography
     contexts: ED/Inpatient/Outpatient
     #modalities: All
@@ -1465,5 +1536,11 @@ rotation_manifest:
     time_periods:
     - 00:00 CD-13:00 CD
     - 16:30 CD-24:00 CD
+  #- sites: LMH
+  #  exams: All
+  #  contexts: All
+  #  days: Mon/Tue/Wed/Thu/Fri
+  #  time_periods:
+  #  - 00:00 CD-00:00 CD
   comments:
   - Responsibilities listed here represent schedule blocks. Such studies should not be scheduled and so are not accounted for in these rotations.
